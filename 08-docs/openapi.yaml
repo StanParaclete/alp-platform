@@ -1,0 +1,565 @@
+openapi: 3.0.3
+info:
+  title: ALP Platform API
+  description: |
+    Accelerated Learning Plan Platform — REST API
+    
+    Built by Stan Paraclete | www.stanparaclete.com
+    
+    **Base URL:** `https://app.growwithalp.com/api`
+    
+    **Authentication:** Bearer JWT token. Obtain via `POST /auth/login`.
+    
+    **Rate Limits:**
+    - General: 500 requests / 15 minutes
+    - Auth endpoints: 20 requests / 15 minutes
+    - AI endpoints: 30 requests / minute
+  version: 2.4.1
+  contact:
+    name: Stan Paraclete
+    url: https://www.stanparaclete.com
+    email: support@growwithalp.com
+  license:
+    name: Proprietary
+    url: https://growwithalp.com/terms
+
+servers:
+  - url: https://app.growwithalp.com/api
+    description: Production
+  - url: http://localhost:4000/api
+    description: Local Development
+
+tags:
+  - name: auth
+    description: Authentication and session management
+  - name: students
+    description: Student profiles and caseload management
+  - name: alp
+    description: ALP plan creation, editing, and lifecycle
+  - name: goals
+    description: Measurable annual goals
+  - name: progress
+    description: Progress monitoring and data entry
+  - name: family
+    description: Family portal — messages, meetings, signatures
+  - name: ai
+    description: Claude-powered AI features
+  - name: reports
+    description: Reporting and compliance
+  - name: notifications
+    description: In-app notification management
+  - name: schools
+    description: School and district management
+  - name: documents
+    description: Document upload and management
+  - name: compliance
+    description: Multi-framework compliance checking
+  - name: billing
+    description: Subscription and billing management
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:           { type: string }
+        email:        { type: string, format: email }
+        firstName:    { type: string }
+        lastName:     { type: string }
+        role:         { type: string, enum: [SUPER_ADMIN, DISTRICT_MANAGER, SCHOOL_ADMIN, TEACHER, SPECIAL_ED_TEACHER, THERAPIST, PSYCHOLOGIST, PARENT, STUDENT] }
+        schoolId:     { type: string, nullable: true }
+        districtId:   { type: string, nullable: true }
+        avatarUrl:    { type: string, nullable: true }
+        isActive:     { type: boolean }
+        lastLoginAt:  { type: string, format: date-time, nullable: true }
+        createdAt:    { type: string, format: date-time }
+
+    Student:
+      type: object
+      properties:
+        id:              { type: string }
+        firstName:       { type: string }
+        lastName:        { type: string }
+        grade:           { type: string }
+        dateOfBirth:     { type: string, format: date }
+        primaryLanguage: { type: string }
+        supportLevel:    { type: integer, minimum: 1, maximum: 3 }
+        isActive:        { type: boolean }
+        disabilities:    { type: array, items: { $ref: '#/components/schemas/Disability' } }
+        alpPlans:        { type: array, items: { $ref: '#/components/schemas/ALPPlanSummary' } }
+
+    Disability:
+      type: object
+      properties:
+        id:         { type: string }
+        category:   { type: string, enum: [AUTISM, ADHD, DYSLEXIA, DYSCALCULIA, SPEECH_LANGUAGE, HEARING_IMPAIRMENT, VISUAL_IMPAIRMENT, BEHAVIORAL_EMOTIONAL, GIFTED, MULTIPLE_DISABILITIES, DEVELOPMENTAL_DELAY, EARLY_CHILDHOOD, ELL, TWICE_EXCEPTIONAL, PHYSICAL_DISABILITY, TRAUMA, HEALTH_IMPAIRMENT, INTELLECTUAL, CUSTOM] }
+        isPrimary:  { type: boolean }
+        diagnosedAt:{ type: string, format: date, nullable: true }
+        diagnosedBy:{ type: string, nullable: true }
+
+    ALPPlan:
+      type: object
+      properties:
+        id:             { type: string }
+        studentId:      { type: string }
+        planType:       { type: string, enum: [ALP, RTI_I, RTI_II, RTI_III, SECTION_504, CUSTOM] }
+        status:         { type: string, enum: [DRAFT, ACTIVE, UNDER_REVIEW, EXPIRED, ARCHIVED] }
+        framework:      { type: string }
+        effectiveDate:  { type: string, format: date }
+        reviewDate:     { type: string, format: date }
+        completionPct:  { type: integer, minimum: 0, maximum: 100 }
+        isCompliant:    { type: boolean }
+        goals:          { type: array, items: { $ref: '#/components/schemas/Goal' } }
+        signatures:     { type: array, items: { $ref: '#/components/schemas/Signature' } }
+
+    ALPPlanSummary:
+      type: object
+      properties:
+        id:           { type: string }
+        status:       { type: string }
+        planType:     { type: string }
+        reviewDate:   { type: string, format: date }
+        completionPct:{ type: integer }
+
+    Goal:
+      type: object
+      properties:
+        id:          { type: string }
+        alpId:       { type: string }
+        domain:      { type: string, enum: [READING, MATH, WRITING, COMMUNICATION, SOCIAL_EMOTIONAL, BEHAVIOR, MOTOR, ADAPTIVE, VOCATIONAL, FUTURE_READINESS, CUSTOM] }
+        status:      { type: string, enum: [ACTIVE, MASTERED, NOT_MET, DISCONTINUED, PENDING] }
+        description: { type: string }
+        baseline:    { type: string }
+        target:      { type: string }
+        monitoring:  { type: string }
+        aiGenerated: { type: boolean }
+        progress:    { type: array, items: { $ref: '#/components/schemas/Progress' } }
+
+    Progress:
+      type: object
+      properties:
+        id:         { type: string }
+        goalId:     { type: string }
+        value:      { type: number }
+        unit:       { type: string }
+        notes:      { type: string, nullable: true }
+        recordedAt: { type: string, format: date-time }
+
+    Signature:
+      type: object
+      properties:
+        id:       { type: string }
+        alpId:    { type: string }
+        userId:   { type: string }
+        role:     { type: string, enum: [parent, teacher, admin, student] }
+        status:   { type: string, enum: [PENDING, SIGNED, DECLINED, EXPIRED] }
+        signedAt: { type: string, format: date-time, nullable: true }
+
+    Notification:
+      type: object
+      properties:
+        id:        { type: string }
+        title:     { type: string }
+        body:      { type: string }
+        type:      { type: string }
+        isRead:    { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+
+security:
+  - BearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Sign in and get JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string }
+                totpCode: { type: string, description: "6-digit 2FA code (if enabled)" }
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:         { $ref: '#/components/schemas/User' }
+                  accessToken:  { type: string }
+                  refreshToken: { type: string }
+        '401': { description: Invalid credentials }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200': { description: New tokens issued }
+        '401': { description: Invalid or expired refresh token }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Sign out and invalidate tokens
+      responses:
+        '200': { description: Logged out }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /students:
+    get:
+      tags: [students]
+      summary: List students (school-scoped, paginated)
+      parameters:
+        - { name: q,         in: query, schema: { type: string },  description: Search by name }
+        - { name: grade,     in: query, schema: { type: string },  description: Filter by grade }
+        - { name: disability,in: query, schema: { type: string },  description: Filter by disability category }
+        - { name: page,      in: query, schema: { type: integer }, description: Page number }
+        - { name: limit,     in: query, schema: { type: integer }, description: Results per page (max 50) }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  students: { type: array, items: { $ref: '#/components/schemas/Student' } }
+                  total:    { type: integer }
+                  page:     { type: integer }
+                  pages:    { type: integer }
+
+    post:
+      tags: [students]
+      summary: Create a new student record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [firstName, lastName, dateOfBirth, grade]
+              properties:
+                firstName:    { type: string }
+                lastName:     { type: string }
+                dateOfBirth:  { type: string, format: date }
+                grade:        { type: string }
+                primaryLanguage: { type: string }
+                supportLevel: { type: integer, minimum: 1, maximum: 3 }
+                disabilities: { type: array, items: { type: object } }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Student' }
+
+  /students/{id}:
+    get:
+      tags: [students]
+      summary: Get full student profile
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Student profile }
+        '404': { description: Not found }
+
+  /alp:
+    get:
+      tags: [alp]
+      summary: List ALP plans
+      parameters:
+        - { name: status,    in: query, schema: { type: string } }
+        - { name: studentId, in: query, schema: { type: string } }
+      responses:
+        '200': { description: ALP plans list }
+
+    post:
+      tags: [alp]
+      summary: Create a new ALP plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [studentId]
+              properties:
+                studentId:    { type: string }
+                planType:     { type: string, default: ALP }
+                framework:    { type: string, default: IDEA_USA }
+                effectiveDate:{ type: string, format: date }
+                reviewDate:   { type: string, format: date }
+      responses:
+        '201': { description: ALP created }
+        '409': { description: Active plan already exists }
+
+  /alp/{id}:
+    get:
+      tags: [alp]
+      summary: Get full ALP plan with goals, signatures, documents
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Full ALP plan }
+
+    patch:
+      tags: [alp]
+      summary: Autosave a section of the ALP
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                section:       { type: string, description: "Section name e.g. presentLevels" }
+                data:          { type: object }
+                completionPct: { type: integer }
+      responses:
+        '200': { description: Updated }
+
+  /alp/{id}/activate:
+    post:
+      tags: [alp]
+      summary: Activate an ALP plan (runs compliance check first)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Activated }
+        '422': { description: Compliance check failed }
+
+  /alp/{id}/export-pdf:
+    post:
+      tags: [alp]
+      summary: Export ALP as PDF
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: PDF file
+          content:
+            application/pdf: {}
+
+  /goals:
+    get:
+      tags: [goals]
+      summary: List goals for a plan or domain
+      parameters:
+        - { name: alpId,  in: query, schema: { type: string } }
+        - { name: domain, in: query, schema: { type: string } }
+        - { name: status, in: query, schema: { type: string } }
+      responses:
+        '200': { description: Goals list }
+
+    post:
+      tags: [goals]
+      summary: Create a new goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [alpId, domain, description, baseline, target]
+              properties:
+                alpId:       { type: string }
+                domain:      { type: string }
+                description: { type: string }
+                baseline:    { type: string }
+                target:      { type: string }
+                monitoring:  { type: string }
+      responses:
+        '201': { description: Goal created }
+
+  /goals/{id}/status:
+    patch:
+      tags: [goals]
+      summary: Update goal status (MASTERED, DISCONTINUED, etc.)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { type: string, enum: [ACTIVE, MASTERED, NOT_MET, DISCONTINUED] }
+                reason: { type: string }
+      responses:
+        '200': { description: Updated }
+
+  /progress:
+    post:
+      tags: [progress]
+      summary: Log a progress data point
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [goalId, value]
+              properties:
+                goalId:     { type: string }
+                value:      { type: number }
+                unit:       { type: string, default: percent }
+                notes:      { type: string }
+                recordedAt: { type: string, format: date-time }
+      responses:
+        '201': { description: Progress logged }
+
+  /progress/summary/{studentId}:
+    get:
+      tags: [progress]
+      summary: Get progress dashboard summary for a student
+      parameters:
+        - { name: studentId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Progress summary with trends and risk indicators }
+
+  /ai/suggest-goals:
+    post:
+      tags: [ai]
+      summary: Generate Claude-powered SMART annual goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [studentId, domains]
+              properties:
+                studentId:    { type: string }
+                domains:      { type: array, items: { type: string } }
+                presentLevels:{ type: string }
+                baselineData: { type: object }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  goals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        domain:     { type: string }
+                        goalText:   { type: string }
+                        baseline:   { type: string }
+                        target:     { type: string }
+                        monitoring: { type: string }
+                        objectives: { type: array, items: { type: string } }
+
+  /ai/suggest-accommodations:
+    post:
+      tags: [ai]
+      summary: Generate accommodation suggestions by disability
+      responses:
+        '200': { description: Accommodation suggestions by category }
+
+  /ai/predict-risk:
+    post:
+      tags: [ai]
+      summary: AI progress risk prediction for a student
+      responses:
+        '200': { description: Risk assessment with interventions }
+
+  /ai/parent-summary:
+    post:
+      tags: [ai]
+      summary: Generate a parent-friendly ALP summary
+      responses:
+        '200': { description: Plain-language summary text }
+
+  /notifications:
+    get:
+      tags: [notifications]
+      summary: Get current user's notifications
+      parameters:
+        - { name: unread, in: query, schema: { type: boolean } }
+      responses:
+        '200': { description: Notifications list with unread count }
+
+  /compliance/frameworks:
+    get:
+      tags: [compliance]
+      summary: List all supported compliance frameworks
+      security: []
+      responses:
+        '200': { description: Framework list }
+
+  /compliance/check/{alpId}:
+    get:
+      tags: [compliance]
+      summary: Run compliance check on an ALP plan
+      parameters:
+        - { name: alpId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Compliance report with score and issues }
+
+  /billing/subscription:
+    get:
+      tags: [billing]
+      summary: Get current subscription status
+      responses:
+        '200': { description: Subscription details }
+
+  /billing/checkout:
+    post:
+      tags: [billing]
+      summary: Create Stripe checkout session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan: { type: string, enum: [starter, professional, enterprise] }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:       { type: string, description: Stripe checkout URL }
+                  sessionId: { type: string }

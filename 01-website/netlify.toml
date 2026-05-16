@@ -1,0 +1,13 @@
+[build]
+  publish = "."
+  command = "echo 'Static site — no build needed'"
+
+[[redirects]]
+  from   = "/app"
+  to     = "https://app.growwithalp.com"
+  status = 301
+
+[[redirects]]
+  from   = "/download"
+  to     = "https://github.com/stanparaclete/alp-platform/releases/latest"
+  status = 301

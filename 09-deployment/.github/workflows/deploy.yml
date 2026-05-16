@@ -1,0 +1,273 @@
+name: ALP Platform — CI/CD Pipeline
+# Built by Stan Paraclete | www.stanparaclete.com
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ─── Lint & Test ─────────────────────────────────────────────
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: alp_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 05-backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: 05-backend
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: 05-backend
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/alp_test
+
+      - name: Run migrations
+        working-directory: 05-backend
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/alp_test
+
+      - name: Run tests
+        working-directory: 05-backend
+        run: npm test
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/alp_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_secret_key_32_chars_minimum_here
+          JWT_REFRESH_SECRET: test_refresh_secret_key_here_32chars
+          NODE_ENV: test
+
+      - name: Run linter
+        working-directory: 05-backend
+        run: npm run lint
+
+  test-webapp:
+    name: Test Web App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 02-webapp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: 02-webapp
+        run: npm ci
+
+      - name: Type check
+        working-directory: 02-webapp
+        run: npm run type-check
+
+      - name: Run tests
+        working-directory: 02-webapp
+        run: npm test -- --watchAll=false
+
+      - name: Build
+        working-directory: 02-webapp
+        run: npm run build
+        env:
+          VITE_API_URL: https://app.growwithalp.com/api
+
+  # ─── Build Docker Images ────────────────────────────────────
+  build-docker:
+    name: Build Docker Images
+    needs: [test-backend, test-webapp]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./05-backend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: production
+
+      - name: Build and push webapp image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./02-webapp
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/webapp:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── Deploy to Production ────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    needs: build-docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://growwithalp.com
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy backend to Railway
+        uses: berviantoleo/railway-deploy@main
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: alp-backend
+
+      - name: Deploy webapp to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: 02-webapp
+
+      - name: Run production migrations
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"command": "npm run db:migrate"}' \
+            ${{ secrets.RAILWAY_API_URL }}/deploy/run-command
+
+      - name: Notify Slack on success
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: '✅ ALP Platform deployed to production successfully'
+          SLACK_COLOR: '#10B981'
+          SLACK_TITLE: 'Deployment Complete'
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: '❌ ALP Platform deployment failed'
+          SLACK_COLOR: '#EF4444'
+          SLACK_TITLE: 'Deployment Failed'
+
+  # ─── Mobile Build ─────────────────────────────────────────────
+  build-mobile:
+    name: Build Mobile Apps
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [test-backend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        working-directory: 03-app
+        run: npm ci
+
+      - name: Build for both platforms
+        working-directory: 03-app
+        run: eas build --platform all --non-interactive --profile production
+
+  # ─── Desktop Build ─────────────────────────────────────────────
+  build-desktop:
+    name: Build Desktop Apps
+    runs-on: ${{ matrix.os }}
+    if: github.ref == 'refs/heads/main'
+    needs: [test-backend]
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: 04-software
+        run: npm ci
+
+      - name: Build desktop app
+        working-directory: 04-software
+        run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_LINK: ${{ secrets.MAC_CERT }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CERT }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: 04-software/dist/
+          retention-days: 30

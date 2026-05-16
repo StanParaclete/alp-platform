@@ -1,0 +1,522 @@
+// ALP Platform — Prisma Database Schema
+// PostgreSQL — Production Ready
+// Built by Stan Paraclete | www.stanparaclete.com
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ─────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  SUPER_ADMIN
+  DISTRICT_MANAGER
+  SCHOOL_ADMIN
+  TEACHER
+  SPECIAL_ED_TEACHER
+  THERAPIST
+  PSYCHOLOGIST
+  PARENT
+  STUDENT
+}
+
+enum PlanType {
+  ALP
+  RTI_I
+  RTI_II
+  RTI_III
+  SECTION_504
+  CUSTOM
+}
+
+enum PlanStatus {
+  DRAFT
+  ACTIVE
+  UNDER_REVIEW
+  EXPIRED
+  ARCHIVED
+}
+
+enum GoalStatus {
+  ACTIVE
+  MASTERED
+  NOT_MET
+  DISCONTINUED
+  PENDING
+}
+
+enum GoalDomain {
+  READING
+  MATH
+  WRITING
+  COMMUNICATION
+  SOCIAL_EMOTIONAL
+  BEHAVIOR
+  MOTOR
+  ADAPTIVE
+  VOCATIONAL
+  FUTURE_READINESS
+  CUSTOM
+}
+
+enum DisabilityCategory {
+  AUTISM
+  ADHD
+  DYSLEXIA
+  DYSCALCULIA
+  SPEECH_LANGUAGE
+  HEARING_IMPAIRMENT
+  VISUAL_IMPAIRMENT
+  BEHAVIORAL_EMOTIONAL
+  GIFTED
+  MULTIPLE_DISABILITIES
+  DEVELOPMENTAL_DELAY
+  EARLY_CHILDHOOD
+  ELL
+  TWICE_EXCEPTIONAL
+  PHYSICAL_DISABILITY
+  TRAUMA
+  HEALTH_IMPAIRMENT
+  INTELLECTUAL
+  CUSTOM
+}
+
+enum ComplianceFramework {
+  IDEA_USA
+  SECTION_504
+  VDOE_VIRGINIA
+  GES_GHANA
+  NERDC_NIGERIA
+  KICD_KENYA
+  WCED_SOUTH_AFRICA
+  UK_SEND
+  CANADA_IEP
+  AUSTRALIA_NCCD
+  CUSTOM
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  ARCHIVED
+}
+
+enum MeetingType {
+  ANNUAL_REVIEW
+  PROGRESS_CHECK
+  INITIAL_ELIGIBILITY
+  REEVALUATION
+  FAMILY_CONFERENCE
+  CRISIS
+  INFORMAL
+}
+
+enum ServiceType {
+  SPECIAL_ED_INSTRUCTION
+  SPEECH_LANGUAGE
+  OCCUPATIONAL_THERAPY
+  PHYSICAL_THERAPY
+  COUNSELING
+  BEHAVIORAL_SUPPORT
+  TRANSPORTATION
+  ASSISTIVE_TECHNOLOGY
+  NURSING
+  SOCIAL_WORK
+  VISION
+  HEARING
+  CUSTOM
+}
+
+enum SignatureStatus {
+  PENDING
+  SIGNED
+  DECLINED
+  EXPIRED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model District {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  country     String   @default("US")
+  state       String?
+  region      String?
+  framework   ComplianceFramework @default(IDEA_USA)
+  settings    Json     @default("{}")
+  logoUrl     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  schools     School[]
+  users       User[]
+  subscriptions Subscription[]
+}
+
+model School {
+  id          String   @id @default(cuid())
+  districtId  String
+  name        String
+  code        String
+  address     String?
+  city        String?
+  country     String   @default("US")
+  phone       String?
+  principalName String?
+  isActive    Boolean  @default(true)
+  settings    Json     @default("{}")
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  district    District @relation(fields: [districtId], references: [id])
+  users       User[]
+  students    Student[]
+  AuditLog    AuditLog[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  firstName    String
+  lastName     String
+  role         UserRole
+  districtId   String?
+  schoolId     String?
+  avatarUrl    String?
+  phone        String?
+  licenseKey   String?   @unique
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?
+  preferences  Json      @default("{}")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  district     District? @relation(fields: [districtId], references: [id])
+  school       School?   @relation(fields: [schoolId], references: [id])
+  students     Student[] @relation("TeacherStudents")
+  alpPlans     ALPPlan[] @relation("PlanCreator")
+  signatures   Signature[]
+  messages     Message[] @relation("MessageSender")
+  notifications Notification[]
+  auditLogs    AuditLog[]
+  sessions     Session[]
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  deviceInfo Json     @default("{}")
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Student {
+  id               String    @id @default(cuid())
+  schoolId         String
+  studentNumber    String?
+  firstName        String
+  lastName         String
+  dateOfBirth      DateTime
+  grade            String
+  gender           String?
+  ethnicity        String?
+  primaryLanguage  String    @default("English")
+  address          String?
+  emergencyContact String?
+  photoUrl         String?
+  tags             String[]  @default([])
+  supportLevel     Int       @default(1) // 1-3 (Tier)
+  isActive         Boolean   @default(true)
+  enrolledAt       DateTime  @default(now())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  school           School    @relation(fields: [schoolId], references: [id])
+  teachers         User[]    @relation("TeacherStudents")
+  alpPlans         ALPPlan[]
+  disabilities     StudentDisability[]
+  documents        Document[]
+  meetings         MeetingParticipant[]
+}
+
+model StudentDisability {
+  id           String            @id @default(cuid())
+  studentId    String
+  category     DisabilityCategory
+  isPrimary    Boolean           @default(false)
+  diagnosedAt  DateTime?
+  diagnosedBy  String?
+  notes        String?
+  createdAt    DateTime          @default(now())
+
+  student      Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model ALPPlan {
+  id              String      @id @default(cuid())
+  studentId       String
+  createdById     String
+  planType        PlanType    @default(ALP)
+  status          PlanStatus  @default(DRAFT)
+  framework       ComplianceFramework @default(IDEA_USA)
+  effectiveDate   DateTime
+  reviewDate      DateTime
+  version         Int         @default(1)
+  
+  // Section data stored as JSON for flexibility
+  studentInfo     Json        @default("{}")
+  presentLevels   Json        @default("{}")
+  strengths       Json        @default("{}")
+  needs           Json        @default("{}")
+  services        Json        @default("[]")
+  accommodations  Json        @default("[]")
+  interventions   Json        @default("{}")
+  futureReadiness Json        @default("{}")
+  behaviorSupports Json       @default("{}")
+  familyInput     Json        @default("{}")
+  reviewSummary   Json        @default("{}")
+  alpNotice       Json        @default("{}")
+  
+  completionPct   Int         @default(0)
+  isCompliant     Boolean     @default(false)
+  pdfUrl          String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  student         Student     @relation(fields: [studentId], references: [id])
+  createdBy       User        @relation("PlanCreator", fields: [createdById], references: [id])
+  goals           Goal[]
+  signatures      Signature[]
+  documents       Document[]
+  versions        ALPVersion[]
+}
+
+model ALPVersion {
+  id        String   @id @default(cuid())
+  alpId     String
+  version   Int
+  snapshot  Json
+  createdAt DateTime @default(now())
+  createdBy String?
+
+  alp       ALPPlan  @relation(fields: [alpId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id           String      @id @default(cuid())
+  alpId        String
+  domain       GoalDomain
+  customDomain String?
+  status       GoalStatus  @default(ACTIVE)
+  description  String
+  baseline     String
+  target       String
+  method       String?
+  monitoring   String      @default("Monthly")
+  startDate    DateTime    @default(now())
+  targetDate   DateTime?
+  masteredDate DateTime?
+  orderIndex   Int         @default(0)
+  aiGenerated  Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  alp          ALPPlan     @relation(fields: [alpId], references: [id], onDelete: Cascade)
+  progress     Progress[]
+}
+
+model Progress {
+  id          String   @id @default(cuid())
+  goalId      String
+  recordedBy  String
+  value       Float
+  unit        String   @default("percent")
+  notes       String?
+  recordedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  goal        Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model Service {
+  id          String      @id @default(cuid())
+  alpId       String?
+  type        ServiceType
+  customType  String?
+  frequency   String
+  duration    Int         // minutes per session
+  setting     String?     // Resource, Inclusion, etc.
+  provider    String?
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+}
+
+model Accommodation {
+  id          String   @id @default(cuid())
+  alpId       String?
+  category    String   // Testing, Presentation, Response, Setting
+  description String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id          String        @id @default(cuid())
+  senderId    String
+  recipientId String?
+  studentId   String?
+  subject     String
+  body        String
+  status      MessageStatus @default(SENT)
+  isRead      Boolean       @default(false)
+  attachments Json          @default("[]")
+  sentAt      DateTime      @default(now())
+  readAt      DateTime?
+
+  sender      User          @relation("MessageSender", fields: [senderId], references: [id])
+}
+
+model Meeting {
+  id          String      @id @default(cuid())
+  title       String
+  type        MeetingType
+  studentId   String?
+  scheduledAt DateTime
+  duration    Int         @default(60) // minutes
+  location    String?
+  isVirtual   Boolean     @default(false)
+  meetingLink String?
+  notes       String?
+  status      String      @default("scheduled") // scheduled, completed, cancelled
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  participants MeetingParticipant[]
+}
+
+model MeetingParticipant {
+  id          String   @id @default(cuid())
+  meetingId   String
+  studentId   String?
+  userId      String?
+  role        String?
+  attended    Boolean  @default(false)
+
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  student     Student? @relation(fields: [studentId], references: [id])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  body       String
+  type       String   // review_due, goal_alert, message, meeting, signature_needed
+  data       Json     @default("{}")
+  isRead     Boolean  @default(false)
+  readAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Signature {
+  id          String          @id @default(cuid())
+  alpId       String
+  userId      String
+  role        String          // parent, teacher, admin, student
+  status      SignatureStatus @default(PENDING)
+  signedAt    DateTime?
+  ipAddress   String?
+  userAgent   String?
+  signatureData String?       // Base64 encoded signature image
+  declineReason String?
+  requestedAt DateTime        @default(now())
+
+  alp         ALPPlan         @relation(fields: [alpId], references: [id])
+  user        User            @relation(fields: [userId], references: [id])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  studentId   String?
+  alpId       String?
+  uploadedBy  String
+  name        String
+  type        String   // pdf, docx, image, assessment
+  url         String
+  size        Int      // bytes
+  mimeType    String
+  tags        String[] @default([])
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  student     Student? @relation(fields: [studentId], references: [id])
+  alp         ALPPlan? @relation(fields: [alpId], references: [id])
+}
+
+model Template {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  framework   ComplianceFramework
+  planType    PlanType
+  content     Json
+  isDefault   Boolean   @default(false)
+  isPublic    Boolean   @default(false)
+  createdBy   String?
+  schoolId    String?
+  districtId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Subscription {
+  id           String   @id @default(cuid())
+  districtId   String
+  plan         String   // starter, professional, enterprise
+  status       String   @default("active")
+  seats        Int      @default(10)
+  usedSeats    Int      @default(0)
+  startsAt     DateTime @default(now())
+  expiresAt    DateTime?
+  stripeSubId  String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  district     District @relation(fields: [districtId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  schoolId   String?
+  action     String   // CREATE, UPDATE, DELETE, VIEW, EXPORT, SIGN
+  resource   String   // alp, student, goal, document, etc.
+  resourceId String?
+  details    Json     @default("{}")
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id])
+  school     School?  @relation(fields: [schoolId], references: [id])
+}
