@@ -37,13 +37,13 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700;1,800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px}
-body{font-family:'DM Sans',sans-serif;background:#F5F0EB;color:#1A1A1A;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',sans-serif;background:#fff;color:#111;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font-family:'DM Sans',sans-serif}
 button{cursor:pointer;border:none;background:none}
-.dot-bg{background-color:#F5F0EB;background-image:radial-gradient(circle,#C8B89A .8px,transparent .8px);background-size:20px 20px}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#F5F0EB}::-webkit-scrollbar-thumb{background:#C8B89A;border-radius:2px}
+.dot-bg{background-color:#ffffff}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#f9f9f9}::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:2px}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-wrap{overflow:hidden;border-top:1px solid #E8DDD0;border-bottom:1px solid #E8DDD0;padding:13px 0;background:#fff}
+.ticker-wrap{overflow:hidden;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:13px 0;background:#fff}
 .ticker-inner{display:flex;animation:ticker 26s linear infinite;white-space:nowrap}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -72,12 +72,12 @@ button{cursor:pointer;border:none;background:none}
 .btn-ghost:hover{border-color:#C8B89A;color:#1A1A1A}
 .btn-red{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#FEE2E2;color:#B91C1C;border:1px solid #FECACA;border-radius:99px;padding:9px 20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s}
 .btn-red:hover{background:#FEF2F2}
-.card{background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04)}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.04);border:1px solid #f0f0f0}
 .card-dark{background:#1A1A1A;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.2)}
 .lbl{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9A8A78}
 .rule{width:100%;height:1px;background:#E8DDD0;border:none}
 .sidebar{width:220px;flex-shrink:0;background:#111111;height:100vh;position:sticky;top:0;display:flex;flex-direction:column;overflow:hidden}
-.app-main{flex:1;background:#F5F0EB;min-height:100vh;overflow-y:auto}
+.app-main{flex:1;background:#F4F4F6;min-height:100vh;overflow-y:auto}
 .badge{display:inline-flex;align-items:center;padding:3px 10px;font-size:11px;font-weight:700;border-radius:99px;letter-spacing:.03em}
 .data-table{width:100%;border-collapse:collapse}
 .data-table th{padding:11px 20px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#9A8A78;border-bottom:1px solid #E8DDD0;background:#FAFAFA}
@@ -103,8 +103,8 @@ button{cursor:pointer;border:none;background:none}
 `;
 
 const C = {
-  cream:"#F5F0EB",white:"#FFFFFF",black:"#1A1A1A",
-  tan:"#C8B89A",tanL:"#E8DDD0",warm:"#9A8A78",
+  cream:"#ffffff",white:"#FFFFFF",black:"#111111",
+  tan:"#d1d5db",tanL:"#e5e7eb",warm:"#6b7280",
   purple:"#7C3AED",purpleL:"#EDE9FE",purpleD:"#6D28D9",
   green:"#16A34A",greenBg:"#F0FDF4",greenBd:"#BBF7D0",
   amber:"#D97706",amberBg:"#FFFBEB",amberBd:"#FDE68A",
@@ -201,11 +201,11 @@ function DownloadModal({onClose}){
         <h2 style={{fontSize:26,fontWeight:800,color:"#fff",marginBottom:8}}>Download ALP Desktop</h2>
         <p style={{fontSize:14,color:"rgba(255,255,255,.55)",marginBottom:32,lineHeight:1.65}}>Full offline access, faster performance, and enterprise-grade security. Choose your platform below.</p>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:28}}>
-          {[{icon:"🪟",label:"Windows",sub:"v2.4.1 · 64-bit"},{icon:"🍎",label:"macOS",sub:"v2.4.1 · Universal"},{icon:"🐧",label:"Linux",sub:"v2.4.1 · .deb / .rpm"}].map(p=>(
+          {[{img:"/assets/images/windows-logo.png",label:"Windows",sub:"v2.4.1 · 64-bit"},{img:"/assets/images/apple-logo.jpg",label:"macOS",sub:"v2.4.1 · Universal"},{img:"/assets/images/linux-logo.jpg",label:"Linux",sub:"v2.4.1 · .deb / .rpm"}].map(p=>(
             <div key={p.label} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:12,padding:"22px 16px",cursor:"pointer",transition:"all .2s"}}
               onMouseEnter={e=>e.currentTarget.style.background="rgba(124,58,237,.2)"}
               onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.06)"}>
-              <div style={{fontSize:32,marginBottom:10}}>{p.icon}</div>
+              <img src={p.img} alt={p.label} style={{width:48,height:48,objectFit:"contain",margin:"0 auto 10px",display:"block"}}/>
               <div style={{fontSize:15,fontWeight:700,color:"#fff",marginBottom:4}}>{p.label}</div>
               <div style={{fontSize:11,color:"rgba(255,255,255,.4)"}}>{p.sub}</div>
             </div>
@@ -228,7 +228,7 @@ function DownloadModal({onClose}){
 // ─── SHARED SUBNAV ──────────────────────────────────────────────
 function SubNav({active,setNavPage,onEnter}){
   return(
-    <nav style={{position:"sticky",top:0,zIndex:100,background:"rgba(245,240,235,.96)",backdropFilter:"blur(14px)",borderBottom:`1px solid ${C.tanL}`,display:"flex",alignItems:"center",padding:"0 48px",height:62}}>
+    <nav style={{position:"sticky",top:0,zIndex:100,background:"rgba(255,255,255,.97)",backdropFilter:"blur(14px)",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",padding:"0 48px",height:62}}>
       <div style={{flex:1,display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={()=>setNavPage(null)}>
         <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover"}}/>
         <span className="serif" style={{fontSize:15,fontWeight:700}}>ALP</span>
@@ -242,7 +242,7 @@ function SubNav({active,setNavPage,onEnter}){
         ))}
       </div>
       <div style={{flex:1,display:"flex",justifyContent:"flex-end",gap:10}}>
-        <button className="btn-outline" onClick={()=>setNavPage(null)} style={{fontSize:11,padding:"8px 20px"}}>← Home</button>
+        <button className="btn-outline" onClick={()=>setNavPage(null)} style={{fontSize:11,padding:"8px 20px",borderColor:"#111",color:"#111"}}>← Home</button>
         <button className="btn-purple" onClick={onEnter} style={{fontSize:11,padding:"8px 20px"}}>Sign Up Free</button>
       </div>
     </nav>
@@ -864,43 +864,43 @@ function Landing({onEnter,navPage,setNavPage}){
   if(navPage==="Resources")   return <ResourcesPage setNavPage={setNavPage} onEnter={onEnter}/>;
 
   return(
-    <div className="dot-bg" style={{minHeight:"100vh"}}>
+    <div style={{minHeight:"100vh",background:"#ffffff"}}>
       {showDownload&&<DownloadModal onClose={()=>setShowDownload(false)}/>}
-      <nav style={{position:"sticky",top:0,zIndex:100,background:"rgba(245,240,235,.94)",backdropFilter:"blur(14px)",borderBottom:`1px solid ${C.tanL}`,display:"flex",alignItems:"center",padding:"0 48px",height:62}}>
+      <nav style={{position:"sticky",top:0,zIndex:100,background:"#111",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,.08)",display:"flex",alignItems:"center",padding:"0 48px",height:62}}>
         <div style={{flex:1,display:"flex",alignItems:"center",gap:10}}>
           <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover"}}/>
-          <span className="serif" style={{fontSize:15,fontWeight:700}}>ALP</span>
-          <span style={{fontSize:10,color:C.warm,letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>Accelerated Learning Program</span>
+          <span className="serif" style={{fontSize:15,fontWeight:700,color:"#fff"}}>ALP</span>
+          <span style={{fontSize:10,color:"rgba(255,255,255,.6)",letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>Accelerated Learning Program</span>
         </div>
-        <div style={{display:"flex",gap:36,fontSize:13.5,color:C.warm}}>
+        <div style={{display:"flex",gap:36,fontSize:13.5}}>
           {["Features","For Schools","Pricing","Resources"].map(n=>(
             <span key={n} onClick={()=>setNavPage(n)}
-              style={{cursor:"pointer",transition:"color .15s",fontWeight:navPage===n?700:400,color:navPage===n?C.black:C.warm,borderBottom:navPage===n?`2px solid ${C.purple}`:"2px solid transparent",paddingBottom:2}}
-              onMouseEnter={e=>e.currentTarget.style.color=C.black}
-              onMouseLeave={e=>e.currentTarget.style.color=navPage===n?C.black:C.warm}>{n}</span>
+              style={{cursor:"pointer",transition:"color .15s",fontWeight:navPage===n?700:400,color:"rgba(255,255,255,.85)",borderBottom:navPage===n?"2px solid #fff":"2px solid transparent",paddingBottom:2}}
+              onMouseEnter={e=>e.currentTarget.style.color="#fff"}
+              onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.85)"}>{n}</span>
           ))}
         </div>
         <div style={{flex:1,display:"flex",justifyContent:"flex-end",gap:10}}>
-          <button className="btn-outline" onClick={onEnter} style={{padding:"8px 22px",fontSize:11}}>Log in</button>
-          <button className="btn-purple" onClick={onEnter} style={{padding:"8px 22px",fontSize:11}}>Sign Up</button>
+          <button onClick={onEnter} style={{padding:"8px 22px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.15)",color:"#fff",border:"1.5px solid rgba(255,255,255,.4)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.25)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}>Log in</button>
+          <button onClick={onEnter} style={{padding:"8px 22px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>Sign Up</button>
         </div>
       </nav>
 
-      <section style={{padding:"96px 48px 80px",maxWidth:1100,margin:"0 auto"}} className="fade-up">
-        <p className="lbl" style={{marginBottom:24}}>Now available · Spring 2026 · 10+ global frameworks</p>
-        <h1 className="serif" style={{fontSize:"clamp(54px,7vw,96px)",fontWeight:800,lineHeight:1.02,letterSpacing:"-2.5px",marginBottom:32,maxWidth:820}}>
-          Supporting Every<br/><span className="serif-italic" style={{color:C.purple}}>Learner's Growth.</span>
+      <section style={{background:"#18003d",padding:"0"}}><div style={{padding:"96px 48px 80px",maxWidth:1100,margin:"0 auto"}} className="fade-up">
+        <p className="lbl" style={{marginBottom:24,color:"#a78bfa",letterSpacing:".14em"}}>Now available · Spring 2026 · 10+ global frameworks</p>
+        <h1 className="serif" style={{fontSize:"clamp(54px,7vw,96px)",fontWeight:800,lineHeight:1.02,letterSpacing:"-2.5px",marginBottom:32,maxWidth:820,color:"#fff"}}>
+          Supporting Every<br/><span className="serif-italic" style={{color:"#a78bfa"}}>Learner's Growth.</span>
         </h1>
-        <p style={{fontSize:18,color:C.warm,maxWidth:520,lineHeight:1.78,marginBottom:52}}>A complete student intervention and progress monitoring system — designed to help schools worldwide support every learner through structured plans, real-time tracking, and family collaboration.</p>
+        <p style={{fontSize:18,color:"rgba(255,255,255,.7)",maxWidth:520,lineHeight:1.78,marginBottom:52}}>A complete student intervention and progress monitoring system — designed to help schools worldwide support every learner through structured plans, real-time tracking, and family collaboration.</p>
         <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-          <button className="btn-black" onClick={onEnter} style={{fontSize:11,padding:"15px 38px"}}>🚀 Start in the Browser →</button>
-          <button className="btn-outline" onClick={()=>setShowDownload(true)} style={{fontSize:11,padding:"14px 34px"}}>⬇ Download Desktop App</button>
-          <button className="btn-ghost" style={{fontSize:11,padding:"14px 28px"}}>📅 Schedule a Demo</button>
+          <button onClick={onEnter} style={{fontSize:11,padding:"15px 38px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>🚀 Start in the Browser →</button>
+          <button onClick={()=>setShowDownload(true)} style={{fontSize:11,padding:"14px 34px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"transparent",color:"#fff",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.borderColor="#fff"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.5)"}>⬇ Download Desktop App</button>
+          <button style={{fontSize:11,padding:"14px 28px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.8)",border:"1px solid rgba(255,255,255,.2)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.2)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.1)"}>📅 Schedule a Demo</button>
         </div>
-        <div style={{display:"flex",gap:56,marginTop:64,paddingTop:48,borderTop:`1px solid ${C.tanL}`}}>
-          {[["10+","Countries supported"],["IDEA & GES","Global frameworks"],["Claude AI","Goal generation"],["FERPA","Compliant & secure"]].map(([v,l])=><div key={l}><div className="serif" style={{fontSize:24,fontWeight:700}}>{v}</div><div style={{fontSize:12,color:C.warm,marginTop:2}}>{l}</div></div>)}
+        <div style={{display:"flex",gap:56,marginTop:64,paddingTop:48,borderTop:"1px solid rgba(255,255,255,.1)"}}>
+          {[["10+","Countries supported"],["IDEA & GES","Global frameworks"],["Claude AI","Goal generation"],["FERPA","Compliant & secure"]].map(([v,l])=><div key={l}><div className="serif" style={{fontSize:24,fontWeight:700,color:"#fff"}}>{v}</div><div style={{fontSize:12,color:"rgba(255,255,255,.6)",marginTop:2}}>{l}</div></div>)}
         </div>
-      </section>
+      </div></section>
 
       <div className="ticker-wrap">
         <div className="ticker-inner">
@@ -927,7 +927,7 @@ function Landing({onEnter,navPage,setNavPage}){
       </section>
 
 
-      <section style={{padding:"96px 48px",maxWidth:1100,margin:"0 auto"}}>
+      <section style={{background:"#fff",padding:"0"}}><div style={{padding:"96px 48px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:12}}>
           <div>
             <p className="lbl" style={{marginBottom:14}}>Platform Features</p>
@@ -942,17 +942,19 @@ function Landing({onEnter,navPage,setNavPage}){
             <div className="serif" style={{fontSize:19,fontWeight:700,lineHeight:1.2}}><span className="serif-italic" style={{color:C.warm,marginRight:4}}>{f.italic}</span>{f.title}</div>
             <p style={{fontSize:13,color:C.warm,lineHeight:1.75,marginTop:12}}>{f.desc}</p>
           </div>)}
-        </div>
-      </section>
+        </div></div></section>
 
       <section style={{background:C.black,padding:"96px 48px"}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <p className="lbl" style={{color:"#9A8A78",marginBottom:20}}>Access ALP your way</p>
           <h2 className="serif" style={{fontSize:"clamp(36px,5vw,64px)",fontWeight:700,color:C.cream,letterSpacing:"-1.5px",marginBottom:64,lineHeight:1.08}}>Your Platform.<br/><span className="serif-italic" style={{color:"#A78BFA"}}>Your Device.</span></h2>
           <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"#2D2D2D"}}>
-            {[{icon:"🌐",label:"Web App",sub:"No download needed",cta:true},{icon:"🪟",label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},{icon:"🍎",label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},{icon:"🐧",label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}].map(p=>(
+            {[{img:null,icon:"🌐",label:"Web App",sub:"No download needed",cta:true},{img:"/assets/images/windows-logo.png",label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},{img:"/assets/images/apple-logo.jpg",label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},{img:"/assets/images/linux-logo.jpg",label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}].map(p=>(
               <div key={p.label} style={{background:"#1A1A1A",padding:"40px 32px",display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
-                <div style={{fontSize:34,marginBottom:12}}>{p.icon}</div>
+                {p.img
+                  ?<img src={p.img} alt={p.label} style={{width:52,height:52,objectFit:"contain",marginBottom:12}}/>
+                  :<div style={{fontSize:34,marginBottom:12}}>{p.icon}</div>
+                }
                 <div className="serif" style={{fontSize:21,fontWeight:700,color:C.cream,marginBottom:4}}>{p.label}</div>
                 <div style={{fontSize:12,color:"#9A8A78",marginBottom:20}}>{p.sub}</div>
                 {p.cta
@@ -965,7 +967,7 @@ function Landing({onEnter,navPage,setNavPage}){
         </div>
       </section>
 
-      <footer style={{padding:"64px 48px 32px",maxWidth:1100,margin:"0 auto"}}>
+      <footer style={{padding:"64px 48px 32px",maxWidth:1100,margin:"0 auto",background:"#fff"}}>
         <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr 1fr",gap:32,marginBottom:48}}>
           <div>
             <div className="serif" style={{fontSize:22,fontWeight:700,marginBottom:10,color:"#8B2020",fontStyle:"italic"}}>ALP.</div>
@@ -994,7 +996,7 @@ function Landing({onEnter,navPage,setNavPage}){
 // ═══════════════════════════════════════════════════════════
 // LOGIN — matches pages 4 & 5 of prototype exactly
 // ═══════════════════════════════════════════════════════════
-function Login({onLogin}){
+function Login({onLogin, onBack}){
   const [tab,setTab]=useState("web");
   const [email,setEmail]=useState("ms.simmons@westwood.edu");
   const [pw,setPw]=useState("ALPDemo2026!");
@@ -1010,9 +1012,12 @@ function Login({onLogin}){
         <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,rgba(124,58,237,.15) .8px,transparent .8px)",backgroundSize:"22px 22px"}}/>
         <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(124,58,237,.25) 0%,transparent 55%)"}}/>
         <div style={{position:"relative",zIndex:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:64}}>
-            <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:44,height:44,borderRadius:11,objectFit:"cover"}}/>
-            <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff",lineHeight:1}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em",marginTop:1}}>Accelerated Learning Program</div></div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:64}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={onBack}>
+              <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:44,height:44,borderRadius:11,objectFit:"cover"}}/>
+              <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff",lineHeight:1}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em",marginTop:1}}>Accelerated Learning Program</div></div>
+            </div>
+            <button onClick={onBack} style={{fontSize:12,color:"rgba(255,255,255,.4)",background:"none",border:"1px solid rgba(255,255,255,.15)",borderRadius:99,padding:"6px 14px",cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.color="#fff";e.currentTarget.style.borderColor="rgba(255,255,255,.4)";}} onMouseLeave={e=>{e.currentTarget.style.color="rgba(255,255,255,.4)";e.currentTarget.style.borderColor="rgba(255,255,255,.15)";}}>← Website</button>
           </div>
           <div style={{fontSize:15,fontWeight:600,color:"rgba(255,255,255,.5)",marginBottom:16}}>Welcome back to</div>
           <h2 style={{fontSize:"clamp(36px,4vw,52px)",fontWeight:800,lineHeight:1.1,marginBottom:36}}>
@@ -1079,7 +1084,7 @@ function Login({onLogin}){
         ))}
 
         <p style={{textAlign:"center",fontSize:13,color:C.warm,marginTop:20}}>Don't have an account? <span style={{color:C.black,fontWeight:700,cursor:"pointer"}}>Contact your district admin</span></p>
-        <p style={{textAlign:"center",fontSize:12,color:C.warm,marginTop:8,cursor:"pointer"}}>← Back to website</p>
+        <p onClick={onBack} style={{textAlign:"center",fontSize:12,color:C.warm,marginTop:8,cursor:"pointer",transition:"color .15s"}} onMouseEnter={e=>e.currentTarget.style.color=C.black} onMouseLeave={e=>e.currentTarget.style.color=C.warm}>← Back to website</p>
       </div>
     </div>
   );
@@ -1939,7 +1944,7 @@ export default function App(){
     <>
       <style>{CSS}</style>
       {screen==="landing"&&<Landing onEnter={()=>setScreen("login")} navPage={navPage} setNavPage={setNavPage}/>}
-      {screen==="login"&&<Login onLogin={()=>{setScreen("app");setPage("dashboard");}}/>}
+      {screen==="login"&&<Login onLogin={()=>{setScreen("app");setPage("dashboard");}} onBack={()=>setScreen("landing")}/>}
       {screen==="app"&&
         <div style={{display:"flex",minHeight:"100vh"}}>
           <SidebarFull page={page} setPage={p=>{setPage(p);setSidebarOpen(false);}} open={sidebarOpen} setOpen={setSidebarOpen}/>
