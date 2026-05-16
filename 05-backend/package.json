@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "node src/seed.js",
     "db:studio": "prisma studio",
-    "test": "jest"
+    "test": "jest",
+    "build": "npx prisma generate --schema=prisma/schema.prisma"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",

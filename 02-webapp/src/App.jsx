@@ -259,7 +259,7 @@ function PageFooter(){
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// FEATURES PAGE — drawn from Playground IEP + ALP prototype
+// FEATURES PAGE — ALP Platform
 // ═══════════════════════════════════════════════════════════════════
 function FeaturesPage({setNavPage,onEnter}){
   const aiTools=[
@@ -305,7 +305,7 @@ function FeaturesPage({setNavPage,onEnter}){
         </div>
       </section>
 
-      {/* ALP Intelligence Suite Tools — 8 tools in 4-col grid like Playground IEP */}
+      {/* ALP Intelligence Suite — 8 tools */}
       <section style={{background:C.white,padding:"72px 48px",borderTop:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:12}}>
@@ -363,7 +363,7 @@ function FeaturesPage({setNavPage,onEnter}){
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <p className="lbl" style={{color:"#9A8A78",marginBottom:14,textAlign:"center"}}>Global Compliance Engine</p>
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:700,color:C.cream,textAlign:"center",marginBottom:16,letterSpacing:"-1px"}}>Built for every country,<br/><span className="serif-italic" style={{color:"#A78BFA"}}>every framework.</span></h2>
-          <p style={{fontSize:15,color:"#9A8A78",textAlign:"center",maxWidth:560,margin:"0 auto 48px",lineHeight:1.7}}>ALP automatically checks programs against 10+ compliance frameworks — flagging anything missing before your audit arrives. Playground IEP only supports USA.</p>
+          <p style={{fontSize:15,color:"#9A8A78",textAlign:"center",maxWidth:560,margin:"0 auto 48px",lineHeight:1.7}}>ALP automatically checks programs against 10+ compliance frameworks — flagging anything missing before your audit arrives.</p>
           <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:40}}>
             {frameworks.map(c=>(
               <div key={c.n} style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"16px 12px",textAlign:"center",transition:"all .2s"}}
@@ -507,7 +507,7 @@ function ForSchoolsPage({setNavPage,onEnter}){
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// PRICING PAGE — strategic pricing vs Playground IEP ($10/mo)
+// PRICING PAGE
 // ═══════════════════════════════════════════════════════════════════
 function PricingPage({setNavPage,onEnter}){
   const [billing,setBilling]=useState("monthly");
@@ -525,7 +525,7 @@ function PricingPage({setNavPage,onEnter}){
       name:"Professional",
       price:billing==="monthly"?"$9":"$7",
       period:"/mo per teacher",tag:"MOST POPULAR",color:C.purple,bg:C.black,textColor:C.cream,
-      desc:"The full ALP system. Cheaper than Playground IEP's $10/mo — and with global compliance, family portal, and desktop apps they don't offer.",
+      desc:"The complete ALP system — global compliance, family portal with e-signature, desktop apps, and unlimited AI tools all included.",
       features:["Unlimited students","ALP Intelligence Suite — all 8 tools unlimited","Full 13-section ALP Builder","Real-time CBM progress monitoring + alerts","Family portal with e-signature","All 10+ global compliance frameworks","ALP Student Snapshot for gen-ed teachers","ALP Accommodations Hub","Caseload dashboard","PDF + Word export","Automated ALP scheduling","Priority email & chat support"],
       missing:[],
       cta:"Start 14-Day Free Trial",style:"btn-purple",
@@ -555,19 +555,19 @@ function PricingPage({setNavPage,onEnter}){
     {f:"ALP Reading Adapter",a:"✓ All plans",p:"✓ All plans"},
     {f:"ALP Intervention Planner",a:"✓ All plans",p:"✓ All plans"},
     {f:"Progress Monitoring (AI)",a:"✓ CBM + auto-alerts",p:"✓ Basic"},
-    {f:"Family Portal",a:"✓ Pro & above",p:"✗ Not available"},
-    {f:"E-Signature",a:"✓ Pro & above",p:"✗ Not available"},
+    {f:"Family Portal",a:"✓ Pro & above",p:"✗ Not included"},
+    {f:"E-Signature",a:"✓ Pro & above",p:"✗ Not included"},
     {f:"Global Compliance (Ghana, Nigeria, UK…)",a:"✓ 10+ frameworks",p:"✗ USA only"},
     {f:"Desktop App (offline access)",a:"✓ Windows/Mac/Linux",p:"✗ Web only"},
     {f:"ALP Student Snapshot",a:"✓ Pro & above",p:"✓ Pro & above"},
     {f:"ALP Accommodations Hub",a:"✓ School & above",p:"✓ School & above"},
-    {f:"Age Range",a:"Birth–22+",p:"School age only"},
-    {f:"Price for SPED teams",a:"$9/mo ✓",p:"$10/mo"},
+    {f:"Age Range",a:"Birth–22+",p:"Ages 5–21 only"},
+    {f:"Price for SPED teams",a:"$9/mo",p:"$10–15/mo"},
   ];
 
   const faqs=[
     {q:"Is ALP really free for individual teachers?",a:"Yes. All 8 tools in the ALP Intelligence Suite are free for individual teachers, forever: ALP Goal Architect, ALP Present Levels Coach, ALP Behaviour Blueprint, ALP Reading Adapter, ALP Intervention Planner, ALP Progress Probe Generator, ALP Learner Profile Builder, and ALP Lesson Differentiator. We believe educators deserve support, not paywalls."},
-    {q:"How does ALP compare to Playground IEP in price?",a:"ALP's Professional plan is $9/month — less than Playground IEP's $10/month. But more importantly, ALP includes global compliance frameworks (Ghana GES, Nigeria NERDC, UK SEND, etc.), a family portal with e-signature, desktop apps for offline access, and support for students from birth to age 22+ — features Playground IEP doesn't offer at any price tier."},
+    {q:"How does ALP compare to other IEP software?",a:"ALP's Professional plan starts at $9/month and includes features most IEP software charges extra for or doesn't offer at all — global compliance frameworks (Ghana GES, Nigeria NERDC, UK SEND, and more), a full family portal with e-signature, desktop apps for offline access, and support for students from birth to age 22+."},
     {q:"Is there a free trial on paid plans?",a:"Yes — every paid plan comes with a 14-day free trial. No credit card required. You get full access to all features during the trial period."},
     {q:"Do you support Ghana GES or Nigeria NERDC compliance?",a:"Yes — ALP was built with African and global schools in mind from day one. We support GES Ghana, NERDC Nigeria, KICD Kenya, WCED South Africa, UK SEND, Australia NCCD, and all US frameworks (IDEA, Section 504) out of the box."},
     {q:"Can I use ALP for students from birth to age 22?",a:"Absolutely. ALP supports early intervention (birth–3), preschool (ages 3–5), school age (6–13), transition (14–21), and adult transition (18–22+). The ALP Builder automatically adjusts required sections and compliance requirements based on the student's age."},
@@ -585,9 +585,9 @@ function PricingPage({setNavPage,onEnter}){
         <h1 className="serif" style={{fontSize:"clamp(36px,5vw,68px)",fontWeight:800,letterSpacing:"-2px",lineHeight:1.05,marginBottom:16}}>
           Plans for every<br/><span className="serif-italic" style={{color:C.purple}}>school and budget.</span>
         </h1>
-        <p style={{fontSize:17,color:C.warm,maxWidth:540,margin:"0 auto 12px",lineHeight:1.75}}>ALP Intelligence Suite tools are <b style={{color:C.black}}>free forever</b> for individual teachers. Paid plans start at just $9/mo — cheaper than Playground IEP.</p>
+        <p style={{fontSize:17,color:C.warm,maxWidth:540,margin:"0 auto 12px",lineHeight:1.75}}>ALP Intelligence Suite tools are <b style={{color:C.black}}>free forever</b> for individual teachers. Paid plans start at just $9/mo — cheaper than traditional IEP software.</p>
         <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap",marginBottom:36}}>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Less than Playground IEP</span>
+          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Most affordable plan</span>
           <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Global compliance included</span>
           <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Family portal included</span>
           <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Desktop apps included</span>
@@ -630,14 +630,14 @@ function PricingPage({setNavPage,onEnter}){
         <p style={{textAlign:"center",fontSize:13,color:C.warm,marginTop:20}}>All paid plans include a <b style={{color:C.black}}>14-day free trial</b>. No credit card required. · <a href="mailto:support@growwithalp.com" style={{color:C.purple}}>support@growwithalp.com</a></p>
       </section>
 
-      {/* ALP vs Playground IEP comparison */}
+      {/* ALP vs Traditional Software comparison */}
       <section style={{background:C.white,padding:"72px 48px",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:800,margin:"0 auto"}}>
-          <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-1px",marginBottom:6,textAlign:"center"}}>ALP vs <span className="serif-italic" style={{color:C.warm}}>Playground IEP</span></h2>
-          <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:36}}>See exactly what ALP offers that others don't — at a lower price.</p>
+          <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-1px",marginBottom:6,textAlign:"center"}}>ALP vs <span className="serif-italic" style={{color:C.warm}}>Traditional IEP Software</span></h2>
+          <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:36}}>See exactly what makes ALP different from traditional IEP software.</p>
           <div style={{border:`1px solid ${C.tanL}`,borderRadius:12,overflow:"hidden"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:"#FAF8F5",padding:"12px 20px",borderBottom:`1px solid ${C.tanL}`}}>
-              {["Feature","ALP Platform","Playground IEP"].map((h,i)=><span key={h} style={{fontSize:11,fontWeight:700,color:i===1?C.purple:C.warm,textTransform:"uppercase",letterSpacing:".08em",textAlign:i>0?"center":"left"}}>{h}</span>)}
+              {["Feature","ALP Platform","Traditional IEP Software"].map((h,i)=><span key={h} style={{fontSize:11,fontWeight:700,color:i===1?C.purple:C.warm,textTransform:"uppercase",letterSpacing:".08em",textAlign:i>0?"center":"left"}}>{h}</span>)}
             </div>
             {compare.map((row,i)=>(
               <div key={row.f} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",padding:"12px 20px",background:i%2===0?C.white:"#FAFAFA",borderBottom:i<compare.length-1?`1px solid ${C.tanL}`:"none",alignItems:"center"}}>
@@ -744,7 +744,7 @@ function ResourcesPage({setNavPage,onEnter}){
         </div>
       </section>
 
-      {/* Live Workshops — inspired by Playground IEP's Workshops section */}
+      {/* Live Workshops */}
       <section style={{background:C.white,padding:"72px 48px",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <p className="lbl" style={{marginBottom:12}}>Live Workshops</p>
@@ -1908,7 +1908,12 @@ function SidebarFull({page,setPage,open,setOpen}){
           </div>
         ))}
       </nav>
-      <div style={{padding:"14px 16px",borderTop:"1px solid rgba(255,255,255,.07)",display:"flex",alignItems:"center",gap:10}}>
+      <div style={{padding:"10px 16px",borderTop:"1px solid rgba(255,255,255,.07)"}}>
+        <button onClick={()=>window.location.href="/"} style={{width:"100%",display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",color:"rgba(255,255,255,.5)",fontSize:11,fontWeight:600,cursor:"pointer",letterSpacing:".04em",transition:"all .15s",marginBottom:8}} onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.1)";e.currentTarget.style.color="#fff";}} onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.05)";e.currentTarget.style.color="rgba(255,255,255,.5)";}}>
+          <span style={{fontSize:12}}>🏠</span> Back to Website
+        </button>
+      </div>
+      <div style={{padding:"0 16px 14px",display:"flex",alignItems:"center",gap:10}}>
         <Avatar name="Ms Simmons" size={32}/>
         <div style={{flex:1,minWidth:0}}><div style={{fontSize:12.5,fontWeight:600,color:C.cream,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>Ms. Simmons</div><div style={{fontSize:10,color:"#5A4A3A"}}>Special Ed · Westwood</div></div>
         <button onClick={()=>setPage("settings")} style={{color:"#5A4A3A",fontSize:16}}>⚙</button>
