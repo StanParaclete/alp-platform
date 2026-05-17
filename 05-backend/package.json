@@ -10,7 +10,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "node src/seed.js",
+    "db:seed": "node prisma/seed.js",
     "db:studio": "prisma studio",
     "test": "jest",
     "build": "npx prisma generate --schema=prisma/schema.prisma"
@@ -46,6 +46,7 @@
     "node": ">=18.0.0"
   },
   "prisma": {
-    "schema": "prisma/schema.prisma"
+    "schema": "prisma/schema.prisma",
+    "seed": "node prisma/seed.js"
   }
 }
