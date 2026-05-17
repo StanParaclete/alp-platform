@@ -1,7 +1,7 @@
 {
   "name": "alp-backend",
   "version": "2.4.1",
-  "description": "ALP Platform API Server \u2014 Built by Stan Paraclete",
+  "description": "ALP Platform API Server — Built by Stan Paraclete",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
