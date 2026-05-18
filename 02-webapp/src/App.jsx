@@ -892,11 +892,11 @@ function PricingPage({setNavPage,onEnter}){
       </section>
 
       {/* Pricing cards */}
-      <section style={{padding:"0 48px 64px",maxWidth:1100,margin:"0 auto"}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,alignItems:"start"}}>
+      <section style={{padding:"0 clamp(20px,4vw,48px) 64px",maxWidth:1100,margin:"0 auto"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,alignItems:"start",paddingTop:24}}>
           {plans.map(p=>(
-            <div key={p.name} style={{background:p.bg,borderRadius:14,padding:26,position:"relative",border:`1.5px solid ${p.tag?p.color:C.tanL}`,boxShadow:p.tag?"0 8px 40px rgba(124,58,237,.2)":"0 1px 3px rgba(0,0,0,.04)",display:"flex",flexDirection:"column",gap:0}}>
-              {p.tag&&<div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:p.color,color:"#fff",fontSize:10,fontWeight:800,padding:"4px 16px",borderRadius:99,letterSpacing:".08em",whiteSpace:"nowrap"}}>{p.tag}</div>}
+            <div key={p.name} style={{background:p.bg,borderRadius:14,padding:26,position:"relative",border:`1.5px solid ${p.tag?p.color:C.tanL}`,boxShadow:p.tag?"0 8px 40px rgba(124,58,237,.2)":"0 1px 3px rgba(0,0,0,.04)",display:"flex",flexDirection:"column",gap:0,marginTop:p.tag?0:0}}>
+              {p.tag&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:p.color,color:"#fff",fontSize:10,fontWeight:800,padding:"5px 18px",borderRadius:99,letterSpacing:".08em",whiteSpace:"nowrap",boxShadow:`0 2px 8px ${p.color}66`}}>{p.tag}</div>}
               <p style={{fontSize:10,fontWeight:700,color:p.bg===C.black?"#A78BFA":p.color,letterSpacing:".12em",textTransform:"uppercase",marginBottom:8}}>{p.name}</p>
               <div style={{display:"flex",alignItems:"flex-end",gap:3,marginBottom:4}}>
                 <span className="serif" style={{fontSize:p.price==="Custom"?30:42,fontWeight:800,color:p.bg===C.black?C.cream:C.black,lineHeight:1}}>{p.price}</span>
