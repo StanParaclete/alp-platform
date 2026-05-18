@@ -436,7 +436,7 @@ function DownloadModal({onClose}){
               {!imgErrors[p.label]
                 ?<img src={p.img} alt={p.label}
                     onError={()=>setImgErrors(prev=>({...prev,[p.label]:true}))}
-                    style={{width:52,height:52,objectFit:"contain",margin:"0 auto 12px",display:"block"}}/>
+                    style={{width:52,height:52,objectFit:"contain",margin:"0 auto 12px",display:"block",mixBlendMode:"screen"}}/>
                 :<div style={{fontSize:36,marginBottom:12,lineHeight:1}}>{p.fallback}</div>
               }
               <div style={{fontSize:14,fontWeight:700,marginBottom:4}}>{p.label}</div>
@@ -1057,7 +1057,7 @@ function ResourcesPage({setNavPage,onEnter}){
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16}}>
             {[{img:null,icon:"🌐",label:"Web App",sub:"No download needed",cta:true},{img:"/assets/images/windows-logo.png",label:"Windows",sub:"Windows 10 / 11"},{img:"/assets/images/apple-logo.png",label:"macOS",sub:"macOS 12+"},{img:"/assets/images/linux-logo.png",label:"Linux",sub:"Ubuntu / Debian"}].map(p=>(
               <div key={p.label} className="card" style={{padding:"28px 20px",textAlign:"center"}}>
-                {p.img?<img src={p.img} alt={p.label} style={{width:52,height:52,objectFit:"contain",margin:"0 auto 12px",display:"block"}} onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="block";}}/>:<span/>}<div style={{fontSize:42,marginBottom:12,display:p.img?"none":"block"}}>{p.icon}</div>
+                {p.img?<img src={p.img} alt={p.label} style={{width:52,height:52,objectFit:"contain",margin:"0 auto 12px",display:"block",mixBlendMode:"multiply"}} onError={e=>{e.target.style.display="none";e.target.nextSibling.style.display="block";}}/>:<span/>}<div style={{fontSize:42,marginBottom:12,display:p.img?"none":"block"}}>{p.icon}</div>
                 <div className="serif" style={{fontSize:17,fontWeight:700,marginBottom:4}}>{p.label}</div>
                 <div style={{fontSize:12,color:C.warm,marginBottom:18}}>{p.sub}</div>
                 {p.cta?<button className="btn-black" onClick={onEnter} style={{width:"100%",fontSize:11}}>Open in Browser</button>:<button className="btn-outline" style={{width:"100%",fontSize:11}}>⬇ Download {p.label}</button>}
@@ -1195,7 +1195,7 @@ function Landing({onEnter,navPage,setNavPage}){
             {[{img:null,icon:"🌐",label:"Web App",sub:"No download needed",cta:true},{img:"/assets/images/windows-logo.png",label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},{img:"/assets/images/apple-logo.png",label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},{img:"/assets/images/linux-logo.png",label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}].map(p=>(
               <div key={p.label} style={{background:"#1A1A1A",padding:"40px 32px",display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
                 {p.img
-                  ?<img src={p.img} alt={p.label} style={{width:52,height:52,objectFit:"contain",marginBottom:12}} onError={e=>{e.target.style.display="none";}}/>
+                  ?<img src={p.img} alt={p.label} style={{width:52,height:52,objectFit:"contain",marginBottom:12,mixBlendMode:"screen"}} onError={e=>{e.target.style.display="none";}}/>
                   :<div style={{fontSize:34,marginBottom:12}}>{p.icon}</div>
                 }
                 <div className="serif" style={{fontSize:21,fontWeight:700,color:C.cream,marginBottom:4}}>{p.label}</div>
