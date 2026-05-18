@@ -417,8 +417,8 @@ function AIModal({student,onAdd,onClose}){
 function DownloadModal({onClose}){
   const platforms=[
     {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11 · 64-bit",btn:"Download .exe"},
-    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="48" viewBox="0 0 814 1000"><path fill="white" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 336.7 45 256 45 224.8c0-69.2 17.9-136 64.1-186.4 28.5-31.5 74.1-58.3 130.6-58.3 54.7 0 93.4 36.4 121.8 36.4 26.6 0 70.9-39.5 134.1-39.5 21.1 0 108.2 1.9 163.7 74.1zm-126.5-68.4c-23.3-28.5-56-48.8-96.6-48.8-11.5 0-25 5.1-37.8 12.9-20.7 12.3-37.8 35.9-37.8 66.1s17.9 53.6 37.8 65.9c18.5 11.5 39.5 16 58.3 16 4.5 0 9-1.3 12.9-1.9-1.3-45.4 22.1-88.2 63.2-110.2z"/></svg>,label:"macOS",sub:"macOS 12+ · Universal",btn:"Download .dmg"},
-    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="16" rx="2.5"/><path d="M7 8l3.5 3.5L7 15"/><path d="M13 15h4"/></svg>,label:"Linux",sub:"Ubuntu / Debian · .deb",btn:"Download .deb"},
+    {svg:<img src="/assets/images/apple-logo.png" alt="macOS" style={{width:48,height:48,objectFit:"contain"}}/>,label:"macOS",sub:"macOS 12+ · Universal",btn:"Download .dmg"},
+    {svg:<img src="/assets/images/linux-logo.png" alt="Linux" style={{width:48,height:48,objectFit:"contain"}}/>,label:"Linux",sub:"Ubuntu / Debian · .deb",btn:"Download .deb"},
   ];
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -1052,8 +1052,8 @@ function ResourcesPage({setNavPage,onEnter}){
             {[
               {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
               {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="48" viewBox="0 0 814 1000"><path fill="currentColor" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 336.7 45 256 45 224.8c0-69.2 17.9-136 64.1-186.4 28.5-31.5 74.1-58.3 130.6-58.3 54.7 0 93.4 36.4 121.8 36.4 26.6 0 70.9-39.5 134.1-39.5 21.1 0 108.2 1.9 163.7 74.1zm-126.5-68.4c-23.3-28.5-56-48.8-96.6-48.8-11.5 0-25 5.1-37.8 12.9-20.7 12.3-37.8 35.9-37.8 66.1s17.9 53.6 37.8 65.9c18.5 11.5 39.5 16 58.3 16 4.5 0 9-1.3 12.9-1.9-1.3-45.4 22.1-88.2 63.2-110.2z"/></svg>,label:"macOS",sub:"macOS 12+"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="16" rx="2.5"/><path d="M7 8l3.5 3.5L7 15"/><path d="M13 15h4"/></svg>,label:"Linux",sub:"Ubuntu / Debian"}
+              {svg:<img src="/assets/images/apple-logo.png" alt="macOS" style={{width:48,height:48,objectFit:"contain"}}/>,label:"macOS",sub:"macOS 12+"},
+              {svg:<img src="/assets/images/linux-logo.png" alt="Linux" style={{width:48,height:48,objectFit:"contain"}}/>,label:"Linux",sub:"Ubuntu / Debian"}
             ].map(p=>(
               <div key={p.label} className="card" style={{padding:"28px 20px",textAlign:"center"}}>
                 {p.svg
@@ -1197,8 +1197,8 @@ function Landing({onEnter,navPage,setNavPage}){
             {[
               {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
               {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="48" viewBox="0 0 814 1000"><path fill="white" d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 336.7 45 256 45 224.8c0-69.2 17.9-136 64.1-186.4 28.5-31.5 74.1-58.3 130.6-58.3 54.7 0 93.4 36.4 121.8 36.4 26.6 0 70.9-39.5 134.1-39.5 21.1 0 108.2 1.9 163.7 74.1zm-126.5-68.4c-23.3-28.5-56-48.8-96.6-48.8-11.5 0-25 5.1-37.8 12.9-20.7 12.3-37.8 35.9-37.8 66.1s17.9 53.6 37.8 65.9c18.5 11.5 39.5 16 58.3 16 4.5 0 9-1.3 12.9-1.9-1.3-45.4 22.1-88.2 63.2-110.2z"/></svg>,label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="16" rx="2.5"/><path d="M7 8l3.5 3.5L7 15"/><path d="M13 15h4"/></svg>,label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}
+              {svg:<img src="/assets/images/apple-logo.png" alt="macOS" style={{width:48,height:48,objectFit:"contain"}}/>,label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},
+              {svg:<img src="/assets/images/linux-logo.png" alt="Linux" style={{width:48,height:48,objectFit:"contain"}}/>,label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}
             ].map(p=>(
               <div key={p.label} style={{background:"#1A1A1A",padding:"40px 32px",display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
                 {p.svg
