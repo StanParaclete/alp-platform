@@ -817,7 +817,7 @@ function PricingPage({setNavPage,onEnter}){
           <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-1px",marginBottom:6,textAlign:"center"}}>ALP vs <span className="serif-italic" style={{color:C.warm}}>Traditional Learning Plan Software</span></h2>
           <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:36}}>See exactly what makes ALP different from traditional learning plan software.</p>
           <div style={{border:`1px solid ${C.tanL}`,borderRadius:12,overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:${C.purpleL},padding:"12px 20px",borderBottom:`1px solid ${C.tanL}`}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:C.purpleL,padding:"12px 20px",borderBottom:`1px solid ${C.tanL}`}}>
               {["Feature","ALP Platform","Traditional Learning Plan Software"].map((h,i)=><span key={h} style={{fontSize:11,fontWeight:700,color:i===1?C.purple:C.warm,textTransform:"uppercase",letterSpacing:".08em",textAlign:i>0?"center":"left"}}>{h}</span>)}
             </div>
             {compare.map((row,i)=>(
@@ -990,7 +990,7 @@ function ResourcesPage({setNavPage,onEnter}){
       </section>
 
       {/* OS Download cards with real logos */}
-      <section style={{background:${C.purpleL},padding:"72px 48px",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
+      <section style={{background:C.purpleL,padding:"72px 48px",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
           <p className="lbl" style={{marginBottom:16}}>Desktop App</p>
           <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-1px",marginBottom:14}}>Access ALP <span className="serif-italic" style={{color:C.warm}}>your way.</span></h2>
@@ -1827,7 +1827,7 @@ function Students({setPage}){
           <div className="card" style={{padding:"24px 28px"}}>
             <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:20}}>Annual Goals</h3>
             {[{d:"READING",c:C.red,text:"By May 2027, Marcus will read grade 3-level text aloud with 90% accuracy (at least 80 wcpm) across 4 consecutive weekly probes.",b:"52 wcpm",t:"80 wcpm",m:"Quarterly",s:"Active"},{d:"COMMUNICATION",c:C.purple,text:"By May 2027, Marcus will initiate and maintain a 3-turn conversation with a peer on a preferred topic in 4 of 5 observed opportunities.",b:"1-turn",t:"3-turn",m:"Monthly",s:"Active"},{d:"SOCIAL-EMOTIONAL",c:C.amber,text:"By May 2027, Marcus will use a self-regulation strategy independently when identifying frustration in 4 of 5 daily opportunities.",b:"Prompted",t:"Independent",m:"Weekly",s:"Active"}].map((g,i)=>(
-              <div key={i} style={{borderLeft:`4px solid ${g.c}`,background:${C.purpleL},borderRadius:"0 10px 10px 0",padding:"18px 22px",marginBottom:14}}>
+              <div key={i} style={{borderLeft:`4px solid ${g.c}`,background:C.purpleL,borderRadius:"0 10px 10px 0",padding:"18px 22px",marginBottom:14}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><p className="lbl" style={{color:g.c}}>{g.d}</p><Badge color="green">{g.s}</Badge></div>
                 <p style={{fontSize:14,color:C.black,lineHeight:1.7,marginBottom:12}}>{g.text}</p>
                 <div style={{display:"flex",flexWrap:"wrap",gap:20,fontSize:12,color:C.warm}}><span>Baseline: <b style={{color:C.black}}>{g.b}</b></span><span>Target: <b style={{color:C.black}}>{g.t}</b></span><span>Monitoring: <b style={{color:C.black}}>{g.m}</b></span></div>
@@ -1850,7 +1850,7 @@ function Students({setPage}){
     <Page title={<>Students</>} subtitle={`${all.length} enrolled · 38 with active plans`} action={<button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 24px"}}>+ New ALP</button>}>
       <div className="card" style={{padding:0,overflow:"hidden"}}>
         <div style={{padding:"18px 24px",borderBottom:`1px solid ${C.tanL}`,display:"flex",gap:14,alignItems:"center"}}>
-          <div style={{flex:1,position:"relative"}}><span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.warm,fontSize:14}}>🔍</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search students..." style={{width:"100%",padding:"9px 12px 9px 34px",border:`1px solid ${C.tanL}`,borderRadius:99,fontSize:13,color:C.black,outline:"none",background:${C.purpleL},fontFamily:"'DM Sans',sans-serif",transition:"border-color .15s"}} onFocus={e=>e.target.style.borderColor=C.black} onBlur={e=>e.target.style.borderColor=C.tanL}/></div>
+          <div style={{flex:1,position:"relative"}}><span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.warm,fontSize:14}}>🔍</span><input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search students..." style={{width:"100%",padding:"9px 12px 9px 34px",border:`1px solid ${C.tanL}`,borderRadius:99,fontSize:13,color:C.black,outline:"none",background:C.purpleL,fontFamily:"'DM Sans',sans-serif",transition:"border-color .15s"}} onFocus={e=>e.target.style.borderColor=C.black} onBlur={e=>e.target.style.borderColor=C.tanL}/></div>
           <div style={{display:"flex",gap:6}}>{["All","ALP","RTI","504"].map(fi=><button key={fi} onClick={()=>setF(fi)} className={f===fi?"btn-black":"btn-ghost"} style={{padding:"8px 18px",fontSize:11}}>{fi}</button>)}</div>
         </div>
         <table className="data-table" style={{minWidth:520}}>
@@ -3704,7 +3704,7 @@ function Settings(){
           </div>
           <div className="card" style={{padding:"28px"}}>
             <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:20}}>Payment & Invoices</h3>
-            <div style={{background:${C.purpleL},borderRadius:10,padding:16,marginBottom:20,display:"flex",alignItems:"center",gap:14}}>
+            <div style={{background:C.purpleL,borderRadius:10,padding:16,marginBottom:20,display:"flex",alignItems:"center",gap:14}}>
               <div style={{width:40,height:28,background:C.blue,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:700}}>VISA</div>
               <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>Visa ending in 4242</div><div style={{fontSize:12,color:C.warm}}>Expires 04/28</div></div>
               <button className="btn-ghost" style={{fontSize:11,padding:"6px 14px"}}>Update</button>
