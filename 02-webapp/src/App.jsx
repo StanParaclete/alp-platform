@@ -448,8 +448,8 @@ function AIModal({student,onAdd,onClose}){
 function DownloadModal({onClose}){
   const platforms=[
     {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11 · 64-bit",btn:"Download .exe"},
-    {svg:<img src="/assets/images/apple-logo.png" alt="macOS" style={{width:48,height:48,objectFit:"contain"}}/>,label:"macOS",sub:"macOS 12+ · Universal",btn:"Download .dmg"},
-    {svg:<img src="/assets/images/linux-logo.png" alt="Linux" style={{width:48,height:48,objectFit:"contain"}}/>,label:"Linux",sub:"Ubuntu / Debian · .deb",btn:"Download .deb"},
+    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.46 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>,label:"macOS",sub:"macOS 12+ · Universal",btn:"Download .dmg"},
+    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50"><ellipse cx="21" cy="31" rx="14" ry="15" fill="#1a1a1a"/><ellipse cx="21" cy="33" rx="7.5" ry="9.5" fill="#f0ece0"/><ellipse cx="21" cy="11" rx="9.5" ry="10.5" fill="#1a1a1a"/><ellipse cx="21" cy="12.5" rx="5.5" ry="6.5" fill="#f0ece0"/><circle cx="18" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="24" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="18.6" cy="8.9" r="0.65" fill="#fff"/><circle cx="24.6" cy="8.9" r="0.65" fill="#fff"/><ellipse cx="21" cy="14.5" rx="2.8" ry="1.7" fill="#f5a623"/><ellipse cx="8" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(-8 8 30)"/><ellipse cx="34" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(8 34 30)"/><ellipse cx="16" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/><ellipse cx="26" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/></svg>,label:"Linux",sub:"Ubuntu / Debian · .deb",btn:"Download .deb"},
   ];
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -534,9 +534,15 @@ function SubNav({active,setNavPage,onEnter}){
 
 function PageFooter(){
   return(
-    <div style={{padding:"clamp(16px,3vw,24px) clamp(20px,5vw,48px)",borderTop:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",fontSize:11,color:C.warm}}>
+    <div style={{padding:"clamp(14px,2.5vw,22px) clamp(20px,5vw,48px)",borderTop:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,color:C.warm,flexWrap:"wrap",gap:8}}>
       <span>© 2026 ALP Platform Inc. All rights reserved.</span>
-      <span>Built by <b style={{color:C.black}}>Stan Paraclete</b> · www.stanparaclete.com · growwithalp.com</span>
+      <span>Built by{" "}
+        <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer" style={{color:C.purple,fontWeight:700,textDecoration:"none"}} onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"} onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>Stan Paraclete</a>
+        {" · "}
+        <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer" style={{color:C.warm,textDecoration:"none"}} onMouseEnter={e=>e.currentTarget.style.color=C.purple} onMouseLeave={e=>e.currentTarget.style.color=C.warm}>stanparaclete.com</a>
+        {" · "}
+        <a href="https://www.growwithalp.com" target="_blank" rel="noopener noreferrer" style={{color:C.warm,textDecoration:"none"}} onMouseEnter={e=>e.currentTarget.style.color=C.purple} onMouseLeave={e=>e.currentTarget.style.color=C.warm}>growwithalp.com</a>
+      </span>
     </div>
   );
 }
@@ -917,10 +923,10 @@ function PricingPage({setNavPage,onEnter}){
       <section style={{background:C.white,padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:800,margin:"0 auto"}}>
           <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-1px",marginBottom:6,textAlign:"center"}}>ALP vs <span className="serif-italic" style={{color:C.warm}}>Traditional Learning Plan Software</span></h2>
-          <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:36}}>See exactly what makes ALP different from traditional learning plan software.</p>
+          <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:36}}>See exactly what makes ALP different — feature by feature.</p>
           <div style={{border:`1px solid ${C.tanL}`,borderRadius:12,overflow:"hidden"}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:C.purpleL,padding:"12px 20px",borderBottom:`1px solid ${C.tanL}`}}>
-              {["Feature","ALP Platform","Traditional Learning Plan Software"].map((h,i)=><span key={h} style={{fontSize:11,fontWeight:700,color:i===1?C.purple:C.warm,textTransform:"uppercase",letterSpacing:".08em",textAlign:i>0?"center":"left"}}>{h}</span>)}
+              {["Feature","ALP","Traditional Software"].map((h,i)=><span key={h} style={{fontSize:11,fontWeight:700,color:i===1?C.purple:C.warm,textTransform:"uppercase",letterSpacing:".08em",textAlign:i>0?"center":"left"}}>{h}</span>)}
             </div>
             {compare.map((row,i)=>(
               <div key={row.f} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",padding:"12px 20px",background:i%2===0?C.white:"#FAFAFA",borderBottom:i<compare.length-1?`1px solid ${C.tanL}`:"none",alignItems:"center"}}>
@@ -1101,8 +1107,8 @@ function ResourcesPage({setNavPage,onEnter}){
             {[
               {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
               {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11"},
-              {svg:<img src="/assets/images/apple-logo.png" alt="macOS" style={{width:48,height:48,objectFit:"contain"}}/>,label:"macOS",sub:"macOS 12+"},
-              {svg:<img src="/assets/images/linux-logo.png" alt="Linux" style={{width:48,height:48,objectFit:"contain"}}/>,label:"Linux",sub:"Ubuntu / Debian"}
+              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="var(--text-primary,#1a0a2e)"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.46 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>,label:"macOS",sub:"macOS 12+"},
+              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50"><ellipse cx="21" cy="31" rx="14" ry="15" fill="#1a1a1a"/><ellipse cx="21" cy="33" rx="7.5" ry="9.5" fill="#f0ece0"/><ellipse cx="21" cy="11" rx="9.5" ry="10.5" fill="#1a1a1a"/><ellipse cx="21" cy="12.5" rx="5.5" ry="6.5" fill="#f0ece0"/><circle cx="18" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="24" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="18.6" cy="8.9" r="0.65" fill="#fff"/><circle cx="24.6" cy="8.9" r="0.65" fill="#fff"/><ellipse cx="21" cy="14.5" rx="2.8" ry="1.7" fill="#f5a623"/><ellipse cx="8" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(-8 8 30)"/><ellipse cx="34" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(8 34 30)"/><ellipse cx="16" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/><ellipse cx="26" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/></svg>,label:"Linux",sub:"Ubuntu / Debian"}
             ].map(p=>(
               <div key={p.label} className="card" style={{padding:"28px 20px",textAlign:"center"}}>
                 {p.svg
@@ -1263,8 +1269,8 @@ function Landing({onEnter,navPage,setNavPage}){
             {[
               {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
               {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},
-              {svg:<img src="/assets/images/apple-logo.png" alt="macOS" style={{width:48,height:48,objectFit:"contain"}}/>,label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},
-              {svg:<img src="/assets/images/linux-logo.png" alt="Linux" style={{width:48,height:48,objectFit:"contain"}}/>,label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}
+              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.46 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>,label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},
+              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50"><ellipse cx="21" cy="31" rx="14" ry="15" fill="#1a1a1a"/><ellipse cx="21" cy="33" rx="7.5" ry="9.5" fill="#f0ece0"/><ellipse cx="21" cy="11" rx="9.5" ry="10.5" fill="#1a1a1a"/><ellipse cx="21" cy="12.5" rx="5.5" ry="6.5" fill="#f0ece0"/><circle cx="18" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="24" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="18.6" cy="8.9" r="0.65" fill="#fff"/><circle cx="24.6" cy="8.9" r="0.65" fill="#fff"/><ellipse cx="21" cy="14.5" rx="2.8" ry="1.7" fill="#f5a623"/><ellipse cx="8" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(-8 8 30)"/><ellipse cx="34" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(8 34 30)"/><ellipse cx="16" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/><ellipse cx="26" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/></svg>,label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}
             ].map(p=>(
               <div key={p.label} style={{background:"#1A1A1A",padding:"40px 32px",display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
                 {p.svg
@@ -1283,25 +1289,61 @@ function Landing({onEnter,navPage,setNavPage}){
         </div>
       </section>
 
-      <footer style={{padding:"64px 48px 32px",maxWidth:1100,margin:"0 auto",background:"#fff"}}>
-        <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr 1fr 1fr",gap:32,marginBottom:48}}>
-          <div>
-            <div className="serif" style={{fontSize:22,fontWeight:700,marginBottom:10,color:"#8B2020",fontStyle:"italic"}}>ALP.</div>
-            <p style={{fontSize:13,color:C.warm,lineHeight:1.7,marginBottom:14}}>ACCELERATED LEARNING PROGRAM<br/>Supporting Every Learner's Growth</p>
-            <p style={{fontSize:11,color:C.tan}}>Shalom Estate, Adenta Municipality, Ghana</p>
-            <p style={{fontSize:11,color:C.tan,marginTop:2}}>Built by Stan Paraclete</p>
+      <footer style={{background:"#0d0d0d",padding:"clamp(40px,6vw,72px) clamp(20px,5vw,48px) 0"}}>
+        <div style={{maxWidth:1100,margin:"0 auto"}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"clamp(28px,4vw,48px)",marginBottom:"clamp(36px,5vw,56px)"}}>
+            <div>
+              <div className="serif" style={{fontSize:26,fontWeight:800,marginBottom:10,color:"#fff",fontStyle:"italic",letterSpacing:"-0.5px"}}>ALP.</div>
+              <p style={{fontSize:13,color:"rgba(255,255,255,.5)",lineHeight:1.75,marginBottom:16}}>Accelerated Learning Program.<br/>Supporting every learner's growth — worldwide.</p>
+              <p style={{fontSize:11,color:"rgba(255,255,255,.3)",lineHeight:1.6}}>Shalom Estate, Adenta Municipality<br/>Ghana, West Africa</p>
+              <div style={{marginTop:16,display:"flex",gap:10}}>
+                {[["🌍","https://www.growwithalp.com"],["✉️","mailto:hello@growwithalp.com"]].map(([icon,href])=>(
+                  <a key={href} href={href} target="_blank" rel="noopener noreferrer" style={{width:34,height:34,borderRadius:8,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,textDecoration:"none",transition:"all .18s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="rgba(124,58,237,.4)"}
+                    onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.08)"}>{icon}</a>
+                ))}
+              </div>
+            </div>
+            {[
+              ["Platform",["ALP Builder","Progress Monitoring","Family Portal","Reports","Compliance Engine"]],
+              ["For Schools",["Special Ed Teachers","School Leadership","Districts & NGOs","Governments","Pricing"]],
+              ["Support",["Documentation","Contact Us","Privacy Policy","Terms of Service","Schedule Demo"]]
+            ].map(([title,links])=>(
+              <div key={title}>
+                <p style={{fontSize:10,fontWeight:800,letterSpacing:".14em",textTransform:"uppercase",color:"rgba(255,255,255,.35)",marginBottom:18}}>{title}</p>
+                {links.map(l=>(
+                  <div key={l} style={{fontSize:13,color:"rgba(255,255,255,.55)",marginBottom:11,cursor:"pointer",transition:"color .15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
+                    onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.55)"}>{l}</div>
+                ))}
+              </div>
+            ))}
           </div>
-          {[["Platform",["ALP Builder","Progress Monitoring","Family Portal","Reports","Compliance"]],["For Schools",["Special Ed Teachers","School Admins","Districts","NGOs","Governments"]],["Support",["Documentation","Contact Us","Privacy Policy","Terms of Service"]]].map(([title,links])=>(
-            <div key={title}><p className="lbl" style={{marginBottom:16}}>{title}</p>{links.map(l=><div key={l} style={{fontSize:13,color:C.warm,marginBottom:9,cursor:"pointer"}}>{l}</div>)}</div>
-          ))}
-        </div>
-        <hr className="rule" style={{marginBottom:24}}/>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:11,color:C.tan}}>
-          <span>© 2026 ALP Platform Inc. All rights reserved.</span>
-          <div style={{display:"flex",gap:24,alignItems:"center"}}>
-            <span>PRIVACY</span><span>TERMS</span>
-            <span style={{display:"flex",alignItems:"center",gap:6}}><span className="pulse" style={{width:6,height:6,borderRadius:"50%",background:C.green,display:"inline-block"}}/>Systems Operational</span>
-            <b style={{color:C.black}}>BUILT BY Stan Paraclete</b>
+          <div style={{borderTop:"1px solid rgba(255,255,255,.08)",padding:"clamp(18px,2.5vw,24px) 0",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+            <span style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>© 2026 ALP Platform Inc. All rights reserved.</span>
+            <div style={{display:"flex",gap:20,alignItems:"center",flexWrap:"wrap"}}>
+              <span style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"rgba(255,255,255,.3)"}}>
+                <span className="pulse" style={{width:6,height:6,borderRadius:"50%",background:"#34D399",display:"inline-block"}}/>
+                Systems Operational
+              </span>
+              <span style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>
+                Built by{" "}
+                <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer"
+                  style={{color:"#A78BFA",fontWeight:700,textDecoration:"none"}}
+                  onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"}
+                  onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>Stan Paraclete</a>
+                {" · "}
+                <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer"
+                  style={{color:"rgba(255,255,255,.35)",textDecoration:"none"}}
+                  onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
+                  onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.35)"}>stanparaclete.com</a>
+                {" · "}
+                <a href="https://www.growwithalp.com" target="_blank" rel="noopener noreferrer"
+                  style={{color:"rgba(255,255,255,.35)",textDecoration:"none"}}
+                  onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
+                  onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.35)"}>growwithalp.com</a>
+              </span>
+            </div>
           </div>
         </div>
       </footer>
@@ -2379,7 +2421,7 @@ function CreateALPDoc({setPage}){
               <p style={{fontSize:10,color:C.amber}}>Patricia Johnson · PENDING</p>
             </div>
           </div>
-          <div style={{marginTop:16,textAlign:"center",fontSize:10,color:C.warm}}>Built by Stan Paraclete · www.stanparaclete.com · ALP Platform v2.4.1 · growwithalp.com · Generated {new Date().toLocaleDateString()}</div>
+          <div style={{marginTop:16,textAlign:"center",fontSize:10,color:C.warm}}>Built by Stan Paraclete · stanparaclete.com · ALP Platform v2.4.1 · growwithalp.com · Generated {new Date().toLocaleDateString()}</div>
         </div>
 
         {/* Export Actions */}
@@ -4008,7 +4050,7 @@ function AppInner(){
               <hr className="rule" style={{marginBottom:20}}/>
               <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.tan}}>
                 <span>© 2026 ALP Platform Inc. All rights reserved.</span>
-                <span>Built by <b style={{color:C.warm}}>Stan Paraclete</b> · www.stanparaclete.com · growwithalp.com · ALP Platform v2.4.1</span>
+                <span>Built by <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer" style={{color:C.purple,fontWeight:700,textDecoration:"none"}}>Stan Paraclete</a> · <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer" style={{color:C.warm,textDecoration:"none"}}>stanparaclete.com</a> · <a href="https://www.growwithalp.com" target="_blank" rel="noopener noreferrer" style={{color:C.warm,textDecoration:"none"}}>growwithalp.com</a> · v2.4.1</span>
               </div>
             </div>
           </div>
