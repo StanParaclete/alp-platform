@@ -268,6 +268,37 @@ input:focus-visible, textarea:focus-visible { outline: none; }
 .ticker-inner:hover { animation-play-state: paused; cursor: default; }
 @keyframes alp-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
+/* ── LANDING PAGE MOBILE NAV ───────────────────────── */
+.landing-nav-tagline{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.landing-nav-hamburger{display:none;flex-direction:column;gap:5px;width:36px;height:36px;
+  cursor:pointer;padding:7px;border-radius:8px;background:transparent;border:none;
+  flex-shrink:0;align-items:center;justify-content:center}
+.landing-nav-hamburger span{display:block;height:2px;border-radius:2px;
+  transition:all 0.25s ease;width:20px}
+.landing-nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.landing-nav-hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.landing-nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+@media(max-width:768px){
+  .landing-nav-links{display:none!important}
+  .landing-nav-tagline{display:none!important}
+  .landing-nav-hamburger{display:flex!important}
+  .landing-nav-desktop{display:none!important}
+  .r-hero-btns{flex-direction:column!important;align-items:stretch!important}
+  .r-hero-btns button{width:100%!important;justify-content:center!important}
+  .r-stats-row{flex-wrap:wrap!important;gap:20px!important}
+  .r-platform-grid{grid-template-columns:repeat(2,1fr)!important}
+  .r-feat-grid{grid-template-columns:repeat(2,1fr)!important}
+  .r-compliance-grid{grid-template-columns:repeat(2,1fr)!important}
+  .r-3col{grid-template-columns:1fr!important}
+  .r-2col{grid-template-columns:1fr!important}
+  .r-hero-section{padding:48px 20px 40px!important}
+}
+@media(max-width:480px){
+  .r-platform-grid{grid-template-columns:1fr!important}
+  .r-feat-grid{grid-template-columns:1fr!important}
+  .r-compliance-grid{grid-template-columns:1fr!important}
+}
+
 `;
 
 // ─── LIGHT COLORS ──────────────────────────────────────────
@@ -460,26 +491,44 @@ function DownloadModal({onClose}){
 
 // ─── SHARED SUBNAV ──────────────────────────────────────────────
 function SubNav({active,setNavPage,onEnter}){
+  const [mobileOpen,setMobileOpen]=useState(false);
+  const links=["Features","For Schools","Pricing","Resources"];
   return(
-    <nav style={{position:"sticky",top:0,zIndex:100,background:"rgba(255,255,255,.97)",backdropFilter:"blur(14px)",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",padding:"0 clamp(16px,4vw,48px)",height:62,overflow:"hidden"}}>
-      <div style={{flex:1,display:"flex",alignItems:"center",gap:10,cursor:"pointer",minWidth:0}} onClick={()=>setNavPage(null)}>
-        <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover"}}/>
-        <span className="serif" style={{fontSize:15,fontWeight:700}}>ALP</span>
-        <span style={{fontSize:10,color:C.warm,letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PROGRAM</span>
+    <>
+    <nav style={{position:"sticky",top:0,zIndex:100,background:"rgba(255,255,255,.97)",backdropFilter:"blur(14px)",borderBottom:"1px solid #e5e7eb",display:"flex",alignItems:"center",padding:"0 clamp(16px,4vw,48px)",height:62,gap:16}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",minWidth:0,flex:1,overflow:"hidden"}} onClick={()=>{setNavPage(null);setMobileOpen(false);}}>
+        <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
+        <span className="serif" style={{fontSize:15,fontWeight:700,flexShrink:0}}>ALP</span>
+        <span className="landing-nav-tagline" style={{fontSize:10,color:C.warm,letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PROGRAM</span>
       </div>
-      <div style={{display:"flex",gap:32,fontSize:13.5}}>
-        {["Features","For Schools","Pricing","Resources"].map(n=>(
-          <span key={n} onClick={()=>setNavPage(n)} style={{cursor:"pointer",fontWeight:active===n?700:400,color:active===n?C.black:C.warm,borderBottom:active===n?`2px solid ${C.purple}`:"2px solid transparent",paddingBottom:2,transition:"all .15s"}}
+      <div className="landing-nav-links" style={{display:"flex",gap:28,fontSize:13.5,flexShrink:0}}>
+        {links.map(n=>(
+          <span key={n} onClick={()=>setNavPage(n)} style={{cursor:"pointer",fontWeight:active===n?700:400,color:active===n?C.black:C.warm,borderBottom:active===n?`2px solid ${C.purple}`:"2px solid transparent",paddingBottom:2,transition:"all .15s",whiteSpace:"nowrap"}}
             onMouseEnter={e=>e.currentTarget.style.color=C.black}
             onMouseLeave={e=>e.currentTarget.style.color=active===n?C.black:C.warm}>{n}</span>
         ))}
       </div>
-      <div style={{flex:1,display:"flex",justifyContent:"flex-end",gap:10,alignItems:"center"}}>
+      <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
         <ThemeToggle/>
-        <button className="btn-ghost" onClick={()=>setNavPage(null)} style={{fontSize:11,padding:"8px 20px"}}>← Home</button>
-        <button className="btn-purple" onClick={onEnter} style={{fontSize:11,padding:"8px 20px"}}>Sign Up Free</button>
+        <button className="btn-ghost landing-nav-desktop" onClick={()=>setNavPage(null)} style={{fontSize:11,padding:"8px 16px"}}>← Home</button>
+        <button className="btn-purple landing-nav-desktop" onClick={onEnter} style={{fontSize:11,padding:"8px 16px"}}>Sign Up Free</button>
+        <button className={`landing-nav-hamburger${mobileOpen?" open":""}`} onClick={()=>setMobileOpen(o=>!o)} aria-label="Menu">
+          <span style={{background:C.black}}/><span style={{background:C.black}}/><span style={{background:C.black}}/>
+        </button>
       </div>
     </nav>
+    {mobileOpen&&(
+      <div style={{position:"fixed",top:62,left:0,right:0,zIndex:99,background:"rgba(255,255,255,.98)",borderBottom:"1px solid #e5e7eb",padding:"8px 20px 20px",boxShadow:"0 8px 24px rgba(0,0,0,.1)"}}>
+        {links.map(n=>(
+          <div key={n} onClick={()=>{setNavPage(n);setMobileOpen(false);}} style={{padding:"14px 0",fontSize:15,fontWeight:active===n?700:500,color:active===n?C.purple:C.black,borderBottom:"1px solid #f3f3f3",cursor:"pointer"}}>{n}</div>
+        ))}
+        <div style={{display:"flex",gap:10,marginTop:16}}>
+          <button className="btn-ghost" onClick={()=>{setNavPage(null);setMobileOpen(false);}} style={{flex:1,fontSize:12}}>← Home</button>
+          <button className="btn-purple" onClick={()=>{onEnter();setMobileOpen(false);}} style={{flex:1,fontSize:12}}>Sign Up Free</button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -526,7 +575,7 @@ function FeaturesPage({setNavPage,onEnter}){
       <SubNav active="Features" setNavPage={setNavPage} onEnter={onEnter}/>
 
       {/* Hero */}
-      <section style={{padding:"80px 48px 56px",maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
+      <section className="r-hero-section" style={{padding:"80px 48px 56px",maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
         <p className="lbl" style={{marginBottom:16,color:C.purple}}>Platform Features</p>
         <h1 className="serif" style={{fontSize:"clamp(40px,6vw,76px)",fontWeight:800,letterSpacing:"-2px",lineHeight:1.05,marginBottom:20}}>
           Everything your school<br/><span className="serif-italic" style={{color:C.purple}}>needs to succeed.</span>
@@ -553,7 +602,7 @@ function FeaturesPage({setNavPage,onEnter}){
           </div>
           <p style={{fontSize:15,color:C.warm,marginBottom:36,maxWidth:620,lineHeight:1.7}}>Eight purpose-built tools in the ALP AI Intelligence Suite — designed exclusively for Adaptive Learning Programs. Every tool is free for individual teachers, forever. Powered by ALP AI to save you hours each week.</p>
           <hr className="rule" style={{marginBottom:36}}/>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
+          <div className="r-feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
             {aiTools.map(t=>(
               <div key={t.name} style={{padding:24,border:`1px solid ${C.tanL}`,borderTop:`3px solid ${C.purple}`,borderRadius:12,background:"#FAF8FF",cursor:"pointer",transition:"all .2s"}}
                 onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 28px rgba(124,58,237,.15)";}}
@@ -576,7 +625,7 @@ function FeaturesPage({setNavPage,onEnter}){
           </h2>
           <p style={{fontSize:15,color:C.warm,marginBottom:36,maxWidth:580,lineHeight:1.7}}>Managing a caseload with spreadsheets is messy, stressful, and error-prone. ALP's dashboard gives teachers and case managers access to vital information in an easy, effective way.</p>
           <hr className="rule" style={{marginBottom:36}}/>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:18}}>
+          <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:18}}>
             {caseTools.map(t=>(
               <div key={t.name} style={{display:"flex",gap:16,padding:"22px 24px",border:`1px solid ${C.tanL}`,borderRadius:12,background:C.white,transition:"all .2s"}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=C.purple;e.currentTarget.style.background="#FAF8FF";}}
@@ -598,7 +647,7 @@ function FeaturesPage({setNavPage,onEnter}){
           <p className="lbl" style={{color:"#9A8A78",marginBottom:14,textAlign:"center"}}>Global Compliance Engine</p>
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:700,color:C.cream,textAlign:"center",marginBottom:16,letterSpacing:"-1px"}}>Built for every country,<br/><span className="serif-italic" style={{color:"#A78BFA"}}>every framework.</span></h2>
           <p style={{fontSize:15,color:"#9A8A78",textAlign:"center",maxWidth:560,margin:"0 auto 48px",lineHeight:1.7}}>ALP automatically checks programs against 10+ compliance frameworks — flagging anything missing before your audit arrives.</p>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:40}}>
+          <div className="r-compliance-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:40}}>
             {frameworks.map(c=>(
               <div key={c.n} style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"16px 12px",textAlign:"center",transition:"all .2s"}}
                 onMouseEnter={e=>e.currentTarget.style.background="rgba(124,58,237,.2)"}
@@ -654,7 +703,7 @@ function ForSchoolsPage({setNavPage,onEnter}){
       <SubNav active="For Schools" setNavPage={setNavPage} onEnter={onEnter}/>
 
       {/* Hero */}
-      <section style={{padding:"80px 48px 56px",maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
+      <section className="r-hero-section" style={{padding:"80px 48px 56px",maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
         <p className="lbl" style={{marginBottom:16,color:C.purple}}>For Schools & Districts</p>
         <h1 className="serif" style={{fontSize:"clamp(38px,6vw,72px)",fontWeight:800,letterSpacing:"-2px",lineHeight:1.05,marginBottom:20}}>
           Regardless of your role,<br/><span className="serif-italic" style={{color:C.purple}}>ALP supports you.</span>
@@ -674,7 +723,7 @@ function ForSchoolsPage({setNavPage,onEnter}){
       <section style={{padding:"0 48px 72px",maxWidth:1100,margin:"0 auto"}}>
         <h2 className="serif" style={{fontSize:36,fontWeight:700,letterSpacing:"-1px",marginBottom:8,textAlign:"center"}}>Who we <span className="serif-italic" style={{color:C.purple}}>support</span></h2>
         <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:40}}>ALP is designed for every educator who supports a learner with structured needs.</p>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
+        <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
           {roles.map(r=>(
             <div key={r.title} className="card" style={{padding:28,borderTop:`4px solid ${r.color}`}}>
               <div style={{width:50,height:50,borderRadius:12,background:r.bg,display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,marginBottom:14}}>{r.icon}</div>
@@ -721,7 +770,7 @@ function ForSchoolsPage({setNavPage,onEnter}){
       {/* Testimonials */}
       <section style={{padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",maxWidth:1100,margin:"0 auto"}}>
         <h2 className="serif" style={{fontSize:34,fontWeight:700,letterSpacing:"-1px",marginBottom:40,textAlign:"center"}}>Trusted by <span className="serif-italic" style={{color:C.warm}}>educators worldwide</span></h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
+        <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
           {testimonials.map(t=>(
             <div key={t.n} className="card" style={{padding:28}}>
               <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div>
@@ -838,7 +887,7 @@ function PricingPage({setNavPage,onEnter}){
 
       {/* Pricing cards */}
       <section style={{padding:"0 48px 64px",maxWidth:1100,margin:"0 auto"}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,alignItems:"start"}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,alignItems:"start"}}>
           {plans.map(p=>(
             <div key={p.name} style={{background:p.bg,borderRadius:14,padding:26,position:"relative",border:`1.5px solid ${p.tag?p.color:C.tanL}`,boxShadow:p.tag?"0 8px 40px rgba(124,58,237,.2)":"0 1px 3px rgba(0,0,0,.04)",display:"flex",flexDirection:"column",gap:0}}>
               {p.tag&&<div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:p.color,color:"#fff",fontSize:10,fontWeight:800,padding:"4px 16px",borderRadius:99,letterSpacing:".08em",whiteSpace:"nowrap"}}>{p.tag}</div>}
@@ -1002,7 +1051,7 @@ function ResourcesPage({setNavPage,onEnter}){
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <p className="lbl" style={{color:"#9A8A78",marginBottom:12}}>Learning Library</p>
           <h2 className="serif" style={{fontSize:32,fontWeight:700,color:C.cream,letterSpacing:"-1px",marginBottom:40}}>Tutorial videos on getting<br/><span className="serif-italic" style={{color:"#A78BFA"}}>the most out of ALP.</span></h2>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>
+          <div className="r-feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14}}>
             {videos.map(v=>(
               <div key={v.title} style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:12,overflow:"hidden",cursor:"pointer",transition:"all .2s"}}
                 onMouseEnter={e=>e.currentTarget.style.background="rgba(124,58,237,.2)"}
@@ -1026,7 +1075,7 @@ function ResourcesPage({setNavPage,onEnter}){
       <section style={{padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",maxWidth:1100,margin:"0 auto"}}>
         <p className="lbl" style={{marginBottom:12}}>Free Downloads</p>
         <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-1px",marginBottom:40}}>Templates & <span className="serif-italic" style={{color:C.warm}}>tools.</span></h2>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+        <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
           {downloads.map(d=>(
             <div key={d.title} className="card" style={{padding:"18px 22px",display:"flex",gap:14,alignItems:"flex-start",cursor:"pointer",transition:"all .2s"}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor=C.purple;e.currentTarget.style.background="#FAF8FF";}}
@@ -1091,6 +1140,7 @@ function ResourcesPage({setNavPage,onEnter}){
 
 function Landing({onEnter,navPage,setNavPage}){
   const [showDownload,setShowDownload]=useState(false);
+  const [mobileNavOpen,setMobileNavOpen]=useState(false);
   // Prevent horizontal overflow on mobile
   if(typeof document!=="undefined")document.body.style.overflowX="hidden";
   const features=[
@@ -1110,26 +1160,42 @@ function Landing({onEnter,navPage,setNavPage}){
   return(
     <div style={{minHeight:"100vh",background:"#ffffff",overflowX:"hidden",width:"100%"}}>
       {showDownload&&<DownloadModal onClose={()=>setShowDownload(false)}/>}
-      <nav style={{position:"sticky",top:0,zIndex:100,background:"#111",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,.08)",display:"flex",alignItems:"center",padding:"0 clamp(16px,4vw,48px)",height:62,overflow:"hidden"}}>
-        <div style={{flex:1,display:"flex",alignItems:"center",gap:10,minWidth:0}}>
-          <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover"}}/>
-          <span className="serif" style={{fontSize:15,fontWeight:700,color:"#fff"}}>ALP</span>
-          <span style={{fontSize:10,color:"rgba(255,255,255,.6)",letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PROGRAM</span>
+      <>
+      <nav style={{position:"sticky",top:0,zIndex:100,background:"#111",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,.08)",display:"flex",alignItems:"center",padding:"0 clamp(16px,4vw,48px)",height:62,gap:16}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:1,overflow:"hidden"}}>
+          <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
+          <span className="serif" style={{fontSize:15,fontWeight:700,color:"#fff",flexShrink:0}}>ALP</span>
+          <span className="landing-nav-tagline" style={{fontSize:10,color:"rgba(255,255,255,.6)",letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PROGRAM</span>
         </div>
-        <div style={{display:"flex",gap:36,fontSize:13.5}}>
+        <div className="landing-nav-links" style={{display:"flex",gap:28,fontSize:13.5,flexShrink:0}}>
           {["Features","For Schools","Pricing","Resources"].map(n=>(
             <span key={n} onClick={()=>setNavPage(n)}
-              style={{cursor:"pointer",transition:"color .15s",fontWeight:navPage===n?700:400,color:"rgba(255,255,255,.85)",borderBottom:navPage===n?"2px solid #fff":"2px solid transparent",paddingBottom:2}}
+              style={{cursor:"pointer",transition:"color .15s",fontWeight:navPage===n?700:400,color:"rgba(255,255,255,.85)",borderBottom:navPage===n?"2px solid #fff":"2px solid transparent",paddingBottom:2,whiteSpace:"nowrap"}}
               onMouseEnter={e=>e.currentTarget.style.color="#fff"}
               onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.85)"}>{n}</span>
           ))}
         </div>
-        <div style={{flex:1,display:"flex",justifyContent:"flex-end",gap:10,alignItems:"center"}}>
+        <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
           <ThemeToggle/>
-          <button onClick={onEnter} style={{padding:"8px 22px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.15)",color:"#fff",border:"1.5px solid rgba(255,255,255,.4)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.25)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}>Log in</button>
-          <button onClick={onEnter} style={{padding:"8px 22px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>Sign Up</button>
+          <button className="landing-nav-desktop" onClick={onEnter} style={{padding:"8px 18px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.15)",color:"#fff",border:"1.5px solid rgba(255,255,255,.4)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.25)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}>Log in</button>
+          <button className="landing-nav-desktop" onClick={onEnter} style={{padding:"8px 18px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>Sign Up</button>
+          <button className={`landing-nav-hamburger${mobileNavOpen?" open":""}`} onClick={()=>setMobileNavOpen(o=>!o)} aria-label="Menu">
+            <span style={{background:"#fff"}}/><span style={{background:"#fff"}}/><span style={{background:"#fff"}}/>
+          </button>
         </div>
       </nav>
+      {mobileNavOpen&&(
+        <div style={{position:"fixed",top:62,left:0,right:0,zIndex:99,background:"#111",borderBottom:"1px solid rgba(255,255,255,.1)",padding:"8px 20px 20px",boxShadow:"0 8px 24px rgba(0,0,0,.5)"}}>
+          {["Features","For Schools","Pricing","Resources"].map(n=>(
+            <div key={n} onClick={()=>{setNavPage(n);setMobileNavOpen(false);}} style={{padding:"14px 0",fontSize:15,fontWeight:500,color:"rgba(255,255,255,.9)",borderBottom:"1px solid rgba(255,255,255,.08)",cursor:"pointer"}}>{n}</div>
+          ))}
+          <div style={{display:"flex",gap:10,marginTop:16}}>
+            <button onClick={()=>{onEnter();setMobileNavOpen(false);}} style={{flex:1,padding:"12px",fontSize:12,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.3)",borderRadius:99,cursor:"pointer"}}>Log In</button>
+            <button onClick={()=>{onEnter();setMobileNavOpen(false);}} style={{flex:1,padding:"12px",fontSize:12,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer"}}>Sign Up Free</button>
+          </div>
+        </div>
+      )}
+      </>
 
       <section style={{background:"#18003d",padding:"0"}}><div style={{padding:"clamp(48px,8vw,96px) clamp(20px,4vw,48px) clamp(48px,6vw,80px)",maxWidth:1100,margin:"0 auto"}} className="fade-up">
         <p className="lbl" style={{marginBottom:24,color:"#a78bfa",letterSpacing:".14em"}}>Now available · Spring 2026 · 10+ global frameworks</p>
@@ -1137,7 +1203,7 @@ function Landing({onEnter,navPage,setNavPage}){
           Supporting Every<br/><span className="serif-italic" style={{color:"#a78bfa"}}>Learner's Growth.</span>
         </h1>
         <p style={{fontSize:18,color:"rgba(255,255,255,.7)",maxWidth:520,lineHeight:1.78,marginBottom:52}}>A complete student intervention and progress monitoring system — designed to help schools worldwide support every learner through structured plans, real-time tracking, and family collaboration.</p>
-        <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
+        <div className="r-hero-btns" style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
           <button onClick={onEnter} style={{fontSize:11,padding:"15px 38px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>🚀 Start in the Browser →</button>
           <button onClick={()=>setShowDownload(true)} style={{fontSize:11,padding:"14px 34px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"transparent",color:"#fff",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.borderColor="#fff"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.5)"}>⬇ Download Desktop App</button>
           <button style={{fontSize:11,padding:"14px 28px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.8)",border:"1px solid rgba(255,255,255,.2)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.2)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.1)"} onClick={()=>window.open("mailto:hello@growwithalp.com?subject=Demo Request - ALP Platform","_blank")}>📅 Schedule a Demo</button>
@@ -1193,7 +1259,7 @@ function Landing({onEnter,navPage,setNavPage}){
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <p className="lbl" style={{color:"#9A8A78",marginBottom:20}}>Access ALP your way</p>
           <h2 className="serif" style={{fontSize:"clamp(36px,5vw,64px)",fontWeight:700,color:C.cream,letterSpacing:"-1.5px",marginBottom:64,lineHeight:1.08}}>Your Platform.<br/><span className="serif-italic" style={{color:"#A78BFA"}}>Your Device.</span></h2>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"#2D2D2D"}}>
+          <div className="r-platform-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"#2D2D2D"}}>
             {[
               {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
               {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},
