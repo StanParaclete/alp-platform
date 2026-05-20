@@ -439,6 +439,8 @@ input:focus-visible, textarea:focus-visible { outline: none; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes scaleIn { from { transform: scale(.92); opacity: 0; } to { transform: none; opacity: 1; } }
 
+/* ── CONFETTI ───────────────────────────────────────── */
+@keyframes confettiFall{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(100vh) rotate(720deg)}}
 /* ── MICRO-ANIMATIONS ───────────────────────────────── */
 @keyframes checkmark{0%{transform:scale(0) rotate(-45deg);opacity:0}60%{transform:scale(1.2) rotate(0deg)}100%{transform:scale(1);opacity:1}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
@@ -5313,43 +5315,44 @@ function OnboardingModal({onClose,setPage}){
 // ═══════════════════════════════════════════════════════════
 // CONFETTI CELEBRATION
 // ═══════════════════════════════════════════════════════════
+
 function Confetti({active}){
-  const [particles,setParticles]=useState([]);
+  const [items,setItems]=useState([]);
   useEffect(()=>{
-    if(!active)return;
-    const p=Array.from({length:60},(_,i)=>({
-      id:i,x:Math.random()*100,color:["#7C3AED","#A855F7","#F59E0B","#10B981","#3B82F6","#EF4444","#F97316"][i%7],
-      size:Math.random()*8+4,delay:Math.random()*0.8,duration:Math.random()*1.5+1.2,
-      dx:(Math.random()-0.5)*200,dy:Math.random()*-300-100,rotate:Math.random()*720-360
-    }));
-    setParticles(p);
-    const t=setTimeout(()=>setParticles([]),3000);
+    if(!active){setItems([]);return;}
+    const colors=["#7C3AED","#A855F7","#F59E0B","#10B981","#3B82F6","#EF4444","#F97316"];
+    setItems(Array.from({length:50},(_,i)=>({
+      id:i,
+      left:Math.random()*100,
+      color:colors[i%colors.length],
+      size:Math.random()*8+4,
+      delay:Math.random()*0.6,
+      dur:Math.random()*1.2+1,
+    })));
+    const t=setTimeout(()=>setItems([]),3000);
     return()=>clearTimeout(t);
   },[active]);
-  if(!particles.length)return null;
+  if(!items.length)return null;
   return(
     <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:9999,overflow:"hidden"}}>
-      {particles.map(p=>(
+      {items.map(p=>(
         <div key={p.id} style={{
-          position:"absolute",left:`${p.x}%`,bottom:0,
-          width:p.size,height:p.size*1.4,background:p.color,borderRadius:2,
-          animation:`confetti-${p.id} ${p.duration}s ${p.delay}s ease-out forwards`,
-          '--dx':`${p.dx}px`,'--dy':`${p.dy}px`,'--rot':`${p.rotate}deg`
+          position:"absolute",
+          left:`${p.left}%`,
+          top:"-10px",
+          width:p.size,
+          height:p.size*1.6,
+          background:p.color,
+          borderRadius:2,
+          opacity:0,
+          animation:`confettiFall ${p.dur}s ${p.delay}s ease-in forwards`,
+          transform:`rotate(${Math.random()*360}deg)`,
         }}/>
       ))}
-      <style>{`
-        ${particles.map(p=>`@keyframes confetti-${p.id}{
-          from{transform:translateY(0) translateX(0) rotate(0deg);opacity:1}
-          to{transform:translateY(var(--dy)) translateX(var(--dx)) rotate(var(--rot));opacity:0}
-        }`).join('')}
-      `}</style>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// COPY TO CLIPBOARD HOOK
-// ═══════════════════════════════════════════════════════════
 function useCopy(){
   const [copied,setCopied]=useState(false);
   function copy(text){
