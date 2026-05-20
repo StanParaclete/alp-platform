@@ -609,7 +609,7 @@ Return ONLY this JSON array (no explanation):
         })
       });
       const d=await r.json();
-      const raw=d.(content && content[0])?.text||"[]";
+      const raw=(d.content&&d.content[0]?d.content[0].text:null)||"[]";
       const m=raw.match(/\[[\s\S]*\]/);
       if(!m)throw new Error("Invalid response");
       setGoals(JSON.parse(m[0]));
@@ -2248,7 +2248,7 @@ function AIChatWidget({onClose}){
         })
       });
       const d=await r.json();
-      const reply=d.(content && content[0])?.text||"I couldn't process that. Please try again.";
+      const reply=(d.content&&d.content[0]?d.content[0].text:null)||"I couldn't process that. Please try again.";
       setMsgs(m=>[...m,{role:"assistant",text:reply}]);
     }catch(e){
       setMsgs(m=>[...m,{role:"assistant",text:"Connection issue. Please check your internet and try again."}]);
@@ -2508,7 +2508,7 @@ function MeetingSchedulerModal({onClose}){
         </div>
         <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            <USelect label="Student & Family" value={form.family} onChange={e=>{setF("family",e.target.value);setF("student",families.(families.find(f=>f[0]===e.target.value)||["",""])[1].split(" — ")[0]||"");}} options={families.map(([v,l])=>({value:v,label:l.split(" — ")[0]}))}/>
+            <USelect label="Student & Family" value={form.family} onChange={e=>{setF("family",e.target.value);setF("student",(families.find(f=>f[0]===e.target.value)||["",""])[1].split(" — ")[0]||"");}} options={families.map(([v,l])=>({value:v,label:l.split(" — ")[0]}))}/>
             <USelect label="Meeting Type" value={form.type} onChange={e=>setF("type",e.target.value)} options={meetingTypes.map(t=>({value:t,label:t}))}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
