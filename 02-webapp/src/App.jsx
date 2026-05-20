@@ -744,7 +744,7 @@ function DownloadModal({onClose}){
           ))}
         </div>
         <div style={{padding:"14px 16px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,marginBottom:20}}>
-          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free forever for individual teachers &nbsp;·&nbsp; ✓ Offline access &nbsp;·&nbsp; ✓ Auto-updates &nbsp;·&nbsp; ✓ Sync across devices</p>
+          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free forever for individual teachers  ·  ✓ Offline access  ·  ✓ Auto-updates  ·  ✓ Sync across devices</p>
         </div>
         <button onClick={onClose} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:99,padding:"9px 28px",fontSize:12,color:"rgba(255,255,255,.5)",cursor:"pointer",transition:"all .15s"}}
           onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.12)";e.currentTarget.style.color="#fff";}}
@@ -4401,7 +4401,7 @@ function DocumentsPage({setPage}){
   }
 
   return(
-    <Page title={<>Documents <span className="serif-italic" style={{color:C.warm,fontSize:26}}>&amp; Files</span></>}
+    <Page title={<>Documents <span className="serif-italic" style={{color:C.warm,fontSize:26}}>& Files</span></>}
       subtitle={`${docs.length} documents · ${docs.filter(d=>d.status==="Pending").length} pending`}
       action={
         <button className="btn-black" onClick={handleUpload} disabled={uploading} style={{fontSize:11,padding:"11px 22px"}}>
@@ -4842,7 +4842,7 @@ function ALPPrintPreview({onClose,studentName="Marcus Johnson"}){
                 <span style={{fontSize:14,fontWeight:700,color:"#1a1a1a",fontFamily:"system-ui"}}>{title}</span>
               </div>
               <div style={{fontSize:13,color:"#444",lineHeight:1.8,fontFamily:"system-ui",paddingLeft:32}}>
-                {i===0&&<><b>Student Name:</b> Marcus Darnell Johnson &nbsp;|&nbsp; <b>DOB:</b> March 12, 2016 &nbsp;|&nbsp; <b>ID:</b> WE-2024-0142<br/><b>School:</b> Westwood Elementary &nbsp;|&nbsp; <b>Grade:</b> 4 &nbsp;|&nbsp; <b>Teacher:</b> Ms. Simmons</>}
+                {i===0&&<><b>Student Name:</b> Marcus Darnell Johnson  |  <b>DOB:</b> March 12, 2016  |  <b>ID:</b> WE-2024-0142<br/><b>School:</b> Westwood Elementary  |  <b>Grade:</b> 4  |  <b>Teacher:</b> Ms. Simmons</>}
                 {i===2&&<><b>Goal 1 (Reading):</b> By June 2026, Marcus will read grade 3 text aloud at 80+ wcpm across 4 consecutive probes.<br/><b>Goal 2 (Communication):</b> By June 2026, Marcus will initiate and maintain 3-turn peer conversations in 4/5 opportunities.<br/><b>Goal 3 (Social-Emotional):</b> By June 2026, Marcus will independently use a calm-down strategy in 4/5 opportunities.<br/><b>Goal 4 (Writing):</b> By June 2026, Marcus will write 3-sentence paragraphs with correct structure in 80% of tasks.</>}
                 {i===3&&<><b>Special Education:</b> 5× weekly resource room (30 min each) — reading, writing, math support</>}
                 {i===5&&<><b>Presentation:</b> Extended time (2×), text-to-speech, large print<br/><b>Response:</b> Typed responses, graphic organisers, sentence starters<br/><b>Environment:</b> Preferential seating, reduced distractions, movement breaks</>}
@@ -5571,7 +5571,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
             ))}
           </div>
           <p style={{textAlign:"center",fontSize:12,color:C.warm,marginTop:20}}>
-            + educators in <b style={{color:C.black}}>10+ countries</b> including USA, Ghana, Nigeria, UK, Kenya, Canada &amp; Australia
+            + educators in <b style={{color:C.black}}>10+ countries</b> including USA, Ghana, Nigeria, UK, Kenya, Canada & Australia
           </p>
         </div>
       </section>
@@ -5789,7 +5789,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         <div style={{maxWidth:640,margin:"0 auto",textAlign:"center"}}>
           <p className="lbl" style={{marginBottom:16,color:"rgba(255,255,255,.6)"}}>Stay Updated</p>
           <h2 className="serif" style={{fontSize:"clamp(26px,4vw,44px)",fontWeight:800,color:"#fff",letterSpacing:"-1px",marginBottom:12,lineHeight:1.1}}>
-            Get ALP tips &amp; planning<br/>updates in your inbox.
+            Get ALP tips & planning<br/>updates in your inbox.
           </h2>
           <p style={{fontSize:14,color:"rgba(255,255,255,.6)",marginBottom:32,lineHeight:1.7}}>Join 8,000+ special educators. No spam — unsubscribe anytime.</p>
           <NewsletterForm/>
