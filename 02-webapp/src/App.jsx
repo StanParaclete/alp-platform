@@ -1733,86 +1733,6 @@ Any educator supporting a learner with structured needs — from a special educa
 
 // ═══════════════════════════════════════════════════════════
 // ARTICLE CONTENT DATABASE
-// ═══════════════════════════════════════════════════════════
-const ARTICLES={
-  "Writing Effective SMART Goals":{tag:"GUIDE",time:"6 min read",color:"#7C3AED",body:`A SMART goal is Specific, Measurable, Achievable, Relevant, and Time-bound. In special education, every annual goal must meet these criteria.
-
-**The SMART Framework**
-• **Specific**: Name the exact skill or behaviour. "Reading fluency" is too broad. "Oral reading of grade-level text" is specific.
-• **Measurable**: Include a number. "80 words per minute" or "4 out of 5 opportunities" gives you something to track.
-• **Achievable**: Based on the student's current performance and trajectory. A student reading at 50 wcpm probably won't reach 120 wcpm in one year.
-• **Relevant**: Directly tied to the student's identified needs in their Present Level.
-• **Time-bound**: State the deadline. "By June 2026" or "By the end of the academic year."
-
-**A strong goal formula:**
-"By [date], [student name] will [observable behaviour] in [conditions] with [accuracy/frequency criteria] as measured by [assessment type]."
-
-**Example:**
-"By June 2026, Marcus will read grade 3 oral reading fluency probes at 80 words per minute with 90% accuracy on 4 out of 5 consecutive probes, as measured by weekly DIBELS ORF probes."
-
-**Using ALP AI Goal Architect**
-Paste your baseline data into the AI Goal Architect (Section 3 → ✦ button) and it will generate 3 SMART goal options tailored to the student's profile. Review, edit, and save the one that fits best.`},
-
-  "Present Levels of Performance":{tag:"GUIDE",time:"7 min read",color:"#2563EB",body:`The Present Level of Performance (PLOP) is the foundation of every effective learning plan. It describes what the student can currently do — and must be based on objective data, not impressions.
-
-**What to include**
-A strong Present Level covers:
-1. **Academic skills** — reading (fluency, comprehension), writing, maths
-2. **Communication** — expressive and receptive language, social communication
-3. **Social-emotional** — self-regulation, peer interaction, executive function
-4. **Functional skills** — daily living, organisation, independence
-5. **Impact statement** — how the disability affects access to the general curriculum
-
-**Writing tips**
-• Use assessment scores wherever possible: "On the DIBELS ORF, Marcus scored 52 wcpm (Instructional level for Grade 3)"
-• Describe both strengths and needs — start with strengths
-• Write in plain language that families can understand
-• Avoid jargon, labels, or deficit-only language
-• Tie each need directly to a goal: "Because Marcus struggles with sustained peer interaction, his communication goal is..."
-
-**Using ALP's Present Levels Coach**
-Click ✦ AI Tools → Present Levels Coach. Paste in your assessment results, select the domains, and the AI will draft a complete, structured narrative that you can edit and save.`},
-
-  "Progress Monitoring Basics":{tag:"GUIDE",time:"5 min read",color:"#16A34A",body:`Progress monitoring is how you know whether your teaching and intervention is working. Without data, you're guessing.
-
-**Curriculum-Based Measurement (CBM)**
-CBM probes are brief, standardised assessments that measure a specific skill:
-• **Reading**: Oral Reading Fluency (ORF) — words per minute
-• **Math**: Computation probes — problems correct per minute
-• **Writing**: Written Expression — words written, words spelled correctly
-• **Behaviour**: Observation data — frequency, duration, intensity
-
-**How often?**
-• Students receiving Tier 2 support: at least every 2 weeks
-• Students receiving Tier 3 (intensive) support: weekly
-• All students: at minimum, once per marking period
-
-**The 3-Point Rule**
-If 3 consecutive data points fall below the goal line: intensify the intervention.
-If 3 consecutive data points are above the goal line: raise the goal.
-
-**In ALP**
-Click Progress → select student and domain → click 'Log Data' → enter your probe score. ALP plots it on a trendline chart against the goal line automatically. Red alerts appear when the 3-point rule applies.`},
-
-  "Family Engagement Best Practice":{tag:"GUIDE",time:"4 min read",color:"#DC2626",body:`Family involvement is one of the strongest predictors of student success in special education. Research consistently shows that students with engaged families make faster progress and sustain gains longer.
-
-**Why families disengage**
-• Language barriers or jargon-heavy documents
-• Meeting formats that feel intimidating
-• Feeling like decisions have already been made
-• Not understanding what goals mean in practice
-
-**Practical strategies**
-1. **Use plain language** — avoid acronyms, explain terms
-2. **Share progress regularly** — don't wait for annual reviews
-3. **Ask, don't just tell** — "What are you seeing at home?"
-4. **Translate documents** — ALP supports 7 languages
-5. **Offer flexible meeting times** — evening or virtual options
-6. **Celebrate wins** — send progress milestones by message
-
-**Using ALP's Family Portal**
-The portal lets families see plans, read progress reports, sign documents, and message teachers at their own pace. Send an invitation from Family Portal → Messages → Compose. Response rates are typically 3× higher than paper-based systems.`},
-};
 function ArticleModal({article,onClose}){
   if(!article)return null;
   const data=ARTICLES[article.title]||{tag:article.tag||"ARTICLE",time:article.time||"5 min read",color:"#7C3AED",body:"ALP is designed to help special educators build better learning plans, faster. This guide covers key concepts, practical strategies, and how to use the platform effectively.\n\n**Getting Started**\nStart with the student's Present Level of Performance, then build annual goals and choose appropriate services. ALP guides you through all 13 required sections step by step.\n\n**AI Tools**\nThe AI Goal Architect generates 3 SMART goal options from your baseline data. The Present Levels Coach helps write functional academic and developmental narratives.\n\n**Progress Monitoring**\nLog CBM probes weekly. ALP tracks trends and flags students who are falling behind. Use the 3-point rule to adjust goals and interventions based on real data.\n\n**Family Partnership**\nUse the Family Portal to share progress, collect signatures, and schedule meetings. Research shows family engagement is one of the strongest predictors of student success in special education."};
@@ -1946,8 +1866,7 @@ function InviteUserModal({onClose}){
 
   function sendInvite(){
     if(tab==="bulk"){
-      const emails=bulk.split(/[
-,]/).map(e=>e.trim()).filter(Boolean);
+      const emails=bulk.split(/[\n,]/).map(e=>e.trim()).filter(Boolean);
       if(!emails.length){toast("Add at least one email address","error");return;}
       setSending(true);
       setTimeout(()=>{setSending(false);setSent(true);toast(`${emails.length} invitations sent!`,"success");},1000);
@@ -2020,9 +1939,7 @@ function InviteUserModal({onClose}){
                 <textarea value={bulk} onChange={e=>setBulk(e.target.value)} rows={5}
                   placeholder="teacher@school.edu&#10;slp@school.edu&#10;admin@school.edu&#10;(one per line or comma-separated)"
                   style={{width:"100%",padding:"10px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontFamily:"'DM Sans',sans-serif",resize:"vertical",outline:"none",color:C.black,boxSizing:"border-box",lineHeight:1.6}}/>
-                {bulk&&<p style={{fontSize:11,color:C.warm,marginTop:4}}>{bulk.split(/[
-,]/).filter(e=>e.trim()).length} email{bulk.split(/[
-,]/).filter(e=>e.trim()).length!==1?"s":""} detected</p>}
+                {bulk&&<p style={{fontSize:11,color:C.warm,marginTop:4}}>{bulk.split(/[\n,]/).filter(e=>e.trim()).length} email{bulk.split(/[\n,]/).filter(e=>e.trim()).length!==1?"s":""} detected</p>}
               </div>
             </div>
           )}
