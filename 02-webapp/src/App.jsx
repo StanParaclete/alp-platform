@@ -609,7 +609,7 @@ Return ONLY this JSON array (no explanation):
         })
       });
       const d=await r.json();
-      const raw=d.content?.[0]?.text||"[]";
+      const raw=d.(content && content[0])?.text||"[]";
       const m=raw.match(/\[[\s\S]*\]/);
       if(!m)throw new Error("Invalid response");
       setGoals(JSON.parse(m[0]));
@@ -746,7 +746,7 @@ function DownloadModal({onClose}){
           ))}
         </div>
         <div style={{padding:"14px 16px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,marginBottom:20}}>
-          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free forever for individual teachers  ·  ✓ Offline access  ·  ✓ Auto-updates  ·  ✓ Sync across devices</p>
+          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free forever for individual teachers  ·  ✓ Offline access  ·  ✓ Auto-updates  ·  ✓ Sync across devices</p>
         </div>
         <button onClick={onClose} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:99,padding:"9px 28px",fontSize:12,color:"rgba(255,255,255,.5)",cursor:"pointer",transition:"all .15s"}}
           onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.12)";e.currentTarget.style.color="#fff";}}
@@ -2248,7 +2248,7 @@ function AIChatWidget({onClose}){
         })
       });
       const d=await r.json();
-      const reply=d.content?.[0]?.text||"I couldn't process that. Please try again.";
+      const reply=d.(content && content[0])?.text||"I couldn't process that. Please try again.";
       setMsgs(m=>[...m,{role:"assistant",text:reply}]);
     }catch(e){
       setMsgs(m=>[...m,{role:"assistant",text:"Connection issue. Please check your internet and try again."}]);
@@ -2508,7 +2508,7 @@ function MeetingSchedulerModal({onClose}){
         </div>
         <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            <USelect label="Student & Family" value={form.family} onChange={e=>{setF("family",e.target.value);setF("student",families.find(f=>f[0]===e.target.value)?.[1].split(" — ")[0]||"");}} options={families.map(([v,l])=>({value:v,label:l.split(" — ")[0]}))}/>
+            <USelect label="Student & Family" value={form.family} onChange={e=>{setF("family",e.target.value);setF("student",families.(families.find(f=>f[0]===e.target.value)||["",""])[1].split(" — ")[0]||"");}} options={families.map(([v,l])=>({value:v,label:l.split(" — ")[0]}))}/>
             <USelect label="Meeting Type" value={form.type} onChange={e=>setF("type",e.target.value)} options={meetingTypes.map(t=>({value:t,label:t}))}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
@@ -4844,7 +4844,7 @@ function ALPPrintPreview({onClose,studentName="Marcus Johnson"}){
                 <span style={{fontSize:14,fontWeight:700,color:"#1a1a1a",fontFamily:"system-ui"}}>{title}</span>
               </div>
               <div style={{fontSize:13,color:"#444",lineHeight:1.8,fontFamily:"system-ui",paddingLeft:32}}>
-                {i===0&&<><b>Student Name:</b> Marcus Darnell Johnson  |  <b>DOB:</b> March 12, 2016  |  <b>ID:</b> WE-2024-0142<br/><b>School:</b> Westwood Elementary  |  <b>Grade:</b> 4  |  <b>Teacher:</b> Ms. Simmons</>}
+                {i===0&&<><b>Student Name:</b> Marcus Darnell Johnson  |  <b>DOB:</b> March 12, 2016  |  <b>ID:</b> WE-2024-0142<br/><b>School:</b> Westwood Elementary  |  <b>Grade:</b> 4  |  <b>Teacher:</b> Ms. Simmons</>}
                 {i===2&&<><b>Goal 1 (Reading):</b> By June 2026, Marcus will read grade 3 text aloud at 80+ wcpm across 4 consecutive probes.<br/><b>Goal 2 (Communication):</b> By June 2026, Marcus will initiate and maintain 3-turn peer conversations in 4/5 opportunities.<br/><b>Goal 3 (Social-Emotional):</b> By June 2026, Marcus will independently use a calm-down strategy in 4/5 opportunities.<br/><b>Goal 4 (Writing):</b> By June 2026, Marcus will write 3-sentence paragraphs with correct structure in 80% of tasks.</>}
                 {i===3&&<><b>Special Education:</b> 5× weekly resource room (30 min each) — reading, writing, math support</>}
                 {i===5&&<><b>Presentation:</b> Extended time (2×), text-to-speech, large print<br/><b>Response:</b> Typed responses, graphic organisers, sentence starters<br/><b>Environment:</b> Preferential seating, reduced distractions, movement breaks</>}
@@ -9315,9 +9315,9 @@ function AppInner(){
   // Mobile swipe navigation
   useEffect(()=>{
     let startX=0;
-    const handleStart=(e)=>{startX=e.touches?.[0]?.clientX??0;};
+    const handleStart=(e)=>{try{startX=(e.touches&&e.touches[0]&&e.touches[0].clientX)||0;}catch{startX=0;}};
     const handleEnd=(e)=>{
-      const endX=e.changedTouches?.[0]?.clientX??0;
+      const endX=(e.changedTouches&&e.changedTouches[0]&&e.changedTouches[0].clientX)||0;
       const diff=startX-endX;
       if(Math.abs(diff)<80)return; // min swipe distance
       // Only swipe on main app pages, not landing/login
@@ -9465,6 +9465,36 @@ function AppInner(){
       }
     </>
   );
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// ERROR BOUNDARY
+// ═══════════════════════════════════════════════════════════
+class ErrorBoundary extends React.Component{
+  constructor(props){super(props);this.state={hasError:false,error:null};}
+  static getDerivedStateFromError(error){return{hasError:true,error};}
+  componentDidCatch(error,info){console.error("ALP Error:",error,info);}
+  render(){
+    if(this.state.hasError){
+      return(
+        <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#f9f7f4",padding:32}}>
+          <div style={{textAlign:"center",maxWidth:480}}>
+            <div style={{fontSize:56,marginBottom:16}}>⚠️</div>
+            <h2 style={{fontSize:24,fontWeight:700,color:"#1a1a2e",marginBottom:10}}>Something went wrong</h2>
+            <p style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:24}}>
+              An unexpected error occurred. Your data is safe.
+            </p>
+            <button onClick={()=>this.setState({hasError:false,error:null})}
+              style={{padding:"12px 32px",borderRadius:99,background:"#7C3AED",color:"#fff",border:"none",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+              Try Again
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export default function App(){
