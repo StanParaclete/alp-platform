@@ -4,9 +4,10 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION   = "20"
+  NODE_OPTIONS   = "--max-old-space-size=4096"
 
-# SPA routing - all routes go to index.html
+# SPA routing
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
