@@ -4183,7 +4183,7 @@ function GoalsPage({setPage}){
   const stats={total:allGoals.length,onTrack:allGoals.filter(g=>g.status==="On Track").length,developing:allGoals.filter(g=>g.status==="Developing").length,needs:allGoals.filter(g=>g.status==="Needs Support").length};
 
   return(
-    {showNewGoal&&(
+    <>{showNewGoal&&(
       <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setShowNewGoal(false)}>
         <div className="card fade-up" style={{width:"100%",maxWidth:480,padding:0}}>
           <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -4285,6 +4285,7 @@ function GoalsPage({setPage}){
         </div>
       </div>
     </Page>
+    </>
   );
 }
 
