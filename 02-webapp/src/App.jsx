@@ -2679,7 +2679,7 @@ function highlight(text,query){
 function HelpCenter(){
   const [search,setSearch]=useState("");
   const [openItem,setOpenItem]=useState(null);
-  const extraCategories={label:"Progress & Data",icon:"📊",items:[
+  const extraCategories=[{label:"Progress & Data",icon:"📊",items:[
       {q:"How do I log CBM progress data?",a:"Go to Progress → click 'Log Data' → select student and domain → enter your probe score. Data is charted automatically. Aim to log data at least weekly for each goal."},
       {q:"What is the 3-point rule?",a:"If 3 consecutive data points fall below the goal line, you should consider intensifying the intervention. If 3 points are above, consider raising the goal. ALP will alert you when this threshold is reached."},
       {q:"Can I export progress reports?",a:"Yes. In Reports → Progress tab → click 'Export'. You can generate PDF or Excel summaries for individual students or your entire caseload."},
@@ -2696,7 +2696,7 @@ function HelpCenter(){
       {q:"Can I change the interface language?",a:"Yes. Settings → Profile → Language dropdown. Currently supports English, Spanish, French, Portuguese, Arabic, Twi, and Kiswahili."},
       {q:"How do I add a new team member?",a:"Go to Settings → Users & Roles → click 'Invite User'. Enter their email, select their role and school. They'll receive an invitation email with instructions to create their account."},
       {q:"How do I export all my data?",a:"Settings → click 'Export Data' in the header, or use the global shortcut ⌘E. Select the datasets you want, choose your format (CSV/JSON/Excel), and download the secure export."},
-    ]},;
+    ]}];
   const categories=[
     {icon:"🚀",title:"Getting Started",items:[
       {q:"How do I add my first student?",a:"Go to Students in the sidebar, then click '+ Add Student'. Enter the student's name, grade, and primary disability. You'll be taken straight to the ALP Builder to start their plan."},
@@ -5195,7 +5195,7 @@ function OnboardingModal({onClose,setPage}){
                 ))}
               </div>
               <button className="btn-purple" onClick={()=>setStep(3)} disabled={!country} style={{width:"100%",fontSize:13,padding:"14px"}}>Next →</button>
-              <button onClick={()=>setStep(2)} style={{width:"100%",marginTop:6,fontSize:11,color:C.warm,background:"none",border:"none",cursor:"pointer"}} onClick={()=>setStep(1)}>← Back</button>
+              <button style={{width:"100%",marginTop:6,fontSize:11,color:C.warm,background:"none",border:"none",cursor:"pointer"}} onClick={()=>setStep(1)}>← Back</button>
             </div>
           )}
 
@@ -8874,7 +8874,7 @@ function Settings(){
               <h3 className="serif" style={{fontSize:17,fontWeight:700}}>Users & Role Management</h3>
               <p style={{fontSize:13,color:C.warm,marginTop:4}}>Manage staff access, permissions, and role assignments.</p>
             </div>
-            <div style={{display:"flex",gap:8}}}><button className="btn-ghost" style={{fontSize:11,padding:"11px 18px"}} onClick={()=>setShowExportData(true)}>⬇ Export Data</button><button className="btn-black" style={{fontSize:11,padding:"11px 22px"}} onClick={()=>setShowInvite(true)}>+ Invite User</button></div>
+            <div style={{display:"flex",gap:8}}><button className="btn-ghost" style={{fontSize:11,padding:"11px 18px"}} onClick={()=>setShowExportData(true)}>⬇ Export Data</button><button className="btn-black" style={{fontSize:11,padding:"11px 22px"}} onClick={()=>setShowInvite(true)}>+ Invite User</button></div>
           </div>
 
           {/* Role Summary Cards */}
