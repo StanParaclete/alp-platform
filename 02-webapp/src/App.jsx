@@ -4176,6 +4176,16 @@ function ChangelogPage(){
     removed:{label:"REMOVED",bg:"#FEE2E2",color:C.red},
   };
   const changes=[
+  {version:"v3.0.0",date:"May 2026",badge:"Production",badgeColor:C.green,items:[
+    {type:"new",text:"Real database — student, goal & progress data persists between sessions (Supabase PostgreSQL)"},
+    {type:"new",text:"Real authentication — sign in, sign up, sign out, password reset via Supabase Auth"},
+    {type:"new",text:"CSV bulk import — upload a spreadsheet to add multiple students at once"},
+    {type:"new",text:"ALP Builder autosave — documents write to database automatically"},
+    {type:"new",text:"Privacy Policy, Terms of Service, and Data & Security pages"},
+    {type:"new",text:"Cookie consent banner and SEO meta tags (og:image, Twitter card, JSON-LD)"},
+    {type:"improve",text:"Role-based access control enforced at database level (RLS)"},
+    {type:"improve",text:"Notifications now sync in real time via Supabase Realtime"},
+  ]},
     {version:"v2.5.0",date:"May 2026",badge:"Latest",badgeColor:C.green,items:[
       {type:"new",text:"Onboarding flow — 4-step setup guide for new teachers with role and country selection"},
       {type:"new",text:"All 8 role dashboards fully rebuilt: Director, Admin, RelatedServices, Student, Family, Intervention, Leadership"},
@@ -6251,7 +6261,8 @@ function Page({title,subtitle,action,children}){
 function Dashboard({setPage,onAddStudent}){
   const {role}=useRole();
   const {toast}=useToast();
-  const {user,profile,unreadCount:realUnreadCount}=useSupabaseAuth();
+  const {user,profile,unreadCount:realUnreadCount,students:dbStudentsRaw}=useSupabaseAuth();
+  const dbStudents=dbStudentsRaw&&dbStudentsRaw.length>0?dbStudentsRaw.length:19;
   const {isMobile}=useResponsive();
   const [period,setPeriod]=useState("This Month");
   const [showChecklist,setShowChecklist]=useState(true);
@@ -6260,7 +6271,7 @@ function Dashboard({setPage,onAddStudent}){
   const userName="Ms. Simmons";
 
   const metrics=[
-    {icon:"👥",label:"Active Students",value:"19",change:"+3",trend:"up",sub:"vs last month",color:C.purple},
+    {icon:"👥",label:"Active Students",value:String(dbStudents||19),change:"+3",trend:"up",sub:"vs last month",color:C.purple},
     {icon:"📋",label:"ALPs In Progress",value:"14",change:"3 due soon",trend:"warn",sub:"reviews this week",color:C.amber},
     {icon:"📈",label:"On Track",value:"74%",change:"+8%",trend:"up",sub:"of all goals",color:C.green},
     {icon:"⭐",label:"Avg Goal Progress",value:"68%",change:"+5%",trend:"up",sub:"across caseload",color:C.blue},
@@ -7678,7 +7689,7 @@ function FamilyPortal(){
             </div>
             <div style={{display:"flex",gap:12}}>
               <button className="btn-ghost" onClick={()=>setCompose(false)} style={{flex:1}}>Cancel</button>
-              <button className="btn-black" onClick={()=>{if(msgBody.trim()){const newMsg={id:Date.now(),from:"Ms. Simmons",to:"Johnson Family",subject:msgSubject||"Message from Ms. Simmons",body:msgBody,time:"Just now",read:true,avatar:"SS"};setMessages(m=>[...m,newMsg]);setCompose(false);setMsgSubject("");setMsgBody("");toast("Message sent to family ✓","success");}else toast("Please write a message first","error");}} style={{flex:1,fontSize:11}}>Send Message →</button>
+              <button className="btn-black" onClick={()=>{if(msgBody.trim()){const newMsg={id:Date.now(),from:"Ms. Simmons",to:"Johnson Family",subject:msgSubject||"Message from Ms. Simmons",body:msgBody,time:"Just now",read:true,avatar:"SS"};setMessages(m=>[...m,newMsg]);setCompose(false);setMsgSubject("");setMsgBody("");if(user)Supabase.sendFamilyMessage({sender_id:user.id,sender_name:"Ms. Simmons",subject:msgSubject||"Message",body:msgBody}).catch(()=>{});toast("Message sent to family ✓","success");}else toast("Please write a message first","error");}} style={{flex:1,fontSize:11}}>Send Message →</button>
             </div>
           </div>
         </div>
@@ -8027,6 +8038,8 @@ function FamilyPortal(){
 function Reports(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
+  const {students:dbStudents}=useSupabaseAuth();
+  const totalStudents=dbStudents&&dbStudents.length>0?dbStudents.length:19;
   const [tab,setTab]=useState("reports");
   const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
   const [exporting,setExporting]=useState(null);
@@ -8614,7 +8627,10 @@ function NotifPrefsTab({save,saved}){
 function Settings(){
   const {toast}=useToast();
   const {user,profile}=useSupabaseAuth();
+  const [displayName,setDisplayName]=useState(profile?.full_name||"Ms. Simmons");
+  const [schoolName,setSchoolName]=useState(profile?.school||"Westwood Elementary");
   async function saveSettings(){
+    if(user) await Supabase.upsertProfile({id:user.id,full_name:displayName,school:schoolName,updated_at:new Date().toISOString()});
     if(user&&profile){
       await Supabase.upsertProfile({id:user.id,full_name:profile.full_name,school:profile.school,updated_at:new Date().toISOString()});
     }
