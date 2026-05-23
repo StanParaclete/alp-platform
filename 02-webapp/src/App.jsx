@@ -5074,13 +5074,6 @@ function KeyboardShortcutsPanel({onClose}){
     </div>
   );
 }
->Press <kbd style={{fontSize:9,padding:"1px 5px",borderRadius:3,background:C.purpleL,color:C.purple,border:`1px solid ${C.border}`,fontFamily:"monospace"}}>?</kbd> anytime to show this panel</span>
-          <button onClick={onClose} className="btn-ghost" style={{fontSize:10,padding:"4px 10px"}}>Close</button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════
 // BULK ACTIONS BAR (students page)
