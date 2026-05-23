@@ -2302,6 +2302,7 @@ function AIChatWidget({onClose}){
 
 function QuickAddStudentModal({onClose,onAdded}){
   const {toast}=useToast();
+  const {createStudentRecord}=useSupabaseAuth();
   const {isMobile}=useResponsive();
   const [step,setStep]=useState(1);
   const [form,setForm]=useState({
@@ -2311,13 +2312,21 @@ function QuickAddStudentModal({onClose,onAdded}){
   });
   const setF=(k,v)=>setForm(p=>({...p,[k]:v}));
 
-  function submit(){
+  async function submit(){
     if(!form.name||!form.grade||!form.disability)return;
-    setTimeout(()=>{
-      toast(`${form.name} added to your caseload!`,"success");
-      onAdded&&onAdded();
-      onClose();
-    },600);
+    if(createStudentRecord){
+      const {error}=await createStudentRecord({
+        name:form.name, grade:form.grade, disability:form.disability,
+        dob:form.dob||null, status:"Active", plan:"ALP",
+        plan_date:new Date().toISOString().split("T")[0]
+      });
+      if(error&&typeof error==="object"&&error.message&&!error.message.includes("Demo")){
+        toast("Could not save student. Try again.","error"); return;
+      }
+    }
+    toast(form.name+" added to your caseload!","success");
+    onAdded&&onAdded();
+    onClose();
   }
 
   const disabilities=["Autism Spectrum Disorder","Specific Learning Disability","Speech-Language Impairment","Intellectual Disability","ADHD","Emotional Behavioural Disorder","Physical Disability","Hearing Impairment","Visual Impairment","Traumatic Brain Injury","Other Health Impairment","Multiple Disabilities"];
@@ -4623,129 +4632,141 @@ function TimelinePage({setPage}){
   );
 }
 
+
 function DataImportModal({onClose}){
   const {toast}=useToast();
-  const [step,setStep]=useState("upload"); // upload → preview → done
-  const [dragging,setDragging]=useState(false);
-  const [source,setSource]=useState("csv");
+  const {createStudentRecord}=useSupabaseAuth();
+  const [tab,setTab]=useState("csv");
+  const [csvText,setCsvText]=useState("");
+  const [parsed,setParsed]=useState([]);
   const [importing,setImporting]=useState(false);
-  const [progress,setProgress]=useState(0);
+  const [done,setDone]=useState(false);
+  const [errors,setErrors]=useState([]);
 
-  const sampleRows=[
-    {name:"Kezia Mensah",grade:"3",disability:"Specific Learning Disability",teacher:"Ms. Simmons",dob:"2017-04-12"},
-    {name:"Jordan Williams",grade:"5",disability:"ADHD",teacher:"Mr. Davis",dob:"2015-08-23"},
-    {name:"Priya Patel",grade:"1",disability:"Speech-Language Impairment",teacher:"Ms. Rivera",dob:"2019-02-07"},
-    {name:"Carlos Reyes",grade:"7",disability:"Intellectual Disability",teacher:"Mr. Chen",dob:"2013-11-30"},
-  ];
+  const csvTemplate="name,grade,dob,disability,status\nMarcus Johnson,4,2014-03-12,ASD,Active\nSofia Lee,5,2013-07-22,ADHD,Active";
 
-  function startImport(){
-    setStep("importing");
-    let p=0;
-    const t=setInterval(()=>{
-      p+=Math.random()*20+8;
-      if(p>=100){clearInterval(t);setProgress(100);setTimeout(()=>setStep("done"),400);}
-      else setProgress(Math.min(p,95));
-    },200);
+  function parseCSV(text){
+    const lines=text.trim().split("\n").filter(Boolean);
+    if(lines.length<2){setErrors(["CSV must have a header row and at least one data row"]);return;}
+    const headers=lines[0].split(",").map(h=>h.trim().toLowerCase());
+    const required=["name"];
+    const missing=required.filter(r=>!headers.includes(r));
+    if(missing.length){setErrors(["Missing required columns: "+missing.join(", ")]);return;}
+    const rows=[];
+    const errs=[];
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(",").map(v=>v.trim());
+      const row={};
+      headers.forEach((h,idx)=>{row[h]=vals[idx]||"";});
+      if(!row.name){errs.push("Row "+(i+1)+": name is required");continue;}
+      rows.push({name:row.name,grade:row.grade||"",dob:row.dob||null,disability:row.disability||"",status:row.status||"Active"});
+    }
+    setErrors(errs);
+    setParsed(rows);
   }
 
-  const sources=[
-    {id:"csv",label:"CSV File",icon:"📄",desc:"Any spreadsheet export"},
-    {id:"powerschool",label:"PowerSchool",icon:"🏫",desc:"Direct SIS import"},
-    {id:"infinite",label:"Infinite Campus",icon:"🏫",desc:"Roster export"},
-    {id:"paste",label:"Paste Data",icon:"📋",desc:"Copy from spreadsheet"},
-  ];
+  async function importAll(){
+    if(!parsed.length)return;
+    setImporting(true);
+    let success=0,fail=0;
+    for(const row of parsed){
+      const {error}=await createStudentRecord(row);
+      if(error){fail++;} else {success++;}
+    }
+    setImporting(false);
+    setDone(true);
+    toast(success+" students imported"+(fail?" ("+fail+" failed)":""),"success");
+  }
+
+  function downloadTemplate(){
+    const blob=new Blob([csvTemplate],{type:"text/csv"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;a.download="alp_students_template.csv";a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&step!=="importing"&&onClose()}>
-      <div className="card fade-up" style={{width:"100%",maxWidth:600,padding:0}}>
-        <div style={{padding:"22px 28px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div><p className="lbl" style={{color:C.purple,marginBottom:4}}>Bulk Import</p><h3 style={{fontSize:20,fontWeight:800,color:C.black,letterSpacing:"-.5px"}}>Import Students</h3></div>
-          {step!=="importing"&&<button onClick={onClose} style={{fontSize:24,color:C.warm,background:"none",border:"none",cursor:"pointer"}} aria-label="Close">×</button>}
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="card fade-up" style={{width:"100%",maxWidth:560,padding:0}}>
+        <div style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",padding:"22px 28px",borderRadius:"12px 12px 0 0"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <h3 className="serif" style={{fontSize:22,fontWeight:800,color:"#fff",margin:0}}>Import Students</h3>
+              <p style={{fontSize:12,color:"rgba(255,255,255,.4)",margin:"4px 0 0"}}>Upload a CSV file or paste data directly</p>
+            </div>
+            <button onClick={onClose} style={{fontSize:22,color:"rgba(255,255,255,.4)",background:"none",border:"none",cursor:"pointer"}}>×</button>
+          </div>
         </div>
 
-        {step==="upload"&&(
-          <div style={{padding:"24px 28px"}}>
-            <p className="lbl" style={{marginBottom:10}}>Data Source</p>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:22}}>
-              {sources.map(s=>(
-                <button key={s.id} onClick={()=>setSource(s.id)}
-                  style={{padding:"14px 16px",borderRadius:10,border:`2px solid ${source===s.id?C.purple:C.tanL}`,background:source===s.id?C.purpleL:"transparent",cursor:"pointer",textAlign:"left",transition:"all .15s"}}>
-                  <div style={{fontSize:20,marginBottom:4}}>{s.icon}</div>
-                  <div style={{fontSize:13,fontWeight:700,color:C.black}}>{s.label}</div>
-                  <div style={{fontSize:11,color:C.warm}}>{s.desc}</div>
+        <div style={{padding:"24px 28px"}}>
+          {!done?(
+            <>
+              {/* Tabs */}
+              <div style={{display:"flex",gap:8,marginBottom:20}}>
+                {[["csv","CSV Upload"],["paste","Paste Data"]].map(([id,label])=>(
+                  <button key={id} onClick={()=>setTab(id)} className={tab===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"7px 14px"}}>{label}</button>
+                ))}
+              </div>
+
+              {/* Template download */}
+              <div style={{background:C.purpleL,borderRadius:8,padding:"10px 14px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <p style={{fontSize:12,color:C.warm,margin:0}}>📄 Required columns: <b>name</b>, grade, dob (YYYY-MM-DD), disability, status</p>
+                <button onClick={downloadTemplate} className="btn-ghost" style={{fontSize:10,padding:"4px 10px",flexShrink:0}}>⬇ Template</button>
+              </div>
+
+              {/* Input area */}
+              <textarea
+                value={csvText}
+                onChange={e=>{setCsvText(e.target.value);setParsed([]);setErrors([]);}}
+                placeholder={"name,grade,dob,disability,status\nMarcus Johnson,4,2014-03-12,ASD,Active"}
+                style={{width:"100%",height:140,padding:"10px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontFamily:"monospace",resize:"vertical",outline:"none",boxSizing:"border-box",lineHeight:1.6}}
+              />
+
+              {/* Errors */}
+              {errors.length>0&&<div style={{background:"#FEF2F2",borderRadius:8,padding:"8px 12px",marginTop:8}}>
+                {errors.map((e,i)=><p key={i} style={{fontSize:12,color:"#DC2626",margin:"2px 0"}}>⚠ {e}</p>)}
+              </div>}
+
+              {/* Preview */}
+              {parsed.length>0&&(
+                <div style={{marginTop:12}}>
+                  <p style={{fontSize:11,fontWeight:700,color:C.warm,marginBottom:8}}>PREVIEW — {parsed.length} STUDENTS</p>
+                  <div style={{maxHeight:140,overflowY:"auto",border:`1px solid ${C.tanL}`,borderRadius:8}}>
+                    {parsed.map((r,i)=>(
+                      <div key={i} style={{display:"flex",gap:10,padding:"8px 12px",borderBottom:i<parsed.length-1?`1px solid ${C.tanL}`:"none",fontSize:12}}>
+                        <b style={{flex:2}}>{r.name}</b>
+                        <span style={{flex:1,color:C.warm}}>Gr.{r.grade}</span>
+                        <span style={{flex:2,color:C.warm}}>{r.disability}</span>
+                        <span style={{color:C.green,fontSize:10,fontWeight:700}}>{r.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div style={{display:"flex",gap:10,marginTop:16}}>
+                <button className="btn-ghost" onClick={()=>parseCSV(csvText)} disabled={!csvText.trim()} style={{flex:1,fontSize:12}}>Preview</button>
+                <button className="btn-purple" onClick={importAll} disabled={!parsed.length||importing} style={{flex:2,fontSize:12}}>
+                  {importing?<><Spin/>Importing…</>:"⬆ Import "+parsed.length+" Students"}
                 </button>
-              ))}
+              </div>
+            </>
+          ):(
+            <div style={{textAlign:"center",padding:"32px 0"}}>
+              <div style={{fontSize:48,marginBottom:12}}>✅</div>
+              <h3 style={{fontSize:18,fontWeight:700}}>Import complete!</h3>
+              <p style={{fontSize:14,color:C.warm,marginBottom:20}}>Students have been added to your account.</p>
+              <button className="btn-purple" onClick={onClose} style={{fontSize:12}}>Done →</button>
             </div>
-            <div style={{border:`2px dashed ${dragging?C.purple:C.tanL}`,borderRadius:12,padding:"32px",textAlign:"center",cursor:"pointer",background:dragging?"#FAF8FF":"transparent",transition:"all .2s",marginBottom:20}}
-              onDragOver={e=>{e.preventDefault();setDragging(true);}}
-              onDragLeave={()=>setDragging(false)}
-              onDrop={e=>{e.preventDefault();setDragging(false);setStep("preview");}}
-              onClick={()=>setStep("preview")}>
-              <div style={{fontSize:36,marginBottom:10}}>📤</div>
-              <p style={{fontSize:14,fontWeight:600,color:C.black,marginBottom:4}}>{dragging?"Drop your file here":"Drop file or click to browse"}</p>
-              <p style={{fontSize:12,color:C.warm}}>CSV, Excel (.xlsx), or Google Sheets export · Max 500 students</p>
-            </div>
-            <div style={{background:C.purpleL,borderRadius:10,padding:"12px 14px",fontSize:12,color:C.warm,marginBottom:20}}>
-              💡 <b>Required columns:</b> Student Name, Grade, Primary Disability. Optional: DOB, Teacher, School, Parent Name, Parent Email.
-            </div>
-            <div style={{display:"flex",gap:10}}>
-              <button className="btn-ghost" onClick={onClose} style={{flex:1,fontSize:12}}>Cancel</button>
-              <button className="btn-purple" onClick={()=>setStep("preview")} style={{flex:2,fontSize:12,padding:"13px"}}>Use Sample Data →</button>
-            </div>
-          </div>
-        )}
-
-        {step==="preview"&&(
-          <div style={{padding:"24px 28px"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <p className="lbl">{sampleRows.length} students found — preview</p>
-              <button onClick={()=>setStep("upload")} style={{fontSize:11,color:C.purple,background:"none",border:"none",cursor:"pointer"}}>← Change file</button>
-            </div>
-            <div style={{overflowX:"auto",marginBottom:20}}>
-              <table className="data-table" style={{minWidth:480}}>
-                <thead><tr>{["Name","Grade","Disability","Teacher","DOB"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-                <tbody>{sampleRows.map((r,i)=><tr key={i}><td style={{fontWeight:600}}>{r.name}</td><td>Grade {r.grade}</td><td style={{fontSize:11}}>{r.disability}</td><td>{r.teacher}</td><td style={{fontSize:11}}>{r.dob}</td></tr>)}</tbody>
-              </table>
-            </div>
-            <div style={{background:"#DCFCE7",borderRadius:10,padding:"10px 14px",fontSize:12,color:C.green,fontWeight:600,marginBottom:20}}>✓ All {sampleRows.length} rows valid · 0 errors · Ready to import</div>
-            <div style={{display:"flex",gap:10}}>
-              <button className="btn-ghost" onClick={()=>setStep("upload")} style={{flex:1,fontSize:12}}>← Back</button>
-              <button className="btn-purple" onClick={startImport} style={{flex:2,fontSize:12,padding:"13px"}}>Import {sampleRows.length} Students →</button>
-            </div>
-          </div>
-        )}
-
-        {step==="importing"&&(
-          <div style={{padding:"36px 28px",textAlign:"center"}}>
-            <div style={{width:64,height:64,borderRadius:"50%",background:C.purpleL,border:`3px solid ${C.purple}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 20px"}}><Spin color={C.purple}/></div>
-            <h3 style={{fontSize:17,fontWeight:700,color:C.black,marginBottom:8}}>Importing students…</h3>
-            <div style={{background:C.tanL,borderRadius:99,height:6,overflow:"hidden",marginBottom:8,maxWidth:300,margin:"0 auto 8px"}}>
-              <div style={{height:"100%",background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99,width:`${progress}%`,transition:"width .2s"}}/>
-            </div>
-            <p style={{fontSize:12,color:C.warm}}>{Math.round(progress)}% complete</p>
-          </div>
-        )}
-
-        {step==="done"&&(
-          <div style={{padding:"36px 28px",textAlign:"center"}}>
-            <div style={{width:64,height:64,borderRadius:"50%",background:"#DCFCE7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,margin:"0 auto 20px"}}>🎉</div>
-            <h3 style={{fontSize:20,fontWeight:800,color:C.black,marginBottom:8}}>Import complete!</h3>
-            <p style={{fontSize:14,color:C.warm,marginBottom:6}}>{sampleRows.length} students added to your caseload.</p>
-            <p style={{fontSize:12,color:C.warm,marginBottom:28}}>You can now start building ALPs for each student.</p>
-            <div style={{display:"flex",gap:10}}>
-              <button className="btn-ghost" onClick={onClose} style={{flex:1,fontSize:12}}>Close</button>
-              <button className="btn-purple" onClick={onClose} style={{flex:2,fontSize:12,padding:"12px"}}>View Students →</button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════
-// SVG MINI BAR CHART
-// ═══════════════════════════════════════════════════════════
 function MiniBarChart({data,color,height=60,width=160}){
   if(!data||!data.length)return null;
   const max=Math.max(...data.map(d=>d.value))||1;
@@ -6230,6 +6251,7 @@ function Page({title,subtitle,action,children}){
 function Dashboard({setPage,onAddStudent}){
   const {role}=useRole();
   const {toast}=useToast();
+  const {user,profile,unreadCount:realUnreadCount}=useSupabaseAuth();
   const {isMobile}=useResponsive();
   const [period,setPeriod]=useState("This Month");
   const [showChecklist,setShowChecklist]=useState(true);
@@ -6597,7 +6619,13 @@ function ALPBuilder({setPage}){
   const {toast}=useToast();
   const [lastSaved,setLastSaved]=useState(null);
   const [saveMsg,setSaveMsg]=useState("");
-  function autoSave(){const now=new Date();setLastSaved(now);setSaveMsg("✓ Saved");setTimeout(()=>setSaveMsg(""),2200);}
+  async function autoSave(){
+    const now=new Date();setLastSaved(now);setSaveMsg("Saving…");
+    if(saveDocument&&user){
+      await saveDocument({year:"2025-2026",status:"Draft",section_3:JSON.stringify(goals)});
+    }
+    setSaveMsg("✓ Saved");setTimeout(()=>setSaveMsg(""),2200);
+  }
   const [step,setStep]=useState(1);
   const [showAI,setShowAI]=useState(false);
   const [goals,setGoals]=useState([
@@ -7247,6 +7275,7 @@ function CreateALPDoc({setPage}){
 function Progress(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
+  const {logProgressEntry,students:dbStudents}=useSupabaseAuth();
   const [period,setPeriod]=useState('This Term');
   const [student,setStudent]=useState("Marcus Johnson");
   const [domain,setDomain]=useState("Reading");
@@ -8430,7 +8459,7 @@ function Notifications(){
   const [filter,setFilter]=useState("all");
   const [selected,setSelected]=useState(null);
   function dismiss(id){setDismissed(d=>[...d,id]);}
-  function markAllRead(){setAllRead(true);toast("All notifications marked as read","success");}
+  async function markAllRead(){setAllRead(true);if(user)await Supabase.markAllNotificationsRead(user.id);toast("All notifications marked as read","success");}
 
   const notifs=[
     {id:1,type:"review",icon:"📅",title:"Annual Review — Marcus Johnson",body:"Marcus Johnson's annual ALP review is due in 14 days (May 28, 2026). The meeting has been scheduled with the Johnson family. Please ensure all 13 sections are complete before the review date.",time:"2 hours ago",urgent:true,read:false,student:"Marcus Johnson",actions:["Open ALP","Message Family"]},
@@ -8584,7 +8613,13 @@ function NotifPrefsTab({save,saved}){
 // ═══════════════════════════════════════════════════════════
 function Settings(){
   const {toast}=useToast();
-  function saveSettings(){toast("Settings saved successfully ✔","success");}
+  const {user,profile}=useSupabaseAuth();
+  async function saveSettings(){
+    if(user&&profile){
+      await Supabase.upsertProfile({id:user.id,full_name:profile.full_name,school:profile.school,updated_at:new Date().toISOString()});
+    }
+    toast("Settings saved successfully ✓","success");
+  }
   const [activeTab,setActiveTab]=useState("profile");
   const [saved,setSaved]=useState(false);
   const [showInvite,setShowInvite]=useState(false);
