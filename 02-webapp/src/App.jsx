@@ -3175,7 +3175,7 @@ function SignUp({onLogin,onBack}){
     {id:"professional",name:"Professional",price:"$9/mo",desc:"Everything — unlimited students, progress tools, family portal.",color:"#7C3AED",features:["Unlimited students","All AI tools","Global support","Family portal + e-signature"],popular:true},
     {id:"school",name:"School",price:"$29/mo",desc:"Admin dashboard, district reporting, bulk import.",color:"#16A34A",features:["Everything in Pro","Admin dashboard","Staff management","Priority support"]},
   ];
-  function handleCreate(){
+  async function handleCreate(){
     if(!form.name||!form.email||!form.password)return;
     setLoading(true);
     const {data,error:e}=await Supabase.signUp(form.email,form.password,{
@@ -5977,7 +5977,7 @@ function Login({onLogin, onBack}){
   const [step,setStep]=useState("credentials"); // "credentials" | "role"
   const [selectedRole,setSelectedRole]=useState(null);
 
-  function handleSignIn(){
+  async function handleSignIn(){
     setLoading(true);
     const {data,error:e}=await Supabase.signIn(email,password);
     setLoading(false);
@@ -9134,7 +9134,7 @@ function AppInner(){
     return()=>window.removeEventListener("keydown",handler);
   },[]);
 
-  function handleLogin(selectedRole){
+  async function handleLogin(selectedRole){
     setRole(selectedRole);
     const startPage={family:"family",student:"dashboard",related:"progress",intervention:"progress"}[selectedRole]||"dashboard";
     setPage(startPage);
