@@ -5760,9 +5760,6 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
                   <Avatar name={t.n} size={40}/>
                   <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:C.black}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
                 </div>
-              </div>:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div>
-                  <div><div style={{fontSize:13,fontWeight:700,color:C.black}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
-                </div>
               </div>
             ))}
           </div>
