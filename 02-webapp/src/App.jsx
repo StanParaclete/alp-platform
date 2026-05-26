@@ -6810,7 +6810,7 @@ function ReviewSummary({setPage}){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
   const [activeTab,setActiveTab]=useState("summary");
-  const [notes,setNotes]=useState("");
+  const [notes,setNotes]=useState("Patricia Johnson shared that Marcus has been showing more confidence at home with communication. She mentioned he successfully made a request at a restaurant last week without support. Team agreed that the 3-turn conversation goal should focus more on peer interactions during lunch. Ms. Rivera will develop a home practice sheet for the Calm-Down strategies.");
   const [editNotes,setEditNotes]=useState(false);
   const meetingDate="May 28, 2026 · 3:00 PM";
   const attendees=["Ms. Simmons (ALP Coordinator)","Ms. Rivera (SLP)","Patricia Johnson (Parent)","Principal Owusu (Admin)"];
@@ -6933,18 +6933,10 @@ function ReviewSummary({setPage}){
             <button className="btn-ghost" style={{fontSize:10}} onClick={()=>setEditNotes(e=>!e)}>{editNotes?"Done":"Edit"}</button>
           </div>
           {editNotes?(
-            <textarea value={notes||"Patricia Johnson shared that Marcus has been showing more confidence at home with communication. She mentioned he successfully made a request at a restaurant last week without support.
-
-Team agreed that the 3-turn conversation goal should focus more on peer interactions during lunch.
-
-Ms. Rivera will develop a home practice sheet for the Calm-Down strategies."} onChange={e=>setNotes(e.target.value)}
+            <textarea value={notes} onChange={e=>setNotes(e.target.value)}
               style={{width:"100%",padding:"12px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:13,fontFamily:"'DM Sans',sans-serif",resize:"vertical",minHeight:200,outline:"none",lineHeight:1.7,boxSizing:"border-box"}}/>
           ):(
-            <p style={{fontSize:13,color:C.warm,lineHeight:1.75,whiteSpace:"pre-wrap"}}>{notes||"Patricia Johnson shared that Marcus has been showing more confidence at home with communication. She mentioned he successfully made a request at a restaurant last week without support.
-
-Team agreed that the 3-turn conversation goal should focus more on peer interactions during lunch.
-
-Ms. Rivera will develop a home practice sheet for the Calm-Down strategies."}</p>
+<p style={{fontSize:13,color:C.warm,lineHeight:1.75,whiteSpace:"pre-wrap"}}>{notes||"Patricia Johnson shared that Marcus has been showing more confidence at home with communication. She mentioned he successfully made a request at a restaurant last week without support. Team agreed that the 3-turn conversation goal should focus more on peer interactions during lunch. Ms. Rivera will develop a home practice sheet for the Calm-Down strategies."}</p>
           )}
         </div>
       )}
