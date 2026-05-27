@@ -6606,6 +6606,7 @@ function Students({setPage,onAddStudent}){
           </tr>)}</tbody>
         </table>}
       </div>
+  </div>
     </Page></>
   );
 }
@@ -7258,6 +7259,7 @@ function CreateALPDoc({setPage}){
 
 
     </div>
+  </div>
     </Page></>
   );
 }

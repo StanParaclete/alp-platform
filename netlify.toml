@@ -1,36 +1,23 @@
 [build]
   base    = "02-webapp"
   command = "npm run build"
-  publish = "dist"
+  publish = "02-webapp/dist"
 
 [build.environment]
-  NODE_VERSION   = "20"
-  NODE_OPTIONS   = "--max-old-space-size=4096"
+  NODE_VERSION = "20"
 
-# SPA routing
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
   status = 200
 
-# API proxy to Railway backend
-[[redirects]]
-  from   = "/api/*"
-  to     = "https://alp-backend-production.up.railway.app/api/:splat"
-  status = 200
-  force  = true
-  headers = {X-From = "Netlify"}
-
-# Security headers
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options        = "SAMEORIGIN"
-    X-XSS-Protection       = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy        = "strict-origin-when-cross-origin"
+    X-Frame-Options          = "SAMEORIGIN"
+    X-Content-Type-Options   = "nosniff"
+    Referrer-Policy          = "strict-origin-when-cross-origin"
 
-# Cache static assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
