@@ -1229,10 +1229,7 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
         <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
           {testimonials.map(t=>(
             <div key={t.n} className="card" style={{padding:28}}>
-              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div>
-              <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p>
-              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div>
+              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div> <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p> <div style={{display:"flex",alignItems:"center",gap:12}}> <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div>
                 <div><div style={{fontSize:13,fontWeight:700}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
               </div>
             </div>
@@ -7258,8 +7255,9 @@ function CreateALPDoc({setPage}){
               </div>
             ))}
           </div>
-        </div>
-      </div>
+
+
+    </div>
     </Page></>
   );
 }
@@ -7442,8 +7440,9 @@ function Progress(){
             </div>
           ))}
         </div>
-      </div>
-      </div>
+
+
+    </div>
     </Page></>
   );
 }
@@ -8008,9 +8007,10 @@ function FamilyPortal(){
           <div style={{padding:"14px 20px",fontSize:12,color:C.warm,display:"flex",justifyContent:"space-between"}}>
             <span>Showing {commLog.length} of {commLog.length} entries</span>
             <span>privacy standards complete · All records encrypted · Audit trail active</span>
-          </div>
-        </div>
+
+
       )}
+      </div>
     </Page></>
   );
 }
@@ -8437,9 +8437,10 @@ function Reports(){
               ))}
               <button className="btn-black" style={{width:"100%",marginTop:14,fontSize:11,padding:"12px"}}>Enable Auto-Scheduling →</button>
             </div>
-          </div>
-        </div>
+
+
       )}
+      </div>
     </Page></>
   );
 }
@@ -8609,9 +8610,9 @@ function NotifPrefsTab({save,saved}){
 // ═══════════════════════════════════════════════════════════
 function Settings(){
   const {toast}=useToast();
-  const {user,profile}=useSupabaseAuth();
-  const [displayName,setDisplayName]=useState(profile?.full_name||"Ms. Simmons");
-  const [schoolName,setSchoolName]=useState(profile?.school||"Westwood Elementary");
+  const {user:sUser,profile:sProfile}=useSupabaseAuth();
+  const [displayName,setDisplayName]=useState(sProfile?.full_name||"Ms. Simmons");
+  const [schoolName,setSchoolName]=useState(sProfile?.school||"Westwood Elementary");
   async function saveSettings(){
     if(user) await Supabase.upsertProfile({id:user.id,full_name:displayName,school:schoolName,updated_at:new Date().toISOString()});
     if(user&&profile){
@@ -8948,11 +8949,12 @@ function Settings(){
                 <span style={{fontSize:13,fontWeight:600}}>{amount}</span>
                 <Badge color="green">{status}</Badge>
                 <button className="btn-ghost" style={{fontSize:10,padding:"4px 12px"}}>PDF</button>
-              </div>
+
             ))}
-          </div>
-        </div>
+
+
       )}
+      </div>
     </Page></>
   );
 }
