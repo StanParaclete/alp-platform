@@ -1229,8 +1229,7 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
         <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
           {testimonials.map(t=>(
             <div key={t.n} className="card" style={{padding:28}}>
-              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div> <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p> <div style={{display:"flex",alignItems:"center",gap:12}}> <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div>
-                <div><div style={{fontSize:13,fontWeight:700}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
+              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div> <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p> <div style={{display:"flex",alignItems:"center",gap:12}}> <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div> <div><div style={{fontSize:13,fontWeight:700}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
               </div>
             </div>
           ))}
@@ -6606,7 +6605,6 @@ function Students({setPage,onAddStudent}){
           </tr>)}</tbody>
         </table>}
       </div>
-  </div>
     </Page></>
   );
 }
@@ -7260,6 +7258,8 @@ function CreateALPDoc({setPage}){
 
     </div>
   </div>
+        </div>
+    </div>
     </Page></>
   );
 }
@@ -7445,6 +7445,7 @@ function Progress(){
 
 
     </div>
+        </div>
     </Page></>
   );
 }
@@ -8013,6 +8014,9 @@ function FamilyPortal(){
 
       )}
       </div>
+        </div>
+    </div>
+    </div>
     </Page></>
   );
 }
@@ -8957,6 +8961,9 @@ function Settings(){
 
       )}
       </div>
+        </div>
+    </div>
+        </div>
     </Page></>
   );
 }
