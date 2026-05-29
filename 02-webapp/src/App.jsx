@@ -8013,9 +8013,6 @@ function FamilyPortal(){
 
 
       )}
-      </div>
-        </div>
-    </div>
     </div>
     </Page></>
   );
@@ -8960,9 +8957,6 @@ function Settings(){
 
 
       )}
-      </div>
-        </div>
-    </div>
     </div>
     </Page></>
   );
