@@ -6605,7 +6605,7 @@ function Students({setPage,onAddStudent}){
           </tr>)}</tbody>
         </table>}
       </div>
-    </Page></>
+      </Page></>
   );
 }
 
@@ -8963,7 +8963,7 @@ function Settings(){
       </div>
         </div>
     </div>
-        </div>
+    </div>
     </Page></>
   );
 }
