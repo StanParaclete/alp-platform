@@ -1229,7 +1229,8 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
         <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
           {testimonials.map(t=>(
             <div key={t.n} className="card" style={{padding:28}}>
-              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div> <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p> <div style={{display:"flex",alignItems:"center",gap:12}}> <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div> <div><div style={{fontSize:13,fontWeight:700}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
+              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div> <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p> <div style={{display:"flex",alignItems:"center",gap:12}}> <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div>
+                <div><div style={{fontSize:13,fontWeight:700}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
               </div>
             </div>
           ))}
@@ -6605,7 +6606,7 @@ function Students({setPage,onAddStudent}){
           </tr>)}</tbody>
         </table>}
       </div>
-      </Page></>
+    </Page></>
   );
 }
 
@@ -7258,8 +7259,6 @@ function CreateALPDoc({setPage}){
 
     </div>
   </div>
-        </div>
-    </div>
     </Page></>
   );
 }
@@ -8014,9 +8013,6 @@ function FamilyPortal(){
 
       )}
       </div>
-        </div>
-    </div>
-    </div>
     </Page></>
   );
 }
@@ -8443,10 +8439,11 @@ function Reports(){
               ))}
               <button className="btn-black" style={{width:"100%",marginTop:14,fontSize:11,padding:"12px"}}>Enable Auto-Scheduling →</button>
             </div>
+          </div>
+        </div>
 
 
       )}
-      </div>
     </Page></>
   );
 }
@@ -8923,47 +8920,11 @@ function Settings(){
         </div>
       )}
 
-      {false&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
-          <div className="card" style={{padding:"28px"}}>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:20}}>Current Plan</h3>
-            <div style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",borderRadius:12,padding:"24px",color:"#fff",marginBottom:20}}>
-              <p style={{fontSize:11,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",opacity:.7,marginBottom:8}}>Professional Plan</p>
-              <div className="serif" style={{fontSize:36,fontWeight:800,marginBottom:4}}>$29<span style={{fontSize:16,fontWeight:400,opacity:.7}}>/mo</span></div>
-              <p style={{fontSize:13,opacity:.8}}>Per teacher · billed monthly</p>
-              <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,.2)"}}>
-                <p style={{fontSize:12,opacity:.7}}>Next billing: June 8, 2026</p>
-              </div>
-            </div>
-            {[["Caseload","Unlimited students"],["ALP AI Goals","Unlimited ALP AI generation"],["Storage","10 GB documents"],["Support","Priority email support"],["Progress Review","All global frameworks"]].map(([k,v])=>(
-              <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.tanL}`}}>
-                <span style={{fontSize:13,color:C.warm}}>{k}</span><span style={{fontSize:13,fontWeight:600}}>✓ {v}</span>
-              </div>
-            ))}
-            <button className="btn-outline" style={{width:"100%",marginTop:20,fontSize:11}}>Upgrade to Enterprise</button>
-          </div>
-          <div className="card" style={{padding:"28px"}}>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:20}}>Payment & Invoices</h3>
-            <div style={{background:C.purpleL,borderRadius:10,padding:16,marginBottom:20,display:"flex",alignItems:"center",gap:14}}>
-              <div style={{width:40,height:28,background:C.blue,borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:10,fontWeight:700}}>VISA</div>
-              <div style={{flex:1}}><div style={{fontSize:13,fontWeight:600}}>Visa ending in 4242</div><div style={{fontSize:12,color:C.warm}}>Expires 04/28</div></div>
-              <button className="btn-ghost" style={{fontSize:11,padding:"6px 14px"}}>Update</button>
-            </div>
-            <p className="lbl" style={{marginBottom:12}}>Recent Invoices</p>
-            {[["May 2026","$29.00","Paid"],["Apr 2026","$29.00","Paid"],["Mar 2026","$29.00","Paid"],["Feb 2026","$29.00","Paid"]].map(([month,amount,status])=>(
-              <div key={month} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:`1px solid ${C.tanL}`}}>
-                <span style={{fontSize:13}}>{month}</span>
-                <span style={{fontSize:13,fontWeight:600}}>{amount}</span>
-                <Badge color="green">{status}</Badge>
-                <button className="btn-ghost" style={{fontSize:10,padding:"4px 12px"}}>PDF</button>
 
-            ))}
 
 
       )}
       </div>
-        </div>
-    </div>
-    </div>
     </Page></>
   );
 }
