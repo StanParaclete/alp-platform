@@ -8009,10 +8009,9 @@ function FamilyPortal(){
           <div style={{padding:"14px 20px",fontSize:12,color:C.warm,display:"flex",justifyContent:"space-between"}}>
             <span>Showing {commLog.length} of {commLog.length} entries</span>
             <span>privacy standards complete · All records encrypted · Audit trail active</span>
-
-
+          </div>
+        </div>
       )}
-      </div>
     </Page></>
   );
 }
@@ -8919,12 +8918,6 @@ function Settings(){
           </div>
         </div>
       )}
-
-
-
-
-      )}
-      </div>
     </Page></>
   );
 }
@@ -9075,7 +9068,6 @@ function AppInner(){
   const [showNotes,setShowNotes]=useState(false);
   const [showShortcuts,setShowShortcuts]=useState(false);
   const [showExport,setShowExport]=useState(false);
-  const [showOnboarding,setShowOnboarding]=useState(false);
   const {toast}=useToast();
 
   // Global keyboard shortcut: Cmd+K for search
