@@ -1828,7 +1828,7 @@ function ArticleModal({article,onClose}){
               <p className="lbl">TEACHER NOTES</p>
               <button className="btn-ghost" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>{setNoteDraft(noteText);setEditNote(e=>!e);}}>{editNote?"Cancel":"Edit"}</button>
             </div>
-  const [editNote,setEditNote]=useState(false);
+  const [editNote,setEditNote]=useState(false); // fix
             {editNote?<div><textarea value={noteDraft} onChange={e=>setNoteDraft(e.target.value)} style={{width:"100%",padding:"8px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontFamily:"'DM Sans',sans-serif",resize:"vertical",minHeight:72,outline:"none",lineHeight:1.6}}/><button className="btn-purple" onClick={()=>{setNoteText(noteDraft);setEditNote(false);toast("Note saved","success");}} style={{marginTop:6,fontSize:10,padding:"6px 14px"}}>Save</button></div>:<p style={{fontSize:12,color:C.warm,lineHeight:1.6,margin:0}}>{noteText}</p>}
           </div>
 
