@@ -1823,19 +1823,12 @@ function ArticleModal({article,onClose}){
 // ═══════════════════════════════════════════════════════════
 // STUDENT DETAIL MODAL
 // ═══════════════════════════════════════════════════════════
-          <div className="card" style={{padding:"18px 20px",marginTop:12}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-  const [editNote,setEditNote]=useState(false); // fix
-              <p className="lbl">TEACHER NOTES</p>
-              <button className="btn-ghost" style={{fontSize:9,padding:"3px 8px"}} onClick={()=>{setNoteDraft(noteText);setEditNote(e=>!e);}}>{editNote?"Cancel":"Edit"}</button>
-            </div>
-            {editNote?<div><textarea value={noteDraft} onChange={e=>setNoteDraft(e.target.value)} style={{width:"100%",padding:"8px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontFamily:"'DM Sans',sans-serif",resize:"vertical",minHeight:72,outline:"none",lineHeight:1.6}}/><button className="btn-purple" onClick={()=>{setNoteText(noteDraft);setEditNote(false);toast("Note saved","success");}} style={{marginTop:6,fontSize:10,padding:"6px 14px"}}>Save</button></div>:<p style={{fontSize:12,color:C.warm,lineHeight:1.6,margin:0}}>{noteText}</p>}
-          </div>
 
 function StudentDetailModal({student,onClose,onOpenALP}){
   const {toast}=useToast();
   const [noteText,setNoteText]=useState("Making great progress. Works best with visual supports and extra processing time.");
   const [noteDraft,setNoteDraft]=useState("");
+  const [editNote,setEditNote]=useState(false);
   if(!student)return null;
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
