@@ -5956,6 +5956,7 @@ function Login({onLogin, onBack}){
   const [showForgot,setShowForgot]=useState(false);
   const [step,setStep]=useState("credentials"); // "credentials" | "role"
   const [selectedRole,setSelectedRole]=useState(null);
+  const [loginError,setLoginError]=useState("");
 
   async function handleSignIn(){
     setLoading(true);
@@ -6198,7 +6199,7 @@ function Sidebar({page,setPage}){
 
       {/* Footer — Back to landing + user info */}
       <div style={{borderTop:"1px solid rgba(255,255,255,.07)"}}>
-        {!collapsed&&<button onClick={async()=>{await Supabase.signOut();setPage("landing");}} style={{width:"100%",padding:"10px 16px",display:"flex",alignItems:"center",gap:8,background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.4)",fontSize:11,transition:"color .15s"}}
+        {!collapsed&&<button onClick={async()=>{await Supabase.signOut();}} style={{width:"100%",padding:"10px 16px",display:"flex",alignItems:"center",gap:8,background:"none",border:"none",cursor:"pointer",color:"rgba(255,255,255,.4)",fontSize:11,transition:"color .15s"}}
           onMouseEnter={e=>e.currentTarget.style.color="rgba(255,255,255,.7)"}
           onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.4)"}>
           <span>←</span> Back to Site
@@ -6409,6 +6410,7 @@ function Students({setPage,onAddStudent}){
   const [bulkSelected,setBulkSelected]=useState([]);
   const [sortCol,setSortCol]=useState("student");
   const [sortDir,setSortDir]=useState("asc");
+  const [viewMode,setViewMode]=useState("grid");
   const {toast}=useToast();
   const isBirthdaySoon=(dob)=>{if(!dob)return false;const d=new Date(dob);const t=new Date();return d.getMonth()===t.getMonth()&&Math.abs(d.getDate()-t.getDate())<=7;};
   function toggleSort(col){if(sortCol===col){setSortDir(d=>d==="asc"?"desc":"asc");}else{setSortCol(col);setSortDir("asc");}}
@@ -6608,194 +6610,717 @@ function Students({setPage,onAddStudent}){
 // ═══════════════════════════════════════════════════════════
 function ALPBuilder({setPage}){
   const {toast}=useToast();
-  const [lastSaved,setLastSaved]=useState(null);
-  const [saveMsg,setSaveMsg]=useState("");
-  async function autoSave(){
-    const now=new Date();setLastSaved(now);setSaveMsg("Saving…");
-    if(saveDocument&&user){
-      await saveDocument({year:"2025-2026",status:"Draft",section_3:JSON.stringify(goals)});
-    }
-    setSaveMsg("✓ Saved");setTimeout(()=>setSaveMsg(""),2200);
-  }
+  const {isMobile}=useResponsive();
   const [step,setStep]=useState(1);
+  const [completedSteps,setCompletedSteps]=useState([]);
   const [showAI,setShowAI]=useState(false);
-  const [goals,setGoals]=useState([
-    {domain:"READING",color:C.red,text:"By May 2027, Marcus will read grade 3-level text aloud with 90% accuracy (at least 80 wcpm) across 4 consecutive weekly probes, measured by CBM assessments.",baseline:"52 wcpm",target:"80 wcpm",monitoring:"Quarterly"},
-    {domain:"COMMUNICATION",color:C.purple,text:"By May 2027, Marcus will initiate and maintain a 3-turn conversation with a peer on a preferred topic in 4 of 5 observed opportunities.",baseline:"1-turn",target:"3-turn",monitoring:"Monthly"},
-    {domain:"SOCIAL-EMOTIONAL",color:C.amber,text:"By May 2027, Marcus will use a self-regulation strategy independently when identifying frustration in 4 of 5 daily opportunities.",baseline:"Prompted",target:"Independent",monitoring:"Weekly"},
-  ]);
-  const [relServices,setRelServices]=useState([
-    {type:"Speech-Language Pathology",freq:"2x/week",duration:"30 min",location:"Pull-out",provider:"Ms. Rivera"},
-    {type:"Occupational Therapy",freq:"1x/week",duration:"30 min",location:"Pull-out",provider:"Mr. Chen"},
-  ]);
-  const [hasBIP,setHasBIP]=useState(false);
-  const [addAccom,setAddAccom]=useState("");
-  const [sectionData,setSectionData]=useState({});
-  const [completedSteps,setCompletedSteps]=useState([1]);
-  const setSD=(k,v)=>{setSectionData(p=>({...p,[k]:v}));autoSave();if(!completedSteps.includes(step))setCompletedSteps(s=>[...s,step]);};
-  const [teamMembers,setTeamMembers]=useState([
-    {name:"Ms. Simmons",role:"ALP Coordinator",present:true},
-    {name:"Patricia Johnson",role:"Parent/Guardian",present:true},
-    {name:"Mr. Davis",role:"General Ed Teacher",present:true},
-    {name:"Ms. Rivera",role:"Speech-Language Pathologist",present:false},
-  ]);
-  const steps=["Student Information","Present Levels","Annual Goals","Services","Related Services","Accommodations","Learning Environment","Assessment Participation","Transition Planning","Behavior Support","Early Intervention","Team Collaboration","Family Rights & Safeguards"];
-  const student={name:"Marcus Johnson",grade:"4",disability:"Autism Spectrum Disorder"};
-  const [studentInfo,setStudentInfo]=useState({name:"Marcus Darnell Johnson",dob:"2016-03-12",id:"WE-2024-0142",grade:"4",disability:"AUTISM",school:"Westwood Elementary",teacher:"Ms. Simmons",country:"US"});
-  const setSI=(k,v)=>{setStudentInfo(p=>({...p,[k]:v}));autoSave();};
-  function addGoal(g,domain){const colors={READING:C.red,MATH:C.green,WRITING:C.blue,COMMUNICATION:C.purple,SOCIAL_EMOTIONAL:C.amber,BEHAVIOR:"#F97316"};setGoals(p=>[...p,{domain,color:colors[domain]||C.purple,text:g.goalText,baseline:g.baseline,target:g.target,monitoring:g.monitoring}]);}
-  function next(){autoSave();setCompletedSteps(s=>s.includes(step)?s:[...s,step]);if(step===13){if(typeof setCelebrate==="function"){setCelebrate(true);setTimeout(()=>setCelebrate(false),3000);}toast("🎉 All 13 sections complete! Well done.","success");setPage("review");return;}setStep(s=>s+1);}
-  function back(){if(step===1)return;setStep(s=>s-1);}
-  useEffect(()=>{
-    function kh(e){if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA")return;if(e.key==="ArrowRight"||e.key==="PageDown")next();if(e.key==="ArrowLeft"||e.key==="PageUp")back();}
-    try{window.addEventListener("keydown",kh);}catch{}
-    return()=>{try{window.removeEventListener("keydown",kh);}catch{}};
-  },[step]);
-  const completion=Math.round((step-1)/13*100);
-  const SH=({n,title,sub})=>(<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24,flexWrap:"wrap",gap:8}}><div><div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}><p className="lbl" style={{margin:0}}>Section {n} of 13</p>{completedSteps.includes(n)&&<span style={{fontSize:10,fontWeight:700,color:C.green,background:"#DCFCE7",padding:"2px 8px",borderRadius:99}}>✓ Saved</span>}</div><h2 className="serif" style={{fontSize:22,fontWeight:700}}>{title} <span className="serif-italic" style={{color:C.warm}}>{sub}</span></h2></div><div style={{display:"flex",gap:4}}>{[...Array(13)].map((_,i)=>(<div key={i} style={{width:i===step-1?24:8,height:8,borderRadius:99,background:completedSteps.includes(i+1)?C.green:i===step-1?C.purple:C.tanL,transition:"all .3s"}}/>))}</div></div>);
+
+  /* ── Shared student data across all steps ── */
+  const [sData,setSData]=useState({
+    /* Step 1 */
+    firstName:"Marcus",lastName:"Johnson",dob:"2017-03-14",gender:"Male",
+    grade:"Grade 4",studentId:"WES-2024-0847",school:"Westwood Elementary",
+    enrollDate:"2024-09-02",tier:"Tier 2",photo:null,notes:"",
+    parentName:"Patricia Johnson",parentEmail:"patricia.johnson@email.com",
+    parentPhone:"+1 (703) 555-0199",emergencyContact:"Robert Johnson (Uncle)",
+    /* Step 2 */
+    strengths:"Strong verbal communication, enthusiasm for science and hands-on activities, excellent memory for facts and routines.",
+    growthAreas:"Reading fluency and decoding multi-syllabic words; sustaining attention during independent seat work.",
+    learningConcerns:"Specific Learning Disability (SLD) in reading; mild ADHD traits affecting focus.",
+    learningStyle:"Visual-kinesthetic learner. Responds well to graphic organisers, colour-coding, and movement breaks.",
+    interests:"Dinosaurs, building with LEGO, football, drawing comic strips.",
+    languages:"English (primary), some Spanish at home",
+    techSkills:"Comfortable with tablets and educational apps; uses text-to-speech independently.",
+    parentObservations:"Marcus has shown more confidence at home. He loves when his teacher sends voice notes.",
+    /* Step 3 */
+    readingScore:52,writingScore:48,mathScore:71,scienceScore:80,
+    criticalThinkingScore:65,communicationScore:74,socialScore:68,
+    lifeSkillsScore:77,digitalLiteracyScore:62,
+    assessmentDate:"2026-04-10",assessor:"Ms. Simmons",assessmentNotes:"",
+    /* Step 4 */
+    academicNarrative:"Marcus is a 4th-grade student at Westwood Elementary. At his most recent assessment, he was reading at a 2nd-grade level (52 wcpm on Grade 3 probes). He demonstrates strong vocabulary knowledge but struggles with decoding and fluency. In Math he performs at or near grade level, scoring 71/100 on the baseline. In Science he shows genuine enthusiasm and above-average performance (80/100).",
+    functionalNarrative:"Marcus demonstrates age-appropriate independent living skills. He navigates the school building independently, manages his belongings, and participates in group routines with minimal prompting. He benefits from frequent comprehension checks and clear step-by-step directions.",
+    riskIndicators:{reading:true,attention:true,writing:true,socialEmotional:false,attendance:false},
+    /* Step 5 — goals are objects */
+    goals:[
+      {id:1,domain:"READING",text:"Marcus will read 3rd-grade passages at 80 wcpm with 90% accuracy by Dec 2026.",baseline:"52 wcpm",target:"80 wcpm",targetDate:"2026-12-15",staff:"Ms. Simmons",status:"Active",progress:72},
+      {id:2,domain:"WRITING",text:"Marcus will independently write a 3-sentence paragraph with correct punctuation 4 out of 5 trials by Oct 2026.",baseline:"1 sentence",target:"3 sentences",targetDate:"2026-10-30",staff:"Ms. Simmons",status:"Active",progress:45},
+      {id:3,domain:"COMMUNICATION",text:"Marcus will sustain a 3-turn peer conversation in structured activities 4/5 opportunities.",baseline:"1-turn",target:"3-turn",targetDate:"2026-11-30",staff:"Ms. Rivera (SLP)",status:"Active",progress:60},
+    ],
+    /* Step 6 */
+    accommodations:{
+      presentation:["Extended time on assessments (1.5×)","Text-to-speech for reading tasks","Directions read aloud or pre-recorded"],
+      response:["Oral responses accepted for written tasks","Scribe for longer assignments"],
+      setting:["Preferential seating near teacher","Small-group testing environment"],
+      timing:["Movement breaks every 20 minutes","Flexible scheduling for assessments"],
+    },
+    customAccomm:"",
+    /* Step 7 */
+    interventions:[
+      {program:"Reading Intervention — Tier 2",frequency:"3× per week",duration:"30 min",staff:"Ms. Simmons",outcome:"Reach 80 wcpm by December",status:"Active"},
+      {program:"Social Skills Group",frequency:"1× per week",duration:"45 min",staff:"Ms. Rivera",outcome:"3-turn conversations independently",status:"Active"},
+    ],
+    /* Step 8 — progress entries */
+    progressEntries:[
+      {date:"2026-04-10",domain:"Reading",score:52,notes:"Baseline assessment"},
+      {date:"2026-05-01",domain:"Reading",score:61,notes:"Responding well to decodable readers"},
+      {date:"2026-05-20",domain:"Reading",score:68,notes:"Strong week — used audio support"},
+      {date:"2026-05-28",domain:"Reading",score:72,notes:"Best score to date"},
+    ],
+    /* Step 9 */
+    transitionTarget:"College Prep Programme",
+    postSecGoal:"Marcus will explore career interests in STEM fields and participate in at least one community learning experience by Grade 6.",
+    transitionDomain:"Employment",
+    /* Step 10 */
+    meetingDate:"2026-05-28",
+    reviewNotes:"Team reviewed all 10 sections. Parent expressed satisfaction with progress. Team agreed to increase reading intervention to 4× per week.",
+  });
+  const SD=(k,v)=>setSData(p=>({...p,[k]:v}));
+
+  const STEPS=[
+    "Student Information","Learning Profile","Baseline Assessment",
+    "Present Levels","Learning Goals","Accommodations & Support",
+    "Intervention Plans","Progress Monitoring","Future Readiness","Review & Sign-Off"
+  ];
+  const TOTAL=STEPS.length;
+  const completion=Math.round((completedSteps.length/TOTAL)*100);
+
+  function next(){
+    if(!completedSteps.includes(step)) setCompletedSteps(s=>[...s,step]);
+    if(step===TOTAL){setPage("review");toast("ALP completed — opening Review Summary ✓","success");}
+    else setStep(s=>s+1);
+  }
+  function back(){if(step>1)setStep(s=>s-1);}
+
+  const SH=({n,title,sub})=>(
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:22,flexWrap:"wrap",gap:12}}>
+      <div>
+        <p className="lbl" style={{color:C.purple,marginBottom:4}}>STEP {n} OF {TOTAL}</p>
+        <h2 className="serif" style={{fontSize:isMobile?20:24,fontWeight:800,color:C.black,letterSpacing:"-.5px",lineHeight:1.15}}>
+          {title}{sub&&<><br/><span className="serif-italic" style={{color:C.warm,fontSize:isMobile?17:21}}>{sub}</span></>}
+        </h2>
+      </div>
+      <button className="btn-outline" onClick={()=>setShowAI(true)} style={{fontSize:11,padding:"9px 16px",whiteSpace:"nowrap"}}>
+        ✦ AI Assist
+      </button>
+    </div>
+  );
+
+  const DomainScore=({label,score,max=100,color})=>(
+    <div style={{marginBottom:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:5}}>
+        <span style={{color:C.warm,fontWeight:600}}>{label}</span>
+        <span style={{fontWeight:700,color:score>=70?C.green:score>=50?C.amber:C.red}}>{score}/{max}</span>
+      </div>
+      <div style={{height:7,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+        <div style={{height:"100%",width:`${score/max*100}%`,background:color||C.purple,borderRadius:99,transition:"width .5s"}}/>
+      </div>
+    </div>
+  );
+
   return(
-    <Page title={<>ALP Builder <span className="serif-italic" style={{color:C.warm,fontSize:24}}>— {steps[step-1]}</span></>} subtitle={`Marcus Johnson · Section ${step} of 13 · ${completion}% complete${lastSaved?" · Saved "+lastSaved.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):""}`} action={<button className="btn-black" onClick={()=>setPage("students")} style={{fontSize:11,padding:"11px 24px"}}>All Students</button>}>
-      {showAI&&<AIModal student={student} onAdd={addGoal} onClose={()=>setShowAI(false)}/>}
-      <div className="r-stack" style={{display:"flex",gap:20,alignItems:"flex-start"}}>
-        <div style={{width:214,flexShrink:0,background:"var(--sidebar-bg)",borderRadius:14,padding:16}}>
-          <div style={{marginBottom:12}}>
-            <p style={{fontSize:9,fontWeight:700,color:"rgba(255,255,255,.35)",letterSpacing:".14em",textTransform:"uppercase",marginBottom:8}}>Progress</p>
-            <div style={{height:3,background:"rgba(255,255,255,.1)",borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${completion}%`,background:C.purple,borderRadius:99,transition:"width .6s ease"}}/></div>
-            <p style={{fontSize:10,color:"rgba(255,255,255,.4)",marginTop:5}}>{step-1} of 13 complete</p>
-          </div>
-          {steps.map((s,i)=>{const n=i+1,done=n<step,active=n===step;return(<button key={s} onClick={()=>setStep(n)} className={`step-item${active?" active":done?" done":""}`}><div style={{width:20,height:20,borderRadius:"50%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,background:done?C.green:active?C.purple:"rgba(255,255,255,.08)",color:done||active?"#fff":C.warm}}>{done?"✓":n}</div><span style={{fontSize:11}}>{s}</span></button>);})}
+    <Page title={<>ALP <span className="serif-italic" style={{color:C.warm,fontSize:isMobile?20:26}}>Builder</span></>}
+      subtitle={`Step ${step} of ${TOTAL} — ${STEPS[step-1]}`}
+      action={<div style={{display:"flex",gap:8,alignItems:"center"}}>
+        <button className="btn-ghost" onClick={()=>setPage("students")} style={{fontSize:11}}>← Students</button>
+        <button className="btn-purple" onClick={()=>toast("ALP auto-saved ✓","success")} style={{fontSize:11,padding:"9px 18px"}}>↑ Save</button>
+      </div>}>
+
+      {showAI&&<AIModal onClose={()=>setShowAI(false)} context={`ALP Builder Step ${step}: ${STEPS[step-1]}`}/>}
+
+      {/* ── Progress bar + step nav ── */}
+      <div className="card" style={{padding:"18px 20px",marginBottom:20}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+          <span style={{fontSize:11,fontWeight:700,color:C.warm,letterSpacing:".1em"}}>PLAN COMPLETION</span>
+          <span style={{fontSize:13,fontWeight:800,color:C.purple}}>{completion}%</span>
         </div>
-        <div className="card" style={{flex:1,padding:"30px 32px",minWidth:0}}>
-          {step===1&&<div><SH n={1} title="Student" sub="Information"/>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:20}}>
-              <UInput label="Student Full Name" value={studentInfo.name} onChange={e=>setSI("name",e.target.value)}/><UInput label="Date of Birth" value={studentInfo.dob} onChange={e=>setSI("dob",e.target.value)} type="date"/>
-              <UInput label="Student ID" value={studentInfo.id} onChange={e=>setSI("id",e.target.value)}/><USelect label="Grade Level" value={studentInfo.grade} onChange={e=>setSI("grade",e.target.value)} options={[{value:"K",label:"Kindergarten"},...Array.from({length:12},(_,i)=>({value:`${i+1}`,label:`Grade ${i+1}`}))]}/>
-              <USelect label="Primary Disability" value={studentInfo.disability} onChange={e=>setSI("disability",e.target.value)} options={[{value:"AUTISM",label:"Autism Spectrum Disorder"},{value:"ADHD",label:"ADHD"},{value:"DYSLEXIA",label:"Dyslexia"},{value:"SPEECH",label:"Speech/Language Impairment"},{value:"INTELLECTUAL",label:"Intellectual Disability"},{value:"HEARING",label:"Hearing Impairment"},{value:"VISUAL",label:"Visual Impairment"},{value:"PHYSICAL",label:"Physical/Orthopedic"},{value:"TBI",label:"Traumatic Brain Injury"},{value:"EMOTIONAL",label:"Emotional/Behavioral"},{value:"MULTIPLE",label:"Multiple Disabilities"},{value:"DEVELOPMENTAL",label:"Developmental Delay"},{value:"OTHER_HI",label:"Other Health Impairment"}]}/>
-              <USelect label="Program Type" value="ALP" onChange={e=>setSD("field1",e.target.value)} options={[{value:"ALP",label:"ALP (Adaptive Learning Program)"},{value:"RTI_I",label:"RTI Tier I"},{value:"RTI_II",label:"RTI Tier II"},{value:"RTI_III",label:"RTI Tier III"},{value:"504",label:"Support Plans"},{value:"IEP",label:"IEP"}]}/>
-              <UInput label="Effective Date" value="2026-05-08" type="date" onChange={e=>setSD("field2",e.target.value)}/><UInput label="Annual Review Date" value="2027-05-08" type="date" onChange={e=>setSD("field3",e.target.value)}/>
-              <UInput label="School" value="Westwood Elementary School" onChange={e=>setSD("field4",e.target.value)}/><UInput label="ALP Coordinator" value={studentInfo.teacher} onChange={e=>setSI("teacher",e.target.value)}/>
-              <UInput label="Parent/Guardian" value="Patricia Johnson" onChange={e=>setSD("f101",e.target.value)}/><UInput label="Primary Language" value="English" onChange={e=>setSD("field5",e.target.value)}/>
-            </div>
-            <div style={{background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:10,padding:14}}>
-              <p className="lbl" style={{color:C.purple,marginBottom:10}}>Intervention Tier</p>
-              <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-                {["Tier 1 — Universal","Tier 2 — Targeted","Tier 3 — Intensive","ALP (Full Program)"].map(t=>(<label key={t} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer"}}><input type="radio" name="tier" defaultChecked={t.includes("ALP")} style={{accentColor:C.purple}}/>{t}</label>))}
+        <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden",marginBottom:16}}>
+          <div style={{height:"100%",width:`${completion}%`,background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99,transition:"width .4s"}}/>
+        </div>
+        <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+          {STEPS.map((s,i)=>{
+            const n=i+1,done=completedSteps.includes(n),active=n===step;
+            return(
+              <button key={s} onClick={()=>setStep(n)} style={{
+                fontSize:9,padding:"5px 8px",borderRadius:6,border:"none",cursor:"pointer",fontWeight:700,
+                background:active?C.purple:done?"#DCFCE7":"transparent",
+                color:active?"#fff":done?C.green:C.warm,
+                outline:active?`2px solid ${C.purple}`:"none",outlineOffset:1,transition:"all .2s"
+              }} title={s}>
+                {done&&!active?"✓ ":""}{n}. {s.split(" ")[0]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ══════════════════════════════════════════
+          STEP 1 — STUDENT INFORMATION
+      ══════════════════════════════════════════ */}
+      {step===1&&(
+        <div>
+          <SH n={1} title="Student" sub="Information"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>STUDENT DETAILS</p>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                  <UInput label="First Name" value={sData.firstName} onChange={e=>SD("firstName",e.target.value)}/>
+                  <UInput label="Last Name" value={sData.lastName} onChange={e=>SD("lastName",e.target.value)}/>
+                  <UInput label="Date of Birth" value={sData.dob} onChange={e=>SD("dob",e.target.value)} type="date"/>
+                  <USelect label="Gender" value={sData.gender} onChange={e=>SD("gender",e.target.value)}
+                    options={["Male","Female","Non-binary","Prefer not to say"]}/>
+                  <USelect label="Grade" value={sData.grade} onChange={e=>SD("grade",e.target.value)}
+                    options={["Pre-K","Kindergarten","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","Grade 11","Grade 12"]}/>
+                  <UInput label="Student ID" value={sData.studentId} onChange={e=>SD("studentId",e.target.value)}/>
+                  <UInput label="School / Organisation" value={sData.school} onChange={e=>SD("school",e.target.value)}/>
+                  <UInput label="Enrolment Date" value={sData.enrollDate} onChange={e=>SD("enrollDate",e.target.value)} type="date"/>
+                </div>
+              </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>PARENT / GUARDIAN</p>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+                  <UInput label="Full Name" value={sData.parentName} onChange={e=>SD("parentName",e.target.value)}/>
+                  <UInput label="Email" value={sData.parentEmail} onChange={e=>SD("parentEmail",e.target.value)}/>
+                  <UInput label="Phone" value={sData.parentPhone} onChange={e=>SD("parentPhone",e.target.value)}/>
+                  <UInput label="Emergency Contact" value={sData.emergencyContact} onChange={e=>SD("emergencyContact",e.target.value)}/>
+                </div>
               </div>
             </div>
-          </div>}
-          {step===2&&<div><SH n={2} title="Present" sub="Levels of Performance"/>
-            <div style={{display:"flex",flexDirection:"column",gap:20}}>
-              {[["Academic — Reading","Marcus reads at a 2nd grade level with 52 wcpm on grade 3 probes. Strong phonemic awareness but struggles with fluency and comprehension."],["Academic — Math","Marcus understands addition and subtraction facts. Struggles with multi-step word problems and place value above 100."],["Academic — Writing","Marcus produces 2-3 sentence paragraphs with support. Difficulty with sentence structure, punctuation, and organizing ideas independently."],["Communication Skills","Marcus initiates 1-turn conversations using 3-4 word sentences. Needs support with sustained peer interaction and topic maintenance."],["Social-Emotional Functioning","Marcus needs adult prompting to identify and regulate emotions, particularly frustration. Benefits from visual supports and structured routines."],["Motor Skills","Age-appropriate gross motor skills. Fine motor challenges affect handwriting legibility and tool use."],["Daily Living / Adaptive Behavior","Independently manages personal hygiene and basic self-care. Needs support with organizational skills and time management."]].map(([label,val],i)=>(<UTextarea key={label} label={label} value={sectionData["plop_"+i]||val} onChange={e=>setSD("plop_"+i,e.target.value)} rows={3}/>))}
-            </div>
-          </div>}
-          {step===3&&<div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
-              <div><p className="lbl" style={{marginBottom:6}}>Section 3 of 13</p><h2 className="serif" style={{fontSize:22,fontWeight:700}}>Measurable Annual <span className="serif-italic" style={{color:C.warm}}>Goals</span></h2></div>
-              <button className="btn-outline" onClick={()=>setShowAI(true)} style={{fontSize:11,padding:"10px 22px"}}>✦ ALP AI Suggest Goals</button>
-            </div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-              {["Reading","Math","Writing","Communication","Behavior","Motor","Daily Living","Transition"].map(d=>(<span key={d} style={{fontSize:11,fontWeight:700,padding:"4px 12px",borderRadius:99,background:C.purpleL,color:C.purple,border:`1px solid ${C.tanL}`,cursor:"pointer"}}>{d}</span>))}
-            </div>
-            {goals.map((g,i)=>(<div key={i} style={{borderLeft:`4px solid ${g.color}`,background:C.purpleL,borderRadius:"0 10px 10px 0",padding:"18px 22px",marginBottom:14}}><p className="lbl" style={{color:g.color,marginBottom:10}}>{g.domain}</p><p style={{fontSize:14,color:C.black,lineHeight:1.7,marginBottom:12}}>{g.text}</p><div style={{display:"flex",flexWrap:"wrap",gap:24,fontSize:12,color:C.warm}}><span>Baseline: <b style={{color:C.black}}>{g.baseline}</b></span><span>Target: <b style={{color:C.black}}>{g.target}</b></span><span>Monitoring: <b style={{color:C.black}}>{g.monitoring}</b></span></div></div>))}
-            <button style={{width:"100%",padding:"13px",border:`1.5px dashed ${C.tan}`,borderRadius:10,background:"transparent",color:C.warm,fontSize:13,cursor:"pointer",transition:"all .15s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=C.black;e.currentTarget.style.color=C.black;}} onMouseLeave={e=>{e.currentTarget.style.borderColor=C.tan;e.currentTarget.style.color=C.warm;}}>+ Add Goal Manually</button>
-          </div>}
-          {step===4&&<div><SH n={4} title="Special Education" sub="Services"/>
-            {[["Special Education Instruction","5 hrs/week","Resource Room","Ms. Simmons"],["Reading Intervention","3x/week · 45 min","Pull-out","Ms. Thompson"]].map(([name,freq,loc,provider])=>(<div key={name} style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",gap:16,padding:"16px 0",borderBottom:`1px solid ${C.tanL}`}}><UInput label="Service Type" value={name} onChange={e=>setSD("field7",e.target.value)}/><UInput label="Frequency" value={freq} onChange={e=>setSD("field8",e.target.value)}/><UInput label="Location" value={loc} onChange={e=>setSD("field9",e.target.value)}/><UInput label="Provider" value={provider} onChange={e=>setSD("field10",e.target.value)}/></div>))}
-            <button style={{width:"100%",padding:"12px",border:`1.5px dashed ${C.tan}`,borderRadius:10,background:"transparent",color:C.warm,fontSize:13,cursor:"pointer",marginTop:16}}>+ Add Service</button>
-          </div>}
-          {step===5&&<div><SH n={5} title="Related" sub="Services"/>
-            <p style={{fontSize:13,color:C.warm,marginBottom:20,lineHeight:1.65}}>Related services support the student in benefiting from special education — includes therapies, counseling, assistive technology, and transportation.</p>
-            {relServices.map((s,i)=>(<div key={i} style={{background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:12,padding:"18px 20px",marginBottom:14}}><div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr",gap:16}}><USelect label="Service Type" value={s.type} onChange={e=>setRelServices(p=>p.map((x,j)=>j===i?{...x,type:e.target.value}:x))} options={[{value:"Speech-Language Pathology",label:"Speech-Language Pathology"},{value:"Occupational Therapy",label:"Occupational Therapy"},{value:"Physical Therapy",label:"Physical Therapy"},{value:"Counseling",label:"Counseling / Mental Health"},{value:"Assistive Technology",label:"Assistive Technology"},{value:"Transportation",label:"Transportation"},{value:"Behavioral",label:"Behavioral Support"}]}/><UInput label="Frequency" value={s.freq} onChange={e=>setRelServices(p=>p.map((x,j)=>j===i?{...x,freq:e.target.value}:x))}/><UInput label="Duration" value={s.duration} onChange={e=>setRelServices(p=>p.map((x,j)=>j===i?{...x,duration:e.target.value}:x))}/><USelect label="Location" value={s.location} onChange={e=>setSD("field11",e.target.value)} options={[{value:"Pull-out",label:"Pull-out"},{value:"Push-in",label:"Push-in"},{value:"Clinic",label:"Clinic"},{value:"Community",label:"Community"}]}/><UInput label="Provider" value={s.provider} onChange={e=>setRelServices(p=>p.map((x,j)=>j===i?{...x,provider:e.target.value}:x))}/></div></div>))}
-            <button onClick={()=>setRelServices(p=>[...p,{type:"Speech-Language Pathology",freq:"",duration:"",location:"Pull-out",provider:""}])} style={{width:"100%",padding:"12px",border:`1.5px dashed ${C.tan}`,borderRadius:10,background:"transparent",color:C.warm,fontSize:13,cursor:"pointer",marginTop:4}}>+ Add Related Service</button>
-          </div>}
-          {step===6&&<div><SH n={6} title="Accommodations" sub="& Modifications"/>
-            {[["Presentation",["Extended time on assessments (1.5×)","Text-to-speech software for reading tasks","Directions read aloud","Large print materials if needed"]],["Response",["Typed responses accepted","Graphic organizers for writing","Reduced writing requirements"]],["Setting",["Preferential seating (front of classroom)","Small group testing environment","Minimal distractions"]],["Scheduling",["Breaks as needed (max 5 min)","Chunked assignments","Flexible pacing"]]].map(([cat,items])=>(<div key={cat} style={{marginBottom:18}}><p className="lbl" style={{color:C.purple,marginBottom:10}}>{cat} Accommodations</p>{items.map(item=>(<label key={item} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,marginBottom:8,cursor:"pointer"}}><input type="checkbox" defaultChecked style={{accentColor:C.purple,width:14,height:14}}/>{item}</label>))}</div>))}
-            <UTextarea label="Additional Accommodations" value={addAccom} onChange={e=>setAddAccom(e.target.value)} rows={3} placeholder="Enter any additional accommodations..."/>
-          </div>}
-          {step===7&&<div><SH n={7} title="Learning" sub="Environment (LRE)"/>
-            {[["General Education","Marcus attends 80% of instruction in general education with accommodations and supplemental aids."],["Supplemental Services","20% pull-out for specialized reading instruction and social-emotional learning support."],["Placement Rationale","Placement in least restrictive environment with supports aligns with ALP goals and disability needs."],["Non-Participation Justification","Pull-out services are required due to the nature and intensity of reading and communication needs."]].map(([k,v])=>(<div key={k} style={{marginBottom:20}}><UTextarea label={k} value={v} onChange={e=>setSD("field12",e.target.value)} rows={2}/></div>))}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16,marginTop:8}}>
-              <USelect label="General Ed Percentage" value="80" onChange={e=>setSD("field13",e.target.value)} options={["100","95","90","80","70","60","50","40"].map(v=>({value:v,label:`${v}% in General Education`}))}/>
-              <USelect label="Placement Setting" value="resource" onChange={e=>setSD("field14",e.target.value)} options={[{value:"full",label:"Full Inclusion"},{value:"resource",label:"Resource Room (Part-time)"},{value:"selfcontained",label:"Self-Contained Classroom"},{value:"special",label:"Special School"},{value:"home",label:"Home/Hospital"}]}/>
-            </div>
-          </div>}
-          {step===8&&<div><SH n={8} title="Assessment" sub="Participation"/>
-            <p style={{fontSize:13,color:C.warm,marginBottom:20,lineHeight:1.65}}>Indicate how the student will participate in state, district, and alternate assessments.</p>
-            {[{title:"State Standardized Assessment",opts:["Standard participation with accommodations","Alternate assessment (AA-AAAS)","Exempt — document reason"]},{title:"District Benchmark Assessment",opts:["Standard with accommodations","Modified format","Alternate assessment","Not applicable"]},{title:"Classroom / Curriculum Assessment",opts:["Standard with accommodations","Modified assignments","Portfolio assessment","Performance-based"]}].map(a=>(<div key={a.title} style={{background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:10,padding:"16px 20px",marginBottom:14}}><p style={{fontSize:13,fontWeight:700,color:C.black,marginBottom:12}}>{a.title}</p><div style={{display:"flex",flexDirection:"column",gap:8}}>{a.opts.map((o,i)=>(<label key={o} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,cursor:"pointer"}}><input type="radio" name={a.title} defaultChecked={i===0} style={{accentColor:C.purple}}/>{o}</label>))}</div></div>))}
-            <UTextarea label="Assessment Accommodations (for all assessments)" value="Extended time (1.5×) · Text-to-speech for reading passages · Separate testing room · Questions read aloud" onChange={e=>setSD("field15",e.target.value)} rows={3}/>
-          </div>}
-          {step===9&&<div><SH n={9} title="Transition" sub="Planning"/>
-            <p style={{fontSize:13,color:C.warm,marginBottom:20,lineHeight:1.65}}>Required for students aged 16+ (or younger if appropriate). Describe measurable post-secondary goals in education, career, and independent living.</p>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:20}}>
-              {[["🎓","Post-Secondary Education","Community college with supported learning program; vocational training in technology or art."],["💼","Career & Employment","Supported employment in creative or technical fields. Work experience starting at age 16."],["🏠","Independent Living","Supported independent living skills: budgeting, transportation, daily scheduling."],["🌍","Community Participation","Participation in community groups and recreational activities aligned with student interests."]].map(([icon,title,desc])=>(<div key={title} style={{background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:12,padding:"18px 16px"}}><p style={{fontSize:22,marginBottom:8}}>{icon}</p><p className="lbl" style={{color:C.purple,marginBottom:8}}>{title.toUpperCase()}</p><textarea className="u-textarea" rows={3} defaultValue={desc} style={{fontSize:12}}/></div>))}
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
-              <UInput label="Vocational Rehabilitation Agency" value="Virginia VR Services" onChange={e=>setSD("field16",e.target.value)}/><UInput label="Community Agency / Partner" value="Arc of Northern Virginia" onChange={e=>setSD("f102",e.target.value)}/>
-              <USelect label="Age of Majority Notification" value="17" onChange={e=>setSD("field17",e.target.value)} options={["14","15","16","17","18"].map(v=>({value:v,label:`Notified at age ${v}`}))}/>
-              <USelect label="Self-Advocacy Level" value="developing" onChange={e=>setSD("field18",e.target.value)} options={[{value:"emerging",label:"Emerging"},{value:"developing",label:"Developing"},{value:"proficient",label:"Proficient"},{value:"advanced",label:"Advanced"}]}/>
-            </div>
-          </div>}
-          {step===10&&<div><SH n={10} title="Behavior" sub="Support Plan"/>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20,padding:"14px 18px",background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:10,flexWrap:"wrap",gap:10}}>
-              <span style={{fontSize:14,fontWeight:600,color:C.black,marginRight:4}}>Student has a Behavior Intervention Plan (BIP)?</span>
-              {["Yes — Full BIP","Yes — Informal plan","No"].map(o=>(<label key={o} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer"}}><input type="radio" name="bip" onChange={()=>setHasBIP(o.startsWith("Yes"))} style={{accentColor:C.purple}}/>{o}</label>))}
-            </div>
-            {[["Target Behaviors (to reduce)","Elopement from classroom during unstructured transitions. Self-injurious behavior when presented with non-preferred tasks (avg 2x/day)."],["Replacement / Teaching Behaviors","Using a visual break card to request a break. Identifying and naming emotions using a feelings chart."],["Antecedent / Preventive Strategies","Provide transition warnings (5-min, 2-min, 1-min). Pre-teach expectations. Visual schedule for predictability."],["Consequence Strategies","Differential reinforcement of appropriate behavior. Token economy system. Planned ignoring for minor off-task behavior."],["Crisis Protocol","If student elopes: follow school safety protocol. Notify administrator. Document incident. Debrief after calm."]].map(([label,val])=>(<div key={label} style={{marginBottom:18}}><UTextarea label={label} value={val} onChange={e=>setSD("field19",e.target.value)} rows={3}/></div>))}
-          </div>}
-          {step===11&&<div><SH n={11} title="Early" sub="Intervention History"/>
-            <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:20,padding:"14px 18px",background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:10,flexWrap:"wrap"}}>
-              <span style={{fontSize:14,fontWeight:600,color:C.black}}>Did this student receive Early Intervention (EI) services (birth – age 3)?</span>
-              {["Yes","No","Unknown"].map(o=>(<label key={o} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,cursor:"pointer"}}><input type="radio" name="ei" style={{accentColor:C.purple}}/>{o}</label>))}
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:20}}>
-              <UInput label="Age at First Identification" value="18 months" onChange={e=>setSD("field20",e.target.value)}/><UInput label="EI Service Start Age" value="22 months" onChange={e=>setSD("field21",e.target.value)}/>
-              <UInput label="EI Service Coordinator / Program" value="Sunrise EI Program" onChange={e=>setSD("f103",e.target.value)}/><UInput label="Transition from EI Date" value="2020-08-15" type="date" onChange={e=>setSD("field22",e.target.value)}/>
-            </div>
-            <UTextarea label="Early Intervention Services Received" value="Speech-language therapy (2x/week), Developmental therapy (1x/week), Occupational therapy (1x/week). Home-based setting with family coaching model." onChange={e=>setSD("f104",e.target.value)} rows={3}/>
-            <div style={{marginTop:18}}><UTextarea label="Impact on Current Programming" value="Early identification and consistent EI services contributed to Marcus's current communicative functioning. Family-centered practices established strong parent engagement that continues today." onChange={e=>setSD("field23",e.target.value)} rows={3}/></div>
-            <div style={{marginTop:18}}><p className="lbl" style={{marginBottom:12}}>Transition Supports from EI to School-Age</p>{["IFSP to ALP transition meeting completed","Family provided with programme safeguards","Records transferred from EI provider","Evaluation conducted before age 3","Transition plan documented"].map(item=>(<label key={item} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,marginBottom:8,cursor:"pointer"}}><input type="checkbox" defaultChecked style={{accentColor:C.purple,width:14,height:14}}/>{item}</label>))}</div>
-          </div>}
-          {step===12&&<div><SH n={12} title="Team" sub="Collaboration"/>
-            <p style={{fontSize:13,color:C.warm,marginBottom:20,lineHeight:1.65}}>Document all team members involved in developing this Adaptive Learning Program and their participation status.</p>
-            <div style={{marginBottom:24}}>
-              <div style={{display:"grid",gridTemplateColumns:"2fr 2fr 1fr",padding:"10px 16px",background:C.purpleL,borderRadius:"10px 10px 0 0",borderBottom:`1px solid ${C.tanL}`}}><span className="lbl">Team Member</span><span className="lbl">Role</span><span className="lbl">Present</span></div>
-              {teamMembers.map((m,i)=>(<div key={i} style={{display:"grid",gridTemplateColumns:"2fr 2fr 1fr",padding:"12px 16px",borderBottom:`1px solid ${C.tanL}`,alignItems:"center"}}><span style={{fontSize:13,fontWeight:600,color:C.black}}>{m.name}</span><span style={{fontSize:13,color:C.warm}}>{m.role}</span><input type="checkbox" checked={m.present} onChange={e=>setTeamMembers(p=>p.map((x,j)=>j===i?{...x,present:e.target.checked}:x))} style={{accentColor:C.purple,width:16,height:16}}/></div>))}
-              <button onClick={()=>setTeamMembers(p=>[...p,{name:"",role:"",present:false}])} style={{width:"100%",padding:"11px",border:`1.5px dashed ${C.tan}`,borderRadius:"0 0 10px 10px",background:"transparent",color:C.warm,fontSize:13,cursor:"pointer"}}>+ Add Team Member</button>
-            </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
-              <UInput label="ALP Meeting Date" value="2026-05-08" type="date" onChange={e=>setSD("field24",e.target.value)}/><UInput label="Next Review Date" value="2027-05-08" type="date" onChange={e=>setSD("field25",e.target.value)}/>
-              <UInput label="Meeting Location" value="Westwood Elementary — Room 14" onChange={e=>setSD("field26",e.target.value)}/><USelect label="Meeting Type" value="annual" onChange={e=>setSD("field27",e.target.value)} options={[{value:"annual",label:"Annual Review"},{value:"initial",label:"Initial ALP"},{value:"amendment",label:"Amendment"},{value:"triennial",label:"Triennial Reevaluation"},{value:"transition",label:"Transition Planning"}]}/>
-            </div>
-            <div style={{marginTop:20}}><UTextarea label="Meeting Notes / Decisions Made" value="Team reviewed all 13 sections. Parent expressed satisfaction with reading goal progress. Team agreed to increase speech services to 3x/week starting September 2026." onChange={e=>setSD("f105",e.target.value)} rows={4}/></div>
-            <div style={{marginTop:18}}><p className="lbl" style={{marginBottom:10}}>Parent/Guardian Participation</p>{["Parent/guardian participated in meeting","Parent/guardian provided input on goals","Parent/guardian received copy of programme safeguards","Parent/guardian consent obtained for placement"].map(item=>(<label key={item} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,marginBottom:8,cursor:"pointer"}}><input type="checkbox" defaultChecked style={{accentColor:C.purple,width:14,height:14}}/>{item}</label>))}</div>
-          </div>}
-          {step===13&&<div><SH n={13} title="Family Rights" sub="& Procedural Safeguards"/>
-            <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:10,padding:16,marginBottom:20,display:"flex",gap:10,fontSize:13,color:C.amber,lineHeight:1.6}}><span>⚠️</span><span>This section documents that the parent/guardian has been informed of their rights under ALP standards and applicable law before the ALP takes effect.</span></div>
-            <UTextarea label="Parent/Guardian Rights Summary" rows={7} value={`You have the right to:\n(1) Participate in all ALP planning meetings\n(2) Review all student records at no cost\n(3) Request an independent educational evaluation at public expense\n(4) Receive prior written notice before any change to your child's program\n(5) Request mediation or a formal review if you disagree with ALP team decisions\n(6) Have this notice in your native language or other mode of communication\n(7) Revoke consent for special education services at any time in writing`} onChange={e=>setSD("f106",e.target.value)}/>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginTop:20}}>
-              <USelect label="Delivery Method" value="email" onChange={e=>setSD("field28",e.target.value)} options={[{value:"email",label:"Email + printed copy"},{value:"email-only",label:"Email only"},{value:"portal",label:"Family portal only"},{value:"mail",label:"US Mail (hard copy)"}]}/><UInput label="Response Deadline" value="2026-05-22" type="date" onChange={e=>setSD("field29",e.target.value)}/>
-              <USelect label="Language of Notice" value="en" onChange={e=>setSD("field30",e.target.value)} options={[{value:"en",label:"English"},{value:"es",label:"Spanish"},{value:"fr",label:"French"},{value:"ar",label:"Arabic"},{value:"zh",label:"Mandarin"},{value:"tw",label:"Twi"},{value:"other",label:"Other"}]}/><USelect label="Signature Status" value="pending" onChange={e=>setSD("field31",e.target.value)} options={[{value:"pending",label:"Pending — Not yet signed"},{value:"signed",label:"Signed — Consent obtained"},{value:"refused",label:"Refused — Documented"}]}/>
-            </div>
-            <div style={{marginTop:22,padding:"18px 20px",background:C.greenBg,border:`1px solid ${C.greenBd}`,borderRadius:10}}>
-              <p className="lbl" style={{color:C.green,marginBottom:10}}>Safeguard Checklist</p>
-              {["Procedural safeguards notice provided","Parent/guardian notified in native language","Parent rights explained verbally at meeting","Copy of ALP provided to family","Signature request sent via family portal"].map(item=>(<label key={item} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,marginBottom:8,cursor:"pointer"}}><input type="checkbox" defaultChecked style={{accentColor:C.green,width:14,height:14}}/>{item}</label>))}
-            </div>
-          </div>}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:28,paddingTop:20,borderTop:`1px solid ${C.tanL}`}}>
-            <button className="btn-ghost" onClick={back} disabled={step===1} style={{opacity:step===1?.4:1}}>← Back</button>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              <span style={{fontSize:11,color:C.warm}}>{step} / 13</span>
-              <button className="btn-black" onClick={next} style={{fontSize:11,padding:"12px 28px"}}>{step===13?"Complete & Review Document →":`Next: ${steps[step]||"Complete"} →`}</button>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:14}}>SUPPORT TIER</p>
+                {[["Tier 1","Universal — whole class"],["Tier 2","Targeted — small group"],["Tier 3","Intensive — individual"]].map(([t,desc])=>(
+                  <label key={t} onClick={()=>SD("tier",t)} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"10px 12px",borderRadius:8,marginBottom:8,cursor:"pointer",
+                    background:sData.tier===t?C.purpleL:"transparent",border:`1px solid ${sData.tier===t?C.purple:C.tanL}`,transition:"all .2s"}}>
+                    <div style={{width:16,height:16,borderRadius:"50%",border:`2px solid ${sData.tier===t?C.purple:C.warm}`,
+                      background:sData.tier===t?C.purple:"transparent",flexShrink:0,marginTop:1}}/>
+                    <div><div style={{fontSize:13,fontWeight:700,color:C.black}}>{t}</div>
+                    <div style={{fontSize:11,color:C.warm}}>{desc}</div></div>
+                  </label>
+                ))}
+              </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:12}}>NOTES</p>
+                <UTextarea label="Additional Notes" value={sData.notes} onChange={e=>SD("notes",e.target.value)} rows={4}/>
+              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 2 — LEARNING PROFILE
+      ══════════════════════════════════════════ */}
+      {step===2&&(
+        <div>
+          <SH n={2} title="Learning" sub="Profile"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16}}>
+            <div className="card" style={{padding:"22px 24px"}}>
+              <p className="lbl" style={{marginBottom:16}}>ACADEMIC PROFILE</p>
+              <UTextarea label="Academic Strengths" value={sData.strengths} onChange={e=>SD("strengths",e.target.value)} rows={3}/>
+              <div style={{marginTop:14}}/>
+              <UTextarea label="Growth Areas" value={sData.growthAreas} onChange={e=>SD("growthAreas",e.target.value)} rows={3}/>
+              <div style={{marginTop:14}}/>
+              <UTextarea label="Learning Concerns / Identified Challenges" value={sData.learningConcerns} onChange={e=>SD("learningConcerns",e.target.value)} rows={3}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>LEARNING STYLE & INTERESTS</p>
+                <USelect label="Primary Learning Style" value={sData.learningStyle.split(".")[0]} onChange={e=>SD("learningStyle",e.target.value+".")}
+                  options={["Visual learner","Auditory learner","Kinesthetic learner","Visual-kinesthetic learner","Reading/writing learner","Multi-modal"]}/>
+                <div style={{marginTop:14}}/>
+                <UTextarea label="Interests & Motivators" value={sData.interests} onChange={e=>SD("interests",e.target.value)} rows={2}/>
+                <div style={{marginTop:14}}/>
+                <UInput label="Home Language(s)" value={sData.languages} onChange={e=>SD("languages",e.target.value)}/>
+                <div style={{marginTop:14}}/>
+                <UInput label="Technology Skills" value={sData.techSkills} onChange={e=>SD("techSkills",e.target.value)}/>
+              </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:12}}>PARENT / GUARDIAN OBSERVATIONS</p>
+                <UTextarea label="What parents have shared" value={sData.parentObservations} onChange={e=>SD("parentObservations",e.target.value)} rows={4}/>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 3 — BASELINE ASSESSMENT
+      ══════════════════════════════════════════ */}
+      {step===3&&(
+        <div>
+          <SH n={3} title="Baseline" sub="Assessment"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
+            <div className="card" style={{padding:"22px 24px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+                <p className="lbl">DOMAIN SCORES</p>
+                <div style={{display:"flex",gap:8}}>
+                  <UInput label="" value={sData.assessmentDate} onChange={e=>SD("assessmentDate",e.target.value)} type="date" style={{fontSize:11,padding:"6px 10px",width:130}}/>
+                </div>
+              </div>
+              {[
+                ["Reading & Literacy",sData.readingScore,"readingScore",C.red],
+                ["Writing & Expression",sData.writingScore,"writingScore",C.blue],
+                ["Mathematics",sData.mathScore,"mathScore",C.green],
+                ["Science & Inquiry",sData.scienceScore,"scienceScore",C.amber],
+                ["Critical Thinking",sData.criticalThinkingScore,"criticalThinkingScore",C.purple],
+                ["Communication",sData.communicationScore,"communicationScore","#6366F1"],
+                ["Social & Emotional",sData.socialScore,"socialScore","#EC4899"],
+                ["Life Skills",sData.lifeSkillsScore,"lifeSkillsScore","#14B8A6"],
+                ["Digital Literacy",sData.digitalLiteracyScore,"digitalLiteracyScore","#F97316"],
+              ].map(([label,score,key,color])=>(
+                <div key={key} style={{marginBottom:16}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:6}}>
+                    <span style={{fontWeight:600,color:C.black}}>{label}</span>
+                    <input type="number" min={0} max={100} value={score}
+                      onChange={e=>SD(key,Number(e.target.value))}
+                      style={{width:56,padding:"3px 8px",borderRadius:6,border:`1.5px solid ${C.tanL}`,fontSize:12,fontWeight:700,
+                        color:score>=70?C.green:score>=50?C.amber:C.red,textAlign:"center",background:"transparent"}}/>
+                  </div>
+                  <div style={{height:8,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:`${score}%`,background:color,borderRadius:99,transition:"width .4s"}}/>
+                  </div>
+                </div>
+              ))}
+              <UTextarea label="Assessor Notes" value={sData.assessmentNotes} onChange={e=>SD("assessmentNotes",e.target.value)} rows={3} style={{marginTop:8}}/>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:14}}>ASSESSMENT SUMMARY</p>
+                <UInput label="Assessor Name" value={sData.assessor} onChange={e=>SD("assessor",e.target.value)}/>
+                <div style={{marginTop:14}}/>
+                {[
+                  ["Overall Average",Math.round([sData.readingScore,sData.writingScore,sData.mathScore,sData.scienceScore,sData.criticalThinkingScore,sData.communicationScore,sData.socialScore,sData.lifeSkillsScore,sData.digitalLiteracyScore].reduce((a,b)=>a+b,0)/9)],
+                  ["Strongest Domain",["Reading","Writing","Math","Science","Critical Thinking","Communication","Social","Life Skills","Digital Literacy"][[sData.readingScore,sData.writingScore,sData.mathScore,sData.scienceScore,sData.criticalThinkingScore,sData.communicationScore,sData.socialScore,sData.lifeSkillsScore,sData.digitalLiteracyScore].indexOf(Math.max(sData.readingScore,sData.writingScore,sData.mathScore,sData.scienceScore,sData.criticalThinkingScore,sData.communicationScore,sData.socialScore,sData.lifeSkillsScore,sData.digitalLiteracyScore))]],
+                  ["Needs Most Support",["Reading","Writing","Math","Science","Critical Thinking","Communication","Social","Life Skills","Digital Literacy"][[sData.readingScore,sData.writingScore,sData.mathScore,sData.scienceScore,sData.criticalThinkingScore,sData.communicationScore,sData.socialScore,sData.lifeSkillsScore,sData.digitalLiteracyScore].indexOf(Math.min(sData.readingScore,sData.writingScore,sData.mathScore,sData.scienceScore,sData.criticalThinkingScore,sData.communicationScore,sData.socialScore,sData.lifeSkillsScore,sData.digitalLiteracyScore))]],
+                ].map(([label,val])=>(
+                  <div key={label} style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,fontSize:13}}>
+                    <span style={{color:C.warm}}>{label}</span>
+                    <span style={{fontWeight:700,color:C.black}}>{val}{label==="Overall Average"?"%":""}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="card" style={{padding:"18px 20px",background:C.purpleL,border:`1px solid ${C.purple}22`}}>
+                <p style={{fontSize:12,fontWeight:700,color:C.purple,marginBottom:6}}>✦ AI Analysis</p>
+                <p style={{fontSize:12,color:C.black,lineHeight:1.6}}>
+                  {sData.firstName} shows a significant gap between reading (
+                  {sData.readingScore}%) and science ({sData.scienceScore}%). 
+                  This pattern suggests strong conceptual understanding but decoding barriers. 
+                  Recommend prioritising literacy intervention while using science as a motivational anchor.
+                </p>
+                <button className="btn-purple" onClick={()=>setShowAI(true)} style={{fontSize:11,padding:"8px 16px",marginTop:10,width:"100%"}}>
+                  Full AI Analysis →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 4 — PRESENT LEVELS
+      ══════════════════════════════════════════ */}
+      {step===4&&(
+        <div>
+          <SH n={4} title="Present Levels" sub="of Academic & Functional Performance"/>
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            <div className="card" style={{padding:"22px 24px"}}>
+              <p className="lbl" style={{marginBottom:6}}>ACADEMIC PERFORMANCE NARRATIVE</p>
+              <p style={{fontSize:11,color:C.warm,marginBottom:12}}>
+                Describe current academic performance across subjects. This becomes the baseline narrative in the ALP document.
+              </p>
+              <UTextarea label="" value={sData.academicNarrative} onChange={e=>SD("academicNarrative",e.target.value)} rows={6}/>
+            </div>
+            <div className="card" style={{padding:"22px 24px"}}>
+              <p className="lbl" style={{marginBottom:6}}>FUNCTIONAL PERFORMANCE NARRATIVE</p>
+              <p style={{fontSize:11,color:C.warm,marginBottom:12}}>
+                Describe daily living skills, social participation, communication, and independence.
+              </p>
+              <UTextarea label="" value={sData.functionalNarrative} onChange={e=>SD("functionalNarrative",e.target.value)} rows={5}/>
+            </div>
+            <div className="card" style={{padding:"22px 24px"}}>
+              <p className="lbl" style={{marginBottom:14}}>RISK INDICATORS</p>
+              <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr 1fr",gap:10}}>
+                {[["reading","📖 Reading difficulties"],["attention","⚡ Attention & focus"],["writing","✏️ Written expression"],
+                  ["socialEmotional","❤️ Social-emotional"],["attendance","🏫 Attendance concerns"]].map(([key,label])=>(
+                  <label key={key} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",borderRadius:8,cursor:"pointer",
+                    background:sData.riskIndicators[key]?"#FEF2F2":C.tanL,
+                    border:`1.5px solid ${sData.riskIndicators[key]?"#FCA5A5":C.tanL}`,transition:"all .2s"}}>
+                    <input type="checkbox" checked={!!sData.riskIndicators[key]}
+                      onChange={e=>SD("riskIndicators",{...sData.riskIndicators,[key]:e.target.checked})} style={{width:15,height:15}}/>
+                    <span style={{fontSize:12,fontWeight:600,color:sData.riskIndicators[key]?C.red:C.warm}}>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 5 — LEARNING GOALS
+      ══════════════════════════════════════════ */}
+      {step===5&&(
+        <div>
+          <SH n={5} title="Learning" sub="Goals"/>
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            {sData.goals.map((g,gi)=>(
+              <div key={g.id} className="card" style={{padding:"22px 24px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{padding:"4px 10px",borderRadius:99,fontSize:10,fontWeight:800,letterSpacing:".08em",
+                      background:{READING:"#FEF2F2",WRITING:"#EFF6FF",COMMUNICATION:"#FAF5FF",MATH:"#F0FDF4",SOCIAL:"#FFF7ED",OTHER:"#F8FAFC"}[g.domain]||"#F8FAFC",
+                      color:{READING:C.red,WRITING:C.blue,COMMUNICATION:C.purple,MATH:C.green,SOCIAL:C.amber,OTHER:C.warm}[g.domain]||C.warm}}>
+                      {g.domain}
+                    </span>
+                    <span style={{fontSize:13,fontWeight:700,color:C.black}}>Goal {gi+1}</span>
+                  </div>
+                  <button onClick={()=>SD("goals",sData.goals.filter((_,i)=>i!==gi))}
+                    style={{fontSize:11,color:C.red,background:"none",border:"none",cursor:"pointer",padding:"4px 8px"}}>✕ Remove</button>
+                </div>
+                <UTextarea label="Goal Statement (measurable)" value={g.text}
+                  onChange={e=>SD("goals",sData.goals.map((x,i)=>i===gi?{...x,text:e.target.value}:x))} rows={2}/>
+                <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr 1fr 1fr",gap:12,marginTop:12}}>
+                  <UInput label="Baseline" value={g.baseline}
+                    onChange={e=>SD("goals",sData.goals.map((x,i)=>i===gi?{...x,baseline:e.target.value}:x))}/>
+                  <UInput label="Target" value={g.target}
+                    onChange={e=>SD("goals",sData.goals.map((x,i)=>i===gi?{...x,target:e.target.value}:x))}/>
+                  <UInput label="Target Date" value={g.targetDate} type="date"
+                    onChange={e=>SD("goals",sData.goals.map((x,i)=>i===gi?{...x,targetDate:e.target.value}:x))}/>
+                  <UInput label="Assigned Staff" value={g.staff}
+                    onChange={e=>SD("goals",sData.goals.map((x,i)=>i===gi?{...x,staff:e.target.value}:x))}/>
+                </div>
+                <div style={{marginTop:12}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:4}}>
+                    <span style={{color:C.warm}}>Current Progress</span>
+                    <span style={{fontWeight:700,color:g.progress>=70?C.green:g.progress>=40?C.amber:C.red}}>{g.progress}%</span>
+                  </div>
+                  <input type="range" min={0} max={100} value={g.progress}
+                    onChange={e=>SD("goals",sData.goals.map((x,i)=>i===gi?{...x,progress:Number(e.target.value)}:x))}
+                    style={{width:"100%",accentColor:C.purple}}/>
+                </div>
+              </div>
+            ))}
+            <button className="btn-outline" onClick={()=>SD("goals",[...sData.goals,{
+              id:Date.now(),domain:"OTHER",text:"",baseline:"",target:"",
+              targetDate:new Date().toISOString().split("T")[0],staff:"",status:"Active",progress:0
+            }])} style={{fontSize:12,padding:"12px 20px",borderStyle:"dashed"}}>
+              + Add Learning Goal
+            </button>
+            <div style={{padding:"14px 18px",background:C.purpleL,borderRadius:10,border:`1px solid ${C.purple}22`}}>
+              <p style={{fontSize:12,fontWeight:700,color:C.purple,marginBottom:4}}>✦ AI Goal Recommendations</p>
+              <p style={{fontSize:12,color:C.black}}>Based on the baseline assessment, consider adding a Math goal (71%) as a strength to build on, and a Digital Literacy goal (62%) to support classroom independence.</p>
+              <button className="btn-purple" onClick={()=>setShowAI(true)} style={{fontSize:11,padding:"8px 16px",marginTop:8}}>Generate Goals with AI →</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 6 — ACCOMMODATIONS & SUPPORT
+      ══════════════════════════════════════════ */}
+      {step===6&&(
+        <div>
+          <SH n={6} title="Accommodations" sub="& Support Strategies"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16}}>
+            {[
+              ["presentation","📖 Presentation",["Extended time on assessments (1.5×)","Text-to-speech for reading tasks","Directions read aloud or pre-recorded","Large print materials","Reduced visual clutter on worksheets"]],
+              ["response","✏️ Response",["Oral responses accepted for written tasks","Scribe for longer assignments","Speech-to-text software","Graphic organisers instead of essays","Multiple-choice instead of short answer"]],
+              ["setting","🏫 Setting",["Preferential seating near teacher","Small-group testing environment","Separate quiet room for assessments","Flexible seating options","Reduced distractions workspace"]],
+              ["timing","⏱ Timing & Scheduling",["Movement breaks every 20 minutes","Flexible scheduling for assessments","Extended time (1.5× or 2×)","Assignments chunked into smaller parts","Brain breaks between tasks"]],
+            ].map(([key,title,opts])=>(
+              <div key={key} className="card" style={{padding:"20px 22px"}}>
+                <p className="lbl" style={{marginBottom:14}}>{title}</p>
+                {opts.map(opt=>{
+                  const checked=(sData.accommodations[key]||[]).includes(opt);
+                  return(
+                    <label key={opt} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10,cursor:"pointer"}}>
+                      <input type="checkbox" checked={checked} onChange={()=>{
+                        const curr=sData.accommodations[key]||[];
+                        SD("accommodations",{...sData.accommodations,[key]:checked?curr.filter(x=>x!==opt):[...curr,opt]});
+                      }} style={{marginTop:2,accentColor:C.purple,width:14,height:14}}/>
+                      <span style={{fontSize:12,color:C.black,lineHeight:1.4}}>{opt}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <div className="card" style={{padding:"20px 22px",marginTop:14}}>
+            <p className="lbl" style={{marginBottom:12}}>CUSTOM ACCOMMODATIONS</p>
+            <UTextarea label="Additional accommodations not listed above" value={sData.customAccomm}
+              onChange={e=>SD("customAccomm",e.target.value)} rows={3}/>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 7 — INTERVENTION PLANS
+      ══════════════════════════════════════════ */}
+      {step===7&&(
+        <div>
+          <SH n={7} title="Intervention" sub="Plans"/>
+          <div style={{display:"flex",flexDirection:"column",gap:14}}>
+            {sData.interventions.map((iv,ii)=>(
+              <div key={ii} className="card" style={{padding:"22px 24px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+                  <span style={{fontSize:13,fontWeight:700,color:C.black}}>Intervention {ii+1}</span>
+                  <button onClick={()=>SD("interventions",sData.interventions.filter((_,i)=>i!==ii))}
+                    style={{fontSize:11,color:C.red,background:"none",border:"none",cursor:"pointer"}}>✕</button>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:14}}>
+                  <UInput label="Programme / Intervention Name" value={iv.program}
+                    onChange={e=>SD("interventions",sData.interventions.map((x,i)=>i===ii?{...x,program:e.target.value}:x))}/>
+                  <USelect label="Status" value={iv.status}
+                    onChange={e=>SD("interventions",sData.interventions.map((x,i)=>i===ii?{...x,status:e.target.value}:x))}
+                    options={["Active","On Hold","Completed","Exited"]}/>
+                  <UInput label="Frequency" value={iv.frequency} placeholder="e.g. 3× per week"
+                    onChange={e=>SD("interventions",sData.interventions.map((x,i)=>i===ii?{...x,frequency:e.target.value}:x))}/>
+                  <UInput label="Duration per Session" value={iv.duration} placeholder="e.g. 30 min"
+                    onChange={e=>SD("interventions",sData.interventions.map((x,i)=>i===ii?{...x,duration:e.target.value}:x))}/>
+                  <UInput label="Assigned Staff" value={iv.staff}
+                    onChange={e=>SD("interventions",sData.interventions.map((x,i)=>i===ii?{...x,staff:e.target.value}:x))}/>
+                  <UInput label="Expected Outcome" value={iv.outcome}
+                    onChange={e=>SD("interventions",sData.interventions.map((x,i)=>i===ii?{...x,outcome:e.target.value}:x))}/>
+                </div>
+              </div>
+            ))}
+            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+              {["Reading Intervention","Math Support","Behaviour Plan","Speech & Language","Social Skills Group","Career Readiness"].map(prog=>(
+                <button key={prog} className="btn-ghost" onClick={()=>SD("interventions",[...sData.interventions,
+                  {program:prog,frequency:"",duration:"",staff:"",outcome:"",status:"Active"}])}
+                  style={{fontSize:11,padding:"9px 14px",borderStyle:"dashed"}}>
+                  + {prog}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 8 — PROGRESS MONITORING
+      ══════════════════════════════════════════ */}
+      {step===8&&(
+        <div>
+          <SH n={8} title="Progress" sub="Monitoring"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+                  <p className="lbl">DATA POINTS</p>
+                  <button className="btn-purple" onClick={()=>{
+                    const entry={date:new Date().toISOString().split("T")[0],domain:"Reading",score:Math.floor(Math.random()*20+65),notes:"Quick probe"};
+                    SD("progressEntries",[...sData.progressEntries,entry]);
+                    toast("Data point logged ✓","success");
+                  }} style={{fontSize:11,padding:"8px 16px"}}>+ Log Entry</button>
+                </div>
+                <div style={{overflowX:"auto"}}>
+                  <table className="data-table" style={{minWidth:380}}>
+                    <thead><tr>{["Date","Domain","Score","Notes"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {sData.progressEntries.map((e,i)=>(
+                        <tr key={i}>
+                          <td style={{fontSize:12,color:C.warm}}>{e.date}</td>
+                          <td style={{fontSize:12,fontWeight:600}}>{e.domain}</td>
+                          <td><span style={{fontWeight:700,color:e.score>=70?C.green:e.score>=50?C.amber:C.red}}>{e.score}</span></td>
+                          <td style={{fontSize:11,color:C.warm}}>{e.notes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>GOAL PROGRESS TRACKER</p>
+                {sData.goals.map(g=>(
+                  <div key={g.id} style={{marginBottom:16}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:5}}>
+                      <span style={{fontWeight:600,color:C.black,flex:1,paddingRight:8}}>{g.domain} — {g.text.slice(0,60)}{g.text.length>60?"…":""}</span>
+                      <span style={{fontWeight:700,color:g.progress>=70?C.green:g.progress>=40?C.amber:C.red,flexShrink:0}}>{g.progress}%</span>
+                    </div>
+                    <div style={{height:8,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${g.progress}%`,background:g.progress>=70?C.green:g.progress>=40?C.amber:C.red,borderRadius:99,transition:"width .4s"}}/>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:C.warm,marginTop:3}}>
+                      <span>Baseline: {g.baseline}</span><span>Target: {g.target} by {g.targetDate}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"20px 22px"}}>
+                <p className="lbl" style={{marginBottom:14}}>ATTENDANCE SNAPSHOT</p>
+                {[["Present","174 days","92%",C.green],["Absent","14 days","7%",C.amber],["Tardy","4 days","1%",C.red]].map(([l,v,p,c])=>(
+                  <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,fontSize:13}}>
+                    <span style={{color:C.warm}}>{l}</span>
+                    <div style={{textAlign:"right"}}>
+                      <span style={{fontWeight:700,color:c}}>{v}</span>
+                      <span style={{fontSize:11,color:C.warm,marginLeft:6}}>({p})</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="card" style={{padding:"20px 22px",background:C.purpleL,border:`1px solid ${C.purple}22`}}>
+                <p style={{fontSize:12,fontWeight:700,color:C.purple,marginBottom:8}}>✦ AI Insight</p>
+                <p style={{fontSize:12,color:C.black,lineHeight:1.6}}>
+                  {sData.firstName}'s reading score has improved {sData.progressEntries.length>1?sData.progressEntries[sData.progressEntries.length-1].score-sData.progressEntries[0].score:0} points since baseline.
+                  Trend is positive. Recommend maintaining current intervention frequency through the next marking period.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 9 — FUTURE READINESS & TRANSITION
+      ══════════════════════════════════════════ */}
+      {step===9&&(
+        <div>
+          <SH n={9} title="Future Readiness" sub="& Transition Planning"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>TRANSITION GOALS</p>
+                <USelect label="Post-Secondary Target" value={sData.transitionTarget}
+                  onChange={e=>SD("transitionTarget",e.target.value)}
+                  options={["College Prep Programme","Vocational Training","Supported Employment","Community Participation","Independent Living Programme","Career Exploration"]}/>
+                <div style={{marginTop:14}}/>
+                <UTextarea label="Long-Term Post-Secondary Goal" value={sData.postSecGoal}
+                  onChange={e=>SD("postSecGoal",e.target.value)} rows={4}/>
+              </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>TRANSITION SKILLS CHECKLIST</p>
+                {[
+                  ["💼","Employment & Career",["Identifies personal interests and strengths","Understands workplace expectations","Participated in job shadowing or career exploration"]],
+                  ["🏠","Independent Living",["Can manage a simple budget","Can use public transport independently","Can prepare simple meals"]],
+                  ["🤝","Community",["Participates in community groups or activities","Can self-advocate in familiar settings","Understands personal rights and responsibilities"]],
+                  ["🎓","Post-Secondary Education",["Has explored post-secondary options","Can describe learning needs to a provider","Understands application processes"]],
+                ].map(([icon,domain,skills])=>(
+                  <div key={domain} style={{marginBottom:18}}>
+                    <p style={{fontSize:12,fontWeight:700,color:C.black,marginBottom:8}}>{icon} {domain}</p>
+                    {skills.map(skill=>(
+                      <label key={skill} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:7,cursor:"pointer"}}>
+                        <input type="checkbox" style={{marginTop:2,accentColor:C.purple,width:14,height:14}}/>
+                        <span style={{fontSize:12,color:C.warm,lineHeight:1.4}}>{skill}</span>
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"20px 22px"}}>
+                <p className="lbl" style={{marginBottom:14}}>STUDENT VOICE</p>
+                <p style={{fontSize:12,color:C.warm,marginBottom:10}}>What does {sData.firstName} say about their future?</p>
+                <UTextarea label="Student's own words / self-assessment" value={sData.transitionDomain}
+                  onChange={e=>SD("transitionDomain",e.target.value)} rows={5}
+                  placeholder={`"When I grow up I want to..."`}/>
+              </div>
+              <div className="card" style={{padding:"20px 22px",background:C.purpleL,border:`1px solid ${C.purple}22`}}>
+                <p style={{fontSize:12,fontWeight:700,color:C.purple,marginBottom:6}}>✦ AI Recommendation</p>
+                <p style={{fontSize:12,color:C.black,lineHeight:1.6}}>
+                  Based on {sData.firstName}'s strengths in science and communication, 
+                  consider exploring STEM career pathways. A community science programme or 
+                  coding club could be an excellent bridge activity.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════
+          STEP 10 — REVIEW & SIGN-OFF
+      ══════════════════════════════════════════ */}
+      {step===10&&(
+        <div>
+          <SH n={10} title="Review" sub="& Sign-Off"/>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:16}}>ALP SUMMARY</p>
+                {[
+                  ["👤","Student",`${sData.firstName} ${sData.lastName} · ${sData.grade} · ${sData.school}`],
+                  ["🎯","Support Tier",sData.tier],
+                  ["📊","Baseline Average",`${Math.round([sData.readingScore,sData.writingScore,sData.mathScore].reduce((a,b)=>a+b,0)/3)}% (Reading, Writing, Math)`],
+                  ["🎯","Active Goals",`${sData.goals.length} learning goals`],
+                  ["🛠","Interventions",`${sData.interventions.length} programme(s) active`],
+                  ["✅","Accommodations",`${Object.values(sData.accommodations).flat().length + (sData.customAccomm?1:0)} accommodations`],
+                  ["🚀","Transition Target",sData.transitionTarget],
+                ].map(([icon,label,val])=>(
+                  <div key={label} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"flex-start"}}>
+                    <span style={{fontSize:16,flexShrink:0}}>{icon}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:10,fontWeight:700,color:C.warm,letterSpacing:".08em",textTransform:"uppercase"}}>{label}</div>
+                      <div style={{fontSize:13,color:C.black,fontWeight:600,marginTop:2}}>{val}</div>
+                    </div>
+                    <button onClick={()=>setStep([1,1,3,5,5,6,7,9].indexOf(label)+1||1)}
+                      style={{fontSize:10,color:C.purple,background:"none",border:"none",cursor:"pointer",flexShrink:0}}>Edit</button>
+                  </div>
+                ))}
+              </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:12}}>MEETING NOTES & DECISIONS</p>
+                <UInput label="Review Meeting Date" value={sData.meetingDate} type="date"
+                  onChange={e=>SD("meetingDate",e.target.value)} style={{marginBottom:14}}/>
+                <UTextarea label="Team Notes & Decisions Made" value={sData.reviewNotes}
+                  onChange={e=>SD("reviewNotes",e.target.value)} rows={5}/>
+              </div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:14}}>
+              <div className="card" style={{padding:"20px 22px"}}>
+                <p className="lbl" style={{marginBottom:14}}>COMPLETION CHECKLIST</p>
+                {STEPS.map((s,i)=>{
+                  const done=completedSteps.includes(i+1);
+                  return(
+                    <div key={s} style={{display:"flex",gap:10,alignItems:"center",padding:"8px 0",
+                      borderBottom:`1px solid ${C.tanL}`}}>
+                      <div style={{width:20,height:20,borderRadius:"50%",
+                        background:done?"#DCFCE7":C.tanL,
+                        border:`2px solid ${done?C.green:C.warm}`,
+                        display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        {done&&<span style={{fontSize:11,color:C.green}}>✓</span>}
+                      </div>
+                      <span style={{fontSize:12,color:done?C.black:C.warm,fontWeight:done?600:400}}>{s}</span>
+                      {!done&&<button onClick={()=>setStep(i+1)}
+                        style={{marginLeft:"auto",fontSize:10,color:C.purple,background:"none",border:"none",cursor:"pointer"}}>Go →</button>}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="card" style={{padding:"20px 22px",background:completedSteps.length>=8?"#F0FDF4":C.purpleL,
+                border:`1px solid ${completedSteps.length>=8?C.green:C.purple}22`}}>
+                {completedSteps.length>=8
+                  ? <><p style={{fontSize:12,fontWeight:700,color:C.green,marginBottom:6}}>✓ Ready to Complete</p>
+                    <p style={{fontSize:12,color:C.black}}>{completedSteps.length} of {TOTAL} sections completed. Click "Complete ALP" to generate the Review Summary and send the parent notice.</p></>
+                  : <><p style={{fontSize:12,fontWeight:700,color:C.purple,marginBottom:6}}>⚡ Almost There</p>
+                    <p style={{fontSize:12,color:C.black}}>{TOTAL-completedSteps.length} section(s) still need completion. Review each step and click Next to mark it done.</p></>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Nav buttons ── */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:28,
+        padding:"16px 20px",background:C.tanL,borderRadius:12}}>
+        <button className="btn-ghost" onClick={back} disabled={step===1}
+          style={{opacity:step===1?.4:1,fontSize:12,padding:"11px 22px"}}>← Back</button>
+        <span style={{fontSize:11,color:C.warm,fontWeight:600}}>{step} / {TOTAL} — {STEPS[step-1]}</span>
+        <button className="btn-black" onClick={next}
+          style={{fontSize:12,padding:"12px 28px"}}>
+          {step===TOTAL?"✓ Complete ALP":"Next →"}
+        </button>
       </div>
     </Page>
   );
 }
-// ═══════════════════════════════════════════════════════════
-// REVIEW SUMMARY
-// ═══════════════════════════════════════════════════════════
+
 function ReviewSummary({setPage}){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
@@ -7266,6 +7791,7 @@ function Progress(){
   const [domain,setDomain]=useState("Reading");
   const [showLogData,setShowLogData]=useState(false);
   const [showReport,setShowReport]=useState(false);
+  const [selectedBar,setSelectedBar]=useState(null);
   const students=["Marcus Johnson","Sofia Lee","Tyler Parker","Aisha Adeyemi","Ryan Chen"];
   const domainData={
     "Reading":  {scores:[52,56,59,62,65,68],goal:80,label:"wcpm",color:C.purple,trend:"improving",velocity:"+4/mo"},
@@ -9331,7 +9857,7 @@ We aim to respond to all privacy enquiries within 5 business days.`},
         <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",paddingTop:32,borderTop:`1px solid ${C.tanL}`}}>
           <button className="btn-ghost" onClick={()=>setNavPage("Terms")} style={{fontSize:12}}>Terms of Service</button>
           <button className="btn-ghost" onClick={()=>setNavPage("Data")} style={{fontSize:12}}>Data & Security</button>
-          <button className="btn-purple" onClick={()=>setPage("landing")} style={{fontSize:12}}>← Back to Home</button>
+          <button className="btn-purple" onClick={()=>setPage("dashboard")} style={{fontSize:12}}>← Back to Home</button>
         </div>
       </div>
     </div>
@@ -9439,7 +9965,7 @@ We prefer to resolve any issue directly and fairly before any formal process.`},
         <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",paddingTop:32,borderTop:`1px solid ${C.tanL}`}}>
           <button className="btn-ghost" onClick={()=>setNavPage("Privacy")} style={{fontSize:12}}>Privacy Policy</button>
           <button className="btn-ghost" onClick={()=>setNavPage("Data")} style={{fontSize:12}}>Data & Security</button>
-          <button className="btn-purple" onClick={()=>setPage("landing")} style={{fontSize:12}}>← Back to Home</button>
+          <button className="btn-purple" onClick={()=>setPage("dashboard")} style={{fontSize:12}}>← Back to Home</button>
         </div>
       </div>
     </div>
@@ -9513,7 +10039,7 @@ function DataPage({setPage,setNavPage}){
           <button className="btn-ghost" onClick={()=>setNavPage("Privacy")} style={{fontSize:12}}>Privacy Policy</button>
           <button className="btn-ghost" onClick={()=>setNavPage("Terms")} style={{fontSize:12}}>Terms of Service</button>
           <a href="mailto:security@growwithalp.com" style={{fontSize:12,padding:"10px 18px",borderRadius:99,background:C.tanL,color:C.black,textDecoration:"none",fontWeight:600}}>Report a vulnerability</a>
-          <button className="btn-purple" onClick={()=>setPage("landing")} style={{fontSize:12}}>← Back to Home</button>
+          <button className="btn-purple" onClick={()=>setPage("dashboard")} style={{fontSize:12}}>← Back to Home</button>
         </div>
       </div>
     </div>
