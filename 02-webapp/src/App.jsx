@@ -5693,40 +5693,6 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         </div>
       </section>
 
-      {/* ── DEMO VIDEO SECTION ─────────────────────────────────── */}
-      <section style={{background:"#0B0718",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)"}}>
-        <div style={{maxWidth:900,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:16,color:"#A78BFA",letterSpacing:".14em"}}>See It In Action</p>
-          <h2 className="serif" style={{fontSize:"clamp(28px,5vw,52px)",fontWeight:800,color:"#fff",letterSpacing:"-1.5px",marginBottom:16,lineHeight:1.08}}>
-            From blank page to<br/><span className="serif-italic" style={{color:"#A78BFA"}}>effective ALP in 20 minutes.</span>
-          </h2>
-          <p style={{fontSize:15,color:"rgba(255,255,255,.5)",marginBottom:40,maxWidth:540,margin:"0 auto 40px",lineHeight:1.7}}>Watch how a special education teacher builds a complete 13-section Adaptive Learning Program using ALP AI.</p>
-          <div style={{position:"relative",borderRadius:16,overflow:"hidden",background:"#1a1a2e",border:"1px solid rgba(124,58,237,.3)",boxShadow:"0 24px 80px rgba(0,0,0,.6)",maxWidth:760,margin:"0 auto"}}>
-            <div style={{paddingTop:"56.25%",position:"relative"}}>
-              <iframe style={{position:"absolute",top:0,left:0,width:"100%",height:"100%",border:"none"}} src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?modestbranding=1&rel=0&color=white&controls=1" title="ALP Platform Demo — 2 minute walkthrough" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen/>
-              <div style={{display:"none",position:"absolute",inset:0,alignItems:"center",justifyContent:"center",gap:16}}>
-                <div style={{width:72,height:72,borderRadius:"50%",background:"rgba(124,58,237,.9)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 0 12px rgba(124,58,237,.2)",cursor:"pointer",transition:"transform .2s"}}
-                  onMouseEnter={e=>e.currentTarget.style.transform="scale(1.08)"}
-                  onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-                  <span style={{fontSize:26,marginLeft:4}}>▶</span>
-                </div>
-                <p style={{fontSize:13,color:"rgba(255,255,255,.5)",letterSpacing:".06em"}}>ALP PLATFORM DEMO · 3:42</p>
-              </div>
-              <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(124,58,237,.08),rgba(18,0,61,.6))",pointerEvents:"none"}}/>
-              <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,rgba(124,58,237,.08) .8px,transparent .8px)",backgroundSize:"18px 18px",pointerEvents:"none"}}/>
-            </div>
-          </div>
-          <div style={{display:"flex",justifyContent:"center",gap:32,marginTop:32,flexWrap:"wrap"}}>
-            {[["3:42","Full platform walkthrough"],["2:15","AI goal writing demo"],["1:48","Family portal overview"]].map(([t,l])=>(
-              <div key={l} style={{textAlign:"center",cursor:"pointer"}}>
-                <div style={{fontSize:12,fontWeight:700,color:"#A78BFA",marginBottom:3}}>{t}</div>
-                <div style={{fontSize:11,color:"rgba(255,255,255,.4)"}}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
       <section style={{background:"#fff",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
@@ -5948,8 +5914,8 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
 function Login({onLogin, onBack}){
   const [tab,setTab]=useState("web");
   const [rememberMe,setRememberMe]=useState(false);
-  const [email,setEmail]=useState("ms.simmons@westwood.edu");
-  const [pw,setPw]=useState("ALPDemo2026!");
+  const [email,setEmail]=useState("");
+  const [pw,setPw]=useState("");
   const [license,setLicense]=useState("");
   const [loading,setLoading]=useState(false);
   const [showDownload,setShowDownload]=useState(false);
@@ -6243,13 +6209,13 @@ function Dashboard({setPage,onAddStudent}){
   const {role}=useRole();
   const {toast}=useToast();
   const {user,profile,unreadCount:realUnreadCount,students:dbStudentsRaw}=useSupabaseAuth();
-  const dbStudents=dbStudentsRaw&&dbStudentsRaw.length>0?dbStudentsRaw.length:19;
+  const dbStudents=dbStudentsRaw?.length||0;
   const {isMobile}=useResponsive();
   const [period,setPeriod]=useState("This Month");
   const [showChecklist,setShowChecklist]=useState(true);
   const hour=new Date().getHours();
   const greeting=hour<12?"Good morning":hour<17?"Good afternoon":"Good evening";
-  const userName="Ms. Simmons";
+  const userName=profile?.full_name||user?.email?.split("@")[0]||"Teacher";
 
   const metrics=[
     {icon:"👥",label:"Active Students",value:String(dbStudents||19),change:"+3",trend:"up",sub:"vs last month",color:C.purple},
@@ -6259,7 +6225,7 @@ function Dashboard({setPage,onAddStudent}){
   ];
 
   const checkItems=[
-    {id:1,label:"Create your first student profile",done:true,page:"students"},
+    {id:1,label:"Create your first student profile",done:dbStudentsRaw&&dbStudentsRaw.length>0,page:"students"},
     {id:2,label:"Build an ALP with the AI Goal Architect",done:false,page:"builder"},
     {id:3,label:"Log a progress data point",done:false,page:"progress"},
     {id:4,label:"Invite a family member to the portal",done:false,page:"family"},
@@ -6417,7 +6383,8 @@ function Students({setPage,onAddStudent}){
   function toggleBulk(id){setBulkSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);}
   function selectAll(ids){setBulkSelected(ids);}
   const [q,setQ]=useState("");const [f,setF]=useState("All");const [sel,setSel]=useState(null);
-  const all=[{name:"Marcus Johnson",grade:"4th",cat:"ASD",plan:"ALP",planC:"purple",status:"On track",review:"May 2026",disability:"Autism Spectrum Disorder",dob:"March 12, 2016",teacher:"Ms. Simmons"},{name:"Sofia Lee",grade:"2nd",cat:"Dyslexia",plan:"RTI-II",planC:"blue",status:"Review",review:"Apr 2026",disability:"Dyslexia",dob:"July 22, 2018",teacher:"Ms. Simmons"},{name:"Tyler Parker",grade:"6th",cat:"ADHD",plan:"504",planC:"amber",status:"On track",review:"Mar 2026",disability:"ADHD",dob:"Nov 5, 2014",teacher:"Mr. Chen"},{name:"Aisha Adeyemi",grade:"3rd",cat:"Speech/Lang",plan:"ALP",planC:"purple",status:"Attention",review:"Feb 2026",disability:"Speech/Language",dob:"Apr 18, 2017",teacher:"Ms. Simmons"},{name:"Ryan Chen",grade:"5th",cat:"Intellectual",plan:"ALP",planC:"purple",status:"Attention",review:"Apr 2026",disability:"Intellectual Disability",dob:"Sep 30, 2015",teacher:"Ms. Simmons"},{name:"Emma Williams",grade:"1st",cat:"Hearing",plan:"ALP",planC:"purple",status:"On track",review:"May 2026",disability:"Hearing Impairment",dob:"Jan 14, 2019",teacher:"Mr. Chen"},{name:"Kofi Mensah",grade:"3rd",cat:"Dyslexia",plan:"RTI-I",planC:"blue",status:"On track",review:"May 2026",disability:"Dyslexia",dob:"Jun 2, 2017",teacher:"Ms. Simmons"},{name:"Ama Osei",grade:"5th",cat:"ADHD",plan:"504",planC:"amber",status:"Review",review:"Apr 2026",disability:"ADHD",dob:"Feb 28, 2015",teacher:"Mr. Chen"}];
+    const {students:dbSt}=useSupabaseAuth();
+  const all=dbSt&&dbSt.length>0?dbSt.map(s=>({name:s.name,grade:s.grade||"",cat:s.disability||"ALP",plan:"ALP",planC:"purple",status:s.status||"Active",review:s.review_date||"",teacher:s.teacher_name||"",dob:s.dob||"",id:s.id})):[];if(false){const __unused=[{name:"Marcus Johnson"
   const rows=all.filter(s=>(!q||s.name.toLowerCase().includes(q.toLowerCase())||s.cat.toLowerCase().includes(q.toLowerCase()))&&(f==="All"||s.plan===f||(f==="RTI"&&s.plan.startsWith("RTI")))).sort((a,b)=>{const va=String(a[sortCol]||"").toLowerCase();const vb=String(b[sortCol]||"").toLowerCase();return sortDir==="asc"?va.localeCompare(vb):vb.localeCompare(va);});
 
   if(sel){
