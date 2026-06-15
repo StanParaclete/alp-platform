@@ -6234,20 +6234,17 @@ function Dashboard({setPage,onAddStudent}){
   const doneCount=checkItems.filter(c=>c.done).length;
   const pct=Math.round(doneCount/checkItems.length*100);
 
-  const recentActivity=[
-    {icon:"📊",text:"CBM reading probe logged for Marcus Johnson",time:"2 hours ago",color:C.blue},
-    {icon:"✍️",text:"Sofia Lee — ALP accommodation updated by you",time:"Yesterday",color:C.purple},
-    {icon:"📅",text:"Annual review scheduled for Ryan Chen · May 28",time:"Yesterday",color:C.green},
-    {icon:"💬",text:"Patricia Johnson replied in Family Portal",time:"2 days ago",color:C.amber},
-    {icon:"📋",text:"Q3 Progress Reports generated (5 students)",time:"3 days ago",color:C.purple},
+  const recentActivity=dbStudentsRaw&&dbStudentsRaw.length>0?[
+    {icon:"👥",text:`${dbStudentsRaw.length} student${dbStudentsRaw.length!==1?"s":""} on your caseload`,time:"",color:C.purple},
+    {icon:"📋",text:"Open ALP Builder to create your first plan",time:"",color:C.blue},
+    {icon:"📊",text:"Set up progress monitoring for your students",time:"",color:C.green},
+  ]:[
+    {icon:"👋",text:"Welcome to ALP! Add your first student to get started",time:"",color:C.purple},
+    {icon:"📋",text:"Use the ALP Builder to create individualised plans",time:"",color:C.blue},
+    {icon:"👪",text:"Invite families to collaborate via the Family Portal",time:"",color:C.green},
   ];
 
-  const dueDates=[
-    {student:"Marcus Johnson",type:"Annual Review",date:"May 28, 2026",urgent:true},
-    {student:"Aisha Adeyemi",type:"Progress Report",date:"May 31, 2026",urgent:true},
-    {student:"Tyler Parker",type:"ALP Renewal",date:"Jun 5, 2026",urgent:false},
-    {student:"Ryan Chen",type:"Progress Report",date:"Jun 10, 2026",urgent:false},
-  ];
+  const dueDates=[];
 
   return(
     <Page>
