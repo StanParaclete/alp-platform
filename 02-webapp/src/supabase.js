@@ -194,3 +194,29 @@ export function subscribeToNotifications(userId, callback) {
   ).subscribe();
   return () => supabase.removeChannel(sub);
 }
+
+// ── Google OAuth ──────────────────────────────────────────────────
+export async function signInWithGoogle() {
+  if (!supabase) return { error: { message: 'Demo mode — Supabase not configured' } };
+  return supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}`,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  });
+}
+
+export async function signInWithMicrosoft() {
+  if (!supabase) return { error: { message: 'Demo mode — Supabase not configured' } };
+  return supabase.auth.signInWithOAuth({
+    provider: 'azure',
+    options: {
+      redirectTo: `${window.location.origin}`,
+      scopes: 'email profile',
+    },
+  });
+}
