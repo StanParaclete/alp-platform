@@ -7181,65 +7181,62 @@ function ALPBuilder({setPage}){
   const [showAI,setShowAI]=useState(false);
 
   /* ── Shared student data across all steps ── */
-  const [sData,setSData]=useState({
+  const {students:dbStudents,user,createStudentRecord,updateStudentRecord,createGoalRecord}=useSupabaseAuth();
+  const selectedStudent=dbStudents?.[0]||null;
+  const ss=selectedStudent;
+
+  const blankSData={
     /* Step 1 */
-    firstName:"Marcus",lastName:"Johnson",dob:"2017-03-14",gender:"Male",
-    grade:"Grade 4",studentId:"WES-2024-0847",school:"Westwood Elementary",
-    enrollDate:"2024-09-02",tier:"Tier 2",photo:null,notes:"",
-    parentName:"Patricia Johnson",parentEmail:"patricia.johnson@email.com",
-    parentPhone:"+1 (703) 555-0199",emergencyContact:"Robert Johnson (Uncle)",
+    firstName:"",lastName:"",dob:"",gender:"",
+    grade:"",studentId:"",school:"",
+    enrollDate:"",tier:"Tier 2",photo:null,notes:"",
+    parentName:"",parentEmail:"",
+    parentPhone:"",emergencyContact:"",
     /* Step 2 */
-    strengths:"Strong verbal communication, enthusiasm for science and hands-on activities, excellent memory for facts and routines.",
-    growthAreas:"Reading fluency and decoding multi-syllabic words; sustaining attention during independent seat work.",
-    learningConcerns:"Specific Learning Disability (SLD) in reading; mild ADHD traits affecting focus.",
-    learningStyle:"Visual-kinesthetic learner. Responds well to graphic organisers, colour-coding, and movement breaks.",
-    interests:"Dinosaurs, building with LEGO, football, drawing comic strips.",
-    languages:"English (primary), some Spanish at home",
-    techSkills:"Comfortable with tablets and educational apps; uses text-to-speech independently.",
-    parentObservations:"Marcus has shown more confidence at home. He loves when his teacher sends voice notes.",
+    strengths:"",growthAreas:"",learningConcerns:"",
+    learningStyle:"",interests:"",languages:"",
+    techSkills:"",parentObservations:"",
     /* Step 3 */
-    readingScore:52,writingScore:48,mathScore:71,scienceScore:80,
-    criticalThinkingScore:65,communicationScore:74,socialScore:68,
-    lifeSkillsScore:77,digitalLiteracyScore:62,
-    assessmentDate:"2026-04-10",assessor:"Ms. Simmons",assessmentNotes:"",
+    readingScore:0,writingScore:0,mathScore:0,scienceScore:0,
+    criticalThinkingScore:0,communicationScore:0,socialScore:0,
+    lifeSkillsScore:0,digitalLiteracyScore:0,
+    assessmentDate:"",assessor:"",assessmentNotes:"",
     /* Step 4 */
-    academicNarrative:"Marcus is a 4th-grade student at Westwood Elementary. At his most recent assessment, he was reading at a 2nd-grade level (52 wcpm on Grade 3 probes). He demonstrates strong vocabulary knowledge but struggles with decoding and fluency. In Math he performs at or near grade level, scoring 71/100 on the baseline. In Science he shows genuine enthusiasm and above-average performance (80/100).",
-    functionalNarrative:"Marcus demonstrates age-appropriate independent living skills. He navigates the school building independently, manages his belongings, and participates in group routines with minimal prompting. He benefits from frequent comprehension checks and clear step-by-step directions.",
-    riskIndicators:{reading:true,attention:true,writing:true,socialEmotional:false,attendance:false},
-    /* Step 5 — goals are objects */
-    goals:[
-      {id:1,domain:"READING",text:"Marcus will read 3rd-grade passages at 80 wcpm with 90% accuracy by Dec 2026.",baseline:"52 wcpm",target:"80 wcpm",targetDate:"2026-12-15",staff:"Ms. Simmons",status:"Active",progress:72},
-      {id:2,domain:"WRITING",text:"Marcus will independently write a 3-sentence paragraph with correct punctuation 4 out of 5 trials by Oct 2026.",baseline:"1 sentence",target:"3 sentences",targetDate:"2026-10-30",staff:"Ms. Simmons",status:"Active",progress:45},
-      {id:3,domain:"COMMUNICATION",text:"Marcus will sustain a 3-turn peer conversation in structured activities 4/5 opportunities.",baseline:"1-turn",target:"3-turn",targetDate:"2026-11-30",staff:"Ms. Rivera (SLP)",status:"Active",progress:60},
-    ],
+    academicNarrative:"",functionalNarrative:"",
+    riskIndicators:{reading:false,attention:false,writing:false,socialEmotional:false,attendance:false},
+    /* Step 5 */
+    goals:[],
     /* Step 6 */
-    accommodations:{
-      presentation:["Extended time on assessments (1.5×)","Text-to-speech for reading tasks","Directions read aloud or pre-recorded"],
-      response:["Oral responses accepted for written tasks","Scribe for longer assignments"],
-      setting:["Preferential seating near teacher","Small-group testing environment"],
-      timing:["Movement breaks every 20 minutes","Flexible scheduling for assessments"],
-    },
+    accommodations:{presentation:[],response:[],setting:[],timing:[]},
     customAccomm:"",
     /* Step 7 */
-    interventions:[
-      {program:"Reading Intervention — Tier 2",frequency:"3× per week",duration:"30 min",staff:"Ms. Simmons",outcome:"Reach 80 wcpm by December",status:"Active"},
-      {program:"Social Skills Group",frequency:"1× per week",duration:"45 min",staff:"Ms. Rivera",outcome:"3-turn conversations independently",status:"Active"},
-    ],
-    /* Step 8 — progress entries */
-    progressEntries:[
-      {date:"2026-04-10",domain:"Reading",score:52,notes:"Baseline assessment"},
-      {date:"2026-05-01",domain:"Reading",score:61,notes:"Responding well to decodable readers"},
-      {date:"2026-05-20",domain:"Reading",score:68,notes:"Strong week — used audio support"},
-      {date:"2026-05-28",domain:"Reading",score:72,notes:"Best score to date"},
-    ],
+    interventions:[],
+    /* Step 8 */
+    progressEntries:[],
     /* Step 9 */
-    transitionTarget:"College Prep Programme",
-    postSecGoal:"Marcus will explore career interests in STEM fields and participate in at least one community learning experience by Grade 6.",
-    transitionDomain:"Employment",
+    transitionTarget:"",postSecGoal:"",transitionDomain:"Employment",
     /* Step 10 */
-    meetingDate:"2026-05-28",
-    reviewNotes:"Team reviewed all 10 sections. Parent expressed satisfaction with progress. Team agreed to increase reading intervention to 4× per week.",
-  });
+    meetingDate:new Date().toISOString().split("T")[0],reviewNotes:"",
+  };
+
+  // Pre-fill from selected Supabase student if available
+  const prefilled=ss?{
+    ...blankSData,
+    firstName:ss.name?.split(" ")[0]||"",
+    lastName:ss.name?.split(" ").slice(1).join(" ")||"",
+    dob:ss.dob||"",gender:ss.gender||"",grade:ss.grade||"",
+    studentId:ss.student_id||"",school:ss.school_name||"",
+    enrollDate:ss.enrollment_date||"",tier:ss.tier||"Tier 2",
+    parentName:ss.parent_name||"",parentEmail:ss.parent_email||"",
+    parentPhone:ss.parent_phone||"",
+    strengths:ss.strengths||"",growthAreas:ss.growth_areas||"",
+    learningConcerns:ss.concerns||"",interests:ss.interests||"",
+    learningStyle:ss.learning_style||"",languages:ss.language||"",
+    assessor:user?.email?.split("@")[0]||"",
+    meetingDate:new Date().toISOString().split("T")[0],
+  }:blankSData;
+
+  const [sData,setSData]=useState(prefilled);
   const SD=(k,v)=>setSData(p=>({...p,[k]:v}));
 
   const STEPS=[
@@ -7250,9 +7247,37 @@ function ALPBuilder({setPage}){
   const TOTAL=STEPS.length;
   const completion=Math.round((completedSteps.length/TOTAL)*100);
 
-  function next(){
+  async function next(){
     if(!completedSteps.includes(step)) setCompletedSteps(s=>[...s,step]);
-    if(step===TOTAL){setPage("review");toast("ALP completed — opening Review Summary ✓","success");}
+    if(step===TOTAL){
+      // Save all goals to Supabase on final step
+      if(ss?.id && sData.goals.length>0){
+        for(const g of sData.goals){
+          if(g.text?.trim()){
+            await createGoalRecord({
+              student_id:ss.id,goal_text:g.text,domain:g.domain,
+              baseline:g.baseline,target:g.target,
+              target_date:g.targetDate,monitoring:"Weekly",
+              created_by:user?.id,
+            }).catch(()=>{});
+          }
+        }
+      }
+      // Update student record with final ALP data
+      if(ss?.id){
+        await updateStudentRecord(ss.id,{
+          strengths:sData.strengths,growth_areas:sData.growthAreas,
+          concerns:sData.learningConcerns,interests:sData.interests,
+          learning_style:sData.learningStyle,tier:sData.tier,
+          parent_name:sData.parentName,parent_email:sData.parentEmail,
+          parent_phone:sData.parentPhone,notes:sData.notes,
+          alp_completed:true,alp_completed_date:new Date().toISOString(),
+          review_notes:sData.reviewNotes,meeting_date:sData.meetingDate,
+        }).catch(()=>{});
+      }
+      setPage("review");
+      toast("ALP completed — opening Review Summary ✓","success");
+    }
     else setStep(s=>s+1);
   }
   function back(){if(step>1)setStep(s=>s-1);}
@@ -7285,10 +7310,24 @@ function ALPBuilder({setPage}){
 
   return(
     <Page title={<>ALP <span className="serif-italic" style={{color:C.warm,fontSize:isMobile?20:26}}>Builder</span></>}
-      subtitle={`Step ${step} of ${TOTAL} — ${STEPS[step-1]}`}
+      subtitle={ss?`${ss.name} — Step ${step} of ${TOTAL} — ${STEPS[step-1]}`:`Step ${step} of ${TOTAL} — ${STEPS[step-1]}`}
       action={<div style={{display:"flex",gap:8,alignItems:"center"}}>
+        {dbStudents?.length>1&&<select onChange={e=>{const found=dbStudents.find(st=>st.id===e.target.value);if(found){setSData(p=>({...p,firstName:found.name?.split(" ")[0]||"",lastName:found.name?.split(" ").slice(1).join(" ")||"",grade:found.grade||"",studentId:found.student_id||"",school:found.school_name||"",parentName:found.parent_name||"",parentEmail:found.parent_email||"",strengths:found.strengths||"",growthAreas:found.growth_areas||"",}));}}} style={{fontSize:11,padding:"7px 10px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>{dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}</select>}
         <button className="btn-ghost" onClick={()=>setPage("students")} style={{fontSize:11}}>← Students</button>
-        <button className="btn-purple" onClick={()=>toast("ALP auto-saved ✓","success")} style={{fontSize:11,padding:"9px 18px"}}>↑ Save</button>
+        <button className="btn-purple" onClick={async()=>{
+          if(ss?.id){
+            await updateStudentRecord(ss.id,{
+              strengths:sData.strengths,growth_areas:sData.growthAreas,
+              concerns:sData.learningConcerns,interests:sData.interests,
+              learning_style:sData.learningStyle,language:sData.languages,
+              parent_name:sData.parentName,parent_email:sData.parentEmail,
+              parent_phone:sData.parentPhone,tier:sData.tier,notes:sData.notes,
+            });
+            toast("ALP saved to Supabase ✓","success");
+          } else {
+            toast("ALP saved locally ✓","success");
+          }
+        }} style={{fontSize:11,padding:"9px 18px"}}>↑ Save</button>
       </div>}>
 
       {showAI&&<AIModal onClose={()=>setShowAI(false)} context={`ALP Builder Step ${step}: ${STEPS[step-1]}`}/>}
