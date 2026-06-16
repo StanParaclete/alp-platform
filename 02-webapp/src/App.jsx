@@ -4251,130 +4251,184 @@ function ChangelogPage(){
 function GoalsPage({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents,user}=useSupabaseAuth();
   const [filter,setFilter]=useState("all");
   const [search,setSearch]=useState("");
   const [showNewGoal,setShowNewGoal]=useState(false);
-  const [newGoal,setNewGoal]=useState({student:"Marcus Johnson",domain:"Reading",goal:"",baseline:"",target:"",dueDate:"2026-06-30"});
+  const [saving,setSaving]=useState(false);
+  const [allGoals,setAllGoals]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [newGoal,setNewGoal]=useState({student_id:"",domain:"Reading",goal_text:"",baseline:"",target:"",due_date:new Date(Date.now()+180*86400000).toISOString().split("T")[0]});
   const setNG=(k,v)=>setNewGoal(p=>({...p,[k]:v}));
-  const allGoals=[
-    {id:1,student:"Marcus Johnson",grade:"4",domain:"Reading",goal:"Read 80 wcpm on grade 3 probes across 4 consecutive weeks",baseline:"52 wcpm",target:"80 wcpm",current:72,pct:85,status:"On Track",dueDate:"Jun 2026",color:C.green},
-    {id:2,student:"Marcus Johnson",grade:"4",domain:"Communication",goal:"Initiate and maintain 3-turn conversations with peers",baseline:"1-turn",target:"3-turn",current:"2-turn",pct:67,status:"Developing",dueDate:"Jun 2026",color:C.blue},
-    {id:3,student:"Sofia Lee",grade:"5",domain:"Math",goal:"Solve 2-step word problems with 80% accuracy",baseline:"42%",target:"80%",current:"71%",pct:71,status:"Developing",dueDate:"Jun 2026",color:C.amber},
-    {id:4,student:"Sofia Lee",grade:"5",domain:"Writing",goal:"Write 3-sentence paragraphs independently",baseline:"1 sentence",target:"3 sentences",current:"2 sentences",pct:78,status:"On Track",dueDate:"Jun 2026",color:C.green},
-    {id:5,student:"Aisha Adeyemi",grade:"1",domain:"Communication",goal:"Use 2-word combinations to make requests",baseline:"Single words",target:"2-word combos",current:"Emerging",pct:45,status:"Developing",dueDate:"Jun 2026",color:C.amber},
-    {id:6,student:"Aisha Adeyemi",grade:"1",domain:"Social-Emotional",goal:"Use a calm-down strategy independently in 4/5 opportunities",baseline:"0/5",target:"4/5",current:"2/5",pct:50,status:"Developing",dueDate:"Jun 2026",color:C.amber},
-    {id:7,student:"Tyler Parker",grade:"3",domain:"Reading",goal:"Decode CVC+e words with 90% accuracy",baseline:"60%",target:"90%",current:"85%",pct:94,status:"On Track",dueDate:"Jun 2026",color:C.green},
-    {id:8,student:"Ryan Chen",grade:"2",domain:"Math",goal:"Add/subtract within 100 with regrouping, 80% accuracy",baseline:"52%",target:"80%",current:"68%",pct:79,status:"Developing",dueDate:"Jun 2026",color:C.amber},
-    {id:9,student:"Ryan Chen",grade:"2",domain:"Behaviour",goal:"Follow 2-step directions in 4/5 opportunities",baseline:"1/5",target:"4/5",current:"3/5",pct:60,status:"Developing",dueDate:"Jun 2026",color:C.amber},
-    {id:10,student:"Amara Osei",grade:"6",domain:"Reading",goal:"Read grade-level text with 75% comprehension",baseline:"40%",target:"75%",current:"32%",pct:38,status:"Needs Support",dueDate:"Jun 2026",color:C.red},
-  ];
+
+  useEffect(()=>{
+    async function loadGoals(){
+      setLoading(true);
+      if(!dbStudents?.length){setLoading(false);return;}
+      try{
+        const all=[];
+        for(const s of dbStudents){
+          const goals=await Supabase.getGoals(s.id);
+          if(goals?.length) goals.forEach(g=>all.push({...g,studentName:s.name,grade:s.grade||""}));
+        }
+        setAllGoals(all);
+      }catch(e){console.error(e);}
+      setLoading(false);
+    }
+    loadGoals();
+  },[dbStudents]);
+
+  const statusColor=(pct)=>pct>=80?C.green:pct>=50?C.amber:C.red;
+  const statusLabel=(pct)=>pct>=80?"On Track":pct>=50?"Developing":"Needs Support";
+
+  const enriched=allGoals.map(g=>{
+    const entries=g.progress_entries||[];
+    const latest=entries.length>0?entries[entries.length-1].score:null;
+    const pct=latest!=null?(latest/parseFloat(g.target||100))*100:g.current_pct||0;
+    const clampedPct=Math.min(100,Math.max(0,Math.round(pct)));
+    return {...g,pct:clampedPct,statusLabel:statusLabel(clampedPct),color:statusColor(clampedPct)};
+  });
 
   const filters=[["all","All Goals"],["On Track","On Track"],["Developing","Developing"],["Needs Support","Needs Support"]];
-  const filtered=allGoals.filter(g=>(filter==="all"||g.status===filter)&&(!search||g.student.toLowerCase().includes(search.toLowerCase())||g.domain.toLowerCase().includes(search.toLowerCase())));
-  const stats={total:allGoals.length,onTrack:allGoals.filter(g=>g.status==="On Track").length,developing:allGoals.filter(g=>g.status==="Developing").length,needs:allGoals.filter(g=>g.status==="Needs Support").length};
+  const filtered=enriched.filter(g=>(filter==="all"||g.statusLabel===filter)&&(!search||g.studentName?.toLowerCase().includes(search.toLowerCase())||g.domain?.toLowerCase().includes(search.toLowerCase())||g.goal_text?.toLowerCase().includes(search.toLowerCase())));
+  const stats={total:enriched.length,onTrack:enriched.filter(g=>g.statusLabel==="On Track").length,developing:enriched.filter(g=>g.statusLabel==="Developing").length,needs:enriched.filter(g=>g.statusLabel==="Needs Support").length};
+
+  async function handleAddGoal(){
+    if(!newGoal.goal_text.trim()){toast("Please write a goal statement","error");return;}
+    if(!newGoal.student_id){toast("Please select a student","error");return;}
+    setSaving(true);
+    try{
+      await Supabase.createGoal({
+        student_id:newGoal.student_id,
+        domain:newGoal.domain,
+        goal_text:newGoal.goal_text,
+        baseline:newGoal.baseline,
+        target:newGoal.target,
+        due_date:newGoal.due_date,
+        status:"Active",
+        monitoring:"Weekly",
+        created_by:user?.id,
+      });
+      const studentName=dbStudents?.find(s=>s.id===newGoal.student_id)?.name||"student";
+      toast(`Goal added for ${studentName}!`,"success");
+      setShowNewGoal(false);
+      setNewGoal(p=>({...p,goal_text:"",baseline:"",target:""}));
+      // Reload
+      const goals=await Supabase.getGoals(newGoal.student_id);
+      if(goals) setAllGoals(prev=>[...prev.filter(g=>g.student_id!==newGoal.student_id),...goals.map(g=>({...g,studentName:studentName,grade:dbStudents?.find(s=>s.id===newGoal.student_id)?.grade||""}))]);
+    }catch(e){toast("Failed to save goal","error");}
+    setSaving(false);
+  }
 
   return(
     <>{showNewGoal&&(
       <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setShowNewGoal(false)}>
-        <div className="card fade-up" style={{width:"100%",maxWidth:480,padding:0}}>
+        <div className="card fade-up" style={{width:"100%",maxWidth:500,padding:0}}>
           <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div><p className="lbl" style={{color:C.purple,marginBottom:4}}>Add Goal</p><h3 style={{fontSize:18,fontWeight:800,color:C.black}}>New Annual Goal</h3></div>
             <button onClick={()=>setShowNewGoal(false)} style={{fontSize:22,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>×</button>
           </div>
           <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-              <USelect label="Student" value={newGoal.student} onChange={e=>setNG("student",e.target.value)} options={["Marcus Johnson","Sofia Lee","Aisha Adeyemi","Tyler Parker","Ryan Chen","Amara Osei"].map(s=>({value:s,label:s}))}/>
-              <USelect label="Domain" value={newGoal.domain} onChange={e=>setNG("domain",e.target.value)} options={["Reading","Math","Writing","Communication","Social-Emotional","Behaviour","OT","Speech"].map(d=>({value:d,label:d}))}/>
+              <div>
+                <label style={{fontSize:11,fontWeight:700,color:C.warm,display:"block",marginBottom:5}}>STUDENT</label>
+                <select value={newGoal.student_id} onChange={e=>setNG("student_id",e.target.value)} className="u-select">
+                  <option value="">Select student…</option>
+                  {(dbStudents||[]).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
+              <USelect label="Domain" value={newGoal.domain} onChange={e=>setNG("domain",e.target.value)} options={["Reading","Math","Writing","Communication","Social-Emotional","Behaviour","OT","Speech","Life Skills"].map(d=>({value:d,label:d}))}/>
             </div>
-            <UTextarea label="Goal Statement" value={newGoal.goal} onChange={e=>setNG("goal",e.target.value)} rows={3} placeholder="By [date], [student] will [behaviour] with [criteria]…"/>
+            <UTextarea label="Goal Statement" value={newGoal.goal_text} onChange={e=>setNG("goal_text",e.target.value)} rows={3} placeholder="By [date], [student] will [behaviour] with [criteria]…"/>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
               <UInput label="Baseline" value={newGoal.baseline} onChange={e=>setNG("baseline",e.target.value)} placeholder="e.g. 52 wcpm"/>
               <UInput label="Target" value={newGoal.target} onChange={e=>setNG("target",e.target.value)} placeholder="e.g. 80 wcpm"/>
-              <UInput label="Due Date" value={newGoal.dueDate} onChange={e=>setNG("dueDate",e.target.value)} type="date"/>
+              <UInput label="Due Date" value={newGoal.due_date} onChange={e=>setNG("due_date",e.target.value)} type="date"/>
             </div>
-            <button className="btn-ghost" onClick={()=>toast("AI Goal Architect opened","info")} style={{fontSize:11,color:C.purple,border:`1px solid ${C.purple}`}}>✦ AI Goal Architect →</button>
             <div style={{display:"flex",gap:10}}>
               <button className="btn-ghost" onClick={()=>setShowNewGoal(false)} style={{flex:1,fontSize:12}}>Cancel</button>
-              <button className="btn-purple" onClick={()=>{if(newGoal.goal.trim()){toast(`Goal added for ${newGoal.student}!`,"success");setShowNewGoal(false);}else toast("Please write a goal statement","error");}} style={{flex:2,fontSize:12,padding:"13px"}}>Add Goal →</button>
+              <button className="btn-purple" onClick={handleAddGoal} disabled={saving} style={{flex:2,fontSize:12,padding:"13px"}}>
+                {saving?<><Spin/> Saving…</>:"Add Goal →"}
+              </button>
             </div>
           </div>
         </div>
       </div>
     )}
     <Page title={<>Goals <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Tracker</span></>}
-      subtitle={`${stats.total} active goals across ${new Set(allGoals.map(g=>g.student)).size} students`}
-      action={<button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 22px"}}>+ New Goal</button>}>
+      subtitle={loading?"Loading…":`${stats.total} goals across ${new Set(enriched.map(g=>g.student_id)).size} students`}
+      action={<button className="btn-black" onClick={()=>setShowNewGoal(true)} style={{fontSize:11,padding:"11px 22px"}}>+ Add Goal</button>}>
 
-      {/* Stats */}
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"1fr 1fr 1fr 1fr",gap:12,marginBottom:20}}>
-        {[["TOTAL GOALS",stats.total,C.purple],["ON TRACK",stats.onTrack,C.green],["DEVELOPING",stats.developing,C.amber],["NEEDS SUPPORT",stats.needs,C.red]].map(([l,v,c])=>(
-          <div key={l} className="card" style={{padding:"16px 20px",borderLeft:`3px solid ${c}`}}>
-            <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
-            <div className="serif" style={{fontSize:28,fontWeight:700,color:c}}><AnimCounter value={v}/></div>
+      {loading&&<div style={{textAlign:"center",padding:60,color:C.warm}}>Loading goals from Supabase…</div>}
+
+      {!loading&&dbStudents?.length===0&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+          <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+          <p style={{fontSize:13,color:C.warm,marginBottom:24}}>Add students first, then create goals for them through the ALP Builder.</p>
+          <button className="btn-purple" onClick={()=>setPage("students")} style={{fontSize:12}}>Go to Students →</button>
+        </div>
+      )}
+
+      {!loading&&dbStudents?.length>0&&(
+        <>
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"1fr 1fr 1fr 1fr",gap:12,marginBottom:20}}>
+            {[["TOTAL GOALS",stats.total,C.purple],["ON TRACK",stats.onTrack,C.green],["DEVELOPING",stats.developing,C.amber],["NEEDS SUPPORT",stats.needs,C.red]].map(([l,v,c])=>(
+              <div key={l} className="card" style={{padding:"16px 20px",borderLeft:`3px solid ${c}`}}>
+                <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
+                <div className="serif" style={{fontSize:28,fontWeight:700,color:c}}><AnimCounter value={v}/></div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-
-      {/* Summary */}
-      <div style={{display:"flex",gap:16,alignItems:"center",marginBottom:16,flexWrap:"wrap"}}>
-        <div className="card" style={{padding:"16px 20px",display:"flex",gap:16,alignItems:"center",flex:1,minWidth:280}}>
-          <div style={{position:"relative",width:72,height:72}}>
-            <DonutChart strokeWidth={10} size={72} segments={[{value:stats.onTrack,color:C.green},{value:stats.developing,color:C.amber},{value:stats.needs,color:C.red}]}/>
-            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}><span style={{fontSize:13,fontWeight:800,color:C.black}}>{stats.total}</span></div>
-          </div>
-          <div style={{flex:1}}>
-            <p style={{fontSize:13,fontWeight:700,color:C.black,marginBottom:6}}>Goal Overview</p>
-            <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-              {[["On Track",stats.onTrack,C.green],["Developing",stats.developing,C.amber],["Needs Support",stats.needs,C.red]].map(([l,v,c])=>(
-                <div key={l} style={{textAlign:"center"}}>
-                  <div style={{fontSize:18,fontWeight:800,color:c,lineHeight:1}}>{v}</div>
-                  <div style={{fontSize:10,color:C.warm}}>{l}</div>
-                </div>
-              ))}
+          <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:16,flexWrap:"wrap"}}>
+            <div style={{position:"relative",flex:1,minWidth:160}}>
+              <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.warm}}>🔍</span>
+              <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search goals or students…"
+                style={{width:"100%",padding:"9px 10px 9px 30px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,background:C.white,color:C.black,outline:"none"}}/>
             </div>
+            {filters.map(([id,label])=>(
+              <button key={id} onClick={()=>setFilter(id)} className={filter===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"9px 16px",flexShrink:0}}>{label}</button>
+            ))}
           </div>
-        </div>
-        <button className="btn-purple" onClick={()=>setShowNewGoal(true)} style={{fontSize:12,padding:"14px 24px",flexShrink:0}}>+ Add Goal</button>
-      </div>
-      {/* Filters + Search */}
-      <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:20,flexWrap:"wrap"}}>
-        <div style={{position:"relative",flex:1,minWidth:160}}>
-          <span style={{position:"absolute",left:10,top:"50%",transform:"translateY(-50%)",fontSize:13,color:C.warm}}>🔍</span>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search goals or students…"
-            style={{width:"100%",padding:"9px 10px 9px 30px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,background:C.white,color:C.black,outline:"none"}}/>
-        </div>
-        {filters.map(([id,label])=>(
-          <button key={id} onClick={()=>setFilter(id)} className={filter===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"9px 16px",flexShrink:0}}>{label}</button>
-        ))}
-      </div>
 
-      {/* Goals table */}
-      <div className="card" style={{padding:0,overflow:"hidden"}}>
-        <div style={{overflowX:"auto"}}>
-          <table className="data-table" style={{minWidth:680}}>
-            <thead><tr>{["Student","Domain","Goal (summary)","Progress","Status","Due"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-            <tbody>
-              {filtered.map(g=>(
-                <tr key={g.id} style={{cursor:"pointer"}} onClick={()=>setPage("progress")}>
-                  <td><div style={{fontWeight:600,color:C.black}}>{g.student}</div><div style={{fontSize:10,color:C.warm}}>Grade {g.grade}</div></td>
-                  <td><span style={{background:g.color+"18",color:g.color,fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:99}}>{g.domain}</span></td>
-                  <td style={{maxWidth:220}}><p style={{fontSize:12,color:C.warm,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",margin:0}}>{g.goal}</p><p style={{fontSize:10,color:C.warm,margin:0}}>Baseline: {g.baseline} → Target: {g.target}</p></td>
-                  <td style={{width:140}}>
-                    <div style={{display:"flex",alignItems:"center",gap:8}}>
-                      <div style={{flex:1,height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${g.pct}%`,background:g.color,borderRadius:99,transition:"width .5s"}}/></div>
-                      <span style={{fontSize:11,fontWeight:700,color:g.color,width:30}}>{g.pct}%</span>
-                    </div>
-                  </td>
-                  <td><span style={{fontSize:11,fontWeight:600,color:g.color,background:g.color+"14",padding:"3px 10px",borderRadius:99}}>{g.status}</span></td>
-                  <td style={{fontSize:11,color:C.warm}}>{g.dueDate}</td>
-                </tr>
-              ))}
-              {filtered.length===0&&<tr><td colSpan={6} style={{textAlign:"center",padding:"28px",color:C.warm,fontSize:13}}>No goals match this filter.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {filtered.length===0&&allGoals.length===0?(
+            <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+              <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+              <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Goals Created Yet</h3>
+              <p style={{fontSize:13,color:C.warm,marginBottom:20}}>Create goals through the ALP Builder or click "Add Goal" above.</p>
+              <button className="btn-purple" onClick={()=>setPage("builder")} style={{fontSize:12}}>Open ALP Builder →</button>
+            </div>
+          ):(
+            <div className="card" style={{padding:0,overflow:"hidden"}}>
+              <div style={{overflowX:"auto"}}>
+                <table className="data-table" style={{minWidth:680}}>
+                  <thead><tr>{["Student","Domain","Goal","Progress","Status","Due Date",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                  <tbody>
+                    {filtered.map(g=>(
+                      <tr key={g.id}>
+                        <td><div style={{fontWeight:600,color:C.black}}>{g.studentName}</div><div style={{fontSize:10,color:C.warm}}>{g.grade?`Grade ${g.grade}`:""}</div></td>
+                        <td><span style={{background:g.color+"18",color:g.color,fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:99}}>{g.domain}</span></td>
+                        <td style={{maxWidth:240}}><p style={{fontSize:12,color:C.black,margin:0,lineHeight:1.5}}>{g.goal_text}</p>{g.baseline&&<p style={{fontSize:10,color:C.warm,margin:"4px 0 0"}}>Baseline: {g.baseline} → Target: {g.target}</p>}</td>
+                        <td style={{width:140}}>
+                          <div style={{display:"flex",alignItems:"center",gap:8}}>
+                            <div style={{flex:1,height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}><div style={{height:"100%",width:`${g.pct}%`,background:g.color,borderRadius:99}}/></div>
+                            <span style={{fontSize:11,fontWeight:700,color:g.color,width:32}}>{g.pct}%</span>
+                          </div>
+                        </td>
+                        <td><span style={{fontSize:11,fontWeight:600,color:g.color,background:g.color+"14",padding:"3px 10px",borderRadius:99}}>{g.statusLabel}</span></td>
+                        <td style={{fontSize:11,color:C.warm}}>{g.due_date||g.due_date_formatted||"–"}</td>
+                        <td><button className="btn-ghost" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>setPage("progress")}>Track →</button></td>
+                      </tr>
+                    ))}
+                    {filtered.length===0&&<tr><td colSpan={7} style={{textAlign:"center",padding:28,color:C.warm,fontSize:13}}>No goals match this filter.</td></tr>}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </Page>
     </>
   );
@@ -8389,186 +8443,234 @@ function CreateALPDoc({setPage}){
 function Progress(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
-  const {logProgressEntry,students:dbStudents}=useSupabaseAuth();
-  const [period,setPeriod]=useState('This Term');
-  const [student,setStudent]=useState("Marcus Johnson");
-  const [domain,setDomain]=useState("Reading");
+  const {students:dbStudents,user}=useSupabaseAuth();
   const [showLogData,setShowLogData]=useState(false);
   const [showReport,setShowReport]=useState(false);
-  const [selectedBar,setSelectedBar]=useState(null);
-  const students=["Marcus Johnson","Sofia Lee","Tyler Parker","Aisha Adeyemi","Ryan Chen"];
-  const domainData={
-    "Reading":  {scores:[52,56,59,62,65,68],goal:80,label:"wcpm",color:C.purple,trend:"improving",velocity:"+4/mo"},
-    "Math":     {scores:[60,58,62,64,60,63],goal:85,label:"%",color:C.green,trend:"stable",velocity:"+0.5/mo"},
-    "Communication":{scores:[40,45,48,52,50,54],goal:80,label:"%",color:C.blue,trend:"improving",velocity:"+2.8/mo"},
-    "Social-Emotional":{scores:[55,52,50,55,58,56],goal:80,label:"%",color:C.amber,trend:"stable",velocity:"+0.2/mo"},
-  };
-  const months=["Sep","Oct","Nov","Jan","Mar","May"];
-  const dd=domainData[domain];
-  const maxVal=Math.max(dd.goal,...dd.scores)+10;
-  const chartH=160,chartW=460;
-  const barW=42,gap=32;
-  const toY=v=>chartH-(v/maxVal*chartH);
-  const goalY=toY(dd.goal);
-  const weekLabels=["Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"].slice(0,dd.scores.length);
-  const sparkData=dd.scores.map((score,i)=>({score,label:weekLabels[i]||labels[i]||`W${i+1}`}));
+  const [selectedStudentId,setSelectedStudentId]=useState(null);
+  const [selectedGoalId,setSelectedGoalId]=useState(null);
+  const [goals,setGoals]=useState([]);
+  const [entries,setEntries]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [logForm,setLogForm]=useState({score:"",notes:"",date:new Date().toISOString().split("T")[0]});
+  const [logging,setLogging]=useState(false);
 
-  const masteryGoals=[
-    {goal:"Reading Fluency — 80 wcpm",current:68,target:80,pct:85,status:"On Track",trend:"↑"},
-    {goal:"Communication — 3-turn conversation",current:54,target:80,pct:67,status:"Developing",trend:"↑"},
-    {goal:"Social-Emotional — Self-regulation",current:56,target:80,pct:70,status:"Developing",trend:"→"},
-    {goal:"Math — 2-step word problems",current:63,target:85,pct:74,status:"On Track",trend:"↑"},
-  ];
+  const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
+  const g=goals.find(g=>g.id===selectedGoalId)||goals[0]||null;
+  const goalEntries=entries.filter(e=>e.goal_id===(g?.id));
+
+  useEffect(()=>{
+    if(dbStudents?.length&&!selectedStudentId) setSelectedStudentId(dbStudents[0].id);
+  },[dbStudents]);
+
+  useEffect(()=>{
+    if(!s?.id)return;
+    setLoading(true);
+    Supabase.getGoals(s.id).then(g=>{
+      setGoals(g||[]);
+      if(g?.length) setSelectedGoalId(g[0].id);
+      setLoading(false);
+    });
+  },[s?.id]);
+
+  useEffect(()=>{
+    if(!s?.id)return;
+    Supabase.getProgress(s.id,100).then(e=>setEntries(e||[]));
+  },[s?.id]);
+
+  async function handleLogData(){
+    if(!logForm.score){toast("Enter a score","error");return;}
+    if(!g?.id){toast("Select a goal first","error");return;}
+    setLogging(true);
+    try{
+      await Supabase.logProgress({
+        student_id:s.id,goal_id:g.id,
+        score:parseFloat(logForm.score),
+        notes:logForm.notes,
+        date:logForm.date,
+        created_by:user?.id,
+      });
+      toast("Progress logged!","success");
+      setShowLogData(false);
+      setLogForm({score:"",notes:"",date:new Date().toISOString().split("T")[0]});
+      const updated=await Supabase.getProgress(s.id,100);
+      setEntries(updated||[]);
+    }catch(e){toast("Failed to log","error");}
+    setLogging(false);
+  }
+
+  const sparkData=goalEntries.slice(-8).map((e,i)=>({score:e.score,label:e.date?new Date(e.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}):`#${i+1}`}));
+  const latest=goalEntries.length>0?goalEntries[goalEntries.length-1].score:null;
+  const targetNum=parseFloat(g?.target)||100;
+  const pct=latest!=null?Math.min(100,Math.round((latest/targetNum)*100)):g?.current_pct||0;
+  const domainColor=pct>=80?C.green:pct>=50?C.amber:C.red;
+
+  if(!s){
+    return(
+      <Page title={<>Progress <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Monitoring</span></>} subtitle="Select a student">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>📈</div>
+          <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+          <p style={{fontSize:13,color:C.warm,marginBottom:24}}>Add students and create goals first.</p>
+          <button className="btn-purple" onClick={()=>{}} style={{fontSize:12}}>Go to Students →</button>
+        </div>
+      </Page>
+    );
+  }
 
   return(
-    <>{showLogData&&<LogDataModal onClose={()=>setShowLogData(false)} student={student} domain={domain}/>}{showReport&&<ReportGenerationModal report={{label:'Student Progress Report',formats:['PDF','Excel'],time:'~15 sec'}} onClose={()=>setShowReport(false)}/>}
-    <Page title={<>Progress <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Monitoring</span></>}
-      subtitle={`${student} · Q3 2026`}
-      action={<div style={{display:'flex',gap:8}}><button className="btn-black" onClick={()=>setShowLogData(true)} style={{fontSize:11,padding:"10px 20px"}}>+ Log Data</button><button className="btn-outline" onClick={()=>setShowReport(true)} style={{fontSize:11,padding:"10px 20px"}}>Export ↗</button></div>}>
-
-      {/* Student & Domain Selector */}
-      <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap"}}>
-        <select value={student} onChange={e=>setStudent(e.target.value)} className="u-select" style={{width:"auto",paddingRight:32,fontSize:13,fontWeight:600}}>
-          {students.map(s=><option key={s}>{s}</option>)}
-        </select>
-        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-          {Object.keys(domainData).map(d=>(
-            <button key={d} onClick={()=>setDomain(d)}
-              style={{padding:"8px 16px",fontSize:11,fontWeight:700,borderRadius:99,border:`1.5px solid ${domain===d?domainData[d].color:C.tanL}`,background:domain===d?domainData[d].color+"22":"transparent",color:domain===d?domainData[d].color:C.warm,cursor:"pointer",transition:"all .15s"}}>
-              {d}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Top Metrics */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}}>
-        {[["CURRENT","68 wcpm","vs 52 wcpm baseline",C.purple],["GOAL","80 wcpm","by May 2027",C.green],["TREND",dd.trend==="improving"?"Improving ↑":"Stable →","3-month trajectory",dd.trend==="improving"?C.green:C.amber],["VELOCITY",dd.velocity,"learning rate",C.blue]].map(([l,v,s,c])=>(
-          <div key={l} className="metric-card">
-            <p className="lbl" style={{marginBottom:8}}>{l}</p>
-            <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Playfair Display',serif",letterSpacing:"-.5px"}}>{v}</div>
-            <p style={{fontSize:11,color:C.warm,marginTop:4}}>{s}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Growth Chart */}
-      <div className="card" style={{padding:"26px 28px",marginBottom:20}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
-          <div>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700}}>{domain} Growth — {student}</h3>
-            <p style={{fontSize:12,color:C.warm,marginTop:3}}>Goal: {dd.goal} {dd.label} · Current: {dd.scores[dd.scores.length-1]} {dd.label} · Trend: {dd.trend==="improving"?"↑ Improving":"→ Stable"}</p>
-          </div>
-          <span style={{fontSize:11,color:C.warm}}>CBM Weekly Probes</span>
-        </div>
-        <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-          <div style={{overflowX:"auto",marginBottom:8}}>
-            <SparklineChart data={sparkData} goal={dd.goal} color={C.purple} width={460} height={160}/>
-          </div>
-          {selectedBar!==null&&sparkData[selectedBar]&&(
-            <div style={{background:C.purpleL,border:`1px solid ${C.purple}`,borderRadius:8,padding:"8px 14px",fontSize:12,color:C.black,marginBottom:8,display:"flex",gap:12,alignItems:"center"}}>
-              <span style={{fontWeight:700,color:C.purple}}>📊 {sparkData[selectedBar].label}</span>
-              <span>Score: <b>{sparkData[selectedBar].score}</b></span>
-              <span style={{color:C.warm}}>Goal: {dd.goal}</span>
-              <span style={{color:sparkData[selectedBar].score>=dd.goal?C.green:C.amber,fontWeight:700}}>{sparkData[selectedBar].score>=dd.goal?"✓ On Track":"↓ Below Goal"}</span>
-              <button onClick={()=>setSelectedBar(null)} style={{marginLeft:"auto",fontSize:11,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>×</button>
+    <>
+      {showLogData&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setShowLogData(false)}>
+          <div className="card fade-up" style={{width:"100%",maxWidth:420,padding:0}}>
+            <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div><p className="lbl" style={{color:C.purple,marginBottom:4}}>LOG DATA</p><h3 style={{fontSize:18,fontWeight:800,color:C.black}}>Progress Entry</h3></div>
+              <button onClick={()=>setShowLogData(false)} style={{fontSize:22,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>×</button>
             </div>
-          )}
-          <div style={{display:"none"}}>
-            <svg width={chartW} height={chartH+40} style={{display:"block",minWidth:chartW}}>
-            {/* Goal line */}
-            <line x1={0} y1={goalY} x2={chartW} y2={goalY} stroke={C.red} strokeWidth={1.5} strokeDasharray="6,4" opacity={0.7}/>
-            <text x={chartW-4} y={goalY-5} fontSize={9} fill={C.red} textAnchor="end" fontWeight="700">Goal: {dd.goal}</text>
-            {/* Bars */}
-            {dd.scores.map((score,i)=>{
-              const x=i*(barW+gap)+16;
-              const barH=score/maxVal*chartH;
-              const y=chartH-barH;
-              const isLast=i===dd.scores.length-1;
-              return(
-                <g key={i}>
-                  <rect x={x} y={y} width={barW} height={barH} rx={5} fill={isLast?dd.color:dd.color+"88"}/>
-                  <text x={x+barW/2} y={y-5} textAnchor="middle" fontSize={10} fontWeight={isLast?"700":"400"} fill={isLast?dd.color:C.warm}>{score}</text>
-                  <text x={x+barW/2} y={chartH+16} textAnchor="middle" fontSize={10} fill={C.warm}>{months[i]}</text>
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-      </div>
-
-      {/* ALP AI Recommendation */}
-      <div className="card" style={{padding:"20px 24px",marginBottom:20,borderLeft:`4px solid ${C.purple}`}}>
-        <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-          <span style={{fontSize:20}}>✦</span>
-          <div>
-            <p style={{fontSize:10,fontWeight:700,color:C.purple,letterSpacing:".1em",marginBottom:6}}>ALP AI RECOMMENDATION</p>
-            <p style={{fontSize:13.5,fontWeight:600,color:C.black,marginBottom:6}}>Increase reading intervention frequency to 4x/week</p>
-            <p style={{fontSize:13,color:C.warm,lineHeight:1.65}}>Marcus is improving at +4 wcpm/month but needs to reach 80 wcpm by May 2027. At the current rate, he will reach ~76 wcpm. ALP AI recommends increasing intervention frequency and introducing repeated reading with performance feedback to accelerate growth. Consider adding a fluency-building component to existing sessions.</p>
-            <div style={{display:"flex",gap:10,marginTop:12}}>
-              <button className="btn-purple" style={{fontSize:11,padding:"7px 16px"}} onClick={()=>toast("Recommendation applied — intervention frequency updated to 4×/week","success")}>Apply Recommendation</button>
-              <button className="btn-ghost" style={{fontSize:11,padding:"7px 16px"}}>Dismiss</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mastery Tracking */}
-      <div className="card" style={{padding:"26px 28px",marginBottom:20}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-          <h3 className="serif" style={{fontSize:17,fontWeight:700}}>Mastery Tracking — All Goals</h3>
-          <Badge color="purple">4 Active Goals</Badge>
-        </div>
-        <table className="data-table" style={{minWidth:520}}>
-          <thead><tr>{["Goal","Current","Target","Progress","Status","Trend"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-          <tbody>
-            {masteryGoals.map((g,i)=>(
-              <tr key={i}>
-                <td style={{fontWeight:600,maxWidth:220}}>{g.goal}</td>
-                <td style={{fontWeight:700,color:C.purple}}>{g.current}</td>
-                <td style={{color:C.warm}}>{g.target}</td>
-                <td style={{minWidth:120}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{flex:1}}><PBar value={g.pct} color={g.pct>=80?C.green:g.pct>=60?C.purple:C.amber}/></div>
-                    <span style={{fontSize:12,fontWeight:700,color:C.warm,width:32}}>{g.pct}%</span>
-                  </div>
-                </td>
-                <td><Badge color={g.status==="On Track"?"green":"amber"}>{g.status}</Badge></td>
-                <td style={{fontSize:16,fontWeight:700,color:g.trend==="↑"?C.green:g.trend==="↓"?C.red:C.warm}}>{g.trend}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Benchmark + Intervention Effectiveness */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
-        <div className="card" style={{padding:"24px 26px"}}>
-          <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:18}}>Benchmark Comparison</h3>
-          {[["District Average (Grade 4)","72 wcpm",null],["State Grade-Level Benchmark","85 wcpm",null],["Marcus Current","68 wcpm",C.purple],["Marcus Goal (May 2027)","80 wcpm",C.green]].map(([label,val,c])=>(
-            <div key={label} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`}}>
-              <span style={{fontSize:13,color:C.warm}}>{label}</span>
-              <span style={{fontSize:13,fontWeight:700,color:c||C.black}}>{val}</span>
-            </div>
-          ))}
-        </div>
-        <div className="card" style={{padding:"24px 26px"}}>
-          <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:18}}>Intervention Effectiveness</h3>
-          {[["Orton-Gillingham (Reading)","High","↑↑ Significant gains"],["Social Stories (Communication)","Moderate","↑ Consistent progress"],["CBT Strategies (Social-Emotional)","Moderate","→ Stable, slow gains"],["Token Economy (Behavior)","High","↑↑ Rapid improvement"]].map(([intervention,rating,note])=>(
-            <div key={intervention} style={{padding:"9px 0",borderBottom:`1px solid ${C.tanL}`}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}>
-                <span style={{fontSize:12.5,fontWeight:600,color:C.black}}>{intervention}</span>
-                <Badge color={rating==="High"?"green":"amber"}>{rating}</Badge>
+            <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
+              <div style={{padding:"12px 14px",background:C.purpleL,borderRadius:8,fontSize:12,color:C.purple}}>
+                <b>{s.name}</b> · {g?.domain||"Goal"}: {g?.goal_text?.slice(0,60)}…
               </div>
-              <span style={{fontSize:11.5,color:C.warm}}>{note}</span>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <UInput label={`Score (target: ${g?.target||"?"})`} value={logForm.score} onChange={e=>setLogForm(p=>({...p,score:e.target.value}))} type="number" placeholder="e.g. 68"/>
+                <UInput label="Date" value={logForm.date} onChange={e=>setLogForm(p=>({...p,date:e.target.value}))} type="date"/>
+              </div>
+              <UTextarea label="Notes (optional)" value={logForm.notes} onChange={e=>setLogForm(p=>({...p,notes:e.target.value}))} rows={2} placeholder="Observations, conditions, strategies used…"/>
+              <div style={{display:"flex",gap:10}}>
+                <button className="btn-ghost" onClick={()=>setShowLogData(false)} style={{flex:1,fontSize:12}}>Cancel</button>
+                <button className="btn-purple" onClick={handleLogData} disabled={logging} style={{flex:2,fontSize:12,padding:"13px"}}>
+                  {logging?<><Spin/> Saving…</>:"Save Entry →"}
+                </button>
+              </div>
             </div>
-          ))}
+          </div>
+        </div>
+      )}
+
+      <Page title={<>Progress <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Monitoring</span></>}
+        subtitle={`${s.name}${g?` · ${g.domain}`:""}${goalEntries.length>0?` · ${goalEntries.length} data points`:""}`}
+        action={<div style={{display:"flex",gap:8}}>
+          <button className="btn-black" onClick={()=>setShowLogData(true)} style={{fontSize:11,padding:"10px 20px"}}>+ Log Data</button>
+        </div>}>
+
+        {/* Student + Goal Selectors */}
+        <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap"}}>
+          {dbStudents?.length>1&&(
+            <select value={selectedStudentId||""} onChange={e=>setSelectedStudentId(e.target.value)} className="u-select" style={{width:"auto",paddingRight:32,fontSize:13,fontWeight:600}}>
+              {dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
+            </select>
+          )}
+          {goals.length>0&&(
+            <select value={selectedGoalId||""} onChange={e=>setSelectedGoalId(e.target.value)} className="u-select" style={{width:"auto",paddingRight:32,fontSize:13}}>
+              {goals.map(g=><option key={g.id} value={g.id}>{g.domain}: {g.goal_text?.slice(0,40)}…</option>)}
+            </select>
+          )}
         </div>
 
+        {loading&&<div style={{textAlign:"center",padding:60,color:C.warm}}>Loading data…</div>}
 
-    </div>
-        </div>
-    </Page></>
+        {!loading&&goals.length===0&&(
+          <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+            <div style={{fontSize:48,marginBottom:12}}>🎯</div>
+            <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Goals for {s.name}</h3>
+            <p style={{fontSize:13,color:C.warm,marginBottom:20}}>Create goals in the ALP Builder first, then log progress here.</p>
+            <button className="btn-purple" onClick={()=>{}} style={{fontSize:12}}>Open ALP Builder →</button>
+          </div>
+        )}
+
+        {!loading&&goals.length>0&&(
+          <>
+            {/* Top Metrics */}
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"1fr 1fr 1fr 1fr",gap:14,marginBottom:20}}>
+              {[
+                ["CURRENT",latest!=null?`${latest} ${g?.target?.match(/[a-z%]+/i)?.[0]||""}`:"-","latest data point",domainColor],
+                ["TARGET",g?.target||"–","goal benchmark",C.green],
+                ["PROGRESS",`${pct}%`,pct>=80?"On Track":pct>=50?"Developing":"Needs Support",domainColor],
+                ["DATA POINTS",String(goalEntries.length),goalEntries.length>0?"entries logged":"no data yet",C.blue],
+              ].map(([l,v,sub,c])=>(
+                <div key={l} className="card" style={{padding:"16px 20px"}}>
+                  <p className="lbl" style={{marginBottom:8}}>{l}</p>
+                  <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'DM Serif Display',serif"}}>{v}</div>
+                  <p style={{fontSize:11,color:C.warm,marginTop:4}}>{sub}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Growth Chart */}
+            <div className="card" style={{padding:"26px 28px",marginBottom:20}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16,flexWrap:"wrap",gap:8}}>
+                <div>
+                  <h3 className="serif" style={{fontSize:17,fontWeight:700}}>{g?.domain} Growth — {s.name}</h3>
+                  <p style={{fontSize:12,color:C.warm,marginTop:3}}>Goal: {g?.target||"–"} · Baseline: {g?.baseline||"–"} · {goalEntries.length} probes logged</p>
+                </div>
+                <button className="btn-ghost" style={{fontSize:11}} onClick={()=>setShowLogData(true)}>+ Log Entry</button>
+              </div>
+              {sparkData.length>0?(
+                <SparklineChart data={sparkData} goal={parseFloat(g?.target)||100} color={domainColor} width={460} height={140}/>
+              ):(
+                <div style={{height:120,display:"flex",alignItems:"center",justifyContent:"center",background:C.tanL+"55",borderRadius:10}}>
+                  <p style={{fontSize:13,color:C.warm}}>No data yet — log the first entry to see the chart.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Data Table */}
+            <div className="card" style={{padding:0,overflow:"hidden"}}>
+              <div style={{padding:"16px 20px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <p style={{fontSize:13,fontWeight:700,color:C.black}}>Progress Log</p>
+                <span style={{fontSize:11,color:C.warm}}>{goalEntries.length} entries</span>
+              </div>
+              {goalEntries.length===0?(
+                <div style={{padding:"32px",textAlign:"center",color:C.warm,fontSize:13}}>No entries yet. Click "+ Log Data" to add the first score.</div>
+              ):(
+                <div style={{overflowX:"auto"}}>
+                  <table className="data-table" style={{minWidth:500}}>
+                    <thead><tr><th>Date</th><th>Score</th><th>vs Target</th><th>Notes</th></tr></thead>
+                    <tbody>
+                      {[...goalEntries].reverse().map((e,i)=>{
+                        const diff=parseFloat(e.score)-parseFloat(g?.target||0);
+                        return(
+                          <tr key={i}>
+                            <td style={{fontSize:11,color:C.warm}}>{e.date?new Date(e.date).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"-"}</td>
+                            <td><span style={{fontSize:14,fontWeight:700,color:C.black}}>{e.score}</span></td>
+                            <td><span style={{fontSize:11,fontWeight:600,color:diff>=0?C.green:C.red}}>{diff>=0?`+${diff.toFixed(1)} ✓`:diff.toFixed(1)}</span></td>
+                            <td style={{fontSize:12,color:C.warm,maxWidth:200}}>{e.notes||"–"}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* All Goals Summary */}
+            {goals.length>1&&(
+              <div className="card" style={{padding:"20px 24px",marginTop:16}}>
+                <p className="lbl" style={{marginBottom:14}}>ALL GOALS — {s.name}</p>
+                {goals.map(gl=>{
+                  const glEntries=entries.filter(e=>e.goal_id===gl.id);
+                  const glLatest=glEntries.length>0?glEntries[glEntries.length-1].score:null;
+                  const glTarget=parseFloat(gl.target)||100;
+                  const glPct=glLatest!=null?Math.min(100,Math.round((glLatest/glTarget)*100)):gl.current_pct||0;
+                  const glColor=glPct>=80?C.green:glPct>=50?C.amber:C.red;
+                  return(
+                    <div key={gl.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,cursor:"pointer"}}
+                      onClick={()=>setSelectedGoalId(gl.id)}>
+                      <span style={{fontSize:10,fontWeight:700,background:glColor+"18",color:glColor,padding:"2px 8px",borderRadius:99,flexShrink:0}}>{gl.domain}</span>
+                      <p style={{fontSize:12,color:C.black,flex:1,margin:0}}>{gl.goal_text?.slice(0,60)}…</p>
+                      <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+                        <div style={{width:60,height:5,background:C.tanL,borderRadius:99}}><div style={{height:"100%",width:`${glPct}%`,background:glColor,borderRadius:99}}/></div>
+                        <span style={{fontSize:11,fontWeight:700,color:glColor}}>{glPct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </Page>
+    </>
   );
 }
 
@@ -8704,439 +8806,221 @@ function FutureReadiness({setPage}){
 
 function FamilyPortal(){
   const {toast}=useToast();
+  const {isMobile}=useResponsive();
+  const {students:dbStudents,user,profile}=useSupabaseAuth();
   const [tab,setTab]=useState("messages");
+  const [messages,setMessages]=useState([]);
+  const [loading,setLoading]=useState(true);
   const [compose,setCompose]=useState(false);
-  const [signing,setSigning]=useState(null);
-  const [signed,setSigned]=useState([]);
-  const [showMeetingScheduler,setShowMeetingScheduler]=useState(false);
-  const [replyTexts,setReplyTexts]=useState({});
-  const [messages,setMessages]=useState([
-    {id:1,from:"Ms. Simmons",to:"Johnson Family",subject:"Q3 Progress Update — Marcus",body:"Hi Patricia,\n\nI wanted to share that Marcus has been making great progress this quarter! His reading fluency is now at 72 words per minute — up from 52 at the start of the year.\n\nWe have his annual review coming up on May 28. I'll send the meeting details shortly.\n\nBest,\nMs. Simmons",time:"2h ago",read:false,avatar:"SS"},
-    {id:2,from:"Patricia Johnson",to:"Ms. Simmons",subject:"Re: Q3 Progress Update — Marcus",body:"Thank you so much Ms. Simmons! We are so proud of Marcus. He has really been working hard at home too.\n\nLooking forward to the annual review!\n\nPatricia Johnson",time:"1h ago",read:true,avatar:"PJ"},
-    {id:3,from:"Ms. Rivera",to:"Johnson Family",subject:"Speech Goals — Update",body:"Hello,\n\nJust a quick note to say Marcus did wonderfully in today's session. He initiated a 3-turn conversation with a peer for the first time!\n\nThis is a big milestone. Well done Marcus!\n\nMs. Rivera",time:"Yesterday",read:false,avatar:"MR"},
-  ]);
-  const [mtgFamily,setMtgFamily]=useState("johnson");
-  const [mtgType,setMtgType]=useState("Annual Review");
-  const [mtgDate,setMtgDate]=useState("2026-06-03");
-  const [mtgTime,setMtgTime]=useState("14:00");
-  const [mtgFormat,setMtgFormat]=useState("virtual");
-  const [composeFamily,setComposeFamily]=useState("johnson");
-  const [msgType,setMsgType]=useState("update");
   const [msgSubject,setMsgSubject]=useState("");
   const [msgBody,setMsgBody]=useState("");
-  const [mtgNotes,setMtgNotes]=useState("");
+  const [selectedStudentId,setSelectedStudentId]=useState(null);
+  const [sending,setSending]=useState(false);
+  const [signed,setSigned]=useState([]);
 
-  const msgs=[
-    {id:1,name:"Johnson Family",student:"Marcus",sub:"ALP Update — Reading Goals",preview:'"Can we discuss the reading goals before the review meeting?"',date:"May 6",unread:true,thread:["Can we discuss the reading goals before the review meeting? Marcus mentioned he got a new book and really enjoyed it.","Thank you for reaching out! Marcus has been making great progress. His reading rate is now 68 wcpm, up from 52 in September. I'd love to discuss strategies to keep this momentum going. Would Tuesday at 3PM work for a quick call?"]},
-    {id:2,name:"Lee Family",student:"Sofia",sub:"Sofia Progress — Document Signed",preview:"Document signed ✓ · Thank you for the progress report",date:"May 3",unread:false,thread:["Thank you for sharing Sofia's progress report. We've signed the ALP document. She's been doing the reading exercises at home every night!","That's wonderful to hear! Sofia's consistency at home is making a real difference. Her next CBM probe is Friday — I'll share results right away."]},
-    {id:3,name:"Adeyemi Family",student:"Aisha",sub:"Meeting Request",preview:'"Is Thursday at 4PM available for a quick progress check?"',date:"May 1",unread:true,thread:['"Is Thursday at 4PM available for a quick progress check? We\'re a bit concerned about Aisha\'s communication goals."',"I understand your concern and I'm happy to meet. Thursday at 4PM works perfectly — I'll send a Google Meet link. Aisha is making progress, and I have some new strategies I'd love to share with you."]},
-    {id:4,name:"Parker Family",student:"Tyler",sub:"Question re: 504 Plan",preview:'"Tyler mentioned getting extra time on state tests?"',date:"Apr 28",unread:false,thread:['"Tyler mentioned he gets extra time on tests. Can you explain exactly what accommodations he has?"',"Great question! Tyler has a 504 Plan with 1.5× extended time on all assessments, preferential seating, and the option to take tests in a small group setting. I'll send you a copy of the full accommodations list today."]},
-  ];
-  const [activeMsg,setActiveMsg]=useState(null);
-  const [reply,setReply]=useState("");
+  const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
 
-  const signatures=[
-    {id:1,title:"Marcus Johnson — Annual ALP 2026–2027",student:"Marcus Johnson",type:"ALP",date:"May 8, 2026",deadline:"May 22, 2026",pages:14,status:"pending",desc:"Annual Adaptive Learning Program requiring parent/guardian signature before May 22, 2026."},
-    {id:2,title:"Aisha Adeyemi — ALP Amendment",student:"Aisha Adeyemi",type:"Amendment",date:"May 2, 2026",deadline:"May 16, 2026",pages:3,status:"pending",desc:"Amendment to communication goals section. Changes approved by team on May 2, 2026."},
-    {id:3,title:"Sofia Lee — RTI-II Consent",student:"Sofia Lee",type:"Consent",date:"Apr 15, 2026",deadline:"Apr 29, 2026",pages:2,status:"signed",signedDate:"Apr 22, 2026",desc:"Consent for RTI Tier II reading intervention program."},
-    {id:4,title:"Tyler Parker — 504 Annual Review",student:"Tyler Parker",type:"504",date:"Mar 10, 2026",deadline:"Mar 24, 2026",pages:5,status:"signed",signedDate:"Mar 18, 2026",desc:"Annual review of Support Plans accommodation plan."},
-  ];
+  useEffect(()=>{
+    if(dbStudents?.length&&!selectedStudentId) setSelectedStudentId(dbStudents[0].id);
+  },[dbStudents]);
 
-  const documents=[
-    {id:1,icon:"📋",title:"Marcus Johnson — ALP 2026–2027",type:"Adaptive Learning Program",date:"May 8, 2026",size:"2.4 MB",status:"pending-signature"},
-    {id:2,icon:"📈",title:"Marcus Johnson — Q3 Progress Report",type:"Progress Report",date:"May 5, 2026",size:"1.1 MB",status:"available"},
-    {id:3,icon:"📋",title:"Aisha Adeyemi — ALP Amendment",type:"ALP Amendment",date:"May 2, 2026",size:"0.8 MB",status:"pending-signature"},
-    {id:4,icon:"📊",title:"Sofia Lee — Evaluation Report",type:"Psychoeducational Evaluation",date:"Apr 20, 2026",size:"3.2 MB",status:"available"},
-    {id:5,icon:"📋",title:"Tyler Parker — 504 Plan",type:"Support Plans Plan",date:"Mar 10, 2026",size:"1.4 MB",status:"available"},
-    {id:6,icon:"📝",title:"Ryan Chen — ALP 2025–2026",type:"Adaptive Learning Program",date:"May 15, 2025",size:"2.1 MB",status:"available"},
-    {id:7,icon:"📈",title:"Class Progress Summary — Q2 2026",type:"Class Report",date:"Feb 28, 2026",size:"0.9 MB",status:"available"},
-  ];
+  useEffect(()=>{
+    if(!s?.id)return;
+    setLoading(true);
+    Supabase.getFamilyMessages(s.id).then(m=>{setMessages(m||[]);setLoading(false);});
+  },[s?.id]);
 
-  const meetings=[
-    {day:"14",month:"MAY",title:"Johnson Family — Annual ALP Review",time:"3:30 PM · Virtual · Google Meet",action:"Join",urgent:true,type:"Annual Review"},
-    {day:"20",month:"MAY",title:"Adeyemi Family — Progress Check",time:"4:00 PM · Room 14, Westwood Elem",action:"View",urgent:false,type:"Progress Check"},
-    {day:"28",month:"MAY",title:"Lee Family — Goal Discussion",time:"2:00 PM · Virtual",action:"View",urgent:false,type:"Goal Discussion"},
-    {day:"3",month:"JUN",title:"Parker Family — 504 Annual Review",time:"11:00 AM · Room 7",action:"Schedule",urgent:false,type:"504 Review"},
-  ];
+  async function handleSend(){
+    if(!msgBody.trim()){toast("Write a message","error");return;}
+    if(!s?.id){toast("Select a student","error");return;}
+    setSending(true);
+    try{
+      await Supabase.sendFamilyMessage({
+        student_id:s.id,
+        from_id:user?.id,
+        from_name:profile?.full_name||user?.email?.split("@")[0]||"Teacher",
+        to_email:s.family_email||s.parent_email||"",
+        subject:msgSubject||`Update — ${s.name}`,
+        body:msgBody,
+        message_type:"update",
+      });
+      toast("Message sent!","success");
+      setCompose(false);setMsgBody("");setMsgSubject("");
+      const updated=await Supabase.getFamilyMessages(s.id);
+      setMessages(updated||[]);
+    }catch(e){toast("Failed to send","error");}
+    setSending(false);
+  }
 
-  const commLog=[
-    {date:"May 6, 2026",type:"Message",direction:"←",family:"Johnson Family",subject:"ALP Update — Reading Goals",method:"Portal Message",staff:"Ms. Simmons"},
-    {date:"May 3, 2026",type:"Signature",direction:"✓",family:"Lee Family",subject:"RTI-II Consent Signed",method:"Digital Signature",staff:"System"},
-    {date:"May 2, 2026",type:"Document",direction:"→",family:"Adeyemi Family",subject:"ALP Amendment Shared",method:"Portal",staff:"Ms. Simmons"},
-    {date:"Apr 28, 2026",type:"Meeting",direction:"📅",family:"Johnson Family",subject:"Annual Review Meeting Held",method:"Google Meet",staff:"Ms. Simmons, Ms. Rivera"},
-    {date:"Apr 22, 2026",type:"Signature",direction:"✓",family:"Lee Family",subject:"RTI-II Consent Received",method:"Digital Signature",staff:"System"},
-    {date:"Apr 15, 2026",type:"Notice",direction:"→",family:"Lee Family",subject:"ALP Support Notice Sent",method:"Email + Portal",staff:"Ms. Simmons"},
-    {date:"Apr 10, 2026",type:"Message",direction:"←",family:"Parker Family",subject:"504 Question — Extended Time",method:"Portal Message",staff:"Ms. Simmons"},
-    {date:"Mar 18, 2026",type:"Signature",direction:"✓",family:"Parker Family",subject:"504 Annual Review Signed",method:"Digital Signature",staff:"System"},
-  ];
-
-  const typeColor={Message:C.blue,Signature:C.green,Document:C.purple,Meeting:C.amber,Notice:C.red};
-  const pending=signatures.filter(s=>s.status==="pending");
+  const TABS=[["messages","💬 Messages"],["documents","📄 Documents"],["goals","🎯 Goals"],["contact","📞 Contact"]];
 
   return(
-    <>{showMeetingScheduler&&<MeetingSchedulerModal onClose={()=>setShowMeetingScheduler(false)}/>}
-    <Page
-      title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Collaboration Portal</span></>}
-      subtitle={`${pending.length} signatures pending · ${msgs.filter(m=>m.unread).length} unread messages`}
-      action={<button className="btn-black" onClick={()=>setCompose(true)} style={{fontSize:11,padding:"11px 24px"}}>+ Draft Message</button>}>
+    <Page title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Portal</span></>}
+      subtitle={s?`${s.name} · ${s.family_email||s.parent_email||"No email on file"}`:"Select a student"}
+      action={<div style={{display:"flex",gap:8}}>
+        {dbStudents?.length>1&&(
+          <select value={selectedStudentId||""} onChange={e=>setSelectedStudentId(e.target.value)} style={{fontSize:11,padding:"8px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>
+            {dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
+          </select>
+        )}
+        <button className="btn-black" onClick={()=>setCompose(true)} style={{fontSize:11,padding:"10px 20px"}}>✉️ Message Family</button>
+      </div>}>
 
       {/* Compose Modal */}
       {compose&&(
         <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setCompose(false)}>
-          <div className="card fade-up" style={{width:"100%",maxWidth:540,padding:32}}>
-            <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:20}}>New <span className="serif-italic" style={{color:C.warm}}>Message</span></h3>
-            <div style={{display:"flex",flexDirection:"column",gap:20,marginBottom:24}}>
-              <USelect label="Recipient Family" value={composeFamily} onChange={e=>setComposeFamily(e.target.value)} options={[{value:"johnson",label:"Johnson Family (Marcus)"},{value:"lee",label:"Lee Family (Sofia)"},{value:"adeyemi",label:"Adeyemi Family (Aisha)"},{value:"parker",label:"Parker Family (Tyler)"},{value:"chen",label:"Chen Family (Ryan)"}]}/>
-              <USelect label="Message Type" value={msgType} onChange={e=>setMsgType(e.target.value)} options={[{value:"update",label:"Progress Update"},{value:"meeting",label:"Meeting Request"},{value:"document",label:"Document Share"},{value:"alert",label:"Concern / Alert"},{value:"general",label:"General Communication"}]}/>
-              <UInput label="Subject" value={msgSubject} onChange={e=>setMsgSubject(e.target.value)} placeholder="Message subject"/>
-              <UTextarea label="Message" rows={5} value={msgBody} onChange={e=>setMsgBody(e.target.value)} placeholder="Write your message here…"/>
-              <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,cursor:"pointer"}}>
-                <input type="checkbox" style={{accentColor:C.purple,width:14,height:14}}/> Send copy via email to family
-              </label>
+          <div className="card fade-up" style={{width:"100%",maxWidth:520,padding:0}}>
+            <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div><p className="lbl" style={{color:C.purple,marginBottom:4}}>NEW MESSAGE</p><h3 style={{fontSize:18,fontWeight:800,color:C.black}}>Message {s?.name?.split(" ")[1]||""} Family</h3></div>
+              <button onClick={()=>setCompose(false)} style={{fontSize:22,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>×</button>
             </div>
-            <div style={{display:"flex",gap:12}}>
-              <button className="btn-ghost" onClick={()=>setCompose(false)} style={{flex:1}}>Cancel</button>
-              <button className="btn-black" onClick={()=>{if(msgBody.trim()){const newMsg={id:Date.now(),from:"Ms. Simmons",to:"Johnson Family",subject:msgSubject||"Message from Ms. Simmons",body:msgBody,time:"Just now",read:true,avatar:"SS"};setMessages(m=>[...m,newMsg]);setCompose(false);setMsgSubject("");setMsgBody("");if(user)Supabase.sendFamilyMessage({sender_id:user.id,sender_name:"Ms. Simmons",subject:msgSubject||"Message",body:msgBody}).catch(()=>{});toast("Message sent to family ✓","success");}else toast("Please write a message first","error");}} style={{flex:1,fontSize:11}}>Send Message →</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Signature Modal */}
-      {signing&&(
-        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setSigning(null)}>
-          <div className="card fade-up" style={{width:"100%",maxWidth:580,padding:36}}>
-            <div style={{textAlign:"center",marginBottom:24}}>
-              <div style={{fontSize:40,marginBottom:12}}>✍️</div>
-              <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:6}}>{signing.title}</h3>
-              <p style={{fontSize:13,color:C.warm}}>{signing.desc}</p>
-            </div>
-            <div style={{background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:10,padding:16,marginBottom:20}}>
-              {[["Document Type",signing.type],["Date Issued",signing.date],["Signature Deadline",signing.deadline],["Total Pages",`${signing.pages} pages`]].map(([k,v])=>(
-                <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:`1px solid ${C.tanL}`}}>
-                  <span style={{fontSize:13,color:C.warm}}>{k}</span><span style={{fontSize:13,fontWeight:600,color:C.black}}>{v}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{border:`2px dashed ${C.tanL}`,borderRadius:10,padding:"32px 20px",textAlign:"center",marginBottom:20,background:C.purpleL}}>
-              <p style={{fontSize:13,color:C.warm,marginBottom:8}}>Sign below by clicking the button. Your digital signature will be timestamped and legally recorded.</p>
-              <p style={{fontSize:11,color:C.warm,fontStyle:"italic"}}>By signing, you confirm you have read and understood this document.</p>
-            </div>
-            <div style={{display:"flex",gap:12}}>
-              <button className="btn-ghost" onClick={()=>setSigning(null)} style={{flex:1}}>Review Document First</button>
-              <button className="btn-black" onClick={()=>{setSigned(p=>[...p,signing.id]);setSigning(null);}} style={{flex:1.5,fontSize:11}}>✍️ Sign Document →</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab Navigation */}
-      <div style={{display:"flex",gap:0,marginBottom:22,borderBottom:`1px solid ${C.tanL}`,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {[["messages","💬 Messages",msgs.filter(m=>m.unread).length],["signatures","✍️ Signatures",pending.length],["documents","📄 Documents",0],["meetings","📅 Meetings",0],["progress","📈 Student Progress",0],["log","📒 Communication Log",0]].map(([id,label,badge])=>(
-          <button key={id} onClick={()=>{setTab(id);setActiveMsg(null);}} className={`tab-btn${tab===id?" active":""}`}
-            style={{marginRight:24,display:"flex",alignItems:"center",gap:6,whiteSpace:"nowrap"}}>
-            {label}
-            {badge>0&&<span style={{fontSize:10,fontWeight:700,background:C.purple,color:"#fff",padding:"1px 7px",borderRadius:99,lineHeight:"18px"}}>{badge}</span>}
-          </button>
-        ))}
-      </div>
-
-      {/* ── MESSAGES ───────────────────────────── */}
-      {tab==="messages"&&(
-        <div style={{display:"grid",gridTemplateColumns:activeMsg?"1fr 1.4fr":"1fr",gap:20}}>
-          <div className="card" style={{padding:"20px 0",overflow:"hidden"}}>
-            <div style={{padding:"0 22px 14px",borderBottom:`1px solid ${C.tanL}`,marginBottom:4}}>
-              <h3 className="serif" style={{fontSize:16,fontWeight:700}}>Parent Messages</h3>
-            </div>
-            {msgs.map((m,i)=>(
-              <div key={m.id} onClick={()=>setActiveMsg(m)} style={{display:"flex",gap:10,padding:"14px 22px",borderBottom:i<msgs.length-1?`1px solid ${C.tanL}`:"none",cursor:"pointer",background:activeMsg?.id===m.id?C.purpleL:"transparent",transition:"background .1s"}}
-                onMouseEnter={e=>{if(activeMsg?.id!==m.id)e.currentTarget.style.background=C.purpleL;}}
-                onMouseLeave={e=>{if(activeMsg?.id!==m.id)e.currentTarget.style.background="transparent";}}>
-                <div style={{flexShrink:0,marginTop:4}}>
-                  {m.unread?<div style={{width:8,height:8,borderRadius:"50%",background:C.purple}}/>:<div style={{width:8}}/>}
-                </div>
-                <Avatar name={m.name} size={34}/>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
-                    <span style={{fontSize:13,fontWeight:m.unread?700:500,color:C.black}}>{m.name}</span>
-                    <span style={{fontSize:11,color:C.warm,flexShrink:0}}>{m.date}</span>
-                  </div>
-                  <div style={{fontSize:12,color:C.warm,fontWeight:m.unread?600:400,marginBottom:2}}>{m.sub}</div>
-                  <p style={{fontSize:11.5,color:C.warm,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.preview}</p>
-                </div>
+            <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
+              <div style={{padding:"10px 14px",background:C.purpleL,borderRadius:8,fontSize:12,color:C.warm}}>
+                To: <b style={{color:C.black}}>{s?.family_email||s?.parent_email||"No email on file"}</b>
+                {(!s?.family_email&&!s?.parent_email)&&<span style={{color:C.red}}> — Add parent email in student profile first</span>}
               </div>
+              <UInput label="Subject" value={msgSubject} onChange={e=>setMsgSubject(e.target.value)} placeholder={`Update about ${s?.name||"student"}…`}/>
+              <UTextarea label="Message" value={msgBody} onChange={e=>setMsgBody(e.target.value)} rows={5} placeholder="Write your message to the family…"/>
+              <div style={{display:"flex",gap:10}}>
+                <button className="btn-ghost" onClick={()=>setCompose(false)} style={{flex:1,fontSize:12}}>Cancel</button>
+                <button className="btn-purple" onClick={handleSend} disabled={sending||(!s?.family_email&&!s?.parent_email)} style={{flex:2,fontSize:12,padding:"13px"}}>
+                  {sending?<><Spin/> Sending…</>:"Send Message →"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!s&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>👨‍👩‍👧</div>
+          <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>Add students to use the Family Portal.</p>
+        </div>
+      )}
+
+      {s&&(
+        <>
+          {/* Tab bar */}
+          <div style={{display:"flex",overflowX:"auto",gap:0,borderBottom:`2px solid ${C.tanL}`,marginBottom:20}}>
+            {TABS.map(([id,label])=>(
+              <button key={id} onClick={()=>setTab(id)} style={{padding:"10px 18px",border:"none",background:"transparent",cursor:"pointer",
+                borderBottom:tab===id?`3px solid ${C.purple}`:"3px solid transparent",
+                color:tab===id?C.purple:C.warm,fontWeight:tab===id?700:400,fontSize:12,
+                fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",transition:"all .15s"}}>
+                {label}
+              </button>
             ))}
           </div>
-          {activeMsg&&(
-            <div className="card" style={{padding:"24px 26px",display:"flex",flexDirection:"column"}}>
-              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20,paddingBottom:16,borderBottom:`1px solid ${C.tanL}`}}>
-                <Avatar name={activeMsg.name} size={40}/>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:14,fontWeight:700,color:C.black}}>{activeMsg.name}</div>
-                  <div style={{fontSize:12,color:C.warm}}>{activeMsg.sub}</div>
-                </div>
-                <button onClick={()=>setActiveMsg(null)} style={{color:C.warm,fontSize:18,background:"none",border:"none",cursor:"pointer"}}>✕</button>
+
+          {/* Contact Tab */}
+          {tab==="contact"&&(
+            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16}}>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:14}}>PARENT / GUARDIAN</p>
+                {[["Name",s.parent_name||s.family_name||"Not recorded"],["Email",s.family_email||s.parent_email||"Not recorded"],["Phone",s.family_phone||s.parent_phone||"Not recorded"],["Relationship",s.relationship||"Guardian"]].map(([k,v])=>(
+                  <div key={k} style={{display:"flex",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,gap:12}}>
+                    <span style={{fontSize:11,fontWeight:700,color:C.warm,width:100,flexShrink:0}}>{k}</span>
+                    <span style={{fontSize:13,color:C.black}}>{v}</span>
+                  </div>
+                ))}
+                <button className="btn-purple" style={{marginTop:16,fontSize:11,width:"100%"}} onClick={()=>setCompose(true)}>✉️ Send Message →</button>
               </div>
-              <div style={{flex:1,display:"flex",flexDirection:"column",gap:14,marginBottom:20}}>
-                {activeMsg.thread.map((msg,i)=>(
-                  <div key={i} style={{display:"flex",flexDirection:i%2===0?"row":"row-reverse",gap:10}}>
-                    <Avatar name={i%2===0?activeMsg.name:"Ms. Simmons"} size={28}/>
-                    <div style={{maxWidth:"78%",background:i%2===0?C.purpleL:`${C.purple}22`,borderRadius:12,padding:"10px 14px"}}>
-                      <p style={{fontSize:13,color:C.black,lineHeight:1.6}}>{msg}</p>
-                      <p style={{fontSize:10,color:C.warm,marginTop:4,textAlign:i%2===0?"left":"right"}}>{activeMsg.date} · {i%2===0?activeMsg.name:"Ms. Simmons"}</p>
-                    </div>
+              <div className="card" style={{padding:"22px 24px"}}>
+                <p className="lbl" style={{marginBottom:14}}>STUDENT OVERVIEW</p>
+                {[["Name",s.name],["Grade",s.grade||"–"],["School",s.school_name||"–"],["Plan",s.plan||"ALP"],["Status",s.status||"Active"],["Teacher",profile?.full_name||"–"]].map(([k,v])=>(
+                  <div key={k} style={{display:"flex",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,gap:12}}>
+                    <span style={{fontSize:11,fontWeight:700,color:C.warm,width:100,flexShrink:0}}>{k}</span>
+                    <span style={{fontSize:13,color:C.black}}>{v}</span>
                   </div>
                 ))}
               </div>
-              <div style={{borderTop:`1px solid ${C.tanL}`,paddingTop:14,display:"flex",gap:10}}>
-                <textarea value={reply} onChange={e=>setReply(e.target.value)} placeholder="Type your reply…" rows={2} className="u-textarea" style={{flex:1,resize:"none"}}/>
-                <button className="btn-purple" onClick={()=>{if(reply.trim()){toast("Reply sent ✓","success");setReply("");}}} style={{fontSize:11,padding:"10px 18px",alignSelf:"flex-end"}}>Send →</button>
-              </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* ── SIGNATURES & APPROVALS ─────────────── */}
-      {tab==="signatures"&&(
-        <div>
-          {pending.length>0&&(
-            <div style={{background:C.amberBg,border:`1px solid ${C.amberBd}`,borderRadius:10,padding:"14px 18px",marginBottom:20,display:"flex",gap:10,alignItems:"center"}}>
-              <span style={{fontSize:18}}>⚠️</span>
-              <p style={{fontSize:13,color:C.amber,fontWeight:600}}>{pending.length} document{pending.length>1?"s":""} awaiting parent signature — please review and sign before the deadlines.</p>
+          {/* Messages Tab */}
+          {tab==="messages"&&(
+            <div>
+              {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading messages…</div>}
+              {!loading&&messages.length===0&&(
+                <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+                  <div style={{fontSize:40,marginBottom:12}}>💬</div>
+                  <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:8}}>No Messages Yet</h3>
+                  <p style={{fontSize:13,color:C.warm,marginBottom:20}}>Send the first message to {s.name}'s family to get started.</p>
+                  <button className="btn-purple" onClick={()=>setCompose(true)} style={{fontSize:12}}>✉️ Send First Message →</button>
+                </div>
+              )}
+              {!loading&&messages.length>0&&(
+                <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                  {messages.map((m,i)=>(
+                    <div key={i} className="card" style={{padding:"18px 22px",borderLeft:`3px solid ${m.from_id===user?.id?C.purple:C.green}`}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,flexWrap:"wrap",gap:8}}>
+                        <div>
+                          <span style={{fontSize:12,fontWeight:700,color:m.from_id===user?.id?C.purple:C.green}}>{m.from_id===user?.id?"You → Family":"Family → You"}</span>
+                          {m.subject&&<span style={{fontSize:12,color:C.black,fontWeight:600,marginLeft:10}}>{m.subject}</span>}
+                        </div>
+                        <span style={{fontSize:11,color:C.warm,flexShrink:0}}>{m.created_at?new Date(m.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"–"}</span>
+                      </div>
+                      <p style={{fontSize:13,color:C.warm,lineHeight:1.7,margin:0}}>{m.body}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
-          <div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:28}}>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700}}>Pending Signatures</h3>
-            {signatures.filter(s=>s.status==="pending"&&!signed.includes(s.id)).map(sig=>(
-              <div key={sig.id} className="card" style={{padding:"22px 24px",borderLeft:`4px solid ${C.amber}`}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:16}}>
-                  <div style={{flex:1}}>
-                    <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
-                      <Badge color="amber">{sig.type}</Badge>
-                      <span style={{fontSize:11,color:C.red,fontWeight:700}}>Due {sig.deadline}</span>
-                    </div>
-                    <h4 style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:4}}>{sig.title}</h4>
-                    <p style={{fontSize:12.5,color:C.warm,lineHeight:1.55,marginBottom:12}}>{sig.desc}</p>
-                    <div style={{display:"flex",gap:20,fontSize:12,color:C.warm}}>
-                      <span>📄 {sig.pages} pages</span><span>📅 Issued {sig.date}</span>
-                    </div>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:8,flexShrink:0}}>
-                    <button className="btn-ghost" style={{fontSize:11,padding:"8px 16px"}}>📖 Review</button>
-                    <button className="btn-black" onClick={()=>setSigning(sig)} style={{fontSize:11,padding:"9px 16px"}}>✍️ Sign Now</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {signed.length>0&&signatures.filter(s=>signed.includes(s.id)).map(sig=>(
-              <div key={sig.id} className="card" style={{padding:"18px 22px",borderLeft:`4px solid ${C.green}`,opacity:.85}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <Badge color="green">✓ Signed</Badge>
-                    <h4 style={{fontSize:13.5,fontWeight:700,color:C.black,marginTop:6}}>{sig.title}</h4>
-                    <p style={{fontSize:12,color:C.warm,marginTop:2}}>Signed just now · Digital signature recorded</p>
-                  </div>
-                  <button className="btn-ghost" style={{fontSize:11}}>📥 Download</button>
-                </div>
-              </div>
-            ))}
-            {pending.length===0&&signed.length===0&&<p style={{fontSize:13,color:C.warm,padding:"20px 0"}}>No pending signatures.</p>}
-          </div>
-          <div>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:16}}>Previously Signed</h3>
+
+          {/* Goals Tab */}
+          {tab==="goals"&&(
             <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              {signatures.filter(s=>s.status==="signed").map(sig=>(
-                <div key={sig.id} className="card" style={{padding:"16px 22px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div>
-                    <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:4}}>
-                      <Badge color="green">✓ Signed</Badge>
-                      <Badge color="gray">{sig.type}</Badge>
-                    </div>
-                    <div style={{fontSize:13.5,fontWeight:600,color:C.black}}>{sig.title}</div>
-                    <div style={{fontSize:12,color:C.warm,marginTop:2}}>Signed {sig.signedDate} · {sig.pages} pages</div>
-                  </div>
-                  <div style={{display:"flex",gap:8}}>
-                    <button className="btn-ghost" style={{fontSize:11}}>📖 View</button>
-                    <button className="btn-ghost" style={{fontSize:11}}>📥 Download</button>
-                  </div>
-                </div>
-              ))}
+              <GoalsSummaryForFamily studentId={s.id}/>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* ── DOCUMENTS ──────────────────────────── */}
-      {tab==="documents"&&(
-        <div>
-          <div style={{display:"flex",gap:12,marginBottom:18,alignItems:"center"}}>
-            <input placeholder="Search documents…" className="u-input" style={{maxWidth:280}}/>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Documents","ALP Plans","Progress Reports","Evaluations","Consent Forms","504 Plans"].map(o=><option key={o}>{o}</option>)}
-            </select>
-          </div>
-          <div className="card" style={{padding:0,overflow:"hidden"}}>
-            <table className="data-table" style={{minWidth:520}}>
-              <thead><tr>{["Document","Type","Date","Size","Status",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>
-                {documents.map((doc,i)=>(
-                  <tr key={doc.id}>
-                    <td>
-                      <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <span style={{fontSize:20}}>{doc.icon}</span>
-                        <span style={{fontSize:13.5,fontWeight:600,color:C.black}}>{doc.title}</span>
-                      </div>
-                    </td>
-                    <td><Badge color="gray">{doc.type}</Badge></td>
-                    <td style={{color:C.warm}}>{doc.date}</td>
-                    <td style={{color:C.warm}}>{doc.size}</td>
-                    <td>
-                      {doc.status==="pending-signature"
-                        ?<Badge color="amber">⚠ Needs Signature</Badge>
-                        :<Badge color="green">✓ Available</Badge>}
-                    </td>
-                    <td>
-                      <div style={{display:"flex",gap:8}}>
-                        <button className="btn-ghost" style={{fontSize:11,padding:"6px 14px"}}>📖 View</button>
-                        <button className="btn-ghost" style={{fontSize:11,padding:"6px 14px"}}>📥 Download</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* ── MEETINGS ───────────────────────────── */}
-      {tab==="meetings"&&(
-        <div style={{display:"grid",gridTemplateColumns:"1.3fr 1fr",gap:20}}>
-          <div>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:18}}>Upcoming Meetings</h3>
-            <div style={{display:"flex",flexDirection:"column",gap:14}}>
-              {meetings.map((m,i)=>(
-                <div key={i} className="card" style={{padding:"18px 22px",display:"flex",alignItems:"center",gap:16,borderLeft:m.urgent?`4px solid ${C.purple}`:""}}>
-                  <div style={{width:56,background:m.urgent?C.purple:"#1A1A1A",borderRadius:10,padding:"8px 0",textAlign:"center",flexShrink:0,color:"#fff"}}>
-                    <div className="serif" style={{fontSize:24,fontWeight:700,lineHeight:1}}>{m.day}</div>
-                    <div style={{fontSize:9,fontWeight:700,opacity:.7,letterSpacing:".07em",marginTop:1}}>{m.month}</div>
-                  </div>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:3}}>{m.title}</div>
-                    <div style={{fontSize:12,color:C.warm,marginBottom:4}}>{m.time}</div>
-                    <Badge color={m.urgent?"purple":"gray"}>{m.type}</Badge>
-                  </div>
-                  <button className={m.urgent?"btn-purple":"btn-ghost"} style={{fontSize:11,padding:"8px 18px",flexShrink:0}}>{m.action}</button>
-                </div>
-              ))}
+          {/* Documents Tab */}
+          {tab==="documents"&&(
+            <div className="card" style={{padding:"32px",textAlign:"center"}}>
+              <div style={{fontSize:40,marginBottom:12}}>📄</div>
+              <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:8}}>ALP Documents</h3>
+              <p style={{fontSize:13,color:C.warm,marginBottom:20}}>Generated documents for {s.name} will appear here. Generate your first document from the ALP Builder.</p>
+              <button className="btn-purple" onClick={()=>{}} style={{fontSize:12}}>Generate Document →</button>
             </div>
-          </div>
-          <div className="card" style={{padding:"24px 26px"}}>
-            <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:18}}>Schedule a Meeting</h3>
-            <div style={{display:"flex",flexDirection:"column",gap:18}}>
-              <USelect label="Family" value={mtgFamily} onChange={e=>setMtgFamily(e.target.value)} options={[{value:"johnson",label:"Johnson Family (Marcus)"},{value:"lee",label:"Lee Family (Sofia)"},{value:"adeyemi",label:"Adeyemi Family (Aisha)"},{value:"parker",label:"Parker Family (Tyler)"}]}/>
-              <USelect label="Meeting Type" value={mtgType} onChange={e=>setMtgType(e.target.value)} options={[{value:"review",label:"Annual ALP Review"},{value:"progress",label:"Progress Check"},{value:"goals",label:"Goal Discussion"},{value:"amendment",label:"ALP Amendment"},{value:"triennial",label:"Triennial Reevaluation"},{value:"transition",label:"Transition Planning"}]}/>
-              <UInput label="Preferred Date" type="date" value={mtgDate} onChange={e=>setMtgDate(e.target.value)}/>
-              <UInput label="Preferred Time" type="time" value={mtgTime} onChange={e=>setMtgTime(e.target.value)}/>
-              <USelect label="Meeting Format" value={mtgFormat} onChange={e=>setMtgFormat(e.target.value)} options={[{value:"virtual",label:"Virtual — Google Meet"},{value:"inperson",label:"In-Person — School"},{value:"phone",label:"Phone Call"},{value:"teams",label:"Virtual — Microsoft Teams"}]}/>
-              <UTextarea label="Notes for Family" rows={3} value={mtgNotes} onChange={e=>setMtgNotes(e.target.value)} placeholder="Any specific topics to cover?"/>
-              <button className="btn-black" onClick={()=>{toast("Meeting invitation sent to family!","success");setMtgNotes("");}} style={{fontSize:11,padding:"13px"}}>📅 Send Meeting Invitation →</button>
-            </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
-
-      {/* ── STUDENT PROGRESS (Family View) ─────── */}
-      {tab==="progress"&&(
-        <div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:20}}>
-            {[["Reading","82%",C.purple,"↑ Improving"],["Math","68%",C.green,"→ Stable"],["Communication","75%",C.blue,"↑ Improving"],["Social-Emotional","59%",C.amber,"→ Stable"]].map(([d,v,c,t])=>(
-              <div key={d} className="metric-card">
-                <p className="lbl" style={{marginBottom:8}}>{d}</p>
-                <div style={{fontSize:28,fontWeight:800,color:c,fontFamily:"'Playfair Display',serif"}}>{v}</div>
-                <p style={{fontSize:11,color:c,fontWeight:600,marginTop:4}}>{t}</p>
-              </div>
-            ))}
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:20}}>
-            <div className="card" style={{padding:"24px 26px"}}>
-              <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:16}}>Goal Progress Summary</h3>
-              {[{g:"Reading Fluency — 80 wcpm by May 2027",p:85,c:C.purple,s:"On Track"},
-                {g:"Communication — 3-turn conversation",p:67,c:C.blue,s:"Developing"},
-                {g:"Social-Emotional — Self-regulation",p:70,c:C.amber,s:"Developing"}].map(item=>(
-                <div key={item.g} style={{marginBottom:16}}>
-                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                    <span style={{fontSize:12.5,color:C.black,fontWeight:500,flex:1,marginRight:8}}>{item.g}</span>
-                    <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-                      <span style={{fontSize:12,fontWeight:700,color:item.c}}>{item.p}%</span>
-                      <Badge color={item.s==="On Track"?"green":"amber"}>{item.s}</Badge>
-                    </div>
-                  </div>
-                  <PBar value={item.p} color={item.c}/>
-                </div>
-              ))}
-            </div>
-            <div className="card" style={{padding:"24px 26px"}}>
-              <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:16}}>Recent Updates</h3>
-              {[["May 6","Reading probe: 68 wcpm ↑ (was 65)","positive"],["May 3","Communication goal: 3-turn conv. practiced in class","positive"],["Apr 30","Behavior: Used break card independently ✓","positive"],["Apr 25","Math assessment: 63% (below 70% target)","concern"],["Apr 20","Self-regulation: Needed adult prompt 3/5 obs.","neutral"]].map(([date,update,type])=>(
-                <div key={date} style={{display:"flex",gap:10,padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"flex-start"}}>
-                  <span style={{fontSize:16,flexShrink:0}}>{type==="positive"?"🟢":type==="concern"?"🟡":"⚪"}</span>
-                  <div>
-                    <div style={{fontSize:11,color:C.warm,marginBottom:2}}>{date}</div>
-                    <div style={{fontSize:12.5,color:C.black,lineHeight:1.5}}>{update}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="card" style={{padding:"20px 22px",borderLeft:`4px solid ${C.purple}`}}>
-            <p style={{fontSize:10,fontWeight:700,color:C.purple,letterSpacing:".1em",marginBottom:6}}>✦ ALP AI FAMILY INSIGHT</p>
-            <p style={{fontSize:13.5,fontWeight:600,color:C.black,marginBottom:6}}>Marcus is making steady progress — here's what you can do at home</p>
-            <p style={{fontSize:13,color:C.warm,lineHeight:1.65}}>Marcus's reading rate improved by 16 wcpm since September. To support his goal at home: read together for 10 minutes daily, ask him to retell what he read (helps comprehension), and praise effort over accuracy. For communication, encourage 3-turn conversations at dinner using open-ended questions about his day.</p>
-          </div>
-        </div>
-      )}
-
-      {/* ── COMMUNICATION LOG ──────────────────── */}
-      {tab==="log"&&(
-        <div>
-          <div style={{display:"flex",gap:12,marginBottom:18,alignItems:"center",flexWrap:"wrap"}}>
-            <input placeholder="Search log…" className="u-input" style={{maxWidth:260}}/>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Families","Johnson Family","Lee Family","Adeyemi Family","Parker Family"].map(o=><option key={o}>{o}</option>)}
-            </select>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Types","Message","Signature","Document","Meeting","Notice"].map(o=><option key={o}>{o}</option>)}
-            </select>
-            <button className="btn-ghost" style={{fontSize:11,marginLeft:"auto"}}>📥 Export Log</button>
-          </div>
-          <div className="card" style={{padding:0,overflow:"hidden"}}>
-            <table className="data-table" style={{minWidth:520}}>
-              <thead><tr>{["Date","Type","Direction","Family","Subject","Method","Staff"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>
-                {commLog.map((entry,i)=>(
-                  <tr key={i}>
-                    <td style={{color:C.warm,whiteSpace:"nowrap"}}>{entry.date}</td>
-                    <td><Badge color={typeColor[entry.type]===C.blue?"blue":typeColor[entry.type]===C.green?"green":typeColor[entry.type]===C.purple?"purple":typeColor[entry.type]===C.amber?"amber":"red"}>{entry.type}</Badge></td>
-                    <td style={{fontSize:18,textAlign:"center"}}>{entry.direction}</td>
-                    <td style={{fontWeight:600,color:C.black}}>{entry.family}</td>
-                    <td style={{maxWidth:220,color:C.black}}>{entry.subject}</td>
-                    <td style={{color:C.warm,fontSize:12}}>{entry.method}</td>
-                    <td style={{color:C.warm,fontSize:12}}>{entry.staff}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div style={{padding:"14px 20px",fontSize:12,color:C.warm,display:"flex",justifyContent:"space-between"}}>
-            <span>Showing {commLog.length} of {commLog.length} entries</span>
-            <span>privacy standards complete · All records encrypted · Audit trail active</span>
-          </div>
-        </div>
-      )}
-    </Page></>
+    </Page>
   );
+}
+
+function GoalsSummaryForFamily({studentId}){
+  const [goals,setGoals]=useState([]);
+  const [loading,setLoading]=useState(true);
+  useEffect(()=>{
+    if(!studentId)return;
+    Supabase.getGoals(studentId).then(g=>{setGoals(g||[]);setLoading(false);});
+  },[studentId]);
+  if(loading)return<div style={{textAlign:"center",padding:32,color:C.warm}}>Loading goals…</div>;
+  if(goals.length===0)return<div className="card" style={{padding:"32px",textAlign:"center",color:C.warm}}>No goals created yet. Complete the ALP Builder to add goals.</div>;
+  return goals.map(g=>{
+    const pct=g.current_pct||0;
+    const color=pct>=80?C.green:pct>=50?C.amber:C.red;
+    return(
+      <div key={g.id} className="card" style={{padding:"18px 22px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
+          <span style={{fontSize:11,fontWeight:700,background:color+"18",color,padding:"2px 10px",borderRadius:99}}>{g.domain}</span>
+          <span style={{fontSize:16,fontWeight:800,color}}>{pct}%</span>
+        </div>
+        <p style={{fontSize:13,color:C.black,lineHeight:1.6,margin:"0 0 10px"}}>{g.goal_text}</p>
+        <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:99}}/>
+        </div>
+        <div style={{display:"flex",gap:16,fontSize:11,color:C.warm,marginTop:8}}>
+          {g.baseline&&<span><b style={{color:C.black}}>Baseline:</b> {g.baseline}</span>}
+          {g.target&&<span><b style={{color:C.black}}>Target:</b> {g.target}</span>}
+        </div>
+      </div>
+    );
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -9145,428 +9029,221 @@ function FamilyPortal(){
 function Reports(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
-  const {students:dbStudents}=useSupabaseAuth();
-  const totalStudents=dbStudents&&dbStudents.length>0?dbStudents.length:19;
-  const [tab,setTab]=useState("reports");
-  const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
-  const [exporting,setExporting]=useState(null);
-  const [validating,setValidating]=useState(false);
-  const [validated,setValidated]=useState(false);
+  const {students:dbStudents,user,profile}=useSupabaseAuth();
+  const [tab,setTab]=useState("generate");
   const [activeReport,setActiveReport]=useState(null);
-  const [dateFrom,setDateFrom]=useState("2026-01-01");
-  const [dateTo,setDateTo]=useState("2026-05-31");
+  const [generating,setGenerating]=useState(null);
+  const [selectedStudentId,setSelectedStudentId]=useState(null);
 
-  const frameworks=[
-    {icon:"🏛",label:"ALP Plan Standards",sub:"All 38 ALPs complete · Last check: March 2026",status:"Complete",color:"green",score:98,students:38},
-    {icon:"📅",label:"Annual Review Schedule",sub:"4 plans pending annual review within 30 days",status:"Review Due",color:"amber",score:89,students:4},
-    {icon:"♿",label:"Support Plans / ADA",sub:"All 7 accommodation plans current and signed",status:"Complete",color:"green",score:100,students:7},
-    {icon:"⏰",label:"Reevaluation Schedule",sub:"2 students past 3-year reevaluation due date",status:"Overdue",color:"red",score:72,students:2},
-    {icon:"🌍",label:"Ghana GES Framework",sub:"3 international students · All plans current",status:"Complete",color:"green",score:100,students:3},
-    {icon:"🇬🇧",label:"UK Code of Practice",sub:"2 students · EHC Plans active and reviewed",status:"Complete",color:"green",score:96,students:2},
-    {icon:"🇨🇦",label:"Canada Provincial IEPs",sub:"1 student · Ontario framework complete",status:"Complete",color:"green",score:100,students:1},
-    {icon:"🇦🇺",label:"Australia",sub:"2 students · Disability standards met",status:"Complete",color:"green",score:94,students:2},
-  ];
+  const totalStudents=dbStudents?.length||0;
+  const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
+
+  useEffect(()=>{
+    if(dbStudents?.length&&!selectedStudentId) setSelectedStudentId(dbStudents[0]?.id);
+  },[dbStudents]);
 
   const reportTypes=[
-    {id:"alp",icon:"📋",label:"Individual ALP Report",desc:"Complete ALP document for one student — all 13 sections, goals, services, signatures.",formats:["PDF","Word"],time:"~10 sec"},
-    {id:"progress",icon:"📈",label:"Student Progress Report",desc:"Visual progress report with charts, goal tracking, CBM data, and trend analysis.",formats:["PDF","Excel"],time:"~15 sec"},
-    {id:"class",icon:"👥",label:"Class Caseload Report",desc:"All students in your caseload — summary of plans, goals, and review status.",formats:["PDF","Excel"],time:"~20 sec"},
-    {id:"growth",icon:"📊",label:"Student Growth Report",desc:"Learning velocity, benchmark comparisons, intervention effectiveness ratings.",formats:["PDF"],time:"~12 sec"},
-    {id:"family",icon:"❤️",label:"Family Progress Report",desc:"Parent-friendly progress summary — no jargon, visual graphs, plain language.",formats:["PDF"],time:"~8 sec"},
-    {id:"progress",icon:"✅",label:"School Progress Report",desc:"Full progress snapshot — overdue reviews, missing signatures, framework status.",formats:["PDF","Excel"],time:"~25 sec"},
-    {id:"district",icon:"🏫",label:"District Summary Report",desc:"District-wide ALP metrics, review rates, and aggregate student data.",formats:["PDF","Excel","CSV"],time:"~30 sec"},
-    {id:"audit",icon:"🔍",label:"Audit Trail Report",desc:"Complete activity log — who created, edited, signed, and exported every document.",formats:["PDF","CSV"],time:"~18 sec"},
-    {id:"intervention",icon:"🎯",label:"Intervention Effectiveness",desc:"RTI outcomes, goal attainment rates, and intervention strategy analysis.",formats:["PDF","Excel"],time:"~22 sec"},
+    {id:"alp",icon:"📋",label:"Individual ALP Report",desc:"Complete ALP document for one student — all sections, goals, and services.",formats:["PDF"],time:"~10 sec",needsStudent:true},
+    {id:"progress",icon:"📈",label:"Student Progress Report",desc:"Visual progress report with goal tracking, data points, and trend analysis.",formats:["PDF"],time:"~15 sec",needsStudent:true},
+    {id:"class",icon:"👥",label:"Class Caseload Report",desc:`All ${totalStudents} students in your caseload — plan status and review dates.`,formats:["PDF"],time:"~20 sec",needsStudent:false},
+    {id:"family",icon:"❤️",label:"Family Progress Report",desc:"Parent-friendly summary — plain language, visual progress, next steps.",formats:["PDF"],time:"~8 sec",needsStudent:true},
   ];
 
-  const recentExports=[
-    {icon:"📋",label:"Marcus Johnson — ALP Report",by:"Ms. Simmons",date:"May 6, 2026",format:"PDF",size:"2.4 MB"},
-    {icon:"📈",label:"Q3 Progress Report — Class",by:"Ms. Simmons",date:"May 5, 2026",format:"Excel",size:"1.1 MB"},
-    {icon:"✅",label:"School Progress Report — May",by:"Principal Owusu",date:"May 3, 2026",format:"PDF",size:"3.2 MB"},
-    {icon:"📋",label:"Aisha Adeyemi — ALP Report",by:"Ms. Simmons",date:"Apr 30, 2026",format:"PDF",size:"2.1 MB"},
-  ];
+  async function generateReport(type){
+    if(type.needsStudent&&!s){toast("Select a student first","error");return;}
+    setGenerating(type.id);
+    // Build report data from real Supabase data
+    try{
+      const studentName=s?.name||"All Students";
+      const goals=s?.id?await Supabase.getGoals(s.id):[];
+      const progress=s?.id?await Supabase.getProgress(s.id,50):[];
 
-  const auditLog=[
-    {time:"May 6, 2026 · 2:14 PM",user:"Ms. Simmons",action:"Exported ALP Report",target:"Marcus Johnson",type:"export",ip:"192.168.1.45"},
-    {time:"May 6, 2026 · 11:03 AM",user:"Ms. Simmons",action:"Updated Goal — Reading",target:"Marcus Johnson",type:"edit",ip:"192.168.1.45"},
-    {time:"May 5, 2026 · 4:22 PM",user:"Ms. Simmons",action:"Sent Signature Request",target:"Johnson Family",type:"signature",ip:"192.168.1.45"},
-    {time:"May 5, 2026 · 9:15 AM",user:"Patricia Johnson",action:"Signed ALP Document",target:"Marcus Johnson — ALP 2026",type:"signature",ip:"74.125.224.102"},
-    {time:"May 4, 2026 · 3:08 PM",user:"Ms. Rivera",action:"Added Session Note",target:"Marcus Johnson — SLP",type:"create",ip:"192.168.1.62"},
-    {time:"May 3, 2026 · 10:44 AM",user:"Ms. Simmons",action:"Created ALP Amendment",target:"Aisha Adeyemi",type:"create",ip:"192.168.1.45"},
-    {time:"May 2, 2026 · 2:30 PM",user:"Principal Owusu",action:"Viewed Progress Review Report",target:"School Dashboard",type:"view",ip:"192.168.1.10"},
-    {time:"May 1, 2026 · 9:00 AM",user:"System",action:"Auto-generated Review Reminder",target:"4 students due",type:"system",ip:"—"},
-    {time:"Apr 30, 2026 · 4:15 PM",user:"Ms. Simmons",action:"Entered CBM Data",target:"Sofia Lee — Reading Probe",type:"edit",ip:"192.168.1.45"},
-    {time:"Apr 28, 2026 · 11:20 AM",user:"Ms. Simmons",action:"Completed ALP Meeting",target:"Johnson Family",type:"meeting",ip:"192.168.1.45"},
-  ];
+      // Build text report content
+      const reportLines=[];
+      reportLines.push(`ALP PLATFORM — ${type.label.toUpperCase()}`);
+      reportLines.push(`Generated: ${new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}`);
+      reportLines.push(`Generated by: ${profile?.full_name||user?.email||"Staff"}`);
+      reportLines.push("═".repeat(60));
+      if(s){
+        reportLines.push(`STUDENT: ${s.name}`);
+        reportLines.push(`Grade: ${s.grade||"–"} | School: ${s.school_name||"–"} | Status: ${s.status||"Active"}`);
+        reportLines.push(`Plan: ${s.plan||"ALP"} | Disability/Need: ${s.disability||"–"}`);
+        reportLines.push("─".repeat(60));
+      }
+      if(goals.length>0){
+        reportLines.push("ANNUAL GOALS:");
+        goals.forEach((g,i)=>{
+          reportLines.push(`${i+1}. [${g.domain}] ${g.goal_text}`);
+          if(g.baseline) reportLines.push(`   Baseline: ${g.baseline} → Target: ${g.target||"–"}`);
+          if(g.current_pct) reportLines.push(`   Progress: ${g.current_pct}%`);
+        });
+        reportLines.push("─".repeat(60));
+      }
+      if(progress.length>0){
+        reportLines.push(`PROGRESS DATA (last ${Math.min(10,progress.length)} entries):`);
+        progress.slice(-10).forEach(p=>{
+          reportLines.push(`  ${p.date||"–"} | Score: ${p.score} | ${p.notes||""}`);
+        });
+      }
+      if(type.id==="class"&&dbStudents?.length>0){
+        reportLines.push(`CASELOAD SUMMARY (${totalStudents} students):`);
+        dbStudents.forEach(st=>{
+          reportLines.push(`  • ${st.name} | Grade ${st.grade||"–"} | ${st.status||"Active"} | ${st.disability||"–"}`);
+        });
+      }
+      reportLines.push("═".repeat(60));
+      reportLines.push("END OF REPORT — ALP Platform by Stamper Acolytes");
 
-  const actionColor={export:C.blue,edit:C.amber,signature:C.purple,create:C.green,view:C.warm,system:C.red,meeting:C.blue};
-  const actionIcon={export:"📤",edit:"✏️",signature:"✍️",create:"➕",view:"👁",system:"🤖",meeting:"📅"};
-
-  const sigRequests=[
-    {id:1,student:"Marcus Johnson",doc:"ALP 2026–2027",family:"Patricia Johnson",sent:"May 5, 2026",deadline:"May 22, 2026",status:"pending"},
-    {id:2,student:"Aisha Adeyemi",doc:"ALP Amendment",family:"Mr. & Mrs. Adeyemi",sent:"May 2, 2026",deadline:"May 16, 2026",status:"pending"},
-    {id:3,student:"Sofia Lee",doc:"RTI-II Consent",family:"Lee Family",sent:"Apr 15, 2026",deadline:"Apr 29, 2026",status:"signed",signedDate:"Apr 22"},
-    {id:4,student:"Tyler Parker",doc:"504 Annual Review",family:"Parker Family",sent:"Mar 10, 2026",deadline:"Mar 24, 2026",status:"signed",signedDate:"Mar 18"},
-    {id:5,student:"Ryan Chen",doc:"ALP 2026–2027",family:"Chen Family",sent:"May 8, 2026",deadline:"May 22, 2026",status:"pending"},
-  ];
-
-  const timeline=[
-    {date:"May 14, 2026",days:3,label:"Marcus Johnson — Annual ALP Review Meeting",type:"meeting",urgent:true},
-    {date:"May 16, 2026",days:5,label:"Aisha Adeyemi — ALP Amendment Signature Deadline",type:"signature",urgent:true},
-    {date:"May 22, 2026",days:11,label:"Marcus Johnson — Signature Deadline",type:"signature",urgent:false},
-    {date:"May 22, 2026",days:11,label:"Ryan Chen — Signature Deadline",type:"signature",urgent:false},
-    {date:"May 28, 2026",days:17,label:"Sofia Lee — Annual Review Due",type:"review",urgent:false},
-    {date:"Jun 3, 2026",days:23,label:"Tyler Parker — 504 Annual Review",type:"review",urgent:false},
-    {date:"Jun 15, 2026",days:35,label:"Ryan Chen — Reevaluation Due (3-year)",type:"reeval",urgent:false},
-    {date:"Aug 1, 2026",days:82,label:"Kofi Mensah — Annual Review",type:"review",urgent:false},
-  ];
-
-  const validationResults=[
-    {student:"Marcus Johnson",plan:"ALP",score:96,issues:[],warnings:["Transition planning section recommended for age 10+"]},
-    {student:"Sofia Lee",plan:"RTI-II",score:100,issues:[],warnings:[]},
-    {student:"Aisha Adeyemi",plan:"ALP",score:84,issues:["Parent signature missing","Amendment not yet delivered to family"],warnings:["Communication goal baseline not documented"]},
-    {student:"Ryan Chen",plan:"ALP",score:71,issues:["Annual review overdue by 3 days","Reevaluation consent pending"],warnings:["Transition section incomplete for age 11"]},
-    {student:"Tyler Parker",plan:"504",score:98,issues:[],warnings:["Accommodation review recommended"]},
-  ];
-
-  function doExport(reportId,report){
-    setActiveReport(report||{label:reportTypes.find(r=>r.id===reportId)?.label||"Report",formats:reportTypes.find(r=>r.id===reportId)?.formats||["PDF"],time:reportTypes.find(r=>r.id===reportId)?.time||"~15 sec"});
+      // Create downloadable text file (PDF generation coming Phase 2)
+      const blob=new Blob([reportLines.join("\n")],{type:"text/plain"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;
+      a.download=`ALP_${type.id}_${studentName.replace(/\s+/g,"_")}_${new Date().toISOString().split("T")[0]}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast(`${type.label} downloaded!`,"success");
+    }catch(e){
+      console.error(e);
+      toast("Report generation failed","error");
+    }
+    setGenerating(null);
   }
 
   return(
-    <>{activeReport&&<ReportGenerationModal report={activeReport} onClose={()=>setActiveReport(null)}/>}
-    <Page
-      title={<>Reports & <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Progress Review</span></>}
-      subtitle="Progress Reports · Activity Log · Digital Signatures"
-      action={<button className="btn-outline" onClick={()=>doExport("progress",{label:"School Progress Report",formats:["PDF","Excel"],time:"~25 sec"})} style={{fontSize:11,padding:"10px 22px"}}>Export All ↗</button>}>
+    <Page title={<>Reports <span className="serif-italic" style={{color:C.warm,fontSize:26}}>& Exports</span></>}
+      subtitle={`${totalStudents} student${totalStudents!==1?"s":""} in your caseload · ${new Date().toLocaleDateString("en-US",{month:"long",year:"numeric"})}`}>
 
-      {/* Summary row */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:14,marginBottom:22}}>
-        {[["REVIEWED PLANS","36","of 38 active ALPs",C.green],["REVIEW DUE","4","within 30 days",C.amber],["OVERDUE","2","past due date",C.red],["FRAMEWORKS","8","all monitored",C.purple]].map(([l,v,s,c])=>(
-          <div key={l} className="metric-card">
-            <p className="lbl" style={{marginBottom:8}}>{l}</p>
-            <div className="serif" style={{fontSize:28,fontWeight:700,color:c,letterSpacing:"-1px"}}>{v}</div>
-            <p style={{fontSize:11,color:C.warm,marginTop:4}}>{s}</p>
-          </div>
+      {/* Tab bar */}
+      <div style={{display:"flex",gap:0,borderBottom:`2px solid ${C.tanL}`,marginBottom:20}}>
+        {[["generate","Generate Reports"],["overview","Caseload Overview"]].map(([id,label])=>(
+          <button key={id} onClick={()=>setTab(id)} style={{padding:"10px 20px",border:"none",background:"transparent",cursor:"pointer",
+            borderBottom:tab===id?`3px solid ${C.purple}`:"3px solid transparent",
+            color:tab===id?C.purple:C.warm,fontWeight:tab===id?700:400,fontSize:12,
+            fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",transition:"all .15s"}}>
+            {label}
+          </button>
         ))}
       </div>
 
-      {/* Tabs */}
-      <div style={{display:"flex",gap:0,marginBottom:22,borderBottom:`1px solid ${C.tanL}`,overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-        {[["progress","✅ Progress"],["reports","📄 Reports"],["signatures","✍️ Signatures"],["audit","🔍 Audit Log"],["validation","🔬 Validation"],["timeline","📅 Timeline"]].map(([id,label])=>(
-          <button key={id} onClick={()=>setTab(id)} className={`tab-btn${tab===id?" active":""}`} style={{marginRight:22,whiteSpace:"nowrap"}}>{label}</button>
-        ))}
-      </div>
-
-      {/* ── PROGRESS DASHBOARD ──────────────── */}
-      {tab==="reports"&&(
-        <div style={{display:"grid",gridTemplateColumns:"1.4fr 1fr",gap:20}}>
-          <div>
-            <div style={{display:"flex",gap:12,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-              <select className="u-select" style={{width:"auto",paddingRight:32}}>
-                {["All Students","Marcus Johnson","Sofia Lee","Aisha Adeyemi","Tyler Parker","Ryan Chen"].map(o=><option key={o}>{o}</option>)}
+      {tab==="generate"&&(
+        <>
+          {/* Student selector for per-student reports */}
+          {dbStudents?.length>0&&(
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20,padding:"14px 18px",background:C.purpleL,borderRadius:10,flexWrap:"wrap"}}>
+              <span style={{fontSize:12,color:C.warm}}>Selected student for reports:</span>
+              <select value={selectedStudentId||""} onChange={e=>setSelectedStudentId(e.target.value)} style={{fontSize:12,padding:"7px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black,fontWeight:600}}>
+                {dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
               </select>
-              <UInput label="" value={dateFrom} onChange={e=>setDateFrom(e.target.value)} type="date"/>
-              <span style={{fontSize:12,color:C.warm}}>to</span>
-              <UInput label="" value={dateTo} onChange={e=>setDateTo(e.target.value)} type="date"/>
+              {s&&<span style={{fontSize:11,color:C.warm}}>Grade {s.grade||"–"} · {s.disability||"ALP"}</span>}
             </div>
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              {reportTypes.map(r=>(
-                <div key={r.id} className="card" style={{padding:"18px 20px",display:"flex",alignItems:"center",gap:14}}>
-                  <div style={{width:44,height:44,borderRadius:10,background:C.purpleL,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,border:`1px solid ${C.tanL}`}}>{r.icon}</div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13.5,fontWeight:700,color:C.black,marginBottom:3}}>{r.label}</div>
-                    <div style={{fontSize:12,color:C.warm,marginBottom:6}}>{r.desc}</div>
-                    <div style={{display:"flex",gap:6}}>
-                      {r.formats.map(f=><span key={f} style={{fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:99,background:C.purpleL,color:C.purple,border:`1px solid ${C.tanL}`}}>{f}</span>)}
-                      <span style={{fontSize:10,color:C.warm,marginLeft:4}}>⏱ {r.time}</span>
+          )}
+
+          {totalStudents===0&&(
+            <div className="card" style={{padding:"48px 32px",textAlign:"center",marginBottom:20}}>
+              <div style={{fontSize:48,marginBottom:12}}>📋</div>
+              <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+              <p style={{fontSize:13,color:C.warm}}>Add students and complete their ALPs to generate reports.</p>
+            </div>
+          )}
+
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:14}}>
+            {reportTypes.map(r=>(
+              <div key={r.id} className="card" style={{padding:"22px 24px",cursor:"pointer",transition:"box-shadow .2s",border:`1.5px solid ${activeReport===r.id?C.purple:C.tanL}`}}
+                onClick={()=>setActiveReport(activeReport===r.id?null:r.id)}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                  <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
+                    <span style={{fontSize:24}}>{r.icon}</span>
+                    <div>
+                      <p style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:3}}>{r.label}</p>
+                      <p style={{fontSize:12,color:C.warm,lineHeight:1.5}}>{r.desc}</p>
                     </div>
                   </div>
-                  <button className="btn-black" onClick={()=>doExport(r.id)} disabled={exporting===r.id} style={{fontSize:11,padding:"9px 18px",flexShrink:0}}>
-                    {exporting===r.id?<><Spin/>…</>:"📥 Export"}
-                  </button>
                 </div>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="card" style={{padding:"22px 24px",marginBottom:16}}>
-              <h3 className="serif" style={{fontSize:15,fontWeight:700,marginBottom:14}}>Recent Exports</h3>
-              {recentExports.map((e,i)=>(
-                <div key={i} style={{display:"flex",gap:10,padding:"10px 0",borderBottom:i<recentExports.length-1?`1px solid ${C.tanL}`:"none",alignItems:"center"}}>
-                  <span style={{fontSize:18,flexShrink:0}}>{e.icon}</span>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:12.5,fontWeight:600,color:C.black,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.label}</div>
-                    <div style={{fontSize:11,color:C.warm,marginTop:1}}>{e.by} · {e.date} · {e.size}</div>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:12,paddingTop:12,borderTop:`1px solid ${C.tanL}`}}>
+                  <div style={{display:"flex",gap:6}}>
+                    {r.formats.map(f=><span key={f} style={{fontSize:10,fontWeight:700,color:C.red,background:C.red+"12",padding:"2px 8px",borderRadius:4}}>{f}</span>)}
+                    <span style={{fontSize:10,color:C.warm,padding:"2px 6px"}}>{r.time}</span>
                   </div>
-                  <Badge color="gray">{e.format}</Badge>
-                </div>
-              ))}
-            </div>
-            <div className="card" style={{padding:"20px 22px"}}>
-              <h3 className="serif" style={{fontSize:15,fontWeight:700,marginBottom:12}}>Quick Export</h3>
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-                {["All ALPs (PDF)","Progress Summary","Overdue List","Signature Status","District Data (CSV)"].map(r=>(
-                  <button key={r} className="btn-ghost" onClick={()=>doExport(r)} disabled={exporting===r} style={{fontSize:11,padding:"7px 14px"}}>
-                    {exporting===r?"⏳":""} {r}
+                  <button
+                    className="btn-purple"
+                    style={{fontSize:11,padding:"8px 18px"}}
+                    disabled={generating===r.id||(r.needsStudent&&totalStudents===0)}
+                    onClick={e=>{e.stopPropagation();generateReport(r);}}>
+                    {generating===r.id?<><Spin/> Generating…</>:"Generate ↓"}
                   </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── SIGNATURES ────────────────────────── */}
-      {tab==="signatures"&&(
-        <div>
-          <div style={{display:"flex",gap:12,marginBottom:16,alignItems:"center"}}>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Families","Johnson Family","Adeyemi Family","Chen Family"].map(o=><option key={o}>{o}</option>)}
-            </select>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Status","Pending","Signed","Overdue"].map(o=><option key={o}>{o}</option>)}
-            </select>
-            <button className="btn-black" style={{fontSize:11,padding:"9px 18px",marginLeft:"auto"}}>+ Send New Signature Request</button>
-          </div>
-          <div className="card" style={{padding:0,overflow:"hidden",marginBottom:20}}>
-            <table className="data-table" style={{minWidth:520}}>
-              <thead><tr>{["Student","Document","Family","Sent","Deadline","Status",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>
-                {sigRequests.map(s=>(
-                  <tr key={s.id} style={{cursor:"pointer"}} onClick={()=>setSelectedStudent({...s,name:s.student,grade:s.grade,disability:s.disability,status:s.status,review:s.review})}>
-                    <td style={{fontWeight:600}}>{s.student}</td>
-                    <td style={{color:C.warm,fontSize:12}}>{s.doc}</td>
-                    <td>{s.family}</td>
-                    <td style={{color:C.warm,fontSize:12}}>{s.sent}</td>
-                    <td style={{color:s.status==="pending"?C.amber:C.warm,fontWeight:s.status==="pending"?700:400,fontSize:12}}>{s.deadline}</td>
-                    <td>
-                      {s.status==="signed"
-                        ?<Badge color="green">✓ Signed {s.signedDate}</Badge>
-                        :<Badge color="amber">⏳ Pending</Badge>}
-                    </td>
-                    <td>
-                      <div style={{display:"flex",gap:6}}>
-                        <button className="btn-ghost" style={{fontSize:11,padding:"5px 12px"}}>📖 View</button>
-                        {s.status==="pending"&&<button className="btn-ghost" style={{fontSize:11,padding:"5px 12px"}}>🔁 Resend</button>}
-                        {s.status==="signed"&&<button className="btn-ghost" style={{fontSize:11,padding:"5px 12px"}}>📥 Download</button>}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14}}>
-            {[["Total Requests","5","this year",C.purple],["Signed","2","avg 6 days",C.green],["Pending","3","action required",C.amber]].map(([l,v,s,c])=>(
-              <div key={l} className="metric-card">
-                <p className="lbl" style={{marginBottom:8}}>{l}</p>
-                <div className="serif" style={{fontSize:28,fontWeight:700,color:c}}>{v}</div>
-                <p style={{fontSize:11,color:C.warm,marginTop:4}}>{s}</p>
+                </div>
+                {r.needsStudent&&s&&activeReport===r.id&&(
+                  <div style={{marginTop:10,padding:"8px 12px",background:C.purpleL,borderRadius:8,fontSize:11,color:C.purple}}>
+                    Will generate for: <b>{s.name}</b>
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        </div>
+
+          <div style={{marginTop:16,padding:"12px 16px",background:C.tanL+"55",borderRadius:8,fontSize:12,color:C.warm}}>
+            📌 Reports currently download as formatted text files. Full PDF generation with charts and signatures is coming in Phase 2.
+          </div>
+        </>
       )}
 
-      {/* ── AUDIT LOG ─────────────────────────── */}
-
-      {tab==="progress"&&(
-        <div>
+      {tab==="overview"&&(
+        <>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:20}}>
-            {[["STUDENTS ON TRACK","26","of 38 active",C.green],["GOALS MET","74%","This quarter",C.purple],["DATA ENTRIES","89","Last 30 days",C.blue],["NEEDS REVIEW","4","Action required",C.amber]].map(([l,v,s,c])=>(
+            {[
+              ["TOTAL STUDENTS",totalStudents,C.purple],
+              ["ACTIVE PLANS",dbStudents?.filter(s=>s.status==="Active"||!s.status).length||0,C.green],
+              ["REVIEW DUE",dbStudents?.filter(s=>s.status==="Review Due").length||0,C.amber],
+              ["INACTIVE",dbStudents?.filter(s=>s.status==="Inactive").length||0,C.red],
+            ].map(([l,v,c])=>(
               <div key={l} className="card" style={{padding:"16px 20px",borderLeft:`3px solid ${c}`}}>
                 <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
-                <div className="serif" style={{fontSize:26,fontWeight:700,color:c,lineHeight:1}}><AnimCounter value={v}/></div>
-                <p style={{fontSize:11,color:C.warm,marginTop:4}}>{s}</p>
+                <div className="serif" style={{fontSize:28,fontWeight:700,color:c}}><AnimCounter value={v}/></div>
               </div>
             ))}
           </div>
-          <div className="card" style={{padding:"22px 24px",marginBottom:16}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <p className="lbl">STUDENT PROGRESS OVERVIEW</p>
-              <button className="btn-ghost" onClick={()=>setActiveReport({label:"Progress Summary Report",formats:["PDF","Excel"],time:"~20 sec"})} style={{fontSize:11}}>Export →</button>
-            </div>
-            <div style={{overflowX:"auto"}}>
-              <table className="data-table" style={{minWidth:580}}>
-                <thead><tr>{["Student","Goals Active","On Track","Last Entry","Trend"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-                <tbody>
-                  {[
-                    ["Marcus Johnson","4","3/4","May 8","↑ Improving"],
-                    ["Sofia Lee","3","3/3","May 5","→ Stable"],
-                    ["Aisha Adeyemi","4","2/4","Apr 28","↓ Monitor"],
-                    ["Tyler Parker","2","2/2","May 3","↑ Improving"],
-                    ["Ryan Chen","3","2/3","May 7","→ Stable"],
-                    ["Amara Osei","3","1/3","Apr 15","↓ Monitor"],
-                  ].map(([name,goals,onTrack,date,trend])=>(
-                    <tr key={name}>
-                      <td style={{fontWeight:600}}>{name}</td>
-                      <td style={{textAlign:"center"}}>{goals}</td>
-                      <td><span style={{fontWeight:700,color:onTrack.startsWith(goals.split("/")[0])?C.green:C.amber}}>{onTrack}</span></td>
-                      <td style={{fontSize:11,color:C.warm}}>{date}</td>
-                      <td><span style={{fontSize:12,fontWeight:700,color:trend.startsWith("↑")?C.green:trend.startsWith("↓")?C.amber:C.warm}}>{trend}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="card" style={{padding:"22px 24px"}}>
-            <p className="lbl" style={{marginBottom:16}}>GOAL COMPLETION TREND</p>
-            <MiniBarChart color={C.purple} height={80} width={460}
-              data={[{value:62,label:"Sep"},{value:66,label:"Oct"},{value:68,label:"Nov"},{value:65,label:"Dec"},{value:70,label:"Jan"},{value:71,label:"Feb"},{value:73,label:"Mar"},{value:74,label:"Apr"},{value:76,label:"May"}]}/>
-            <p style={{fontSize:11,color:C.warm,marginTop:8}}>Average % of goals on-track · All students · Academic year</p>
-          </div>
-        </div>
-      )}
-      {tab==="audit"&&(
-        <div>
-          <div style={{display:"flex",gap:12,marginBottom:16,alignItems:"center",flexWrap:"wrap"}}>
-            <input placeholder="Search audit log…" className="u-input" style={{maxWidth:240}}/>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Users","Ms. Simmons","Principal Owusu","Ms. Rivera","System","Families"].map(o=><option key={o}>{o}</option>)}
-            </select>
-            <select className="u-select" style={{width:"auto",paddingRight:32}}>
-              {["All Actions","Export","Edit","Create","Signature","View","Meeting","System"].map(o=><option key={o}>{o}</option>)}
-            </select>
-            <button className="btn-ghost" style={{fontSize:11,marginLeft:"auto"}}>📥 Export Log (CSV)</button>
-          </div>
-          <div className="card" style={{padding:0,overflow:"hidden"}}>
-            <table className="data-table" style={{minWidth:520}}>
-              <thead><tr>{["Timestamp","User","Action","Target","Type","IP Address"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>
-                {auditLog.map((entry,i)=>(
-                  <tr key={i}>
-                    <td style={{color:C.warm,fontSize:11,whiteSpace:"nowrap"}}>{entry.time}</td>
-                    <td style={{fontWeight:600,color:C.black}}>{entry.user}</td>
-                    <td>
-                      <div style={{display:"flex",alignItems:"center",gap:6}}>
-                        <span style={{fontSize:14}}>{actionIcon[entry.type]}</span>
-                        <span style={{fontSize:13,color:C.black}}>{entry.action}</span>
-                      </div>
-                    </td>
-                    <td style={{fontSize:12.5,color:C.warm}}>{entry.target}</td>
-                    <td><Badge color={entry.type==="signature"?"purple":entry.type==="create"?"green":entry.type==="export"?"blue":entry.type==="system"?"red":"gray"}>{entry.type}</Badge></td>
-                    <td style={{fontSize:11,color:C.warm,fontFamily:"monospace"}}>{entry.ip}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div style={{padding:"12px 20px",fontSize:12,color:C.warm,display:"flex",justifyContent:"space-between",borderTop:`1px solid ${C.tanL}`}}>
-            <span>Showing {auditLog.length} most recent entries</span>
-            <span>🔒 Secure · All entries encrypted · Immutable log · Retained 7 years</span>
-          </div>
-        </div>
-      )}
 
-      {/* ── FRAMEWORK VALIDATION ──────────────── */}
-      {tab==="validation"&&(
-        <div>
-          <div style={{display:"flex",gap:14,alignItems:"center",marginBottom:20,padding:"18px 22px",background:C.purpleL,border:`1px solid ${C.tanL}`,borderRadius:12}}>
-            <div style={{flex:1}}>
-              <p style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:4}}>✦ ALP AI Framework Validator</p>
-              <p style={{fontSize:13,color:C.warm}}>Automatically checks all student plans against ALP standards, Support Plans, GES, and other active support frameworks. Identifies missing sections, incomplete fields, and required signatures.</p>
+          {totalStudents===0?(
+            <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+              <div style={{fontSize:48,marginBottom:12}}>👥</div>
+              <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Students on Caseload</h3>
+              <p style={{fontSize:13,color:C.warm}}>Add students to see your caseload overview here.</p>
             </div>
-            <button className="btn-black" onClick={()=>{setValidating(true);setTimeout(()=>{setValidating(false);setValidated(true);toast("Plan review complete — 3 plans need attention","warning");},2000);}} disabled={validating} style={{fontSize:11,padding:"11px 22px",flexShrink:0}}>
-              {validating?<><Spin/>Validating…</>:"🔬 Validate All Plans"}
-            </button>
-          </div>
-          {validated&&(
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              {validationResults.map(r=>(
-                <div key={r.student} className="card" style={{padding:"18px 22px",borderLeft:`4px solid ${r.score>=90?C.green:r.score>=75?C.amber:C.red}`}}>
-                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                    <div style={{display:"flex",alignItems:"center",gap:12}}>
-                      <Avatar name={r.student} size={36}/>
-                      <div>
-                        <div style={{fontSize:14,fontWeight:700,color:C.black}}>{r.student}</div>
-                        <div style={{fontSize:12,color:C.warm}}>{r.plan} Plan</div>
-                      </div>
-                    </div>
-                    <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div className="serif" style={{fontSize:24,fontWeight:700,color:r.score>=90?C.green:r.score>=75?C.amber:C.red}}>{r.score}%</div>
-                      <Badge color={r.score>=90?"green":r.score>=75?"amber":"red"}>{r.score>=90?"Valid":r.score>=75?"Review":"Issues Found"}</Badge>
-                    </div>
-                  </div>
-                  {r.issues.length>0&&(
-                    <div style={{marginBottom:8}}>
-                      <p style={{fontSize:11,fontWeight:700,color:C.red,marginBottom:4}}>⚠ REVIEW NOTES:</p>
-                      {r.issues.map(issue=><div key={issue} style={{fontSize:12.5,color:C.red,padding:"3px 0"}}>• {issue}</div>)}
-                    </div>
-                  )}
-                  {r.warnings.length>0&&(
-                    <div>
-                      <p style={{fontSize:11,fontWeight:700,color:C.amber,marginBottom:4}}>⚡ RECOMMENDATIONS:</p>
-                      {r.warnings.map(w=><div key={w} style={{fontSize:12.5,color:C.amber,padding:"3px 0"}}>• {w}</div>)}
-                    </div>
-                  )}
-                  {r.issues.length===0&&r.warnings.length===0&&(
-                    <div style={{fontSize:13,color:C.green}}>✓ All sections complete and complete. No issues found.</div>
-                  )}
-                </div>
-              ))}
+          ):(
+            <div className="card" style={{padding:0,overflow:"hidden"}}>
+              <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <p style={{fontSize:13,fontWeight:700,color:C.black}}>All Students — Caseload</p>
+                <button className="btn-ghost" style={{fontSize:11}} onClick={()=>generateReport({id:"class",label:"Class Caseload Report",needsStudent:false,formats:["PDF"],time:"~20 sec"})}>⬇ Download Caseload Report</button>
+              </div>
+              <div style={{overflowX:"auto"}}>
+                <table className="data-table" style={{minWidth:600}}>
+                  <thead><tr><th>Student</th><th>Grade</th><th>Plan</th><th>Disability / Need</th><th>Status</th><th>School</th></tr></thead>
+                  <tbody>
+                    {dbStudents.map(st=>(
+                      <tr key={st.id}>
+                        <td style={{fontWeight:600,color:C.black}}>{st.name}</td>
+                        <td style={{fontSize:12,color:C.warm}}>{st.grade||"–"}</td>
+                        <td><span style={{fontSize:11,fontWeight:600,background:C.purple+"18",color:C.purple,padding:"2px 8px",borderRadius:99}}>{st.plan||"ALP"}</span></td>
+                        <td style={{fontSize:12,color:C.warm}}>{st.disability||"–"}</td>
+                        <td>
+                          <span style={{fontSize:11,fontWeight:600,padding:"2px 8px",borderRadius:99,
+                            color:st.status==="Active"?C.green:st.status==="Review Due"?C.amber:C.red,
+                            background:(st.status==="Active"?C.green:st.status==="Review Due"?C.amber:C.red)+"18"}}>
+                            {st.status||"Active"}
+                          </span>
+                        </td>
+                        <td style={{fontSize:12,color:C.warm}}>{st.school_name||"–"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
-          {!validated&&!validating&&(
-            <div style={{textAlign:"center",padding:"60px 20px",color:C.warm}}>
-              <div style={{fontSize:48,marginBottom:16}}>🔬</div>
-              <p style={{fontSize:14,fontWeight:600,marginBottom:8}}>Run Validation to Check All Plans</p>
-              <p style={{fontSize:13}}>ALP AI will check every student plan against all active support frameworks and identify any issues or missing elements.</p>
-            </div>
-          )}
-        </div>
+        </>
       )}
-
-      {/* ── TIMELINE & SCHEDULE ───────────────── */}
-      {tab==="timeline"&&(
-        <div style={{display:"grid",gridTemplateColumns:"1.5fr 1fr",gap:20}}>
-          <div>
-            <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:18}}>Upcoming Deadlines</h3>
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {timeline.map((t,i)=>(
-                <div key={i} className="card" style={{padding:"14px 18px",display:"flex",gap:14,alignItems:"center",borderLeft:`4px solid ${t.urgent?C.red:t.days<=14?C.amber:C.green}`}}>
-                  <div style={{flexShrink:0,textAlign:"center",minWidth:52}}>
-                    <div className="serif" style={{fontSize:20,fontWeight:700,color:t.urgent?C.red:C.black}}>{t.days}</div>
-                    <div style={{fontSize:9,color:C.warm,textTransform:"uppercase",letterSpacing:".08em"}}>days</div>
-                  </div>
-                  <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontSize:13,fontWeight:600,color:C.black,lineHeight:1.3}}>{t.label}</div>
-                    <div style={{fontSize:11,color:C.warm,marginTop:2}}>{t.date}</div>
-                  </div>
-                  <Badge color={t.type==="meeting"?"blue":t.type==="signature"?"purple":t.type==="reeval"?"red":"amber"}>
-                    {t.type==="meeting"?"Meeting":t.type==="signature"?"Signature":t.type==="reeval"?"Reevaluation":"Review"}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:16}}>
-            <div className="card" style={{padding:"22px 24px"}}>
-              <h3 className="serif" style={{fontSize:15,fontWeight:700,marginBottom:14}}>Schedule Summary</h3>
-              {[["Reviews this month","4","amber"],["Signatures pending","3","red"],["Meetings scheduled","3","blue"],["Reevaluations due","1","red"],["Reviews next month","2","green"]].map(([label,count,color])=>(
-                <div key={label} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"center"}}>
-                  <span style={{fontSize:13,color:C.black}}>{label}</span>
-                  <span style={{fontSize:14,fontWeight:700,color:C[color]||C.warm}}>{count}</span>
-                </div>
-              ))}
-            </div>
-            <div className="card" style={{padding:"22px 24px"}}>
-              <h3 className="serif" style={{fontSize:15,fontWeight:700,marginBottom:14}}>Auto-Scheduling</h3>
-              <p style={{fontSize:13,color:C.warm,marginBottom:14,lineHeight:1.6}}>ALP AI can automatically schedule review meetings, send reminders, and manage signature deadlines.</p>
-              {["Auto-send review reminders","Calendar integration","Email family notifications","Deadline alerts"].map(item=>(
-                <label key={item} style={{display:"flex",alignItems:"center",gap:8,fontSize:13,marginBottom:8,cursor:"pointer"}}>
-                  <input type="checkbox" defaultChecked style={{accentColor:C.purple,width:14,height:14}}/>{item}
-                </label>
-              ))}
-              <button className="btn-black" style={{width:"100%",marginTop:14,fontSize:11,padding:"12px"}}>Enable Auto-Scheduling →</button>
-            </div>
-          </div>
-        </div>
-
-
-      )}
-    </Page></>
+    </Page>
   );
 }
 
