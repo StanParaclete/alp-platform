@@ -195,7 +195,104 @@ export function subscribeToNotifications(userId, callback) {
   return () => supabase.removeChannel(sub);
 }
 
-// ── Google OAuth ──────────────────────────────────────────────────
+// ── Workflow / Approval helpers ────────────────────────────────────
+export async function submitForReview(studentId, userId) {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  const result = await supabase.from('students').update({
+    alp_status: 'in_review',
+    submitted_for_review_at: new Date().toISOString(),
+    submitted_by: userId,
+  }).eq('id', studentId).select().single();
+  if (!result.error) await logAuditEvent({ user_id: userId, action: 'submit_for_review', table_name: 'students', record_id: studentId, student_id: studentId });
+  return result;
+}
+
+export async function approveALP(studentId, userId, notes = '') {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  const result = await supabase.from('students').update({
+    alp_status: 'approved',
+    approved_at: new Date().toISOString(),
+    approved_by: userId,
+    review_decision_notes: notes,
+  }).eq('id', studentId).select().single();
+  if (!result.error) await logAuditEvent({ user_id: userId, action: 'approve_alp', table_name: 'students', record_id: studentId, student_id: studentId, details: { notes } });
+  return result;
+}
+
+export async function requestChanges(studentId, userId, notes = '') {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  const result = await supabase.from('students').update({
+    alp_status: 'changes_requested',
+    review_decision_notes: notes,
+  }).eq('id', studentId).select().single();
+  if (!result.error) await logAuditEvent({ user_id: userId, action: 'request_changes', table_name: 'students', record_id: studentId, student_id: studentId, details: { notes } });
+  return result;
+}
+
+export async function reopenAsDraft(studentId, userId) {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  const result = await supabase.from('students').update({ alp_status: 'draft' }).eq('id', studentId).select().single();
+  if (!result.error) await logAuditEvent({ user_id: userId, action: 'reopen_draft', table_name: 'students', record_id: studentId, student_id: studentId });
+  return result;
+}
+
+export async function archiveStudent(studentId, userId) {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  const result = await supabase.from('students').update({
+    alp_status: 'archived', archived_at: new Date().toISOString(), archived_by: userId,
+  }).eq('id', studentId).select().single();
+  if (!result.error) await logAuditEvent({ user_id: userId, action: 'archive_student', table_name: 'students', record_id: studentId, student_id: studentId });
+  return result;
+}
+
+// ── Version History ──────────────────────────────────────────────
+export async function saveALPVersion(version) {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  return supabase.from('alp_versions').insert(version).select().single();
+}
+
+export async function getALPVersions(studentId) {
+  if (!supabase) return [];
+  const { data } = await supabase.from('alp_versions')
+    .select('*, profiles(full_name)')
+    .eq('student_id', studentId)
+    .order('version_number', { ascending: false });
+  return data || [];
+}
+
+// ── Audit Log ─────────────────────────────────────────────────────
+export async function logAuditEvent({ user_id, action, table_name = null, record_id = null, student_id = null, details = null }) {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  return supabase.from('audit_log').insert({
+    user_id, action, table_name, record_id, student_id, details,
+    user_agent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 200) : null,
+  });
+}
+
+export async function getAuditLog({ studentId = null, limit = 100 } = {}) {
+  if (!supabase) return [];
+  let query = supabase.from('audit_log')
+    .select('*, profiles(full_name, role)')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (studentId) query = query.eq('student_id', studentId);
+  const { data } = await query;
+  return data || [];
+}
+
+// ── Notification creation (used to alert reviewers / parents) ─────
+export async function createNotification({ user_id, type = 'general', title, body, student_id = null, urgent = false }) {
+  if (!supabase) return { error: { message: 'Demo mode' } };
+  return supabase.from('notifications').insert({ user_id, type, title, body, student_id, urgent, read: false });
+}
+
+export async function getReviewersForOrg() {
+  // Directors/admins who should be notified when an ALP is submitted for review
+  if (!supabase) return [];
+  const { data } = await supabase.from('profiles').select('id, full_name, role').in('role', ['director', 'admin']);
+  return data || [];
+}
+
 export async function signInWithGoogle() {
   if (!supabase) return { error: { message: 'Demo mode — Supabase not configured' } };
   return supabase.auth.signInWithOAuth({

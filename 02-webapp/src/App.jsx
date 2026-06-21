@@ -2,6 +2,106 @@ import React, { useState, useEffect, useContext, createContext, useRef, useCallb
 import * as Supabase from "./supabase.js";
 
 // ═══════════════════════════════════════════════════════════
+// PDF GENERATION — real, professional ALP document export
+// jsPDF is lazy-loaded on first use so it doesn't bloat initial page load
+// ═══════════════════════════════════════════════════════════
+let _jsPDFModule = null;
+async function loadJsPDF() {
+  if (!_jsPDFModule) _jsPDFModule = await import("jspdf");
+  return _jsPDFModule.jsPDF;
+}
+
+async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", school = "" }) {
+  const jsPDF = await loadJsPDF();
+  const doc = new jsPDF({ unit: "pt", format: "letter" });
+  const W = doc.internal.pageSize.getWidth();
+  const margin = 56;
+  let y = 64;
+  const purple = [124, 58, 237];
+  const warm = [107, 114, 128];
+  const black = [17, 17, 17];
+
+  function ensureSpace(h) {
+    if (y + h > doc.internal.pageSize.getHeight() - 60) {
+      doc.addPage();
+      y = 64;
+    }
+  }
+  function heading(text) {
+    ensureSpace(30);
+    doc.setFont("times", "bold"); doc.setFontSize(13); doc.setTextColor(...black);
+    doc.text(text.toUpperCase(), margin, y);
+    doc.setDrawColor(220, 220, 220); doc.line(margin, y + 6, W - margin, y + 6);
+    y += 26;
+  }
+  function body(text, opts = {}) {
+    doc.setFont("helvetica", "normal"); doc.setFontSize(opts.size || 10.5); doc.setTextColor(...(opts.color || warm));
+    const lines = doc.splitTextToSize(text || "Not recorded.", W - margin * 2);
+    ensureSpace(lines.length * 14 + 10);
+    doc.text(lines, margin, y);
+    y += lines.length * 14 + 14;
+  }
+  function fieldRow(pairs) {
+    doc.setFontSize(9.5);
+    pairs.forEach(([k, v]) => {
+      ensureSpace(16);
+      doc.setFont("helvetica", "bold"); doc.setTextColor(...black);
+      doc.text(`${k}:`, margin, y);
+      doc.setFont("helvetica", "normal"); doc.setTextColor(...warm);
+      doc.text(String(v || "–"), margin + 130, y);
+      y += 16;
+    });
+    y += 8;
+  }
+
+  // ── Cover header ──
+  doc.setFont("times", "bold"); doc.setFontSize(22); doc.setTextColor(...purple);
+  doc.text("Accelerated Learning Plan", margin, y); y += 22;
+  doc.setFont("times", "italic"); doc.setFontSize(12); doc.setTextColor(...warm);
+  doc.text(school || "ALP Platform", margin, y); y += 10;
+  doc.setDrawColor(...purple); doc.setLineWidth(1.5); doc.line(margin, y, W - margin, y); y += 30;
+
+  heading("Student Information");
+  fieldRow([
+    ["Student", student?.name], ["Grade", student?.grade],
+    ["Date of Birth", student?.dob], ["Disability / Need", student?.disability],
+    ["School", student?.school_name || school], ["Plan Year", student?.plan_year],
+    ["Status", (student?.alp_status || "draft").replace("_", " ").toUpperCase()],
+  ]);
+
+  heading("Present Levels");
+  body(student?.strengths ? `Strengths: ${student.strengths}` : "Strengths: Not recorded.");
+  body(student?.growth_areas ? `Growth Areas: ${student.growth_areas}` : "Growth Areas: Not recorded.");
+  body(student?.concerns ? `Concerns: ${student.concerns}` : "Concerns: Not recorded.");
+
+  heading("Annual Goals");
+  if (!goals.length) { body("No goals recorded yet."); }
+  goals.forEach((g, i) => {
+    ensureSpace(50);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10.5); doc.setTextColor(...purple);
+    doc.text(`${i + 1}. [${g.domain || "Goal"}]`, margin, y); y += 14;
+    body(g.goal_text || "");
+    fieldRow([["Baseline", g.baseline], ["Target", g.target], ["Progress", `${g.current_pct || 0}%`]]);
+  });
+
+  heading("Meeting / Review Notes");
+  body(notes || "No notes recorded.");
+
+  heading("Signatures");
+  fieldRow([
+    ["ALP Coordinator", reviewer || "_______________________"],
+    ["Parent / Guardian", student?.parent_name || "_______________________"],
+    ["Date", new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })],
+  ]);
+
+  doc.setFontSize(8); doc.setTextColor(...warm);
+  doc.text(`Generated ${new Date().toLocaleString()} — ALP Platform`, margin, doc.internal.pageSize.getHeight() - 30);
+
+  return doc;
+}
+
+
+// ═══════════════════════════════════════════════════════════
 // ALP PLATFORM — ADAPTIVE LEARNING PROGRAM
 // Built by Stan Paraclete · www.stanparaclete.com
 // ═══════════════════════════════════════════════════════════
@@ -544,7 +644,10 @@ const SupabaseAuthCtx = createContext({ user:null,profile:null,loading:true,
   students:[],notifications:[],unreadCount:0,
   refreshStudents:()=>{},createStudentRecord:async()=>({}),
   updateStudentRecord:async()=>({}),createGoalRecord:async()=>({}),
-  logProgressEntry:async()=>({}),saveDocument:async()=>({}) });
+  logProgressEntry:async()=>({}),saveDocument:async()=>({}),
+  realRole:"teacher",submitForReviewAction:async()=>({}),approveALPAction:async()=>({}),
+  requestChangesAction:async()=>({}),reopenAsDraftAction:async()=>({}),archiveStudentAction:async()=>({}),
+  saveVersionSnapshot:async()=>({}),notifyAction:async()=>({}),deleteStudentRecord:async()=>({}) });
 function useSupabaseAuth(){ return useContext(SupabaseAuthCtx); }
 
 function SupabaseAuthProvider({children}){
@@ -554,6 +657,7 @@ function SupabaseAuthProvider({children}){
   const [students,setStudents]=useState([]);
   const [notifications,setNotifications]=useState([]);
   const [unreadCount,setUnreadCount]=useState(0);
+  const realRole=profile?.role||"teacher"; // REAL authorization role from DB — never the cosmetic preview switcher
 
   useEffect(()=>{
     const unsub=Supabase.onAuthChange(async(_e,session)=>{
@@ -579,16 +683,73 @@ function SupabaseAuthProvider({children}){
   function refreshStudents(uid){ Supabase.getStudents(uid).then(d=>setStudents(d||[])); }
   function refreshNotifications(uid){ Supabase.getNotifications(uid).then(d=>{ setNotifications(d||[]); setUnreadCount((d||[]).filter(n=>!n.read).length); }); }
 
-  async function createStudentRecord(s){ if(!user)return{error:"Not logged in"};const r=await Supabase.createStudent({...s,teacher_id:user.id});if(!r.error)refreshStudents(user.id);return r; }
-  async function updateStudentRecord(id,u2){ const r=await Supabase.updateStudent(id,u2);if(!r.error)refreshStudents(user?.id);return r; }
-  async function createGoalRecord(g){ if(!user)return{error:"Not logged in"};return Supabase.createGoal({...g,created_by:user.id}); }
+  async function createStudentRecord(s){ if(!user)return{error:"Not logged in"};const r=await Supabase.createStudent({...s,teacher_id:user.id});if(!r.error){refreshStudents(user.id);await Supabase.logAuditEvent({user_id:user.id,action:"create_student",table_name:"students",record_id:r.data?.id,student_id:r.data?.id,details:{name:s.name}});}return r; }
+  async function updateStudentRecord(id,u2){ const r=await Supabase.updateStudent(id,u2);if(!r.error){refreshStudents(user?.id);await Supabase.logAuditEvent({user_id:user?.id,action:"update_student",table_name:"students",record_id:id,student_id:id,details:{fields:Object.keys(u2)}});}return r; }
+  async function deleteStudentRecord(id,name){ if(!user)return{error:"Not logged in"};const r=await Supabase.deleteStudent(id);if(!r.error){await Supabase.logAuditEvent({user_id:user.id,action:"delete_student",table_name:"students",record_id:id,details:{name}});refreshStudents(user.id);}return r; }
+  async function createGoalRecord(g){ if(!user)return{error:"Not logged in"};const r=await Supabase.createGoal({...g,created_by:user.id});if(!r.error)await Supabase.logAuditEvent({user_id:user.id,action:"create_goal",table_name:"goals",record_id:r.data?.id,student_id:g.student_id,details:{domain:g.domain}});return r; }
   async function logProgressEntry(e){ if(!user)return{error:"Not logged in"};return Supabase.logProgress({...e,created_by:user.id}); }
   async function saveDocument(d){ if(!user)return{error:"Not logged in"};return Supabase.saveALPDocument({...d,created_by:user.id}); }
 
+  // ── Workflow / approval actions — gated server-side too via RLS trigger ──
+  async function submitForReviewAction(studentId){
+    if(!user)return{error:"Not logged in"};
+    const r=await Supabase.submitForReview(studentId,user.id);
+    if(!r.error){
+      refreshStudents(user.id);
+      const reviewers=await Supabase.getReviewersForOrg();
+      const student=students.find(s=>s.id===studentId);
+      for(const rev of reviewers){
+        await Supabase.createNotification({user_id:rev.id,type:"review",title:`ALP submitted for review — ${student?.name||"Student"}`,body:`${profile?.full_name||"A teacher"} submitted ${student?.name||"a student"}'s ALP for your review.`,student_id:studentId,urgent:true});
+      }
+    }
+    return r;
+  }
+  async function approveALPAction(studentId,notes){
+    if(!user)return{error:"Not logged in"};
+    const r=await Supabase.approveALP(studentId,user.id,notes);
+    if(!r.error){
+      refreshStudents(user.id);
+      const student=students.find(s=>s.id===studentId);
+      if(student?.submitted_by) await Supabase.createNotification({user_id:student.submitted_by,type:"review",title:`ALP approved — ${student.name}`,body:notes||"Your submitted ALP has been approved.",student_id:studentId});
+    }
+    return r;
+  }
+  async function requestChangesAction(studentId,notes){
+    if(!user)return{error:"Not logged in"};
+    const r=await Supabase.requestChanges(studentId,user.id,notes);
+    if(!r.error){
+      refreshStudents(user.id);
+      const student=students.find(s=>s.id===studentId);
+      if(student?.submitted_by) await Supabase.createNotification({user_id:student.submitted_by,type:"review",title:`Changes requested — ${student.name}`,body:notes||"A reviewer requested changes to this ALP.",student_id:studentId,urgent:true});
+    }
+    return r;
+  }
+  async function reopenAsDraftAction(studentId){
+    if(!user)return{error:"Not logged in"};
+    const r=await Supabase.reopenAsDraft(studentId,user.id);
+    if(!r.error)refreshStudents(user.id);
+    return r;
+  }
+  async function archiveStudentAction(studentId){
+    if(!user)return{error:"Not logged in"};
+    const r=await Supabase.archiveStudent(studentId,user.id);
+    if(!r.error)refreshStudents(user.id);
+    return r;
+  }
+  async function saveVersionSnapshot(studentId,snapshot,changeSummary,statusAtSave){
+    if(!user)return{error:"Not logged in"};
+    return Supabase.saveALPVersion({student_id:studentId,snapshot,change_summary:changeSummary,status_at_save:statusAtSave,created_by:user.id});
+  }
+  async function notifyAction(payload){
+    return Supabase.createNotification(payload);
+  }
+
   return(
-    <SupabaseAuthCtx.Provider value={{user,profile,loading,students,notifications,unreadCount,
+    <SupabaseAuthCtx.Provider value={{user,profile,loading,students,notifications,unreadCount,realRole,
       refreshStudents:()=>refreshStudents(user?.id),
-      createStudentRecord,updateStudentRecord,createGoalRecord,logProgressEntry,saveDocument}}>
+      createStudentRecord,updateStudentRecord,deleteStudentRecord,createGoalRecord,logProgressEntry,saveDocument,
+      submitForReviewAction,approveALPAction,requestChangesAction,reopenAsDraftAction,archiveStudentAction,
+      saveVersionSnapshot,notifyAction}}>
       {children}
     </SupabaseAuthCtx.Provider>
   );
@@ -5813,20 +5974,20 @@ function Login({onLogin, onBack}){
 // ─── ROLE-BASED NAVIGATION ─────────────────────────────────
 const NAV_BY_ROLE = {
   admin:[
-    {group:"DISTRICT",items:[{id:"dashboard",label:"Admin Dashboard",icon:"🏛"},{id:"students",label:"All Students",icon:"👥"}]},
-    {group:"MANAGEMENT",items:[{id:"reports",label:"District Reports",icon:"📊"},{id:"notifications",label:"Alerts & Notices",icon:"🔔",badge:"5"},{id:"settings",label:"System Settings",icon:"⚙️"}]},
-    {group:"REPORTS",items:[{id:"reports",label:"Audit Trail",icon:"🔍"},{id:"create",label:"Export All Data",icon:"📤"}]},
+    {group:"DISTRICT",items:[{id:"dashboard",label:"Admin Dashboard",icon:"🏛"},{id:"students",label:"All Students",icon:"👥"},{id:"reviewqueue",label:"Review Queue",icon:"👁️"}]},
+    {group:"MANAGEMENT",items:[{id:"reports",label:"District Reports",icon:"📊"},{id:"compliance",label:"Compliance Dashboard",icon:"📋"},{id:"auditlog",label:"Audit Log",icon:"🔍"},{id:"notifications",label:"Alerts & Notices",icon:"🔔",badge:"5"},{id:"settings",label:"System Settings",icon:"⚙️"}]},
+    {group:"REPORTS",items:[{id:"create",label:"Export All Data",icon:"📤"}]},
   ],
   leadership:[
-    {group:"OVERVIEW",items:[{id:"dashboard",label:"Leadership Dashboard",icon:"👔"},{id:"students",label:"All Students",icon:"👥"}]},
-    {group:"PLANS",items:[{id:"builder",label:"ALP Builder",icon:"✏️"},{id:"review",label:"Review Schedule",icon:"✅"},{id:"future",label:"Future Readiness",icon:"🎯"}]},
+    {group:"OVERVIEW",items:[{id:"dashboard",label:"Leadership Dashboard",icon:"👔"},{id:"students",label:"All Students",icon:"👥"},{id:"reviewqueue",label:"Review Queue",icon:"👁️"}]},
+    {group:"PLANS",items:[{id:"builder",label:"ALP Builder",icon:"✏️"},{id:"review",label:"Review Schedule",icon:"✅"},{id:"compliance",label:"Compliance Dashboard",icon:"📋"},{id:"future",label:"Future Readiness",icon:"🎯"}]},
     {group:"REPORTS",items:[{id:"reports",label:"School Reports",icon:"📊"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"3"}]},
     {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"settings",label:"Settings",icon:"⚙️"}]},
   ],
   teacher:[
     {group:"OVERVIEW",items:[{id:"dashboard",label:"Dashboard",icon:"⊞"},{id:"students",label:"My Students",icon:"👥"}]},
     {group:"ALP BUILDER",items:[{id:"builder",label:"ALP Builder",icon:"✏️",badge:"New"},{id:"quickalp",label:"Quick ALP",icon:"⚡"},{id:"studentprofile",label:"Student Profile",icon:"🪪"},{id:"progress",label:"Progress",icon:"📈"},{id:"goals",label:"Goals",icon:"🎯"}]},
-    {group:"WORKFLOW",items:[{id:"future",label:"Future Readiness",icon:"🎯"},{id:"review",label:"Review Summary",icon:"✅"},{id:"notice",label:"ALP Notice",icon:"⚠️"},{id:"create",label:"Create ALP Doc",icon:"📄"},{id:"timeline",label:"Timeline",icon:"🕐"},{id:"documents",label:"Documents",icon:"📁"}]},
+    {group:"WORKFLOW",items:[{id:"future",label:"Future Readiness",icon:"🎯"},{id:"review",label:"Review Summary",icon:"✅"},{id:"reviewqueue",label:"Review Queue",icon:"👁️"},{id:"notice",label:"ALP Notice",icon:"⚠️"},{id:"create",label:"Create ALP Doc",icon:"📄"},{id:"timeline",label:"Timeline",icon:"🕐"},{id:"documents",label:"Documents",icon:"📁"}]},
     {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"reports",label:"Reports",icon:"📊"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"4"},{id:"settings",label:"Settings",icon:"⚙️"}]},
   ],
   intervention:[
@@ -6141,7 +6302,10 @@ function Students({setPage,onAddStudent}){
   function toggleBulk(id){setBulkSelected(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id]);}
   function selectAll(ids){setBulkSelected(ids);}
   const [q,setQ]=useState("");const [f,setF]=useState("All");const [sel,setSel]=useState(null);
-  const {students:dbStudents}=useSupabaseAuth();
+  const {students:dbStudents,realRole,archiveStudentAction,deleteStudentRecord}=useSupabaseAuth();
+  const [showDeleteConfirm,setShowDeleteConfirm]=useState(false);
+  const [deleteConfirmText,setDeleteConfirmText]=useState("");
+  const [archiving,setArchiving]=useState(false);
   const all=dbStudents&&dbStudents.length>0?dbStudents.map(s=>({
     name:s.name,grade:s.grade||"",cat:s.disability||"ALP",plan:"ALP",planC:"purple",
     status:s.status||"Active",review:s.review_date||"",teacher:s.teacher_name||"",
@@ -6151,9 +6315,46 @@ function Students({setPage,onAddStudent}){
 
   if(sel){
     const s=sel;
+    async function handleArchive(){
+      setArchiving(true);
+      const r=await archiveStudentAction(s.id);
+      if(!r.error){toast(`${s.name} archived`,"success");setSel(null);}
+      else toast(r.error.message||"Archive failed","error");
+      setArchiving(false);
+    }
+    async function handleDelete(){
+      const r=await deleteStudentRecord(s.id,s.name);
+      if(!r.error){toast(`${s.name} permanently deleted`,"success");setShowDeleteConfirm(false);setSel(null);}
+      else toast(r.error.message||"Only a director or admin may permanently delete a student","error");
+    }
     return(
       <Page title={<>{s.name}</>} subtitle={`Grade ${s.grade.replace("th","").replace("nd","").replace("rd","").replace("st","")} · ${s.disability} · ${s.plan}`}
-        action={<div style={{display:"flex",gap:10}}><button className="btn-ghost" onClick={()=>setSel(null)} style={{fontSize:11}}>← All Students</button><button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 24px"}}>Edit ALP</button></div>}>
+        action={<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <button className="btn-ghost" onClick={()=>setSel(null)} style={{fontSize:11}}>← All Students</button>
+          <button className="btn-ghost" disabled={archiving} onClick={handleArchive} style={{fontSize:11,color:C.amber}}>📦 Archive</button>
+          {["director","admin"].includes(realRole)&&<button className="btn-ghost" onClick={()=>setShowDeleteConfirm(true)} style={{fontSize:11,color:C.red}}>🗑 Delete Permanently</button>}
+          <button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 24px"}}>Edit ALP</button>
+        </div>}>
+
+        {showDeleteConfirm&&(
+          <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setShowDeleteConfirm(false)}>
+            <div className="card fade-up" style={{width:"100%",maxWidth:440,padding:0}}>
+              <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`}}>
+                <p className="lbl" style={{color:C.red,marginBottom:4}}>⚠️ PERMANENT DELETE</p>
+                <h3 style={{fontSize:18,fontWeight:800,color:C.black}}>Delete {s.name}?</h3>
+              </div>
+              <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
+                <p style={{fontSize:13,color:C.warm,lineHeight:1.6}}>This permanently deletes the student record and <b>all related goals, progress data, messages, and documents</b>. This cannot be undone. Consider Archive instead if you may need this data later.</p>
+                <UInput label={`Type "${s.name}" to confirm`} value={deleteConfirmText} onChange={e=>setDeleteConfirmText(e.target.value)} placeholder={s.name}/>
+                <div style={{display:"flex",gap:10}}>
+                  <button className="btn-ghost" onClick={()=>setShowDeleteConfirm(false)} style={{flex:1,fontSize:12}}>Cancel</button>
+                  <button className="btn-purple" disabled={deleteConfirmText!==s.name} onClick={handleDelete} style={{flex:1,fontSize:12,background:C.red,opacity:deleteConfirmText!==s.name?.4:1}}>Delete Permanently</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Profile header */}
         <div className="card" style={{padding:"24px 28px",marginBottom:20}}>
           <div style={{display:"flex",alignItems:"center",gap:20}}>
@@ -6952,12 +7153,50 @@ function ALPBuilder({setPage}){
   const [showAI,setShowAI]=useState(false);
 
   /* ── Shared student data across all steps ── */
-  const {students:dbStudents,user,createStudentRecord,updateStudentRecord,createGoalRecord}=useSupabaseAuth();
+  const {students:dbStudents,user,profile,realRole,createStudentRecord,updateStudentRecord,createGoalRecord,
+    submitForReviewAction,approveALPAction,requestChangesAction,reopenAsDraftAction,saveVersionSnapshot}=useSupabaseAuth();
   const selectedStudent=dbStudents?.[0]||null;
   const ss=selectedStudent;
+  const alpStatus=ss?.alp_status||"draft";
+  const isLocked=(alpStatus==="approved"||alpStatus==="in_review")&&!["director","admin"].includes(realRole);
+  const canApprove=["director","admin"].includes(realRole);
+  const [submitting,setSubmitting]=useState(false);
+  const [reviewDecisionNotes,setReviewDecisionNotes]=useState("");
+  const [showReviewPanel,setShowReviewPanel]=useState(false);
 
+  async function handleSubmitForReview(){
+    if(!ss?.id){toast("No student selected","error");return;}
+    setSubmitting(true);
+    const r=await submitForReviewAction(ss.id);
+    if(!r.error){toast("Submitted for review ✓","success");}
+    else toast(r.error.message||"Submit failed","error");
+    setSubmitting(false);
+  }
+  async function handleApprove(){
+    if(!ss?.id)return;
+    setSubmitting(true);
+    const r=await approveALPAction(ss.id,reviewDecisionNotes);
+    if(!r.error){toast("ALP approved ✓","success");setShowReviewPanel(false);setReviewDecisionNotes("");}
+    else toast(r.error.message||"Approval failed — director/admin role required","error");
+    setSubmitting(false);
+  }
+  async function handleRequestChanges(){
+    if(!ss?.id)return;
+    if(!reviewDecisionNotes.trim()){toast("Add a note explaining what needs to change","error");return;}
+    setSubmitting(true);
+    const r=await requestChangesAction(ss.id,reviewDecisionNotes);
+    if(!r.error){toast("Changes requested","success");setShowReviewPanel(false);setReviewDecisionNotes("");}
+    else toast(r.error.message||"Failed","error");
+    setSubmitting(false);
+  }
+  async function handleReopenDraft(){
+    if(!ss?.id)return;
+    const r=await reopenAsDraftAction(ss.id);
+    if(!r.error)toast("Reopened as draft for editing","success");
+  }
+
+  /* ── Step 1 */
   const blankSData={
-    /* Step 1 */
     firstName:"",lastName:"",dob:"",gender:"",
     grade:"",studentId:"",school:"",
     enrollDate:"",tier:"Tier 2",photo:null,notes:"",
@@ -7045,6 +7284,8 @@ function ALPBuilder({setPage}){
           alp_completed:true,alp_completed_date:new Date().toISOString(),
           review_notes:sData.reviewNotes,meeting_date:sData.meetingDate,
         }).catch(()=>{});
+        // Document Version History — immutable snapshot of this completed draft
+        await saveVersionSnapshot(ss.id,sData,"Step 10 completed — full ALP draft",alpStatus).catch(()=>{});
       }
       setPage("review");
       toast("ALP completed — opening Review Summary ✓","success");
@@ -7082,10 +7323,10 @@ function ALPBuilder({setPage}){
   return(
     <Page title={<>ALP <span className="serif-italic" style={{color:C.warm,fontSize:isMobile?20:26}}>Builder</span></>}
       subtitle={ss?`${ss.name} — Step ${step} of ${TOTAL} — ${STEPS[step-1]}`:`Step ${step} of ${TOTAL} — ${STEPS[step-1]}`}
-      action={<div style={{display:"flex",gap:8,alignItems:"center"}}>
+      action={<div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
         {dbStudents?.length>1&&<select onChange={e=>{const found=dbStudents.find(st=>st.id===e.target.value);if(found){setSData(p=>({...p,firstName:found.name?.split(" ")[0]||"",lastName:found.name?.split(" ").slice(1).join(" ")||"",grade:found.grade||"",studentId:found.student_id||"",school:found.school_name||"",parentName:found.parent_name||"",parentEmail:found.parent_email||"",strengths:found.strengths||"",growthAreas:found.growth_areas||"",}));}}} style={{fontSize:11,padding:"7px 10px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>{dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}</select>}
         <button className="btn-ghost" onClick={()=>setPage("students")} style={{fontSize:11}}>← Students</button>
-        <button className="btn-purple" onClick={async()=>{
+        <button className="btn-purple" disabled={isLocked} onClick={async()=>{
           if(ss?.id){
             await updateStudentRecord(ss.id,{
               strengths:sData.strengths,growth_areas:sData.growthAreas,
@@ -7094,17 +7335,69 @@ function ALPBuilder({setPage}){
               parent_name:sData.parentName,parent_email:sData.parentEmail,
               parent_phone:sData.parentPhone,tier:sData.tier,notes:sData.notes,
             });
-            toast("ALP saved to Supabase ✓","success");
+            await saveVersionSnapshot(ss.id,sData,`Manual save at Step ${step}`,alpStatus);
+            toast("ALP saved to Supabase ✓ — version recorded","success");
           } else {
             toast("ALP saved locally ✓","success");
           }
-        }} style={{fontSize:11,padding:"9px 18px"}}>↑ Save</button>
+        }} style={{fontSize:11,padding:"9px 18px",opacity:isLocked?.5:1}}>↑ Save</button>
       </div>}>
 
       {showAI&&<AIModal onClose={()=>setShowAI(false)} context={`ALP Builder Step ${step}: ${STEPS[step-1]}`}/>}
 
+      {/* ── Workflow status bar ── */}
+      {ss&&(()=>{
+        const statusMeta={
+          draft:{label:"Draft",color:C.warm,bg:C.tanL,icon:"✏️"},
+          in_review:{label:"In Review",color:C.amber,bg:"#FFFBEB",icon:"👁️"},
+          approved:{label:"Approved",color:C.green,bg:"#F0FDF4",icon:"✅"},
+          changes_requested:{label:"Changes Requested",color:C.red,bg:"#FEF2F2",icon:"⚠️"},
+          archived:{label:"Archived",color:C.warm,bg:C.tanL,icon:"📦"},
+        }[alpStatus]||{label:alpStatus,color:C.warm,bg:C.tanL,icon:"•"};
+        return(
+          <div className="card" style={{padding:"14px 18px",marginBottom:16,background:statusMeta.bg,border:`1px solid ${statusMeta.color}33`,display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+            <span style={{fontSize:11,fontWeight:800,color:statusMeta.color,background:"#fff",padding:"4px 12px",borderRadius:99,display:"flex",alignItems:"center",gap:5}}>{statusMeta.icon} {statusMeta.label.toUpperCase()}</span>
+            {isLocked&&<span style={{fontSize:12,color:statusMeta.color}}>🔒 Locked — only a director or admin can edit while {statusMeta.label.toLowerCase()}.</span>}
+            {alpStatus==="changes_requested"&&ss.review_decision_notes&&<span style={{fontSize:12,color:C.warm,flex:1}}>Reviewer note: "{ss.review_decision_notes}"</span>}
+            <div style={{marginLeft:"auto",display:"flex",gap:8}}>
+              {(alpStatus==="draft"||alpStatus==="changes_requested")&&!canApprove&&(
+                <button className="btn-purple" disabled={submitting} onClick={handleSubmitForReview} style={{fontSize:11,padding:"8px 16px"}}>
+                  {submitting?<><Spin/> Submitting…</>:"📤 Submit for Review"}
+                </button>
+              )}
+              {alpStatus==="in_review"&&canApprove&&(
+                <button className="btn-purple" onClick={()=>setShowReviewPanel(true)} style={{fontSize:11,padding:"8px 16px"}}>👁️ Review →</button>
+              )}
+              {alpStatus==="approved"&&canApprove&&(
+                <button className="btn-ghost" onClick={handleReopenDraft} style={{fontSize:11,padding:"8px 16px"}}>🔓 Reopen as Draft</button>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ── Review panel (director/admin only) ── */}
+      {showReviewPanel&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setShowReviewPanel(false)}>
+          <div className="card fade-up" style={{width:"100%",maxWidth:480,padding:0}}>
+            <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div><p className="lbl" style={{color:C.purple,marginBottom:4}}>REVIEW ALP</p><h3 style={{fontSize:18,fontWeight:800,color:C.black}}>{ss?.name}</h3></div>
+              <button onClick={()=>setShowReviewPanel(false)} style={{fontSize:22,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>×</button>
+            </div>
+            <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
+              <p style={{fontSize:13,color:C.warm,lineHeight:1.6}}>Submitted by {profile?.full_name||"a teacher"} on {ss?.submitted_for_review_at?new Date(ss.submitted_for_review_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):"—"}.</p>
+              <UTextarea label="Decision notes (visible to teacher)" value={reviewDecisionNotes} onChange={e=>setReviewDecisionNotes(e.target.value)} rows={4} placeholder="What's working well? What needs to change before approval?"/>
+              <div style={{display:"flex",gap:10}}>
+                <button className="btn-ghost" disabled={submitting} onClick={handleRequestChanges} style={{flex:1,fontSize:12,color:C.red}}>⚠️ Request Changes</button>
+                <button className="btn-purple" disabled={submitting} onClick={handleApprove} style={{flex:1,fontSize:12,padding:"13px"}}>{submitting?<><Spin/> Saving…</>:"✅ Approve ALP"}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Progress bar + step nav ── */}
-      <div className="card" style={{padding:"18px 20px",marginBottom:20}}>
+      <div className="card" style={{padding:"18px 20px",marginBottom:20,opacity:isLocked?.6:1,pointerEvents:isLocked?"none":"auto"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
           <span style={{fontSize:11,fontWeight:700,color:C.warm,letterSpacing:".1em"}}>PLAN COMPLETION</span>
           <span style={{fontSize:13,fontWeight:800,color:C.purple}}>{completion}%</span>
@@ -7132,6 +7425,7 @@ function ALPBuilder({setPage}){
       {/* ══════════════════════════════════════════
           STEP 1 — STUDENT INFORMATION
       ══════════════════════════════════════════ */}
+      <fieldset disabled={isLocked} style={{border:"none",padding:0,margin:0,minWidth:0}}>
       {step===1&&(
         <div>
           <SH n={1} title="Student" sub="Information"/>
@@ -7680,6 +7974,7 @@ function ALPBuilder({setPage}){
           </div>
         </div>
       )}
+      </fieldset>
 
       {/* ── Nav buttons ── */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:28,
@@ -7687,9 +7982,9 @@ function ALPBuilder({setPage}){
         <button className="btn-ghost" onClick={back} disabled={step===1}
           style={{opacity:step===1?.4:1,fontSize:12,padding:"11px 22px"}}>← Back</button>
         <span style={{fontSize:11,color:C.warm,fontWeight:600}}>{step} / {TOTAL} — {STEPS[step-1]}</span>
-        <button className="btn-black" onClick={next}
-          style={{fontSize:12,padding:"12px 28px"}}>
-          {step===TOTAL?"✓ Complete ALP":"Next →"}
+        <button className="btn-black" onClick={next} disabled={isLocked}
+          style={{fontSize:12,padding:"12px 28px",opacity:isLocked?.4:1}}>
+          {isLocked?"🔒 Locked":step===TOTAL?"✓ Complete ALP":"Next →"}
         </button>
       </div>
     </Page>
@@ -7706,6 +8001,9 @@ function ReviewSummary({setPage}){
   const [selectedStudentId,setSelectedStudentId]=useState(null);
   const [goals,setGoals]=useState([]);
   const [loading,setLoading]=useState(true);
+  const [versions,setVersions]=useState([]);
+  const [loadingVersions,setLoadingVersions]=useState(false);
+  const [expandedVersion,setExpandedVersion]=useState(null);
 
   const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
   const meetingDate=s?.meeting_date?new Date(s.meeting_date).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
@@ -7720,6 +8018,14 @@ function ReviewSummary({setPage}){
     setLoading(true);
     Supabase.getGoals(s.id).then(g=>{setGoals(g||[]);setLoading(false);setNotes(s.review_notes||"");});
   },[s?.id]);
+
+  async function loadVersions(){
+    if(!s?.id)return;
+    setLoadingVersions(true);
+    const v=await Supabase.getALPVersions(s.id);
+    setVersions(v||[]);
+    setLoadingVersions(false);
+  }
 
   const goalsData=goals.map(g=>{
     const pct=g.current_pct||0;
@@ -7756,18 +8062,60 @@ function ReviewSummary({setPage}){
         {dbStudents?.length>1&&<select value={selectedStudentId||""} onChange={e=>setSelectedStudentId(e.target.value)} style={{fontSize:11,padding:"8px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>
           {dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
         </select>}
-        <button className="btn-ghost" onClick={()=>toast("Review summary exported","success")} style={{fontSize:11}}>⬇ Export PDF</button>
+        <button className="btn-ghost" onClick={async()=>{
+          toast("Generating PDF…","info");
+          const doc=await generateALPPdf({student:s,goals,notes,reviewer:profile?.full_name||user?.email,school:s.school_name});
+          doc.save(`ALP_${s.name.replace(/\s+/g,"_")}.pdf`);
+          toast("ALP PDF downloaded ✓","success");
+        }} style={{fontSize:11}}>⬇ Export PDF</button>
         <button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 20px"}}>Edit ALP →</button>
       </div>}>
 
       {/* Tabs */}
-      <div style={{display:"flex",gap:6,marginBottom:20}}>
-        {[["summary","Summary"],["goals","Goal Progress"],["notes","Meeting Notes"]].map(([id,label])=>(
-          <button key={id} onClick={()=>setActiveTab(id)} className={activeTab===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"8px 16px"}}>{label}</button>
+      <div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
+        {[["summary","Summary"],["goals","Goal Progress"],["notes","Meeting Notes"],["versions","Version History"]].map(([id,label])=>(
+          <button key={id} onClick={()=>{setActiveTab(id);if(id==="versions")loadVersions();}} className={activeTab===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"8px 16px"}}>{label}</button>
         ))}
       </div>
 
       {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading…</div>}
+
+      {!loading&&activeTab==="versions"&&(
+        <div>
+          {loadingVersions&&<div style={{textAlign:"center",padding:32,color:C.warm}}>Loading version history…</div>}
+          {!loadingVersions&&versions.length===0&&(
+            <div className="card" style={{padding:"40px 28px",textAlign:"center"}}>
+              <div style={{fontSize:36,marginBottom:10}}>🕓</div>
+              <p style={{fontSize:13,color:C.warm}}>No saved versions yet. Every time the ALP is saved or completed, a snapshot is recorded here.</p>
+            </div>
+          )}
+          {!loadingVersions&&versions.length>0&&(
+            <div style={{position:"relative",paddingLeft:24}}>
+              <div style={{position:"absolute",left:7,top:6,bottom:6,width:2,background:C.tanL}}/>
+              {versions.map(v=>(
+                <div key={v.id} style={{position:"relative",marginBottom:14}}>
+                  <div style={{position:"absolute",left:-21,top:5,width:14,height:14,borderRadius:"50%",background:C.purple,border:`3px solid ${C.bg}`}}/>
+                  <div className="card" style={{padding:"14px 18px",cursor:"pointer"}} onClick={()=>setExpandedVersion(expandedVersion===v.id?null:v.id)}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:6}}>
+                      <div>
+                        <span style={{fontSize:13,fontWeight:700,color:C.black}}>Version {v.version_number}</span>
+                        <span style={{fontSize:11,color:C.warm,marginLeft:10}}>{v.profiles?.full_name||"Unknown"} · {new Date(v.created_at).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"})}</span>
+                      </div>
+                      <span style={{fontSize:10,fontWeight:700,color:C.purple,background:C.purpleL,padding:"2px 10px",borderRadius:99}}>{(v.status_at_save||"draft").replace("_"," ").toUpperCase()}</span>
+                    </div>
+                    {v.change_summary&&<p style={{fontSize:12,color:C.warm,marginTop:6}}>{v.change_summary}</p>}
+                    {expandedVersion===v.id&&(
+                      <div style={{marginTop:12,padding:"12px 14px",background:C.tanL+"55",borderRadius:8,fontSize:11,color:C.black,maxHeight:240,overflowY:"auto",fontFamily:"monospace",whiteSpace:"pre-wrap"}}>
+                        {JSON.stringify(v.snapshot,null,2)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {!loading&&activeTab==="summary"&&(
         <>
@@ -8055,9 +8403,16 @@ function CreateALPDoc({setPage}){
     setTimeout(()=>{try{window.print();}catch{}},400);
   }
 
-  function handleExport(){
+  async function handleExport(){
+    if(!s){toast("Select a student first","error");return;}
     setExporting(true);
-    setTimeout(()=>{setExporting(false);toast(`ALP exported as ${format.toUpperCase()} ✓`,"success");},1400);
+    try{
+      const goals=await Supabase.getGoals(s.id);
+      const doc=await generateALPPdf({student:s,goals,notes:s.review_notes,reviewer:profile?.full_name||user?.email,school:s.school_name});
+      doc.save(`ALP_${s.name.replace(/\s+/g,"_")}.pdf`);
+      toast("ALP exported as PDF ✓","success");
+    }catch(e){toast("Export failed","error");}
+    setExporting(false);
   }
 
   const docMeta=s?[
@@ -8799,6 +9154,141 @@ function GoalsSummaryForFamily({studentId}){
 // ═══════════════════════════════════════════════════════════
 // REPORTS
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// REVIEW QUEUE — director/admin approval workflow hub
+// ═══════════════════════════════════════════════════════════
+function ReviewQueue({setPage}){
+  const {toast}=useToast();
+  const {isMobile}=useResponsive();
+  const {students:dbStudents,user,profile,realRole,approveALPAction,requestChangesAction}=useSupabaseAuth();
+  const [selectedId,setSelectedId]=useState(null);
+  const [notes,setNotes]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [tab,setTab]=useState("in_review");
+
+  const isReviewer=["director","admin"].includes(realRole);
+  const queue={
+    in_review:(dbStudents||[]).filter(s=>s.alp_status==="in_review"),
+    approved:(dbStudents||[]).filter(s=>s.alp_status==="approved"),
+    changes_requested:(dbStudents||[]).filter(s=>s.alp_status==="changes_requested"),
+    draft:(dbStudents||[]).filter(s=>!s.alp_status||s.alp_status==="draft"),
+  };
+  const visible=queue[tab]||[];
+  const sel=dbStudents?.find(s=>s.id===selectedId)||null;
+
+  async function handleApprove(){
+    if(!sel)return;
+    setBusy(true);
+    const r=await approveALPAction(sel.id,notes);
+    if(!r.error){toast(`${sel.name}'s ALP approved ✓`,"success");setSelectedId(null);setNotes("");}
+    else toast(r.error.message||"Approval failed","error");
+    setBusy(false);
+  }
+  async function handleRequestChanges(){
+    if(!sel)return;
+    if(!notes.trim()){toast("Add a note explaining what needs to change","error");return;}
+    setBusy(true);
+    const r=await requestChangesAction(sel.id,notes);
+    if(!r.error){toast("Changes requested","success");setSelectedId(null);setNotes("");}
+    else toast(r.error.message||"Failed","error");
+    setBusy(false);
+  }
+
+  if(!isReviewer){
+    return(
+      <Page title={<>Review <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Queue</span></>} subtitle="Director / Admin access required">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>🔒</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>Restricted Access</h3>
+          <p style={{fontSize:13,color:C.warm}}>The Review Queue is only available to Director and Admin accounts. Your current role: <b>{realRole}</b>.</p>
+        </div>
+      </Page>
+    );
+  }
+
+  return(
+    <Page title={<>Review <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Queue</span></>}
+      subtitle={`${queue.in_review.length} ALP${queue.in_review.length!==1?"s":""} awaiting your review`}>
+
+      <div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
+        {[["in_review",`👁️ In Review (${queue.in_review.length})`],["changes_requested",`⚠️ Changes Requested (${queue.changes_requested.length})`],["approved",`✅ Approved (${queue.approved.length})`],["draft",`✏️ Draft (${queue.draft.length})`]].map(([id,label])=>(
+          <button key={id} onClick={()=>{setTab(id);setSelectedId(null);}} className={tab===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"9px 16px"}}>{label}</button>
+        ))}
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:isMobile||!sel?"1fr":"1fr 1.2fr",gap:16}}>
+        {/* Queue list */}
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {visible.length===0&&(
+            <div className="card" style={{padding:"40px 24px",textAlign:"center"}}>
+              <div style={{fontSize:36,marginBottom:10}}>📭</div>
+              <p style={{fontSize:13,color:C.warm}}>Nothing in this queue right now.</p>
+            </div>
+          )}
+          {visible.map(s=>(
+            <div key={s.id} onClick={()=>setSelectedId(s.id)} className="card" style={{padding:"16px 18px",cursor:"pointer",border:`1.5px solid ${selectedId===s.id?C.purple:C.tanL}`,background:selectedId===s.id?C.purpleL:C.white}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <div>
+                  <p style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:2}}>{s.name}</p>
+                  <p style={{fontSize:11,color:C.warm}}>Grade {s.grade||"–"} · {s.disability||"ALP"}</p>
+                </div>
+                {s.submitted_for_review_at&&<span style={{fontSize:10,color:C.warm,flexShrink:0}}>{new Date(s.submitted_for_review_at).toLocaleDateString("en-US",{month:"short",day:"numeric"})}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Detail panel */}
+        {sel&&(
+          <div className="card" style={{padding:"24px 26px",alignSelf:"flex-start"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+              <div>
+                <h3 className="serif" style={{fontSize:18,fontWeight:700}}>{sel.name}</h3>
+                <p style={{fontSize:12,color:C.warm,marginTop:2}}>Grade {sel.grade||"–"} · {sel.disability||"ALP"} · {sel.school_name||"–"}</p>
+              </div>
+              <button className="btn-ghost" onClick={()=>setPage("builder")} style={{fontSize:11}}>Open Full ALP →</button>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
+              {[["Strengths",sel.strengths],["Growth Areas",sel.growth_areas],["Concerns",sel.concerns],["Tier",sel.tier]].map(([l,v])=>(
+                <div key={l} style={{padding:"10px 12px",background:C.purpleL,borderRadius:8}}>
+                  <p style={{fontSize:10,fontWeight:700,color:C.purple,marginBottom:3}}>{l.toUpperCase()}</p>
+                  <p style={{fontSize:12,color:C.black,lineHeight:1.5}}>{v||"Not recorded"}</p>
+                </div>
+              ))}
+            </div>
+
+            {sel.submitted_for_review_at&&(
+              <p style={{fontSize:12,color:C.warm,marginBottom:14}}>📤 Submitted {new Date(sel.submitted_for_review_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</p>
+            )}
+            {sel.review_decision_notes&&(
+              <div style={{padding:"10px 14px",background:"#FEF2F2",borderRadius:8,marginBottom:14,fontSize:12,color:C.red}}>Previous note: "{sel.review_decision_notes}"</div>
+            )}
+
+            {tab==="in_review"&&(
+              <>
+                <UTextarea label="Decision notes (visible to teacher)" value={notes} onChange={e=>setNotes(e.target.value)} rows={4} placeholder="What's working well? What needs to change before approval?"/>
+                <div style={{display:"flex",gap:10,marginTop:14}}>
+                  <button className="btn-ghost" disabled={busy} onClick={handleRequestChanges} style={{flex:1,fontSize:12,color:C.red}}>⚠️ Request Changes</button>
+                  <button className="btn-purple" disabled={busy} onClick={handleApprove} style={{flex:1,fontSize:12,padding:"13px"}}>{busy?<><Spin/> Saving…</>:"✅ Approve ALP"}</button>
+                </div>
+              </>
+            )}
+            {tab!=="in_review"&&(
+              <div style={{padding:"12px 14px",background:C.tanL,borderRadius:8,fontSize:12,color:C.warm}}>
+                {tab==="approved"&&`Approved ${sel.approved_at?new Date(sel.approved_at).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):""}.`}
+                {tab==="changes_requested"&&"Waiting for the teacher to resubmit after making changes."}
+                {tab==="draft"&&"Not yet submitted for review."}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Page>
+  );
+}
+
+
 function Reports(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
@@ -8825,57 +9315,33 @@ function Reports(){
   async function generateReport(type){
     if(type.needsStudent&&!s){toast("Select a student first","error");return;}
     setGenerating(type.id);
-    // Build report data from real Supabase data
     try{
-      const studentName=s?.name||"All Students";
-      const goals=s?.id?await Supabase.getGoals(s.id):[];
-      const progress=s?.id?await Supabase.getProgress(s.id,50):[];
-
-      // Build text report content
-      const reportLines=[];
-      reportLines.push(`ALP PLATFORM — ${type.label.toUpperCase()}`);
-      reportLines.push(`Generated: ${new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"})}`);
-      reportLines.push(`Generated by: ${profile?.full_name||user?.email||"Staff"}`);
-      reportLines.push("═".repeat(60));
-      if(s){
-        reportLines.push(`STUDENT: ${s.name}`);
-        reportLines.push(`Grade: ${s.grade||"–"} | School: ${s.school_name||"–"} | Status: ${s.status||"Active"}`);
-        reportLines.push(`Plan: ${s.plan||"ALP"} | Disability/Need: ${s.disability||"–"}`);
-        reportLines.push("─".repeat(60));
-      }
-      if(goals.length>0){
-        reportLines.push("ANNUAL GOALS:");
-        goals.forEach((g,i)=>{
-          reportLines.push(`${i+1}. [${g.domain}] ${g.goal_text}`);
-          if(g.baseline) reportLines.push(`   Baseline: ${g.baseline} → Target: ${g.target||"–"}`);
-          if(g.current_pct) reportLines.push(`   Progress: ${g.current_pct}%`);
+      const studentName=s?.name||"All_Students";
+      if(type.id==="class"){
+        // Multi-student caseload PDF
+        const jsPDF=await loadJsPDF();
+        const doc=new jsPDF({unit:"pt",format:"letter"});
+        const W=doc.internal.pageSize.getWidth();const margin=56;let y=64;
+        doc.setFont("times","bold");doc.setFontSize(20);doc.setTextColor(124,58,237);
+        doc.text("Class Caseload Report",margin,y);y+=24;
+        doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(107,114,128);
+        doc.text(`Generated ${new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})} by ${profile?.full_name||user?.email||"Staff"} · ${totalStudents} students`,margin,y);y+=24;
+        doc.setDrawColor(124,58,237);doc.line(margin,y,W-margin,y);y+=20;
+        (dbStudents||[]).forEach((st,i)=>{
+          if(y>doc.internal.pageSize.getHeight()-80){doc.addPage();y=64;}
+          doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(17,17,17);
+          doc.text(`${i+1}. ${st.name}`,margin,y);y+=15;
+          doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(107,114,128);
+          doc.text(`Grade ${st.grade||"–"} · ${st.disability||"ALP"} · Status: ${(st.alp_status||"draft").replace("_"," ")} · ${st.school_name||"–"}`,margin,y);y+=20;
         });
-        reportLines.push("─".repeat(60));
+        doc.save(`ALP_Caseload_Report_${new Date().toISOString().split("T")[0]}.pdf`);
+      } else {
+        const goals=s?.id?await Supabase.getGoals(s.id):[];
+        const progress=s?.id?await Supabase.getProgress(s.id,50):[];
+        const doc=await generateALPPdf({student:s,goals,notes:s?.review_notes||(type.id==="progress"?`Progress summary — ${progress.length} data points on file.`:""),reviewer:profile?.full_name||user?.email,school:s?.school_name});
+        doc.save(`ALP_${type.id}_${studentName.replace(/\s+/g,"_")}_${new Date().toISOString().split("T")[0]}.pdf`);
       }
-      if(progress.length>0){
-        reportLines.push(`PROGRESS DATA (last ${Math.min(10,progress.length)} entries):`);
-        progress.slice(-10).forEach(p=>{
-          reportLines.push(`  ${p.date||"–"} | Score: ${p.score} | ${p.notes||""}`);
-        });
-      }
-      if(type.id==="class"&&dbStudents?.length>0){
-        reportLines.push(`CASELOAD SUMMARY (${totalStudents} students):`);
-        dbStudents.forEach(st=>{
-          reportLines.push(`  • ${st.name} | Grade ${st.grade||"–"} | ${st.status||"Active"} | ${st.disability||"–"}`);
-        });
-      }
-      reportLines.push("═".repeat(60));
-      reportLines.push("END OF REPORT — ALP Platform by Stamper Acolytes");
-
-      // Create downloadable text file (PDF generation coming Phase 2)
-      const blob=new Blob([reportLines.join("\n")],{type:"text/plain"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");
-      a.href=url;
-      a.download=`ALP_${type.id}_${studentName.replace(/\s+/g,"_")}_${new Date().toISOString().split("T")[0]}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast(`${type.label} downloaded!`,"success");
+      toast(`${type.label} downloaded as PDF!`,"success");
     }catch(e){
       console.error(e);
       toast("Report generation failed","error");
@@ -8956,7 +9422,7 @@ function Reports(){
           </div>
 
           <div style={{marginTop:16,padding:"12px 16px",background:C.tanL+"55",borderRadius:8,fontSize:12,color:C.warm}}>
-            📌 Reports currently download as formatted text files. Full PDF generation with charts and signatures is coming in Phase 2.
+            📄 Reports download as professional PDF documents, generated from your real student and goal data.
           </div>
         </>
       )}
@@ -9023,6 +9489,230 @@ function Reports(){
 // ═══════════════════════════════════════════════════════════
 // NOTIFICATIONS SCREEN
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// COMPLIANCE DASHBOARD — completion, overdue reviews, gaps
+// ═══════════════════════════════════════════════════════════
+function ComplianceDashboard({setPage}){
+  const {isMobile}=useResponsive();
+  const {students:dbStudents,realRole}=useSupabaseAuth();
+  const [goalCounts,setGoalCounts]=useState({});
+  const [loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    if(!dbStudents?.length){setLoading(false);return;}
+    setLoading(true);
+    Promise.all(dbStudents.map(s=>Supabase.getGoals(s.id).then(g=>[s.id,g?.length||0])))
+      .then(pairs=>{setGoalCounts(Object.fromEntries(pairs));setLoading(false);});
+  },[dbStudents]);
+
+  const total=dbStudents?.length||0;
+  const byStatus={
+    draft:dbStudents?.filter(s=>!s.alp_status||s.alp_status==="draft").length||0,
+    in_review:dbStudents?.filter(s=>s.alp_status==="in_review").length||0,
+    approved:dbStudents?.filter(s=>s.alp_status==="approved").length||0,
+    changes_requested:dbStudents?.filter(s=>s.alp_status==="changes_requested").length||0,
+    archived:dbStudents?.filter(s=>s.alp_status==="archived").length||0,
+  };
+  const completionPct=total>0?Math.round((byStatus.approved/total)*100):0;
+  const overdue=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)<new Date())||[];
+  const dueSoon=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)>=new Date()&&new Date(s.review_date)<=new Date(Date.now()+30*86400000))||[];
+  const missingGoals=dbStudents?.filter(s=>!goalCounts[s.id])||[];
+  const missingPresentLevels=dbStudents?.filter(s=>!s.strengths&&!s.growth_areas)||[];
+  const missingParentContact=dbStudents?.filter(s=>!s.parent_email&&!s.parent_phone)||[];
+
+  return(
+    <Page title={<>Compliance <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Dashboard</span></>}
+      subtitle={`${total} student${total!==1?"s":""} · ${completionPct}% with approved ALPs`}
+      action={<button className="btn-black" onClick={()=>setPage("reports")} style={{fontSize:11,padding:"11px 22px"}}>📊 Full Reports →</button>}>
+
+      {total===0&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>✅</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Data Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>Compliance metrics populate once students are added.</p>
+        </div>
+      )}
+
+      {total>0&&(
+        <>
+          {/* Top metrics */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:20}}>
+            {[["COMPLETION RATE",`${completionPct}%`,"Approved ALPs",completionPct>=80?C.green:completionPct>=50?C.amber:C.red,"✅"],
+              ["OVERDUE REVIEWS",overdue.length,"Past review date",overdue.length>0?C.red:C.green,"🚨"],
+              ["DUE WITHIN 30 DAYS",dueSoon.length,"Upcoming reviews",dueSoon.length>0?C.amber:C.green,"📅"],
+              ["MISSING GOALS",missingGoals.length,"No goals recorded",missingGoals.length>0?C.red:C.green,"🎯"]].map(([l,v,sub,c,ic])=>(
+              <div key={l} className="card" style={{padding:"18px 20px",borderLeft:`3px solid ${c}`}}>
+                <div style={{display:"flex",justifyContent:"space-between"}}>
+                  <div>
+                    <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
+                    <div className="serif" style={{fontSize:26,fontWeight:700,color:c,lineHeight:1}}>{v}</div>
+                    <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
+                  </div>
+                  <span style={{fontSize:24,opacity:.15}}>{ic}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Workflow status breakdown */}
+          <div className="card" style={{padding:"22px 24px",marginBottom:16}}>
+            <p className="lbl" style={{marginBottom:16}}>WORKFLOW STATUS BREAKDOWN</p>
+            {[["Draft",byStatus.draft,C.warm],["In Review",byStatus.in_review,C.amber],["Approved",byStatus.approved,C.green],["Changes Requested",byStatus.changes_requested,C.red],["Archived",byStatus.archived,C.tan]].map(([label,count,color])=>{
+              const pct=total>0?Math.round((count/total)*100):0;
+              return(
+                <div key={label} style={{marginBottom:12}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+                    <span style={{color:C.black}}>{label}</span>
+                    <span style={{fontWeight:700,color}}>{count} ({pct}%)</span>
+                  </div>
+                  <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+                    <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:99}}/>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Documentation gaps */}
+          <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr 1fr",gap:14}}>
+            {[["🎯 Missing Goals",missingGoals,"No goals have been created yet."],
+              ["📋 Missing Present Levels",missingPresentLevels,"Strengths/growth areas not recorded."],
+              ["📞 Missing Parent Contact",missingParentContact,"No parent email or phone on file."]].map(([title,list,empty])=>(
+              <div key={title} className="card" style={{padding:"18px 20px"}}>
+                <p style={{fontSize:13,fontWeight:700,color:C.black,marginBottom:10}}>{title} ({list.length})</p>
+                {list.length===0&&<p style={{fontSize:11,color:C.green}}>✓ All students have this on file.</p>}
+                {list.slice(0,5).map(s=>(
+                  <div key={s.id} onClick={()=>setPage("students")} style={{fontSize:12,color:C.warm,padding:"5px 0",borderBottom:`1px solid ${C.tanL}`,cursor:"pointer"}}>{s.name}</div>
+                ))}
+                {list.length>5&&<p style={{fontSize:10,color:C.warm,marginTop:6}}>+{list.length-5} more</p>}
+              </div>
+            ))}
+          </div>
+
+          {/* Overdue reviews table */}
+          {overdue.length>0&&(
+            <div className="card" style={{padding:0,overflow:"hidden",marginTop:16}}>
+              <div style={{padding:"14px 20px",borderBottom:`1px solid ${C.tanL}`,background:"#FEF2F2"}}>
+                <p style={{fontSize:13,fontWeight:700,color:C.red}}>🚨 Overdue Reviews — Action Required</p>
+              </div>
+              <div style={{overflowX:"auto"}}>
+                <table className="data-table" style={{minWidth:400}}>
+                  <thead><tr><th>Student</th><th>Review Was Due</th><th>Days Overdue</th><th></th></tr></thead>
+                  <tbody>{overdue.map(s=>{
+                    const days=Math.floor((new Date()-new Date(s.review_date))/86400000);
+                    return(
+                      <tr key={s.id}>
+                        <td style={{fontWeight:600}}>{s.name}</td>
+                        <td style={{fontSize:12,color:C.warm}}>{new Date(s.review_date).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</td>
+                        <td><span style={{fontSize:11,fontWeight:700,color:C.red}}>{days} day{days!==1?"s":""}</span></td>
+                        <td><button className="btn-ghost" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>setPage("builder")}>Review Now →</button></td>
+                      </tr>
+                    );
+                  })}</tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </Page>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// AUDIT LOG — who changed what, when (admin/director only)
+// ═══════════════════════════════════════════════════════════
+function AuditLogPage({setPage}){
+  const {isMobile}=useResponsive();
+  const {realRole,students:dbStudents}=useSupabaseAuth();
+  const [logs,setLogs]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [filterAction,setFilterAction]=useState("all");
+  const [filterStudent,setFilterStudent]=useState("");
+  const isAuthorized=["director","admin"].includes(realRole);
+
+  useEffect(()=>{
+    if(!isAuthorized)return;
+    setLoading(true);
+    Supabase.getAuditLog({studentId:filterStudent||null,limit:200}).then(d=>{setLogs(d||[]);setLoading(false);});
+  },[isAuthorized,filterStudent]);
+
+  const actionMeta={
+    create_student:{icon:"➕",label:"Created student",color:C.green},
+    update_student:{icon:"✏️",label:"Updated student",color:C.blue},
+    delete_student:{icon:"🗑",label:"Deleted student",color:C.red},
+    create_goal:{icon:"🎯",label:"Created goal",color:C.purple},
+    submit_for_review:{icon:"📤",label:"Submitted for review",color:C.amber},
+    approve_alp:{icon:"✅",label:"Approved ALP",color:C.green},
+    request_changes:{icon:"⚠️",label:"Requested changes",color:C.red},
+    reopen_draft:{icon:"🔓",label:"Reopened as draft",color:C.warm},
+    archive_student:{icon:"📦",label:"Archived student",color:C.warm},
+  };
+  const actionTypes=["all",...new Set(logs.map(l=>l.action))];
+  const visible=filterAction==="all"?logs:logs.filter(l=>l.action===filterAction);
+
+  if(!isAuthorized){
+    return(
+      <Page title={<>Audit <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Log</span></>} subtitle="Director / Admin access required">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>🔒</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>Restricted Access</h3>
+          <p style={{fontSize:13,color:C.warm}}>The Audit Log is only available to Director and Admin accounts. Your current role: <b>{realRole}</b>.</p>
+        </div>
+      </Page>
+    );
+  }
+
+  return(
+    <Page title={<>Audit <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Log</span></>}
+      subtitle={`${logs.length} event${logs.length!==1?"s":""} recorded`}>
+
+      <div style={{display:"flex",gap:10,marginBottom:18,flexWrap:"wrap",alignItems:"center"}}>
+        <select value={filterStudent} onChange={e=>setFilterStudent(e.target.value)} style={{fontSize:12,padding:"8px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>
+          <option value="">All Students</option>
+          {(dbStudents||[]).map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+          {actionTypes.map(a=>(
+            <button key={a} onClick={()=>setFilterAction(a)} className={filterAction===a?"btn-black":"btn-ghost"} style={{fontSize:10,padding:"6px 12px"}}>
+              {a==="all"?"All Actions":actionMeta[a]?.label||a}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading audit log…</div>}
+      {!loading&&visible.length===0&&(
+        <div className="card" style={{padding:"40px 24px",textAlign:"center"}}>
+          <p style={{fontSize:13,color:C.warm}}>No audit events recorded yet. Events appear here as users create, edit, submit, and approve records.</p>
+        </div>
+      )}
+      {!loading&&visible.length>0&&(
+        <div className="card" style={{padding:0,overflow:"hidden"}}>
+          <div style={{overflowX:"auto"}}>
+            <table className="data-table" style={{minWidth:560}}>
+              <thead><tr>{["When","Who","Action","Details",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
+              <tbody>{visible.map(log=>{
+                const meta=actionMeta[log.action]||{icon:"•",label:log.action,color:C.warm};
+                return(
+                  <tr key={log.id}>
+                    <td style={{fontSize:11,color:C.warm,whiteSpace:"nowrap"}}>{new Date(log.created_at).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</td>
+                    <td style={{fontSize:12}}>{log.profiles?.full_name||"Unknown"} <span style={{fontSize:10,color:C.warm}}>({log.profiles?.role||"—"})</span></td>
+                    <td><span style={{fontSize:11,fontWeight:700,color:meta.color}}>{meta.icon} {meta.label}</span></td>
+                    <td style={{fontSize:11,color:C.warm,maxWidth:200}}>{log.details?JSON.stringify(log.details).slice(0,60):"—"}</td>
+                    <td></td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </Page>
+  );
+}
+
+
 function Notifications(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
@@ -9496,8 +10186,15 @@ const NAV_FULL=[
 
 function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent}){
   const {role,roleData,setRole}=useRole();
-  const {profile,user:authUser,students:dbStudents}=useSupabaseAuth();
-  const nav=NAV_BY_ROLE[role]||NAV_BY_ROLE.teacher;
+  const {profile,user:authUser,students:dbStudents,realRole}=useSupabaseAuth();
+  const baseNav=NAV_BY_ROLE[role]||NAV_BY_ROLE.teacher;
+  // Review Queue visibility is driven by the REAL authenticated role (profile.role),
+  // never the cosmetic "preview as" switcher — so a real director always sees it.
+  const isRealReviewer=["director","admin"].includes(realRole);
+  const hasReviewQueueGroup=baseNav.some(g=>g.items.some(i=>i.id==="reviewqueue"));
+  const nav=isRealReviewer&&!hasReviewQueueGroup
+    ?[{group:"APPROVALS",items:[{id:"reviewqueue",label:"Review Queue",icon:"👁️",badge:"New"},{id:"compliance",label:"Compliance",icon:"📋"},{id:"auditlog",label:"Audit Log",icon:"🔍"}]},...baseNav]
+    :baseNav;
   const baseUser=ROLE_USERS[role]||ROLE_USERS.teacher;
   const user=role==="teacher"
     ?{name:profile?.full_name||authUser?.email?.split("@")[0]||"Teacher",sub:`Special Education · ${profile?.school||"Your School"}`}
@@ -9682,6 +10379,9 @@ function AppInner(){
     timeline:<TimelinePage setPage={setPage}/>,
     studentprofile:<StudentProfile setPage={setPage}/>,
     quickalp:<QuickALP setPage={setPage}/>,
+    reviewqueue:<ReviewQueue setPage={setPage}/>,
+    compliance:<ComplianceDashboard setPage={setPage}/>,
+    auditlog:<AuditLogPage setPage={setPage}/>,
   };
   return(
     <>
