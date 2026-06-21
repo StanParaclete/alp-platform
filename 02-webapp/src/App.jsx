@@ -1151,10 +1151,10 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
      desc:"ALP is built for global deployment. Education ministries, NGOs, and government agencies can standardize intervention across schools, regions, and entire countries — with custom frameworks.",
      features:["Country-specific framework config","Bulk student import (CSV/SIS)","Regional progress reporting","Multi-language support","Custom branding & white-labeling"]},
   ];
-  const testimonials=[
-    {q:"ALP has transformed how we support our students. What used to take 2 hours now takes 20 minutes, and our review rate went from 60% to 98%.",n:"Abena Sarpong",r:"Special Education Director · Accra, Ghana",i:"AS",c:"#7C3AED"},
-    {q:"The AI goal writer is unbelievable. I paste in my baseline data and it gives me three SMART goal options — with baseline, target, and monitoring method already filled in.",n:"Marcus Williams",r:"Special Ed Teacher · Virginia, USA",i:"MW",c:"#2563EB"},
-    {q:"Finally a system that works for Ghana's GES framework. ALP flags anything we're missing before our regional review. It saved us from a planning issue that would have been serious.",n:"Kwame Asante",r:"Head of Inclusive Education · GES District, Kumasi",i:"KA",c:"#16A34A"},
+  const highlights=[
+    {q:"Built around a clear 10-step ALP workflow — from student information all the way to review and sign-off.",icon:"📋",c:"#7C3AED"},
+    {q:"AI-assisted goal writing helps you turn baseline data into SMART goals in seconds, not hours.",icon:"✨",c:"#2563EB"},
+    {q:"Designed to work for any school, anywhere — not tied to one country's compliance framework.",icon:"🌍",c:"#16A34A"},
   ];
   return(
     <div className="dot-bg" style={{minHeight:"100vh"}}>
@@ -1225,63 +1225,58 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* What to expect */}
       <section style={{padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",maxWidth:1100,margin:"0 auto"}}>
-        <h2 className="serif" style={{fontSize:34,fontWeight:700,letterSpacing:"-1px",marginBottom:40,textAlign:"center"}}>Trusted by <span className="serif-italic" style={{color:C.warm}}>educators worldwide</span></h2>
+        <h2 className="serif" style={{fontSize:34,fontWeight:700,letterSpacing:"-1px",marginBottom:40,textAlign:"center"}}>Built for <span className="serif-italic" style={{color:C.warm}}>special educators</span></h2>
         <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
-          {testimonials.map(t=>(
-            <div key={t.n} className="card" style={{padding:28}}>
-              <div style={{fontSize:36,color:t.c,marginBottom:10,lineHeight:1}}>"</div> <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black,marginBottom:20}}>{t.q}</p> <div style={{display:"flex",alignItems:"center",gap:12}}> <div style={{width:40,height:40,borderRadius:"50%",background:t.c,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700,fontSize:14,flexShrink:0}}>{t.i}</div>
-                <div><div style={{fontSize:13,fontWeight:700}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
-              </div>
+          {highlights.map((t,i)=>(
+            <div key={i} className="card" style={{padding:28}}>
+              <div style={{fontSize:32,marginBottom:14}}>{t.icon}</div>
+              <p className="serif" style={{fontSize:14,fontStyle:"italic",lineHeight:1.75,color:C.black}}>{t.q}</p>
             </div>
           ))}
         </div>
       </section>
 
 
-      {/* ── CASE STUDY ───────────────────────────── */}
+      {/* ── WHY ALP ───────────────────────────── */}
       <section style={{background:C.white,padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p className="lbl" style={{marginBottom:16,color:C.purple,textAlign:"center"}}>Case Study</p>
+          <p className="lbl" style={{marginBottom:16,color:C.purple,textAlign:"center"}}>Why ALP</p>
           <h2 className="serif" style={{fontSize:"clamp(26px,4vw,44px)",fontWeight:700,letterSpacing:"-1.5px",marginBottom:40,textAlign:"center",lineHeight:1.1}}>
-            How Westwood District went from<br/><span className="serif-italic" style={{color:C.warm}}>60% to 94% review completion in 3 months.</span>
+            Built to solve the problems<br/><span className="serif-italic" style={{color:C.warm}}>special educators face every day.</span>
           </h2>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"clamp(28px,5vw,56px)",alignItems:"start"}}>
             <div>
               <div style={{background:C.purpleL,borderRadius:14,padding:"24px 26px",marginBottom:20}}>
-                <p className="lbl" style={{marginBottom:12}}>THE CHALLENGE</p>
-                <p style={{fontSize:14,color:C.warm,lineHeight:1.75}}>Westwood Unified had 12 schools, 1,800+ students with plans, and a review rate that kept failing regional audits. Teachers spent 3+ hours per ALP. Annual reviews were consistently late. Families were disengaged.</p>
+                <p className="lbl" style={{marginBottom:12}}>THE PROBLEM</p>
+                <p style={{fontSize:14,color:C.warm,lineHeight:1.75}}>Special education teachers spend hours building learning plans by hand, struggle to keep documentation organized, and often fall behind on review deadlines — all while trying to keep families informed and engaged.</p>
               </div>
               <div style={{background:"#DCFCE7",borderRadius:14,padding:"24px 26px"}}>
-                <p className="lbl" style={{marginBottom:12,color:C.green}}>THE RESULT</p>
-                <p style={{fontSize:14,color:C.warm,lineHeight:1.75}}>After 3 months on ALP: review rate jumped from 60% to 94%. Average ALP completion time dropped from 3.2 hours to 22 minutes. Family portal response rate hit 81%.</p>
+                <p className="lbl" style={{marginBottom:12,color:C.green}}>THE ALP APPROACH</p>
+                <p style={{fontSize:14,color:C.warm,lineHeight:1.75}}>A guided 10-step workflow, AI-assisted goal writing, real-time progress tracking, and a built-in family portal — so plans take minutes to draft instead of hours, and nothing falls through the cracks.</p>
               </div>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:16}}>
-              {[["3.2 hrs → 22 min","Time to complete an ALP",C.purple],["60% → 94%","Review completion",C.green],["32% → 81%","Family portal response rate",C.blue],["0 → 142","ALPs on the platform in 90 days",C.amber]].map(([stat,label,color])=>(
+              {[["10 Steps","Guided ALP workflow",C.purple],["AI-Assisted","Goal writing & recommendations",C.green],["Real-Time","Progress monitoring & charts",C.blue],["Built-In","Family communication portal",C.amber]].map(([stat,label,color])=>(
                 <div key={label} style={{background:C.white,border:`1px solid ${C.tanL}`,borderRadius:12,padding:"20px 24px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <span style={{fontSize:13,color:C.warm}}>{label}</span>
                   <span className="serif" style={{fontSize:20,fontWeight:800,color}}>{stat}</span>
                 </div>
               ))}
-              <blockquote style={{background:C.purpleL,borderRadius:12,padding:"20px 24px",borderLeft:`4px solid ${C.purple}`}}>
-                <p className="serif" style={{fontSize:14,fontStyle:"italic",color:C.black,lineHeight:1.7,marginBottom:12}}>"ALP turned plan management from our biggest headache into our strongest asset. Our SPED team has never been more confident going into audit season."</p>
-                <div style={{fontSize:12,fontWeight:700,color:C.purple}}>Dr. Abena Sarpong — District SPED Director, Westwood Unified</div>
-              </blockquote>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── INTEGRATIONS ─────────────────────────── */}
+      {/* ── COMING SOON ─────────────────────────── */}
       <section style={{background:C.purpleL,padding:"clamp(40px,5vw,64px) clamp(20px,4vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:12,color:C.purple}}>Integrations</p>
-          <h2 className="serif" style={{fontSize:"clamp(22px,3.5vw,34px)",fontWeight:700,marginBottom:12,letterSpacing:"-.5px"}}>Works with your existing tools</h2>
-          <p style={{fontSize:14,color:C.warm,marginBottom:32,maxWidth:480,margin:"0 auto 32px"}}>ALP connects to the tools your district already uses — no rip and replace needed.</p>
+          <p className="lbl" style={{marginBottom:12,color:C.purple}}>Roadmap</p>
+          <h2 className="serif" style={{fontSize:"clamp(22px,3.5vw,34px)",fontWeight:700,marginBottom:12,letterSpacing:"-.5px"}}>SIS integrations — coming soon</h2>
+          <p style={{fontSize:14,color:C.warm,marginBottom:32,maxWidth:480,margin:"0 auto 32px"}}>We're building connections to the tools schools already use. Want early access to a specific integration? Let us know.</p>
           <div style={{display:"flex",justifyContent:"center",flexWrap:"wrap",gap:12}}>
-            {[["📊","PowerSchool","SIS import"],["🏫","Infinite Campus","Roster sync"],["📧","Google Workspace","SSO + Meet"],["💻","Microsoft 365","SSO + Teams"],["📋","Frontline","Plan migration"],["🔒","Clever","Single Sign-On"],["📁","Google Drive","Document sync"],["📤","Custom CSV","Any SIS export"]].map(([icon,name,desc])=>(
+            {[["📊","PowerSchool","Planned"],["🏫","Infinite Campus","Planned"],["📧","Google Workspace","Planned"],["💻","Microsoft 365","Planned"],["📁","Google Drive","Planned"],["📤","Custom CSV","Available now"]].map(([icon,name,desc])=>(
               <div key={name} style={{background:C.white,border:`1px solid ${C.tanL}`,borderRadius:10,padding:"14px 18px",minWidth:120,textAlign:"center"}}>
                 <div style={{fontSize:22,marginBottom:6}}>{icon}</div>
                 <div style={{fontSize:12,fontWeight:700,color:C.black}}>{name}</div>
@@ -1806,7 +1801,7 @@ function ArticleModal({article,onClose}){
 
 function StudentDetailModal({student,onClose,onOpenALP}){
   const {toast}=useToast();
-  const [noteText,setNoteText]=useState("Making great progress. Works best with visual supports and extra processing time.");
+  const [noteText,setNoteText]=useState(student?.notes||"");
   const [noteDraft,setNoteDraft]=useState("");
   const [editNote,setEditNote]=useState(false);
   if(!student)return null;
@@ -1836,7 +1831,7 @@ function StudentDetailModal({student,onClose,onOpenALP}){
           {/* Info */}
           <div style={{marginBottom:20}}>
             <p className="lbl" style={{marginBottom:12}}>Student Information</p>
-            {[["School","Westwood Elementary"],["Teacher","Ms. Simmons"],["Services","Speech · OT · Special Ed"],["Accommodations","Extended time · Text-to-speech · Preferential seating"],["Emergency Contact","Parent — +1 (703) 555-0199"]].map(([k,v])=>(
+            {[["School",student.school_name||"Not set"],["Teacher",student.teacher_name||"Not assigned"],["Services",student.services||"Not recorded"],["Accommodations",student.accommodations?.length?student.accommodations.join(" · "):"Not recorded"],["Emergency Contact",student.parent_phone?`Parent — ${student.parent_phone}`:"Not recorded"]].map(([k,v])=>(
               <div key={k} style={{display:"flex",gap:12,padding:"9px 0",borderBottom:`1px solid ${C.tanL}`}}>
                 <span style={{fontSize:12,fontWeight:700,color:C.warm,width:140,flexShrink:0}}>{k}</span>
                 <span style={{fontSize:13,color:C.black}}>{v}</span>
@@ -1879,7 +1874,7 @@ function InviteUserModal({onClose}){
   const {toast}=useToast();
   const [email,setEmail]=useState("");
   const [role,setRole]=useState("teacher");
-  const [school,setSchool]=useState("Westwood Elementary");
+  const [school,setSchool]=useState("");
   const [sent,setSent]=useState(false);
   const [sending,setSending]=useState(false);
   const [bulk,setBulk]=useState("");
@@ -1938,8 +1933,7 @@ function InviteUserModal({onClose}){
           {tab==="single"&&(
             <div style={{display:"flex",flexDirection:"column",gap:14}}>
               <UInput label="Email Address *" value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="teacher@school.edu"/>
-              <USelect label="School" value={school} onChange={e=>setSchool(e.target.value)}
-                options={["Westwood Elementary","Lincoln Middle","Roosevelt High"].map(s=>({value:s,label:s}))}/>
+              <UInput label="School" value={school} onChange={e=>setSchool(e.target.value)} placeholder="Enter school name"/>
               <div>
                 <p className="lbl" style={{marginBottom:10}}>Role</p>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -1959,8 +1953,7 @@ function InviteUserModal({onClose}){
 
           {tab==="bulk"&&(
             <div style={{display:"flex",flexDirection:"column",gap:14}}>
-              <USelect label="School" value={school} onChange={e=>setSchool(e.target.value)}
-                options={["Westwood Elementary","Lincoln Middle","Roosevelt High"].map(s=>({value:s,label:s}))}/>
+              <UInput label="School" value={school} onChange={e=>setSchool(e.target.value)} placeholder="Enter school name"/>
               <USelect label="Role for all invitees" value={role} onChange={e=>setRole(e.target.value)}
                 options={roles.map(r=>({value:r.id,label:`${r.icon} ${r.label}`}))}/>
               <div>
@@ -2087,11 +2080,10 @@ function AnimCounter({value,duration=800}){
 // GLOBAL SEARCH (Cmd+K)
 // ═══════════════════════════════════════════════════════════
 function GlobalSearch({onClose,setPage}){
+  const {students:dbStudents}=useSupabaseAuth();
   const [q,setQ]=useState("");
   const results=[
-    {icon:"👥",label:"Marcus Johnson",sub:"Grade 3 · Intellectual Disability",page:"students",category:"Students"},
-    {icon:"👥",label:"Sofia Lee",sub:"Grade 5 · Dyslexia · RTI Tier II",page:"students",category:"Students"},
-    {icon:"👥",label:"Aisha Adeyemi",sub:"Grade 1 · Autism · Communication goals",page:"students",category:"Students"},
+    ...(dbStudents||[]).slice(0,5).map(s=>({icon:"👥",label:s.name,sub:`Grade ${s.grade||"–"} · ${s.disability||"ALP Student"}`,page:"students",category:"Students"})),
     {icon:"✏️",label:"ALP Builder",sub:"Create or edit Adaptive Learning Programs",page:"builder",category:"Pages"},
     {icon:"📈",label:"Progress Monitoring",sub:"CBM data, trendlines, goal tracking",page:"progress",category:"Pages"},
     {icon:"❤️",label:"Family Portal",sub:"Messages, signatures, documents, meetings",page:"family",category:"Pages"},
@@ -2276,8 +2268,8 @@ function QuickAddStudentModal({onClose,onAdded}){
   const {isMobile}=useResponsive();
   const [step,setStep]=useState(1);
   const [form,setForm]=useState({
-    name:"",dob:"",grade:"",disability:"",school:"Westwood Elementary",
-    teacher:"Ms. Simmons",parent:"",parentEmail:"",parentPhone:"",
+    name:"",dob:"",grade:"",disability:"",school:"",
+    teacher:"",parent:"",parentEmail:"",parentPhone:"",
     services:"",notes:"",photo:""
   });
   const setF=(k,v)=>setForm(p=>({...p,[k]:v}));
@@ -2344,7 +2336,7 @@ function QuickAddStudentModal({onClose,onAdded}){
               <USelect label="Primary Disability *" value={form.disability} onChange={e=>setF("disability",e.target.value)} options={disabilities.map(d=>({value:d,label:d}))}/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <UInput label="School" value={form.school} onChange={e=>setF("school",e.target.value)}/>
-                <USelect label="Assigned Teacher" value={form.teacher} onChange={e=>setF("teacher",e.target.value)} options={["Ms. Simmons","Mr. Davis","Ms. Rivera","Mr. Chen","Ms. Park"].map(t=>({value:t,label:t}))}/>
+                <USelect label="Assigned Teacher" value={form.teacher} onChange={e=>setF("teacher",e.target.value)} options={["Teacher 1","Teacher 2","Teacher 3","Teacher 4","Teacher 5"].map(t=>({value:t,label:t}))}/>
               </div>
               <UTextarea label="Initial Notes (optional)" value={form.notes} onChange={e=>setF("notes",e.target.value)} rows={2} placeholder="Anything relevant for the team…"/>
               <div style={{display:"flex",gap:10,marginTop:4}}>
@@ -2360,7 +2352,7 @@ function QuickAddStudentModal({onClose,onAdded}){
               <div style={{background:C.purpleL,borderRadius:10,padding:"10px 14px",fontSize:12,color:C.warm,marginBottom:4}}>
                 👤 Student: <b style={{color:C.black}}>{form.name}</b> · {form.grade} · {form.disability}
               </div>
-              <UInput label="Parent/Guardian Name" value={form.parent} onChange={e=>setF("parent",e.target.value)} placeholder="e.g. Patricia Johnson"/>
+              <UInput label="Parent/Guardian Name" value={form.parent} onChange={e=>setF("parent",e.target.value)} placeholder="Parent or guardian full name"/>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
                 <UInput label="Parent Email" value={form.parentEmail} onChange={e=>setF("parentEmail",e.target.value)} type="email"/>
                 <UInput label="Parent Phone" value={form.parentPhone} onChange={e=>setF("parentPhone",e.target.value)} placeholder="+1 (703) 555-0199"/>
@@ -2418,8 +2410,9 @@ function QuickAddStudentModal({onClose,onAdded}){
 
 function MeetingSchedulerModal({onClose}){
   const {toast}=useToast();
+  const {students:dbStudents}=useSupabaseAuth();
   const [form,setForm]=useState({
-    family:"johnson",student:"Marcus Johnson",type:"Annual Review",
+    family:"",student:"",type:"Annual Review",
     date:"",time:"14:00",duration:"60",format:"virtual",
     link:"",location:"",attendees:["teacher","parent"],notes:""
   });
@@ -2429,7 +2422,7 @@ function MeetingSchedulerModal({onClose}){
 
   const meetingTypes=["Annual Review","Progress Check","Goal Review","Initial Evaluation","Re-evaluation","Team Meeting","Parent Conference","Transition Planning"];
   const timeSlots=["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30"];
-  const families=[["johnson","Marcus Johnson — Johnson Family"],["lee","Sofia Lee — Lee Family"],["adeyemi","Aisha Adeyemi — Adeyemi Family"],["parker","Tyler Parker — Parker Family"],["chen","Ryan Chen — Chen Family"]];
+  const families=(dbStudents||[]).map(s=>[s.id,`${s.name} — ${s.parent_name||s.name.split(" ")[1]||"Family"}`]);
 
   function schedule(){
     setSending(true);
@@ -2569,9 +2562,10 @@ function LogDataModal({onClose,student,domain}){
 // ═══════════════════════════════════════════════════════════
 function ReportGenerationModal({report,onClose}){
   const {toast}=useToast();
+  const {students:dbStudents}=useSupabaseAuth();
   const [step,setStep]=useState("config"); // config → generating → done
   const [format,setFormat]=useState("PDF");
-  const [student,setStudent]=useState("Marcus Johnson");
+  const [student,setStudent]=useState(dbStudents?.[0]?.name||"");
   const [includeCharts,setIncludeCharts]=useState(true);
   const [includeSignatures,setIncludeSignatures]=useState(true);
   const [progress,setProgress]=useState(0);
@@ -2602,7 +2596,7 @@ function ReportGenerationModal({report,onClose}){
         {step==="config"&&(
           <div style={{padding:"22px 28px"}}>
             <div style={{display:"flex",flexDirection:"column",gap:18,marginBottom:24}}>
-              <USelect label="Student" value={student} onChange={e=>setStudent(e.target.value)} options={["Marcus Johnson","Sofia Lee","Tyler Parker","Aisha Adeyemi","Ryan Chen","All Students — Class Report"].map(s=>({value:s,label:s}))}/>
+              <USelect label="Student" value={student} onChange={e=>setStudent(e.target.value)} options={(dbStudents||[]).map(s=>({value:s.name,label:s.name})).concat([{value:"all",label:"All Students — Class Report"}])}/>
               <div>
                 <p className="lbl" style={{marginBottom:10}}>Format</p>
                 <div style={{display:"flex",gap:8}}>
@@ -3172,7 +3166,7 @@ function SignUp({onLogin,onBack}){
             <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff"}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em"}}>ACCELERATED LEARNING PROGRAM</div></div>
           </div>
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,46px)",fontWeight:800,color:"#fff",lineHeight:1.1,marginBottom:20,letterSpacing:"-1px"}}>
-            Join 10,000+<br/><span style={{color:"#A78BFA"}}>educators worldwide.</span>
+            Join educators<br/><span style={{color:"#A78BFA"}}>building better plans.</span>
           </h2>
           <p style={{fontSize:14,color:"rgba(255,255,255,.55)",lineHeight:1.75,maxWidth:360,marginBottom:40}}>Build effective Adaptive Learning Programs in minutes. Free forever for individual teachers — no credit card required.</p>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -3313,50 +3307,36 @@ function NotFound({setPage}){
 function DirectorDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents,profile}=useSupabaseAuth();
   const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-  const [activeSchool,setActiveSchool]=useState("all");
 
-  const schools=[
-    {id:"all",name:"All Schools",students:142,staff:18,onTrack:89,reviews:3},
-    {id:"westwood",name:"Westwood Elementary",students:58,staff:7,onTrack:93,reviews:1},
-    {id:"lincoln",name:"Lincoln Middle",students:47,staff:6,onTrack:86,reviews:2},
-    {id:"roosevelt",name:"Roosevelt High",students:37,staff:5,onTrack:87,reviews:0},
-  ];
-  const sel=schools.find(s=>s.id===activeSchool)||schools[0];
-
-  const staffData=[
-    {name:"Ms. Simmons",school:"Westwood",students:14,onTrack:"3/4",lastEntry:"Today",status:"Active"},
-    {name:"Mr. Davis",school:"Lincoln",students:11,onTrack:"8/9","lastEntry":"Yesterday",status:"Active"},
-    {name:"Ms. Rivera",school:"Westwood",students:9,onTrack:"7/8",lastEntry:"Today",status:"Active"},
-    {name:"Mr. Chen",school:"Roosevelt",students:12,onTrack:"9/10",lastEntry:"2d ago",status:"Active"},
-    {name:"Ms. Park",school:"Lincoln",students:8,onTrack:"6/7",lastEntry:"3d ago",status:"Review Due"},
-  ];
+  const total=dbStudents?.length||0;
+  const active=dbStudents?.filter(s=>s.status==="Active"||!s.status).length||0;
+  const onTrackPct=total>0?Math.round((active/total)*100):0;
+  const reviewsDue=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)<=new Date(Date.now()+30*86400000)).length||0;
 
   return(
     <Page title={<>Director <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Dashboard</span></>}
-      subtitle={`Multi-school overview · ${today}`}
+      subtitle={`Organization overview · ${today}`}
       action={<button className="btn-black" onClick={()=>setPage("reports")} style={{fontSize:11,padding:"11px 22px"}}>📊 Reports →</button>}>
 
-      {/* School selector */}
-      <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
-        {schools.map(s=>(
-          <button key={s.id} onClick={()=>setActiveSchool(s.id)}
-            className={activeSchool===s.id?"btn-black":"btn-ghost"}
-            style={{fontSize:11,padding:"8px 16px"}}>
-            {s.name}{s.reviews>0&&<span style={{marginLeft:4,background:C.red,color:"#fff",fontSize:9,fontWeight:700,padding:"1px 5px",borderRadius:99}}>{s.reviews}</span>}
-          </button>
-        ))}
-      </div>
+      {total===0&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center",marginBottom:20}}>
+          <div style={{fontSize:48,marginBottom:12}}>🏛️</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Data Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>This view will populate once students are added to the platform.</p>
+        </div>
+      )}
 
       {/* Key metrics */}
       <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:16}}>
-        {[["STUDENTS",sel.students,"Active plans",C.purple,"👥"],["STAFF",sel.staff,"Special educators",C.blue,"👩‍🏫"],["ON TRACK",`${sel.onTrack}%`,"Goals on trajectory",C.green,"📈"],["REVIEWS DUE",sel.reviews,"This month",sel.reviews>0?C.red:C.green,"📅"]].map(([l,v,s,c,ic])=>(
+        {[["STUDENTS",total,"Active plans",C.purple,"👥"],["STAFF",1,"Special educators",C.blue,"👩‍🏫"],["ON TRACK",`${onTrackPct}%`,"Goals on trajectory",C.green,"📈"],["REVIEWS DUE",reviewsDue,"This month",reviewsDue>0?C.red:C.green,"📅"]].map(([l,v,sub,c,ic])=>(
           <div key={l} className="card" style={{padding:"18px 20px",borderLeft:`3px solid ${c}`}}>
             <div style={{display:"flex",justifyContent:"space-between"}}>
               <div>
                 <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
                 <div className="serif" style={{fontSize:26,fontWeight:700,color:c,lineHeight:1}}><AnimCounter value={v}/></div>
-                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{s}</p>
+                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
               </div>
               <span style={{fontSize:28,opacity:.15}}>{ic}</span>
             </div>
@@ -3368,22 +3348,21 @@ function DirectorDashboard({setPage}){
         {/* Staff performance table */}
         <div className="card" style={{padding:"22px 24px"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <p className="lbl">STAFF PERFORMANCE</p>
+            <p className="lbl">CASELOAD OVERVIEW</p>
             <button className="btn-ghost" style={{fontSize:10}} onClick={()=>setPage("reports")}>Full Report →</button>
           </div>
           <div style={{overflowX:"auto"}}>
             <table className="data-table" style={{minWidth:420}}>
-              <thead><tr>{["Teacher","School","Students","On Track","Last Entry","Status"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-              <tbody>{staffData.filter(s=>activeSchool==="all"||s.school.toLowerCase().includes(activeSchool)).map(s=>(
-                <tr key={s.name}>
-                  <td style={{fontWeight:600}}>{s.name}</td>
-                  <td style={{fontSize:11,color:C.warm}}>{s.school}</td>
-                  <td style={{textAlign:"center"}}>{s.students}</td>
-                  <td><span style={{fontWeight:700,color:C.green}}>{s.onTrack}</span></td>
-                  <td style={{fontSize:11,color:C.warm}}>{s.lastEntry}</td>
-                  <td><span style={{fontSize:10,fontWeight:700,color:s.status==="Active"?C.green:C.amber,background:(s.status==="Active"?C.green:C.amber)+"18",padding:"2px 8px",borderRadius:99}}>{s.status}</span></td>
+              <thead><tr>{["Teacher","Students","On Track","Status"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+              <tbody>
+                <tr>
+                  <td style={{fontWeight:600}}>{profile?.full_name||"You"}</td>
+                  <td style={{textAlign:"center"}}>{total}</td>
+                  <td><span style={{fontWeight:700,color:C.green}}>{active}/{total}</span></td>
+                  <td><span style={{fontSize:10,fontWeight:700,color:C.green,background:C.green+"18",padding:"2px 8px",borderRadius:99}}>Active</span></td>
                 </tr>
-              ))}</tbody>
+                {total===0&&<tr><td colSpan={4} style={{textAlign:"center",padding:20,color:C.warm,fontSize:12}}>No students yet.</td></tr>}
+              </tbody>
             </table>
           </div>
         </div>
@@ -3391,14 +3370,8 @@ function DirectorDashboard({setPage}){
         {/* Summary panel */}
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
           <div className="card" style={{padding:"20px"}}>
-            <p className="lbl" style={{marginBottom:12}}>PROGRESS TREND</p>
-            <MiniBarChart color={C.purple} height={60} width={200}
-              data={[{value:82,label:"Sep"},{value:84,label:"Nov"},{value:83,label:"Jan"},{value:86,label:"Mar"},{value:89,label:"May"}]}/>
-            <p style={{fontSize:10,color:C.warm,marginTop:6}}>Avg % on-track goals · All schools</p>
-          </div>
-          <div className="card" style={{padding:"20px"}}>
             <p className="lbl" style={{marginBottom:12}}>QUICK ACTIONS</p>
-            {[["📊","View full reports",()=>setPage("reports")],["📅","Schedule all-staff meeting",()=>toast("Meeting scheduler opened","info")],["📤","Export district data",()=>toast("Export started","info")],["➕","Add staff member",()=>toast("Staff invite sent","success")]].map(([ic,label,fn])=>(
+            {[["📊","View full reports",()=>setPage("reports")],["📤","Export data",()=>toast("Export started","info")],["➕","Add a student",()=>setPage("students")]].map(([ic,label,fn])=>(
               <div key={label} style={{display:"flex",gap:8,padding:"8px 0",borderBottom:`1px solid ${C.tanL}`,cursor:"pointer",alignItems:"center"}} onClick={fn}>
                 <span style={{fontSize:16}}>{ic}</span>
                 <span style={{fontSize:12,color:C.black}}>{label}</span>
@@ -3415,67 +3388,59 @@ function DirectorDashboard({setPage}){
 function RelatedServicesDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents,profile,user}=useSupabaseAuth();
   const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
   const [showNoteForm,setShowNoteForm]=useState(false);
-  const [noteStudent,setNoteStudent]=useState("Marcus Johnson");
+  const [noteStudent,setNoteStudent]=useState(dbStudents?.[0]?.id||"");
   const [noteText,setNoteText]=useState("");
 
-  const schedule=[
-    {time:"8:30 AM",student:"Marcus Johnson",type:"Communication · Pull-out · 30 min",status:"done",color:C.green},
-    {time:"9:30 AM",student:"Sofia Lee",type:"Fluency · Push-in · 20 min",status:"done",color:C.green},
-    {time:"10:00 AM",student:"Ryan Chen",type:"Articulation · Pull-out · 30 min",status:"current",color:C.amber},
-    {time:"11:00 AM",student:"Tyler Parker",type:"Language · Pull-out · 30 min",status:"upcoming",color:C.warm},
-    {time:"1:00 PM",student:"Aisha Adeyemi",type:"Pragmatics · Pull-out · 30 min",status:"upcoming",color:C.warm},
-    {time:"2:00 PM",student:"Amara Osei",type:"Articulation · Telehealth · 30 min",status:"upcoming",color:C.warm},
-  ];
-
-  const caseload=[
-    {name:"Marcus Johnson",grade:4,disability:"ASD",service:"Speech-Language",freq:"3×/wk",goal:"Communication — 3-turn conversations",progress:67,trend:"↑"},
-    {name:"Sofia Lee",grade:5,disability:"ADHD",service:"Speech-Language",freq:"2×/wk",goal:"Fluency — 80% fluent reading",progress:71,trend:"→"},
-    {name:"Ryan Chen",grade:2,disability:"ADHD",service:"Speech-Language",freq:"3×/wk",goal:"Articulation — /r/ sound",progress:54,trend:"↑"},
-    {name:"Aisha Adeyemi",grade:1,disability:"SLI",service:"Speech-Language",freq:"5×/wk",goal:"Language — 2-word combinations",progress:45,trend:"↓"},
-    {name:"Tyler Parker",grade:3,disability:"SLD",service:"Speech-Language",freq:"2×/wk",goal:"Phonological awareness",progress:82,trend:"↑"},
-    {name:"Amara Osei",grade:6,disability:"ID",service:"Speech-Language",freq:"3×/wk",goal:"Vocabulary — functional language",progress:38,trend:"↓"},
-  ];
-
-  const goalProgress=[
-    ["Articulation","82%",C.green],
-    ["Fluency","71%",C.purple],
-    ["Pragmatics","58%",C.amber],
-    ["Language","45%",C.red],
-    ["Phonology","82%",C.green],
-  ];
+  const caseload=(dbStudents||[]).map(s=>{
+    const pct=s.current_pct||0;
+    return{id:s.id,name:s.name,grade:s.grade||"–",disability:s.disability||"ALP",service:"Related Services",freq:"Per IEP",goal:s.strengths?s.strengths.slice(0,40)+"…":"Not yet set",progress:pct,trend:pct>=70?"↑":pct>=40?"→":"↓"};
+  });
+  const total=caseload.length;
+  const goalsMet=total>0?Math.round(caseload.reduce((a,c)=>a+c.progress,0)/total):0;
 
   return(
     <Page title={<>Related <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Services</span></>}
-      subtitle={`Ms. Rivera · SLP · ${today}`}
+      subtitle={`${profile?.full_name||user?.email?.split("@")[0]||"Provider"} · ${today}`}
       action={<div style={{display:"flex",gap:8}}>
-          <button className="btn-ghost" onClick={()=>toast("Account settings panel","info")} style={{fontSize:11}}>Open Account Settings ↗</button>
         <button className="btn-ghost" onClick={()=>setShowNoteForm(v=>!v)} style={{fontSize:11}}>📝 Quick Note</button>
         <button className="btn-black" onClick={()=>setPage("progress")} style={{fontSize:11,padding:"11px 20px"}}>📈 Progress →</button>
       </div>}>
 
+      {total===0&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center",marginBottom:20}}>
+          <div style={{fontSize:48,marginBottom:12}}>🩺</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Students on Caseload</h3>
+          <p style={{fontSize:13,color:C.warm}}>Add students to start tracking related services.</p>
+        </div>
+      )}
+
       {/* Quick note form */}
-      {showNoteForm&&(
+      {showNoteForm&&total>0&&(
         <div className="card fade-up" style={{padding:"18px 22px",marginBottom:16,background:C.purpleL}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:10}}>
             <USelect label="Student" value={noteStudent} onChange={e=>setNoteStudent(e.target.value)}
-              options={caseload.map(s=>({value:s.name,label:s.name.split(" ")[0]}))}/>
+              options={caseload.map(s=>({value:s.id,label:s.name.split(" ")[0]}))}/>
             <UInput label="Today's Score / Observation" value={noteText} onChange={e=>setNoteText(e.target.value)} placeholder="e.g. 72 wcpm, 4/5 trials"/>
           </div>
-          <button className="btn-purple" onClick={()=>{toast(`Note saved for ${noteStudent.split(" ")[0]}`,"success");setShowNoteForm(false);setNoteText("");}} style={{fontSize:11,padding:"9px 20px"}}>Save Note →</button>
+          <button className="btn-purple" onClick={async()=>{
+            if(noteText.trim()){await Supabase.logProgress({student_id:noteStudent,score:parseFloat(noteText)||0,notes:noteText,date:new Date().toISOString().split("T")[0],created_by:user?.id}).catch(()=>{});}
+            toast("Note saved","success");setShowNoteForm(false);setNoteText("");
+          }} style={{fontSize:11,padding:"9px 20px"}}>Save Note →</button>
         </div>
       )}
 
       {/* Metrics */}
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:16}}>
-        {[["MY CASELOAD","9","Students this quarter",C.purple,"👥"],["TODAY","6","Sessions scheduled",C.blue,"📅"],["GOALS MET","74%","Across all students",C.green,"✅"],["NOTES DUE","2","Overdue",C.amber,"📝"]].map(([l,v,s,c,ic])=>(
+      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(3,1fr)",gap:12,marginBottom:16}}>
+        {[["MY CASELOAD",total,"Students",C.purple,"👥"],["GOALS MET",`${goalsMet}%`,"Average progress",C.green,"✅"],["ACTIVE PLANS",total,"ALPs in progress",C.blue,"📋"]].map(([l,v,sub,c,ic])=>(
           <div key={l} className="card" style={{padding:"18px 20px",borderLeft:`3px solid ${c}`}}>
             <div style={{display:"flex",justifyContent:"space-between"}}>
               <div>
                 <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
                 <div className="serif" style={{fontSize:26,fontWeight:700,color:c,lineHeight:1}}><AnimCounter value={v}/></div>
-                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{s}</p>
+                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
               </div>
               <span style={{fontSize:24,opacity:.15}}>{ic}</span>
             </div>
@@ -3483,69 +3448,31 @@ function RelatedServicesDashboard({setPage}){
         ))}
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16,marginBottom:16}}>
-        {/* Today's schedule */}
-        <div className="card" style={{padding:"22px 24px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <p className="lbl">TODAY'S SCHEDULE</p>
-            <button className="btn-ghost" style={{fontSize:10}} onClick={()=>setPage("family")}>Schedule Meeting →</button>
-          </div>
-          {schedule.map((s,i)=>(
-            <div key={i} style={{display:"flex",gap:14,padding:"11px 0",borderBottom:i<schedule.length-1?`1px solid ${C.tanL}`:"none",alignItems:"center"}}>
-              <div style={{width:60,fontSize:11,fontWeight:700,color:C.warm,flexShrink:0}}>{s.time}</div>
-              <div style={{width:8,height:8,borderRadius:"50%",background:s.color,flexShrink:0}}/>
-              <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:600,color:s.status==="current"?C.purple:C.black}}>{s.student}{s.status==="current"&&<span style={{marginLeft:6,fontSize:9,background:C.purple,color:"#fff",padding:"1px 6px",borderRadius:99,fontWeight:700}}>NOW</span>}</div>
-                <div style={{fontSize:11,color:C.warm}}>{s.type}</div>
-              </div>
-              {s.status!=="upcoming"&&<button className="btn-ghost" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>toast("Session note opened","info")}>Note →</button>}
-            </div>
-          ))}
-        </div>
-
-        {/* Goal progress */}
-        <div className="card" style={{padding:"22px 24px"}}>
-          <p className="lbl" style={{marginBottom:16}}>GOAL PROGRESS BY AREA</p>
-          {goalProgress.map(([g,p,c])=>(
-            <div key={g} style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:5}}>
-                <span style={{color:C.black,fontWeight:600}}>{g}</span>
-                <span style={{color:c,fontWeight:700}}>{p}</span>
-              </div>
-              <div style={{height:7,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-                <div style={{height:"100%",width:p,background:c,borderRadius:99,transition:"width .5s"}}/>
-              </div>
-            </div>
-          ))}
-          <button className="btn-purple" onClick={()=>setPage("progress")} style={{width:"100%",marginTop:16,fontSize:11}}>Full Progress Reports →</button>
-        </div>
-      </div>
-
       {/* Caseload table */}
-      <div className="card" style={{padding:0,overflow:"hidden"}}>
-        <div style={{overflowX:"auto"}}>
-          <table className="data-table" style={{minWidth:560}}>
-            <thead><tr>{["Student","Service","Freq","Current Goal","Progress","Trend"].map(h=><th key={h}>{h}</th>)}</tr></thead>
-            <tbody>{caseload.map(s=>(
-              <tr key={s.name}>
-                <td><div style={{fontWeight:600}}>{s.name}</div><div style={{fontSize:10,color:C.warm}}>Gr.{s.grade} · {s.disability}</div></td>
-                <td style={{fontSize:11}}>{s.service}</td>
-                <td style={{fontSize:11,color:C.warm}}>{s.freq}</td>
-                <td style={{fontSize:11,maxWidth:180,color:C.warm}}>{s.goal}</td>
-                <td>
-                  <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <div style={{width:60,height:5,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-                      <div style={{height:"100%",width:`${s.progress}%`,background:s.progress>=70?C.green:s.progress>=50?C.amber:C.red,borderRadius:99}}/>
+      {total>0&&(
+        <div className="card" style={{padding:0,overflow:"hidden"}}>
+          <div style={{overflowX:"auto"}}>
+            <table className="data-table" style={{minWidth:560}}>
+              <thead><tr>{["Student","Focus Area","Progress","Trend"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+              <tbody>{caseload.map(s=>(
+                <tr key={s.id}>
+                  <td><div style={{fontWeight:600}}>{s.name}</div><div style={{fontSize:10,color:C.warm}}>Gr.{s.grade} · {s.disability}</div></td>
+                  <td style={{fontSize:11,maxWidth:220,color:C.warm}}>{s.goal}</td>
+                  <td>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      <div style={{width:60,height:5,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:`${s.progress}%`,background:s.progress>=70?C.green:s.progress>=50?C.amber:C.red,borderRadius:99}}/>
+                      </div>
+                      <span style={{fontSize:11,fontWeight:600,color:s.progress>=70?C.green:s.progress>=50?C.amber:C.red}}>{s.progress}%</span>
                     </div>
-                    <span style={{fontSize:11,fontWeight:600,color:s.progress>=70?C.green:s.progress>=50?C.amber:C.red}}>{s.progress}%</span>
-                  </div>
-                </td>
-                <td style={{fontSize:14,fontWeight:700,color:s.trend==="↑"?C.green:s.trend==="↓"?C.red:C.warm}}>{s.trend}</td>
-              </tr>
-            ))}</tbody>
-          </table>
+                  </td>
+                  <td style={{fontSize:14,fontWeight:700,color:s.trend==="↑"?C.green:s.trend==="↓"?C.red:C.warm}}>{s.trend}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </Page>
   );
 }
@@ -3553,45 +3480,44 @@ function RelatedServicesDashboard({setPage}){
 function StudentDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents}=useSupabaseAuth();
   const [selectedGoal,setSelectedGoal]=useState(null);
-  const goals=[
-    {icon:"📖",label:"Reading",target:"80 words per minute",current:"72 wcpm",pct:90,color:C.green,tip:"You're so close! Keep practising at home."},
-    {icon:"💬",label:"Communication",target:"3-turn conversations",current:"2-turn",pct:67,color:C.blue,tip:"Try starting a chat with a classmate today!"},
-    {icon:"🧘",label:"Calm-Down Skills",target:"Use tool in 4 out of 5 times",current:"3 out of 5",pct:75,color:C.purple,tip:"You're doing great! Remember your breathing."},
-    {icon:"✏️",label:"Writing",target:"3-sentence paragraph",current:"2 sentences",pct:50,color:C.amber,tip:"Ask Ms. Simmons for a graphic organiser."},
-  ];
-  const badges=[
-    {ic:"⭐",label:"First Goal"},
-    {ic:"📚",label:"Reading Star"},
-    {ic:"💬",label:"Good Talker"},
-    {ic:"🏅","label":"Week Streak"},
-    {ic:"🎯","label":"On Target"},
-    {ic:"💪","label":"Try Hard"},
-    {ic:"🌟","label":"Shine Bright"},
-  ];
-  const schedule=[
-    {day:"Mon",events:["Reading group","Speech 2:00"],done:true},
-    {day:"Tue",events:["OT 9:30","Maths support"],done:true},
-    {day:"Wed",events:["Resource room"],done:false},
-    {day:"Thu",events:["Speech 2:00"],done:false},
-    {day:"Fri",events:["Check-in Ms. Simmons"],done:false},
-  ];
+  const [goals,setGoals]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const s=dbStudents?.[0]||null;
+
+  useEffect(()=>{
+    if(!s?.id){setLoading(false);return;}
+    Supabase.getGoals(s.id).then(g=>{setGoals(g||[]);setLoading(false);});
+  },[s?.id]);
+
+  const domainIcons={Reading:"📖",Math:"🔢",Writing:"✏️",Communication:"💬","Social-Emotional":"🧘",Behaviour:"🌟",OT:"✋",Speech:"💬"};
+  const displayGoals=goals.map(g=>({icon:domainIcons[g.domain]||"🎯",label:g.domain,target:g.target||"Not set",current:g.baseline||"–",pct:g.current_pct||0,color:(g.current_pct||0)>=70?C.green:(g.current_pct||0)>=40?C.amber:C.blue,tip:"Keep practising — you're making progress!"}));
+  const badgesEarned=displayGoals.filter(g=>g.pct>=80).length;
+
+  if(!s){
+    return(
+      <Page title={<>Hi there! <span className="serif-italic" style={{color:C.warm,fontSize:26}}>👋</span></>} subtitle="Your learning plan">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>🎒</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Student Selected</h3>
+          <p style={{fontSize:13,color:C.warm}}>Once a student is added, their personalized dashboard will appear here.</p>
+        </div>
+      </Page>
+    );
+  }
 
   return(
-    <Page title={<>Hi, <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Marcus! 👋</span></>}
-      subtitle="Your learning plan · Grade 4 · Westwood Elementary">
+    <Page title={<>Hi, <span className="serif-italic" style={{color:C.warm,fontSize:26}}>{s.name.split(" ")[0]}! 👋</span></>}
+      subtitle={`Your learning plan · Grade ${s.grade||"–"} · ${s.school_name||"Your School"}`}>
 
       {/* Welcome card */}
       <div className="card" style={{padding:"22px 26px",marginBottom:16,background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff"}}>
         <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
           <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0}}>😊</div>
           <div style={{flex:1}}>
-            <h3 style={{fontSize:18,fontWeight:700,marginBottom:4}}>You're doing great this week!</h3>
-            <p style={{fontSize:13,opacity:.8}}>Your reading score went up by 4 words this month. Keep it up!</p>
-          </div>
-          <div style={{textAlign:"center",background:"rgba(255,255,255,.12)",borderRadius:12,padding:"12px 20px"}}>
-            <div style={{fontSize:32,fontWeight:800,lineHeight:1}}>🔥12</div>
-            <div style={{fontSize:10,opacity:.7,marginTop:2}}>Day streak!</div>
+            <h3 style={{fontSize:18,fontWeight:700,marginBottom:4}}>{displayGoals.length>0?"Keep up the great work!":"Welcome to your learning plan!"}</h3>
+            <p style={{fontSize:13,opacity:.8}}>{displayGoals.length>0?`You have ${displayGoals.length} goal${displayGoals.length!==1?"s":""} to work toward this year.`:"Your goals will show here once your teacher sets them up."}</p>
           </div>
         </div>
       </div>
@@ -3600,7 +3526,9 @@ function StudentDashboard({setPage}){
         {/* Goals */}
         <div className="card" style={{padding:"22px 24px"}}>
           <p className="lbl" style={{marginBottom:16}}>MY GOALS THIS YEAR</p>
-          {goals.map((g,i)=>(
+          {loading&&<p style={{fontSize:12,color:C.warm}}>Loading…</p>}
+          {!loading&&displayGoals.length===0&&<p style={{fontSize:12,color:C.warm}}>No goals set yet. Check back soon!</p>}
+          {displayGoals.map((g,i)=>(
             <div key={i} style={{marginBottom:16,padding:"14px",border:`1.5px solid ${selectedGoal===i?g.color:C.tanL}`,borderRadius:12,cursor:"pointer",background:selectedGoal===i?g.color+"08":"transparent",transition:"all .2s"}}
               onClick={()=>setSelectedGoal(selectedGoal===i?null:i)}>
               <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:8}}>
@@ -3619,41 +3547,22 @@ function StudentDashboard({setPage}){
           ))}
         </div>
 
-        {/* Schedule + Badges */}
+        {/* Badges */}
         <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          {/* This week */}
           <div className="card" style={{padding:"20px"}}>
-            <p className="lbl" style={{marginBottom:12}}>THIS WEEK</p>
-            <div style={{display:"flex",gap:6}}>
-              {schedule.map(d=>(
-                <div key={d.day} style={{flex:1,textAlign:"center",padding:"10px 4px",borderRadius:10,background:d.done?C.purpleL:"transparent",border:`1px solid ${d.done?C.purple:C.tanL}`,cursor:"pointer"}}>
-                  <div style={{fontSize:10,fontWeight:700,color:d.done?C.purple:C.warm,marginBottom:4}}>{d.day}</div>
-                  {d.done?<span style={{fontSize:14}}>✅</span>:<span style={{fontSize:14}}>📅</span>}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Badges */}
-          <div className="card" style={{padding:"20px"}}>
-            <p className="lbl" style={{marginBottom:12}}>MY BADGES 🏆</p>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
-              {badges.map((b,i)=>(
-                <div key={i} style={{textAlign:"center",padding:"10px 6px",borderRadius:10,background:C.purpleL,cursor:"pointer"}}
-                  onClick={()=>toast(`${b.label} badge earned! 🎉`,"success")} title={b.label}>
-                  <div style={{fontSize:22}}>{b.ic}</div>
-                  <div style={{fontSize:9,color:C.warm,marginTop:3,lineHeight:1.2}}>{b.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Next session */}
-          <div className="card" style={{padding:"20px",background:"linear-gradient(135deg,#7C3AED11,#A855F711)"}}>
-            <p className="lbl" style={{marginBottom:8}}>NEXT SESSION</p>
-            <div style={{fontSize:15,fontWeight:700,color:C.black,marginBottom:2}}>Reading Group</div>
-            <div style={{fontSize:12,color:C.warm,marginBottom:12}}>Wednesday 10:00 AM · Ms. Simmons</div>
-            <button onClick={()=>toast("See you there! 📚","success")} className="btn-purple" style={{width:"100%",fontSize:11,padding:"10px"}}>✓ I'll be there!</button>
+            <p className="lbl" style={{marginBottom:12}}>MY PROGRESS 🏆</p>
+            {badgesEarned>0?(
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+                {displayGoals.filter(g=>g.pct>=80).map((g,i)=>(
+                  <div key={i} style={{textAlign:"center",padding:"10px 6px",borderRadius:10,background:C.purpleL}} title={`${g.label} — On Track`}>
+                    <div style={{fontSize:22}}>{g.icon}</div>
+                    <div style={{fontSize:9,color:C.warm,marginTop:3,lineHeight:1.2}}>{g.label}</div>
+                  </div>
+                ))}
+              </div>
+            ):(
+              <p style={{fontSize:12,color:C.warm}}>Keep working toward your goals to earn badges!</p>
+            )}
           </div>
         </div>
       </div>
@@ -3665,46 +3574,49 @@ function StudentDashboard({setPage}){
 function FamilyDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents,user}=useSupabaseAuth();
   const [signed,setSigned]=useState([]);
+  const [goals,setGoals]=useState([]);
+  const [messages,setMessages]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const s=dbStudents?.[0]||null;
 
-  const docs=[
-    {id:1,name:"Q3 Progress Report",desc:"Marcus Johnson · Spring 2026",due:"Due May 25",urgent:true},
-    {id:2,name:"Annual Review Meeting Agenda",desc:"May 28, 2026 · 3:00 PM",due:"Review before meeting",urgent:false},
-  ];
-  const goals=[
-    {label:"Reading Fluency",desc:"72 wcpm → Target: 80 wcpm",pct:90,color:C.green,status:"On Track"},
-    {label:"Communication",desc:"Working on 3-turn conversations",pct:67,color:C.blue,status:"Developing"},
-    {label:"Calm-Down Skills",desc:"Using strategies 3 of 5 times",pct:75,color:C.purple,status:"On Track"},
-    {label:"Writing",desc:"Building to 3-sentence paragraphs",pct:50,color:C.amber,status:"Needs Support"},
-  ];
-  const messages=[
-    {from:"Ms. Simmons",preview:"Marcus had a fantastic reading session today…",time:"2h ago",unread:true},
-    {from:"Ms. Rivera (SLP)",preview:"Great progress with communication goals this week!",time:"Yesterday",unread:true},
-    {from:"Ms. Simmons",preview:"Reminder: Annual review meeting is May 28 at 3PM",time:"2 days ago",unread:false},
-  ];
+  useEffect(()=>{
+    if(!s?.id){setLoading(false);return;}
+    Promise.all([Supabase.getGoals(s.id),Supabase.getFamilyMessages(s.id)]).then(([g,m])=>{
+      setGoals(g||[]);setMessages(m||[]);setLoading(false);
+    }).catch(()=>setLoading(false));
+  },[s?.id]);
+
+  const domainColor={Reading:C.green,Math:C.blue,Writing:C.amber,Communication:C.purple};
+  const displayGoals=goals.map(g=>({label:g.domain,desc:`${g.baseline||"–"} → Target: ${g.target||"–"}`,pct:g.current_pct||0,color:domainColor[g.domain]||C.purple,status:(g.current_pct||0)>=80?"On Track":(g.current_pct||0)>=50?"Developing":"Needs Support"}));
+  const unreadCount=messages.filter(m=>!m.read&&m.from_id!==user?.id).length;
+
+  if(!s){
+    return(
+      <Page title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Portal</span></>} subtitle="No student linked yet">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>👨‍👩‍👧</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Student Linked</h3>
+          <p style={{fontSize:13,color:C.warm}}>Once a student is added, family updates will appear here.</p>
+        </div>
+      </Page>
+    );
+  }
 
   return(
     <Page title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Portal</span></>}
-      subtitle="Johnson Family · Marcus Darnell Johnson · Westwood Elementary">
-
-      {/* Urgent actions */}
-      {docs.filter(d=>d.urgent&&!signed.includes(d.id)).length>0&&(
-        <div style={{background:"#FEF3C7",border:"1px solid #FCD34D",borderRadius:10,padding:"14px 16px",marginBottom:16,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-          <span style={{fontSize:20}}>✍️</span>
-          <div style={{flex:1}}><b style={{color:"#92400E"}}>Action needed:</b> <span style={{fontSize:13,color:"#92400E"}}>You have {docs.filter(d=>d.urgent&&!signed.includes(d.id)).length} document{docs.filter(d=>d.urgent&&!signed.includes(d.id)).length!==1?"s":""} waiting for your signature.</span></div>
-          <button className="btn-black" style={{fontSize:11}} onClick={()=>setPage("family")}>Sign Now →</button>
-        </div>
-      )}
+      subtitle={`${s.name} · ${s.school_name||"Your School"}`}>
 
       {/* Metric cards */}
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:16}}>
-        {[["MESSAGES",messages.filter(m=>m.unread).length,"Unread from school",C.blue,"✉️"],["SIGNATURES",docs.filter(d=>!signed.includes(d.id)).length,"Documents to sign",C.red,"📝"],["NEXT MEETING","May 28","Annual Review",C.amber,"📅"],["GOALS","74%","On track this year",C.green,"🎯"]].map(([l,v,s,c,ic])=>(
+      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(3,1fr)",gap:12,marginBottom:16}}>
+        {[["MESSAGES",unreadCount,"Unread from school",C.blue,"✉️"],["GOALS",displayGoals.length,"Active this year",C.purple,"🎯"],["AVG PROGRESS",displayGoals.length?`${Math.round(displayGoals.reduce((a,g)=>a+g.pct,0)/displayGoals.length)}%`:"–","On track this year",C.green,"📈"]].map(([l,v,sub,c,ic])=>(
           <div key={l} className="card" style={{padding:"18px 20px",cursor:"pointer"}} onClick={()=>setPage("family")}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
               <div>
                 <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
                 <div className="serif" style={{fontSize:24,fontWeight:700,color:c,lineHeight:1}}>{v}</div>
-                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{s}</p>
+                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
               </div>
               <span style={{fontSize:24,opacity:.15}}>{ic}</span>
             </div>
@@ -3713,13 +3625,15 @@ function FamilyDashboard({setPage}){
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
-        {/* Marcus's progress */}
+        {/* Student's progress */}
         <div className="card" style={{padding:"22px 24px"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <p className="lbl">MARCUS'S PROGRESS</p>
+            <p className="lbl">{s.name.toUpperCase().split(" ")[0]}'S PROGRESS</p>
             <button className="btn-ghost" style={{fontSize:10}} onClick={()=>setPage("family")}>Full View →</button>
           </div>
-          {goals.map((g,i)=>(
+          {loading&&<p style={{fontSize:12,color:C.warm}}>Loading…</p>}
+          {!loading&&displayGoals.length===0&&<p style={{fontSize:12,color:C.warm}}>No goals recorded yet. Check back soon!</p>}
+          {displayGoals.map((g,i)=>(
             <div key={i} style={{marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
                 <div>
@@ -3737,42 +3651,20 @@ function FamilyDashboard({setPage}){
 
         {/* Right panel */}
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {/* Documents to sign */}
-          <div className="card" style={{padding:"20px"}}>
-            <p className="lbl" style={{marginBottom:12}}>DOCUMENTS</p>
-            {docs.map(d=>(
-              <div key={d.id} style={{padding:"10px 12px",border:`1px solid ${d.urgent&&!signed.includes(d.id)?C.amber:C.tanL}`,borderRadius:8,marginBottom:8,background:d.urgent&&!signed.includes(d.id)?"#FFFBEB":"transparent"}}>
-                <div style={{fontSize:12,fontWeight:600,color:C.black}}>{d.name}</div>
-                <div style={{fontSize:10,color:C.warm,marginBottom:6}}>{d.due}</div>
-                {signed.includes(d.id)
-                  ? <span style={{fontSize:10,color:C.green,fontWeight:700}}>✓ Signed</span>
-                  : <button className="btn-purple" style={{fontSize:10,padding:"5px 12px"}} onClick={()=>{setSigned(s=>[...s,d.id]);toast(`${d.name} signed! ✓`,"success");}}>Sign Now →</button>
-                }
-              </div>
-            ))}
-          </div>
-
           {/* Recent messages */}
           <div className="card" style={{padding:"20px"}}>
             <p className="lbl" style={{marginBottom:12}}>MESSAGES</p>
-            {messages.map((m,i)=>(
-              <div key={i} style={{padding:"9px 0",borderBottom:i<messages.length-1?`1px solid ${C.tanL}`:"none",cursor:"pointer"}} onClick={()=>setPage("family")}>
+            {messages.length===0&&<p style={{fontSize:12,color:C.warm}}>No messages yet.</p>}
+            {messages.slice(0,3).map((m,i)=>(
+              <div key={i} style={{padding:"9px 0",borderBottom:i<Math.min(messages.length,3)-1?`1px solid ${C.tanL}`:"none",cursor:"pointer"}} onClick={()=>setPage("family")}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontSize:12,fontWeight:m.unread?700:400,color:m.unread?C.black:C.warm}}>{m.from}</span>
-                  <span style={{fontSize:10,color:C.warm}}>{m.time}</span>
+                  <span style={{fontSize:12,fontWeight:!m.read?700:400,color:!m.read?C.black:C.warm}}>{m.from_name||"School"}</span>
+                  <span style={{fontSize:10,color:C.warm}}>{m.created_at?timeAgo(m.created_at):""}</span>
                 </div>
-                <p style={{fontSize:11,color:C.warm,margin:"3px 0 0",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{m.preview}</p>
+                <p style={{fontSize:11,color:C.warm,margin:"3px 0 0",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{m.body}</p>
               </div>
             ))}
             <button className="btn-ghost" style={{width:"100%",marginTop:10,fontSize:11}} onClick={()=>setPage("family")}>View All Messages →</button>
-          </div>
-
-          {/* Next meeting */}
-          <div className="card" style={{padding:"18px",background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff"}}>
-            <p style={{fontSize:10,opacity:.7,fontWeight:700,letterSpacing:".1em",marginBottom:6}}>NEXT MEETING</p>
-            <div style={{fontSize:16,fontWeight:700,marginBottom:3}}>Annual Review</div>
-            <div style={{fontSize:12,opacity:.8,marginBottom:12}}>May 28 · 3:00 PM · Video call</div>
-            <button style={{background:"rgba(255,255,255,.2)",border:"none",color:"#fff",padding:"8px 16px",borderRadius:8,fontSize:11,fontWeight:700,cursor:"pointer",width:"100%"}} onClick={()=>setPage("family")}>Join / Details →</button>
           </div>
         </div>
       </div>
@@ -3784,21 +3676,20 @@ function FamilyDashboard({setPage}){
 function AdminDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents,user,profile}=useSupabaseAuth();
   const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
   const [activeTab,setActiveTab]=useState("overview");
 
+  const total=dbStudents?.length||0;
+  const active=dbStudents?.filter(s=>s.status==="Active"||!s.status).length||0;
+  const onTrackPct=total>0?Math.round((active/total)*100):0;
+  const pendingReviews=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)<=new Date(Date.now()+30*86400000)).length||0;
+
   const schools=[
-    {name:"Westwood Elementary",students:58,staff:7,onTrack:93,pending:1,contact:"Ms. Osei"},
-    {name:"Lincoln Middle",students:47,staff:6,onTrack:86,pending:3,contact:"Mr. Davis"},
-    {name:"Roosevelt High",students:37,staff:5,onTrack:87,pending:1,contact:"Ms. Park"},
+    {name:profile?.school||"Your School",students:total,staff:1,onTrack:onTrackPct,pending:pendingReviews,contact:profile?.full_name||user?.email?.split("@")[0]||"–"},
   ];
-  const recentActivity=[
-    {icon:"✅",text:"Westwood ALP batch review complete",time:"1h ago"},
-    {icon:"👤",text:"New staff member added: Mr. Thompson",time:"3h ago"},
-    {icon:"📊",text:"Q3 progress reports generated (142 students)",time:"Yesterday"},
-    {icon:"📤","text":"Data export downloaded by Dr. Sarpong",time:"Yesterday"},
-    {icon:"🔔",text:"6 plan reviews due this month",time:"System"},
-  ];
+  const recentActivity=[];
+
 
   return(
     <Page title={<>Admin <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Dashboard</span></>}
@@ -3819,13 +3710,13 @@ function AdminDashboard({setPage}){
         <div>
           {/* Metrics */}
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:16}}>
-            {[["TOTAL SCHOOLS","3","Across district",C.purple,"🏫"],["STUDENTS","142","Active plans",C.blue,"👥"],["GOAL RATE","91%","On-track goals",C.green,"🎯"],["PENDING","5","Need attention",C.amber,"⚠️"]].map(([l,v,s,c,ic])=>(
+            {[["TOTAL SCHOOLS","1","Your organization",C.purple,"🏫"],["STUDENTS",String(total),"Active plans",C.blue,"👥"],["GOAL RATE",`${onTrackPct}%`,"On-track goals",C.green,"🎯"],["PENDING",String(pendingReviews),"Need attention",C.amber,"⚠️"]].map(([l,v,sub,c,ic])=>(
               <div key={l} className="card" style={{padding:"20px",borderLeft:`3px solid ${c}`}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
                     <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
                     <div className="serif" style={{fontSize:28,fontWeight:700,color:c,lineHeight:1}}>{v}</div>
-                    <p style={{fontSize:10,color:C.warm,marginTop:4}}>{s}</p>
+                    <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
                   </div>
                   <span style={{fontSize:26,opacity:.15}}>{ic}</span>
                 </div>
@@ -3854,6 +3745,7 @@ function AdminDashboard({setPage}){
             {/* Recent activity */}
             <div className="card" style={{padding:"22px 24px"}}>
               <p className="lbl" style={{marginBottom:14}}>RECENT ACTIVITY</p>
+              {recentActivity.length===0&&<p style={{fontSize:12,color:C.warm}}>Activity will appear here as you use the platform.</p>}
               {recentActivity.map((a,i)=>(
                 <div key={i} style={{display:"flex",gap:10,padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"flex-start"}}>
                   <span style={{fontSize:16,flexShrink:0,marginTop:1}}>{a.icon}</span>
@@ -3899,7 +3791,7 @@ function AdminDashboard({setPage}){
             <table className="data-table" style={{minWidth:560}}>
               <thead><tr>{["Name","School","Role","Students","Status",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
               <tbody>
-                {[["Ms. Simmons","Westwood","SPED Teacher",14,"Active"],["Ms. Rivera","Westwood","SLP",9,"Active"],["Mr. Davis","Lincoln","SPED Teacher",11,"Active"],["Mr. Chen","Roosevelt","OT",8,"Active"],["Ms. Park","Lincoln","SPED Teacher",8,"Review Due"],["Mr. Thompson","Roosevelt","SPED Teacher",6,"New"]].map(([name,school,role,students,status])=>(
+                {(allSystemStudents?.reduce((acc,s)=>{const t=s.teacher_name||s.teacher_id||"Unassigned";if(!acc[t])acc[t]={name:t,school:s.school_name||"–",role:"ALP Teacher",students:0,status:"Active"};acc[t].students++;return acc;},{})||{}) && Object.values(allSystemStudents?.reduce((acc,s)=>{const t=s.teacher_name||"Unassigned";if(!acc[t])acc[t]={name:t,school:s.school_name||"–",role:"ALP Teacher",students:0,status:"Active"};acc[t].students++;return acc;},{}) || {[profile?.full_name||"Teacher"]:{name:profile?.full_name||"Teacher",school:profile?.school||"–",role:"ALP Teacher",students:dbStudents?.length||0,status:"Active"}}).map(({name,school,role,students,status})=>(
                   <tr key={name}>
                     <td style={{fontWeight:600}}>{name}</td>
                     <td style={{fontSize:11,color:C.warm}}>{school}</td>
@@ -3946,43 +3838,50 @@ function AdminDashboard({setPage}){
 function InterventionDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents}=useSupabaseAuth();
   const [tier,setTier]=useState("all");
 
-  const students=[
-    {name:"Marcus Johnson",grade:4,disability:"ASD",tier:2,intervention:"Reading fluency",freq:"5×/wk",progress:"↑ Improving",since:"Sep 2025",alert:false},
-    {name:"Sofia Lee",grade:5,disability:"ADHD",tier:2,intervention:"Math problem solving",freq:"3×/wk",progress:"→ Stable",since:"Oct 2025",alert:false},
-    {name:"Aisha Adeyemi",grade:1,disability:"SLI",tier:3,intervention:"Intensive speech",freq:"Daily",progress:"↓ Monitor",since:"Sep 2025",alert:true},
-    {name:"Tyler Parker",grade:3,disability:"SLD",tier:2,intervention:"Phonics programme",freq:"4×/wk",progress:"↑ Improving",since:"Nov 2025",alert:false},
-    {name:"Ryan Chen",grade:2,disability:"ADHD",tier:2,intervention:"Behaviour support",freq:"Daily",progress:"→ Stable",since:"Dec 2025",alert:false},
-    {name:"Amara Osei",grade:6,disability:"ID",tier:3,intervention:"Intensive reading + math",freq:"Daily",progress:"↓ Monitor",since:"Jan 2026",alert:true},
-  ];
+  const students=(dbStudents||[]).map(s=>{
+    const pct=s.current_pct||0;
+    return{id:s.id,name:s.name,grade:s.grade||"–",disability:s.disability||"ALP",tier:s.tier?parseInt(String(s.tier).replace(/\D/g,""))||2:2,intervention:s.strengths?s.strengths.slice(0,30)+"…":"Not yet set",freq:"Per ALP",progress:pct>=70?"↑ Improving":pct>=40?"→ Stable":"↓ Monitor",since:s.created_at?new Date(s.created_at).toLocaleDateString("en-US",{month:"short",year:"numeric"}):"–",alert:pct<40&&pct>0};
+  });
 
   const visible=tier==="all"?students:students.filter(s=>s.tier===Number(tier));
   const alertCount=students.filter(s=>s.alert).length;
+  const alertNames=students.filter(s=>s.alert).map(s=>s.name).join(" and ");
 
   return(
     <Page title={<>Intervention <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Dashboard</span></>}
-      subtitle={`RTI/MTSS · ${students.length} students receiving support`}
+      subtitle={`RTI/MTSS · ${students.length} student${students.length!==1?"s":""} receiving support`}
       action={<button className="btn-black" onClick={()=>setPage("progress")} style={{fontSize:11,padding:"11px 22px"}}>📈 Progress →</button>}>
+
+      {students.length===0&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center",marginBottom:20}}>
+          <div style={{fontSize:48,marginBottom:12}}>⚡</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>Add students to start tracking intervention tiers.</p>
+        </div>
+      )}
 
       {/* Alert banner */}
       {alertCount>0&&<div style={{background:"#FEF3C7",border:"1px solid #FCD34D",borderRadius:10,padding:"12px 16px",marginBottom:16,display:"flex",gap:10,alignItems:"center"}}>
         <span style={{fontSize:20}}>⚠️</span>
-        <div><b style={{color:"#92400E"}}>{alertCount} student{alertCount!==1?"s":""} need immediate attention</b><br/><span style={{fontSize:12,color:"#92400E"}}>Amara Osei and Aisha Adeyemi have been below goal trajectory for 3+ weeks.</span></div>
-        <button className="btn-ghost" style={{marginLeft:"auto",fontSize:11}} onClick={()=>toast("Intervention plan review opened","info")}>Review →</button>
+        <div><b style={{color:"#92400E"}}>{alertCount} student{alertCount!==1?"s":""} need attention</b><br/><span style={{fontSize:12,color:"#92400E"}}>{alertNames} {alertCount!==1?"have":"has"} been below goal trajectory.</span></div>
+        <button className="btn-ghost" style={{marginLeft:"auto",fontSize:11}} onClick={()=>setPage("progress")}>Review →</button>
       </div>}
 
       {/* Stats */}
       <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:16}}>
-        {[["TIER 1",students.filter(s=>s.tier===1).length,"Universal support",C.green],["TIER 2",students.filter(s=>s.tier===2).length,"Targeted support",C.amber],["TIER 3",students.filter(s=>s.tier===3).length,"Intensive",C.red],["IMPROVING",students.filter(s=>s.progress.startsWith("↑")).length,"Positive trends",C.blue]].map(([l,v,s,c])=>(
+        {[["TIER 1",students.filter(s=>s.tier===1).length,"Universal support",C.green],["TIER 2",students.filter(s=>s.tier===2).length,"Targeted support",C.amber],["TIER 3",students.filter(s=>s.tier===3).length,"Intensive",C.red],["IMPROVING",students.filter(s=>s.progress.startsWith("↑")).length,"Positive trends",C.blue]].map(([l,v,sub,c])=>(
           <div key={l} className="card" style={{padding:"16px 20px",borderLeft:`3px solid ${c}`}}>
             <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
             <div className="serif" style={{fontSize:26,fontWeight:700,color:c,lineHeight:1}}>{v}</div>
-            <p style={{fontSize:10,color:C.warm,marginTop:4}}>{s}</p>
+            <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
           </div>
         ))}
       </div>
 
+      {students.length>0&&(<>
       {/* Tier filter */}
       <div style={{display:"flex",gap:8,marginBottom:16}}>
         {[["all","All Tiers"],["2","Tier 2"],["3","Tier 3"]].map(([id,label])=>(
@@ -3994,9 +3893,9 @@ function InterventionDashboard({setPage}){
       <div className="card" style={{padding:0,overflow:"hidden",marginBottom:16}}>
         <div style={{overflowX:"auto"}}>
           <table className="data-table" style={{minWidth:600}}>
-            <thead><tr>{["Student","Tier","Intervention","Frequency","Progress","Since",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
+            <thead><tr>{["Student","Tier","Focus Area","Progress","Since",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
             <tbody>{visible.map(s=>(
-              <tr key={s.name} style={{background:s.alert?"#FFF7ED":"transparent"}}>
+              <tr key={s.id} style={{background:s.alert?"#FFF7ED":"transparent"}}>
                 <td>
                   <div style={{display:"flex",alignItems:"center",gap:8}}>
                     {s.alert&&<span style={{fontSize:12}}>⚠️</span>}
@@ -4005,7 +3904,6 @@ function InterventionDashboard({setPage}){
                 </td>
                 <td><span style={{fontSize:11,fontWeight:700,color:s.tier===3?C.red:C.amber,background:(s.tier===3?C.red:C.amber)+"18",padding:"2px 8px",borderRadius:99}}>Tier {s.tier}</span></td>
                 <td style={{fontSize:12,maxWidth:160}}>{s.intervention}</td>
-                <td style={{fontSize:12,color:C.warm}}>{s.freq}</td>
                 <td><span style={{fontWeight:700,color:s.progress.startsWith("↑")?C.green:s.progress.startsWith("↓")?C.red:C.warm}}>{s.progress}</span></td>
                 <td style={{fontSize:11,color:C.warm}}>{s.since}</td>
                 <td><button className="btn-ghost" style={{fontSize:10,padding:"4px 10px"}} onClick={()=>setPage("progress")}>Data →</button></td>
@@ -4014,8 +3912,9 @@ function InterventionDashboard({setPage}){
           </table>
         </div>
       </div>
+      </>)}
 
-      {/* Evidence-based interventions */}
+      {/* Evidence-based interventions — reference library */}
       <div className="card" style={{padding:"22px 24px"}}>
         <p className="lbl" style={{marginBottom:14}}>EVIDENCE-BASED INTERVENTION LIBRARY</p>
         <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:10}}>
@@ -4036,30 +3935,37 @@ function InterventionDashboard({setPage}){
 function LeadershipDashboard({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
+  const {students:dbStudents,profile}=useSupabaseAuth();
   const today=new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
-  const [period,setPeriod]=useState("2025-26");
+  const [period,setPeriod]=useState(`${new Date().getFullYear()}-${String(new Date().getFullYear()+1).slice(2)}`);
+
+  const total=dbStudents?.length||0;
+  const active=dbStudents?.filter(s=>s.status==="Active"||!s.status).length||0;
+  const reviewRate=total>0?Math.round((active/total)*100):0;
+  const needsReview=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)<=new Date(Date.now()+30*86400000)).length||0;
 
   return(
     <Page title={<>Leadership <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Overview</span></>}
-      subtitle={`District-wide · AY ${period} · ${today}`}
+      subtitle={`${profile?.school||"Your Organization"} · AY ${period} · ${today}`}
       action={<button className="btn-black" onClick={()=>setPage("reports")} style={{fontSize:11,padding:"11px 22px"}}>📊 Full Reports →</button>}>
 
-      {/* Period toggle */}
-      <div style={{display:"flex",gap:8,marginBottom:20}}>
-        {["2024-25","2025-26"].map(p=>(
-          <button key={p} onClick={()=>setPeriod(p)} className={period===p?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"8px 16px"}}>AY {p}</button>
-        ))}
-      </div>
+      {total===0&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center",marginBottom:20}}>
+          <div style={{fontSize:48,marginBottom:12}}>🎓</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Data Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>Executive metrics populate once students are added to the platform.</p>
+        </div>
+      )}
 
       {/* Executive metrics */}
       <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(4,1fr)",gap:12,marginBottom:16}}>
-        {[["TOTAL STUDENTS","1,847","With active plans",C.purple,"👥"],["ACTIVE STAFF","142","Special educators",C.blue,"👩‍🏫"],["REVIEW RATE","94%","On-time reviews",C.green,"✅"],["NEEDS REVIEW","23","Action required",C.amber,"⚠️"]].map(([l,v,s,c,ic])=>(
+        {[["TOTAL STUDENTS",String(total),"With active plans",C.purple,"👥"],["ACTIVE STAFF",1,"Special educators",C.blue,"👩‍🏫"],["ACTIVE RATE",`${reviewRate}%`,"Plans in good standing",C.green,"✅"],["NEEDS REVIEW",String(needsReview),"Action required",C.amber,"⚠️"]].map(([l,v,sub,c,ic])=>(
           <div key={l} className="card" style={{padding:"20px",borderLeft:`3px solid ${c}`}}>
             <div style={{display:"flex",justifyContent:"space-between"}}>
               <div>
                 <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
                 <div className="serif" style={{fontSize:28,fontWeight:800,color:c,lineHeight:1}}>{v}</div>
-                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{s}</p>
+                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
               </div>
               <span style={{fontSize:28,opacity:.15}}>{ic}</span>
             </div>
@@ -4067,68 +3973,37 @@ function LeadershipDashboard({setPage}){
         ))}
       </div>
 
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16,marginBottom:16}}>
-        {/* Goal outcomes */}
-        <div className="card" style={{padding:"22px 24px"}}>
-          <p className="lbl" style={{marginBottom:16}}>GOAL OUTCOMES BY SCHOOL</p>
-          {[["Westwood Elementary","93%",C.green,93],["Lincoln Middle School","86%",C.amber,86],["Roosevelt High","88%",C.amber,88],["District Average","89%",C.green,89]].map(([school,pct,color,val])=>(
-            <div key={school} style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
-                <span style={{color:C.black,fontWeight:school==="District Average"?700:400}}>{school}</span>
-                <span style={{fontWeight:700,color}}>{pct}</span>
+      {total>0&&(
+        <div className="card" style={{padding:"22px 24px",marginBottom:16}}>
+          <p className="lbl" style={{marginBottom:16}}>STUDENT STATUS BREAKDOWN</p>
+          {["Active","Review Due","Inactive"].map(status=>{
+            const count=dbStudents.filter(s=>(s.status||"Active")===status).length;
+            const pct=total>0?Math.round((count/total)*100):0;
+            const color=status==="Active"?C.green:status==="Review Due"?C.amber:C.warm;
+            return(
+              <div key={status} style={{marginBottom:14}}>
+                <div style={{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}}>
+                  <span style={{color:C.black}}>{status}</span>
+                  <span style={{fontWeight:700,color}}>{count} ({pct}%)</span>
+                </div>
+                <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
+                  <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:99,transition:"width .5s"}}/>
+                </div>
               </div>
-              <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${val}%`,background:color,borderRadius:99,transition:"width .5s"}}/>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+      )}
 
-        {/* Year-over-year trends */}
-        <div className="card" style={{padding:"22px 24px"}}>
-          <p className="lbl" style={{marginBottom:16}}>YEAR-OVER-YEAR TRENDS</p>
-          {[["Students on active plans","+142","↑ from 1,705",C.green],["Reviews completed on time","+7%","↑ from 87%",C.green],["Average goals per student","4.2","No change",C.warm],["Family portal engagement","+23%","↑ from 58%",C.green],["Time to create plan","-35%","↓ from 2.1 hrs",C.blue]].map(([label,val,change,color])=>(
-            <div key={label} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.tanL}`,fontSize:12,alignItems:"center"}}>
-              <span style={{color:C.warm,flex:1}}>{label}</span>
-              <span style={{fontWeight:700,color,marginLeft:8}}>{val}</span>
-              <span style={{fontSize:10,color,marginLeft:8,minWidth:90,textAlign:"right"}}>{change}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* District progress chart */}
-      <div className="card" style={{padding:"22px 24px",marginBottom:16}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <div>
-            <p className="lbl">DISTRICT GOAL PROGRESS TREND</p>
-            <p style={{fontSize:11,color:C.warm,marginTop:2}}>% of goals on track · All schools · {period}</p>
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:6}}>
-            <span style={{fontSize:11,fontWeight:700,color:C.green}}>↑ 7%</span>
-            <span style={{fontSize:11,color:C.warm}}>vs last year</span>
-          </div>
-        </div>
-        <MiniBarChart color={C.purple} height={80} width={500}
-          data={[{value:78,label:"Sep"},{value:80,label:"Oct"},{value:81,label:"Nov"},{value:79,label:"Dec"},{value:82,label:"Jan"},{value:84,label:"Feb"},{value:86,label:"Mar"},{value:88,label:"Apr"},{value:89,label:"May"}]}/>
-      </div>
-
-      {/* Strategic priorities */}
+      {/* Quick actions */}
       <div className="card" style={{padding:"22px 24px"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-          <p className="lbl">STRATEGIC PRIORITIES — AY {period}</p>
-          <button className="btn-ghost" style={{fontSize:10}} onClick={()=>toast("Strategic plan opened","info")}>View Plan →</button>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr 1fr",gap:10}}>
-          {[["🎯","Increase Early Intervention","Tier 2 identification within first 6 weeks of year","78% complete",C.green],["❤️","Family Partnership","90%+ family portal engagement across all schools","61% complete",C.amber],["🌍","Inclusive Practices","95% of students in least restrictive environment","88% complete",C.green]].map(([ic,title,desc,prog,c])=>(
-            <div key={title} style={{padding:"16px 14px",border:`1px solid ${C.tanL}`,borderRadius:10}}>
+        <p className="lbl" style={{marginBottom:16}}>QUICK ACTIONS</p>
+        <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"repeat(3,1fr)",gap:10}}>
+          {[["📊","View Full Reports","Caseload and progress data",()=>setPage("reports")],["👥","Manage Students","Add or update student records",()=>setPage("students")],["⚙️","Platform Settings","Configure organization settings",()=>setPage("settings")]].map(([ic,title,desc,fn])=>(
+            <div key={title} onClick={fn} style={{padding:"16px 14px",border:`1px solid ${C.tanL}`,borderRadius:10,cursor:"pointer"}}>
               <span style={{fontSize:24}}>{ic}</span>
               <h4 style={{fontSize:13,fontWeight:700,color:C.black,margin:"8px 0 4px"}}>{title}</h4>
-              <p style={{fontSize:11,color:C.warm,lineHeight:1.5,marginBottom:10}}>{desc}</p>
-              <div style={{height:4,background:C.tanL,borderRadius:99,overflow:"hidden",marginBottom:4}}>
-                <div style={{height:"100%",width:prog,background:c,borderRadius:99}}/>
-              </div>
-              <span style={{fontSize:10,fontWeight:600,color:c}}>{prog}</span>
+              <p style={{fontSize:11,color:C.warm,lineHeight:1.5}}>{desc}</p>
             </div>
           ))}
         </div>
@@ -4441,18 +4316,15 @@ function DocumentsPage({setPage}){
   const {toast}=useToast();
   const {copy,copied}=useCopy();
   const {isMobile}=useResponsive();
+  const {students:dbStudents}=useSupabaseAuth();
   const [tab,setTab]=useState("all");
   const [search,setSearch]=useState("");
   const [uploading,setUploading]=useState(false);
 
   const docs=[
-    {id:1,name:"Marcus Johnson — ALP 2025–2026",ext:"PDF",student:"Marcus Johnson",type:"ALP",size:"2.4 MB",date:"May 8, 2026",status:"Signed",icon:"📋",color:C.purple},
-    {id:2,name:"Marcus Johnson — Q3 Progress Report.pdf",student:"Marcus Johnson",type:"Progress",size:"1.1 MB",date:"Apr 30, 2026",status:"Shared",icon:"📈",color:C.blue},
-    {id:3,name:"Sofia Lee — ALP 2025-2026.pdf",student:"Sofia Lee",type:"ALP",size:"2.1 MB",date:"Apr 15, 2026",status:"Signed",icon:"📋",color:C.purple},
-    {id:4,name:"Aisha Adeyemi — Evaluation Report.pdf",student:"Aisha Adeyemi",type:"Evaluation",size:"4.2 MB",date:"Mar 20, 2026",status:"On File",icon:"🔬",color:C.green},
-    {id:5,name:"Tyler Parker — ALP Notice of Meeting.pdf",student:"Tyler Parker",type:"Notice",size:"0.8 MB",date:"May 1, 2026",status:"Sent",icon:"⚠️",color:C.amber},
-    {id:6,name:"Ryan Chen — Parent Consent Form.pdf",student:"Ryan Chen",type:"Consent",size:"0.4 MB",date:"Feb 10, 2026",status:"Signed",icon:"✍️",color:C.green},
-    {id:7,name:"Amara Osei — Re-evaluation Request.pdf",student:"Amara Osei",type:"Evaluation",size:"1.6 MB",date:"May 12, 2026",status:"Pending",icon:"🔬",color:C.amber},
+    ...(dbStudents||[]).flatMap(s=>[
+      {id:s.id+"_alp",name:`${s.name} — ALP ${new Date().getFullYear()}–${new Date().getFullYear()+1}`,student:s.name,type:"ALP",size:"–",date:s.created_at?new Date(s.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"–",status:s.alp_completed?"Signed":"Draft",icon:"📋",color:C.purple},
+    ]),
     {id:8,name:"District Progress Review Report Q3.xlsx",student:"All Students",type:"Report",size:"3.8 MB",date:"May 5, 2026",status:"Exported",icon:"📊",color:C.blue},
   ];
 
@@ -4555,67 +4427,94 @@ function DocumentsPage({setPage}){
 function TimelinePage({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
-  const [student,setStudent]=useState("marcus");
+  const {students:dbStudents,user,profile}=useSupabaseAuth();
+  const [studentId,setStudentId]=useState(null);
   const [filter,setFilter]=useState("all");
+  const [allEvents,setAllEvents]=useState([]);
+  const [loading,setLoading]=useState(true);
 
-  const students={
-    marcus:{name:"Marcus Johnson",grade:4,disability:"ASD",color:C.purple},
-    sofia:{name:"Sofia Lee",grade:5,disability:"ADHD",color:C.blue},
-    aisha:{name:"Aisha Adeyemi",grade:1,disability:"SLI",color:C.green},
-    tyler:{name:"Tyler Parker",grade:3,disability:"SLD",color:C.amber},
-    ryan:{name:"Ryan Chen",grade:2,disability:"ADHD",color:C.red},
-  };
-  const s=students[student];
+  useEffect(()=>{
+    if(dbStudents?.length&&!studentId) setStudentId(dbStudents[0].id);
+  },[dbStudents]);
 
-  const allEvents=[
-    {date:"May 8, 2026",type:"review",icon:"📋",title:"Annual Review Meeting",desc:"ALP reviewed with family. All 4 goals maintained. Reading goal target raised to 85 wcpm.",color:C.purple,by:"Ms. Simmons",month:"May"},
-    {date:"Apr 30, 2026",type:"progress",icon:"📈",title:"Q3 Progress Report Generated",desc:"Reading: 72 wcpm (On Track). Communication: 2-turn (Developing). Social-Emotional: 4/5 (On Track).",color:C.green,by:"System",month:"Apr"},
-    {date:"Apr 15, 2026",type:"data",icon:"📊",title:"CBM Data — Reading",desc:"Score: 72 wcpm. Above goal trajectory for 3 consecutive weeks. 3-point rule: Consider raising goal.",color:C.blue,by:"Ms. Simmons",month:"Apr"},
-    {date:"Apr 2, 2026",type:"signature",icon:"✍️",title:"Family Signature Collected",desc:"Patricia Johnson signed Q2 Progress Report via Family Portal (digital signature).",color:C.green,by:"Family Portal",month:"Apr"},
-    {date:"Mar 20, 2026",type:"update",icon:"✏️",title:"ALP Section Updated — Accommodations",desc:"Extended time updated from 1.5× to 2× for maths assessments based on OT recommendation.",color:C.amber,by:"Ms. Simmons",month:"Mar"},
-    {date:"Mar 5, 2026",type:"meeting",icon:"📅",title:"Parent-Teacher Conference",desc:"Progress shared with Johnson family. Family raised concerns about homework volume. Action noted.",color:C.blue,by:"Ms. Simmons",month:"Mar"},
-    {date:"Feb 14, 2026",type:"data",icon:"📊",title:"CBM Data — Reading",desc:"Score: 68 wcpm. Below goal line for 2 consecutive weeks. Monitoring closely.",color:C.amber,by:"Ms. Simmons",month:"Feb"},
-    {date:"Jan 28, 2026",type:"progress",icon:"📈",title:"Q2 Progress Report Generated",desc:"Reading: 65 wcpm (Developing). Communication: 1-turn (Needs Support). Action plan updated.",color:C.amber,by:"System",month:"Jan"},
-    {date:"Jan 10, 2026",type:"update",icon:"✏️",title:"Services Updated — Speech Frequency",desc:"Speech-Language services increased from 2× to 3× per week per team recommendation.",color:C.purple,by:"Ms. Rivera",month:"Jan"},
-    {date:"Sep 3, 2025",type:"created",icon:"🎉",title:"ALP Created for 2025–2026",desc:"Annual ALP created for Marcus Johnson, Grade 4. 4 annual goals established across Reading, Communication, Self-Regulation, and Writing.",color:C.green,by:"Ms. Simmons",month:"Sep"},
-  ];
+  const s=dbStudents?.find(st=>st.id===studentId)||null;
+  const byline=profile?.full_name||user?.email?.split("@")[0]||"You";
 
-  const filterTypes={all:"All",review:"Reviews",progress:"Progress",data:"CBM Data",update:"Updates",meeting:"Meetings",signature:"Signatures",created:"Created"};
+  useEffect(()=>{
+    if(!s?.id){setLoading(false);setAllEvents([]);return;}
+    setLoading(true);
+    Promise.all([
+      Supabase.getGoals(s.id),
+      Supabase.getProgress(s.id,50),
+    ]).then(([goals,progress])=>{
+      const events=[];
+      if(s.created_at){
+        events.push({date:s.created_at,type:"created",icon:"🎉",title:`ALP Created for ${s.plan_year||new Date(s.created_at).getFullYear()}`,desc:`Student record created for ${s.name}, Grade ${s.grade||"–"}.`,color:C.green,by:byline});
+      }
+      (goals||[]).forEach(g=>{
+        if(g.created_at) events.push({date:g.created_at,type:"update",icon:"🎯",title:`Goal Added — ${g.domain}`,desc:g.goal_text,color:C.purple,by:byline});
+      });
+      (progress||[]).forEach(p=>{
+        events.push({date:p.date||p.created_at,type:"data",icon:"📊",title:"Progress Data Logged",desc:`Score: ${p.score}${p.notes?" — "+p.notes:""}`,color:C.blue,by:byline});
+      });
+      if(s.alp_completed_date){
+        events.push({date:s.alp_completed_date,type:"review",icon:"📋",title:"ALP Review Completed",desc:s.review_notes||"Annual review completed and signed off.",color:C.purple,by:byline});
+      }
+      events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+      setAllEvents(events);
+      setLoading(false);
+    }).catch(()=>setLoading(false));
+  },[s?.id]);
+
+  const filterTypes={all:"All",review:"Reviews",progress:"Progress",data:"Data",update:"Updates",created:"Created"};
   const events=filter==="all"?allEvents:allEvents.filter(e=>e.type===filter);
   const typeColors={review:C.purple,progress:C.green,data:C.blue,update:C.amber,meeting:C.blue,signature:C.green,created:C.green};
+
+  if(!dbStudents?.length){
+    return(
+      <Page title={<>Student <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Timeline</span></>} subtitle="Full ALP activity history by student">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>🕐</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>Add a student to start building their activity timeline.</p>
+        </div>
+      </Page>
+    );
+  }
 
   return(
     <Page title={<>Student <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Timeline</span></>}
       subtitle="Full ALP activity history by student"
       action={<div style={{display:"flex",gap:8}}>
-        <button className="btn-ghost" onClick={()=>toast("Timeline exported as PDF","success")} style={{fontSize:11}}>⬇ Export</button>
+        <button className="btn-ghost" onClick={()=>toast("Timeline export coming soon","info")} style={{fontSize:11}}>⬇ Export</button>
         <button className="btn-black" onClick={()=>setPage("progress")} style={{fontSize:11,padding:"11px 20px"}}>📈 Progress →</button>
       </div>}>
 
       {/* Student selector */}
       <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
         <span style={{fontSize:12,fontWeight:600,color:C.warm,flexShrink:0}}>Student:</span>
-        {Object.entries(students).map(([id,st])=>(
-          <button key={id} onClick={()=>setStudent(id)} className={student===id?"btn-black":"btn-ghost"}
+        {dbStudents.map(st=>(
+          <button key={st.id} onClick={()=>setStudentId(st.id)} className={studentId===st.id?"btn-black":"btn-ghost"}
             style={{fontSize:11,padding:"8px 14px",display:"flex",alignItems:"center",gap:6}}>
-            {student===id&&<div style={{width:6,height:6,borderRadius:"50%",background:st.color}}/>}
+            {studentId===st.id&&<div style={{width:6,height:6,borderRadius:"50%",background:C.purple}}/>}
             {st.name.split(" ")[0]}
           </button>
         ))}
       </div>
 
-      {/* Student header */}
-      <div className="card" style={{padding:"18px 22px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
-        <Avatar name={s.name} size={48}/>
-        <div style={{flex:1}}>
-          <h3 style={{fontSize:16,fontWeight:700,color:C.black,marginBottom:2}}>{s.name}</h3>
-          <p style={{fontSize:12,color:C.warm}}>Grade {s.grade} · {s.disability}</p>
+      {s&&(
+        <div className="card" style={{padding:"18px 22px",marginBottom:16,display:"flex",alignItems:"center",gap:14,flexWrap:"wrap"}}>
+          <Avatar name={s.name} size={48}/>
+          <div style={{flex:1}}>
+            <h3 style={{fontSize:16,fontWeight:700,color:C.black,marginBottom:2}}>{s.name}</h3>
+            <p style={{fontSize:12,color:C.warm}}>Grade {s.grade||"–"} · {s.disability||"ALP"}</p>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button className="btn-ghost" style={{fontSize:11}} onClick={()=>setPage("builder")}>Open ALP →</button>
+            <button className="btn-purple" style={{fontSize:11}} onClick={()=>setPage("progress")}>Progress →</button>
+          </div>
         </div>
-        <div style={{display:"flex",gap:8}}>
-          <button className="btn-ghost" style={{fontSize:11}} onClick={()=>setPage("builder")}>Open ALP →</button>
-          <button className="btn-purple" style={{fontSize:11}} onClick={()=>setPage("progress")}>Progress →</button>
-        </div>
-      </div>
+      )}
 
       {/* Filter pills */}
       <div style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
@@ -4624,257 +4523,52 @@ function TimelinePage({setPage}){
         ))}
       </div>
 
+      {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading timeline…</div>}
+
       {/* Timeline events */}
-      {events.length===0&&(
+      {!loading&&events.length===0&&(
         <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
           <div style={{fontSize:40,marginBottom:12}}>📭</div>
-          <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:6}}>No events match this filter</h3>
-          <button className="btn-ghost" onClick={()=>setFilter("all")} style={{fontSize:11,marginTop:8}}>Clear Filter</button>
+          <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:6}}>No activity yet</h3>
+          <p style={{fontSize:12,color:C.warm,marginBottom:12}}>Events appear here as you build the ALP, log progress, and complete reviews.</p>
+          <button className="btn-purple" onClick={()=>setPage("builder")} style={{fontSize:11}}>Open ALP Builder →</button>
         </div>
       )}
 
-      <div style={{position:"relative",paddingLeft:isMobile?20:32}}>
-        <div style={{position:"absolute",left:isMobile?8:16,top:8,bottom:8,width:2,background:C.tanL,borderRadius:1}}/>
-        {events.map((ev,i)=>(
-          <div key={i} style={{position:"relative",marginBottom:20,paddingLeft:isMobile?16:24}}>
-            <div style={{position:"absolute",left:isMobile?-18:-26,top:4,width:16,height:16,borderRadius:"50%",background:typeColors[ev.type]||C.purple,border:`3px solid ${C.bg}`,boxShadow:`0 0 0 2px ${typeColors[ev.type]||C.purple}44`}}/>
-            <div className="card" style={{padding:"14px 18px",transition:"all .2s"}}
-              onMouseEnter={e=>e.currentTarget.style.borderColor=C.purple}
-              onMouseLeave={e=>e.currentTarget.style.borderColor=C.tanL}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6,flexWrap:"wrap",gap:6}}>
-                <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                  <span style={{fontSize:16}}>{ev.icon}</span>
-                  <span style={{fontSize:13,fontWeight:700,color:C.black}}>{ev.title}</span>
-                  <span style={{fontSize:9,fontWeight:800,color:typeColors[ev.type],background:typeColors[ev.type]+"18",padding:"2px 7px",borderRadius:99,letterSpacing:".05em"}}>{ev.type.toUpperCase()}</span>
+      {!loading&&events.length>0&&(
+        <div style={{position:"relative",paddingLeft:isMobile?20:32}}>
+          <div style={{position:"absolute",left:isMobile?8:16,top:8,bottom:8,width:2,background:C.tanL,borderRadius:1}}/>
+          {events.map((ev,i)=>(
+            <div key={i} style={{position:"relative",marginBottom:20,paddingLeft:isMobile?16:24}}>
+              <div style={{position:"absolute",left:isMobile?-18:-26,top:4,width:16,height:16,borderRadius:"50%",background:typeColors[ev.type]||C.purple,border:`3px solid ${C.bg}`,boxShadow:`0 0 0 2px ${(typeColors[ev.type]||C.purple)}44`}}/>
+              <div className="card" style={{padding:"14px 18px",transition:"all .2s"}}
+                onMouseEnter={e=>e.currentTarget.style.borderColor=C.purple}
+                onMouseLeave={e=>e.currentTarget.style.borderColor=C.tanL}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6,flexWrap:"wrap",gap:6}}>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    <span style={{fontSize:16}}>{ev.icon}</span>
+                    <span style={{fontSize:13,fontWeight:700,color:C.black}}>{ev.title}</span>
+                    <span style={{fontSize:9,fontWeight:800,color:typeColors[ev.type],background:(typeColors[ev.type]||C.purple)+"18",padding:"2px 7px",borderRadius:99,letterSpacing:".05em"}}>{ev.type.toUpperCase()}</span>
+                  </div>
+                  <div style={{display:"flex",gap:10,alignItems:"center",flexShrink:0}}>
+                    <span style={{fontSize:11,color:C.warm}}>{ev.by}</span>
+                    <span style={{fontSize:11,fontWeight:600,color:C.warm}}>{ev.date?new Date(ev.date).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):""}</span>
+                  </div>
                 </div>
-                <div style={{display:"flex",gap:10,alignItems:"center",flexShrink:0}}>
-                  <span style={{fontSize:11,color:C.warm}}>{ev.by}</span>
-                  <span style={{fontSize:11,fontWeight:600,color:C.warm}}>{ev.date}</span>
-                </div>
+                <p style={{fontSize:12,color:C.warm,lineHeight:1.6,margin:0}}>{ev.desc}</p>
               </div>
-              <p style={{fontSize:12,color:C.warm,lineHeight:1.6,margin:0}}>{ev.desc}</p>
             </div>
-          </div>
-        ))}
-        <div style={{textAlign:"center",paddingTop:8}}>
-          <button className="btn-ghost" style={{fontSize:11}} onClick={()=>toast("Loading earlier events…","info")}>
-            Load earlier events →
-          </button>
+          ))}
         </div>
-      </div>
+      )}
     </Page>
   );
 }
 
 
-function DataImportModal({onClose}){
-  const {toast}=useToast();
-  const {createStudentRecord}=useSupabaseAuth();
-  const [tab,setTab]=useState("csv");
-  const [csvText,setCsvText]=useState("");
-  const [parsed,setParsed]=useState([]);
-  const [importing,setImporting]=useState(false);
-  const [done,setDone]=useState(false);
-  const [errors,setErrors]=useState([]);
-
-  const csvTemplate="name,grade,dob,disability,status\nMarcus Johnson,4,2014-03-12,ASD,Active\nSofia Lee,5,2013-07-22,ADHD,Active";
-
-  function parseCSV(text){
-    const lines=text.trim().split("\n").filter(Boolean);
-    if(lines.length<2){setErrors(["CSV must have a header row and at least one data row"]);return;}
-    const headers=lines[0].split(",").map(h=>h.trim().toLowerCase());
-    const required=["name"];
-    const missing=required.filter(r=>!headers.includes(r));
-    if(missing.length){setErrors(["Missing required columns: "+missing.join(", ")]);return;}
-    const rows=[];
-    const errs=[];
-    for(let i=1;i<lines.length;i++){
-      const vals=lines[i].split(",").map(v=>v.trim());
-      const row={};
-      headers.forEach((h,idx)=>{row[h]=vals[idx]||"";});
-      if(!row.name){errs.push("Row "+(i+1)+": name is required");continue;}
-      rows.push({name:row.name,grade:row.grade||"",dob:row.dob||null,disability:row.disability||"",status:row.status||"Active"});
-    }
-    setErrors(errs);
-    setParsed(rows);
-  }
-
-  async function importAll(){
-    if(!parsed.length)return;
-    setImporting(true);
-    let success=0,fail=0;
-    for(const row of parsed){
-      const {error}=await createStudentRecord(row);
-      if(error){fail++;} else {success++;}
-    }
-    setImporting(false);
-    setDone(true);
-    toast(success+" students imported"+(fail?" ("+fail+" failed)":""),"success");
-  }
-
-  function downloadTemplate(){
-    const blob=new Blob([csvTemplate],{type:"text/csv"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;a.download="alp_students_template.csv";a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="card fade-up" style={{width:"100%",maxWidth:560,padding:0}}>
-        <div style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",padding:"22px 28px",borderRadius:"12px 12px 0 0"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div>
-              <h3 className="serif" style={{fontSize:22,fontWeight:800,color:"#fff",margin:0}}>Import Students</h3>
-              <p style={{fontSize:12,color:"rgba(255,255,255,.4)",margin:"4px 0 0"}}>Upload a CSV file or paste data directly</p>
-            </div>
-            <button onClick={onClose} style={{fontSize:22,color:"rgba(255,255,255,.4)",background:"none",border:"none",cursor:"pointer"}}>×</button>
-          </div>
-        </div>
-
-        <div style={{padding:"24px 28px"}}>
-          {!done?(
-            <>
-              {/* Tabs */}
-              <div style={{display:"flex",gap:8,marginBottom:20}}>
-                {[["csv","CSV Upload"],["paste","Paste Data"]].map(([id,label])=>(
-                  <button key={id} onClick={()=>setTab(id)} className={tab===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"7px 14px"}}>{label}</button>
-                ))}
-              </div>
-
-              {/* Template download */}
-              <div style={{background:C.purpleL,borderRadius:8,padding:"10px 14px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <p style={{fontSize:12,color:C.warm,margin:0}}>📄 Required columns: <b>name</b>, grade, dob (YYYY-MM-DD), disability, status</p>
-                <button onClick={downloadTemplate} className="btn-ghost" style={{fontSize:10,padding:"4px 10px",flexShrink:0}}>⬇ Template</button>
-              </div>
-
-              {/* Input area */}
-              <textarea
-                value={csvText}
-                onChange={e=>{setCsvText(e.target.value);setParsed([]);setErrors([]);}}
-                placeholder={"name,grade,dob,disability,status\nMarcus Johnson,4,2014-03-12,ASD,Active"}
-                style={{width:"100%",height:140,padding:"10px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontFamily:"monospace",resize:"vertical",outline:"none",boxSizing:"border-box",lineHeight:1.6}}
-              />
-
-              {/* Errors */}
-              {errors.length>0&&<div style={{background:"#FEF2F2",borderRadius:8,padding:"8px 12px",marginTop:8}}>
-                {errors.map((e,i)=><p key={i} style={{fontSize:12,color:"#DC2626",margin:"2px 0"}}>⚠ {e}</p>)}
-              </div>}
-
-              {/* Preview */}
-              {parsed.length>0&&(
-                <div style={{marginTop:12}}>
-                  <p style={{fontSize:11,fontWeight:700,color:C.warm,marginBottom:8}}>PREVIEW — {parsed.length} STUDENTS</p>
-                  <div style={{maxHeight:140,overflowY:"auto",border:`1px solid ${C.tanL}`,borderRadius:8}}>
-                    {parsed.map((r,i)=>(
-                      <div key={i} style={{display:"flex",gap:10,padding:"8px 12px",borderBottom:i<parsed.length-1?`1px solid ${C.tanL}`:"none",fontSize:12}}>
-                        <b style={{flex:2}}>{r.name}</b>
-                        <span style={{flex:1,color:C.warm}}>Gr.{r.grade}</span>
-                        <span style={{flex:2,color:C.warm}}>{r.disability}</span>
-                        <span style={{color:C.green,fontSize:10,fontWeight:700}}>{r.status}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Actions */}
-              <div style={{display:"flex",gap:10,marginTop:16}}>
-                <button className="btn-ghost" onClick={()=>parseCSV(csvText)} disabled={!csvText.trim()} style={{flex:1,fontSize:12}}>Preview</button>
-                <button className="btn-purple" onClick={importAll} disabled={!parsed.length||importing} style={{flex:2,fontSize:12}}>
-                  {importing?<><Spin/>Importing…</>:"⬆ Import "+parsed.length+" Students"}
-                </button>
-              </div>
-            </>
-          ):(
-            <div style={{textAlign:"center",padding:"32px 0"}}>
-              <div style={{fontSize:48,marginBottom:12}}>✅</div>
-              <h3 style={{fontSize:18,fontWeight:700}}>Import complete!</h3>
-              <p style={{fontSize:14,color:C.warm,marginBottom:20}}>Students have been added to your account.</p>
-              <button className="btn-purple" onClick={onClose} style={{fontSize:12}}>Done →</button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MiniBarChart({data,color,height=60,width=160}){
-  if(!data||!data.length)return null;
-  const max=Math.max(...data.map(d=>d.value))||1;
-  const barW=Math.floor((width-data.length*2)/data.length);
-  return(
-    <svg width="100%" viewBox={`0 0 ${width} ${height+16}`} style={{overflow:"visible"}}>
-      {data.map((d,i)=>{
-        const bh=Math.max(2,(d.value/max)*(height-4));
-        const x=i*(barW+2);
-        const y=height-bh;
-        return(
-          <g key={i}>
-            <rect x={x} y={y} width={barW} height={bh} rx={2} fill={color} opacity={i===data.length-1?1:0.45}/>
-            <text x={x+barW/2} y={height+13} fontSize={7} fill="var(--text-muted)" textAnchor="middle">{d.label}</text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════
-// SVG DONUT CHART
-// ═══════════════════════════════════════════════════════════
-function DonutChart({segments,size=96,strokeWidth=14}){
-  const r=(size-strokeWidth)/2;
-  const circ=2*Math.PI*r;
-  const cx=size/2, cy=size/2;
-  const total=segments.reduce((a,s)=>a+s.value,0)||1;
-  let offset=0;
-  return(
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{transform:"rotate(-90deg)"}}>
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--border)" strokeWidth={strokeWidth}/>
-      {segments.map((s,i)=>{
-        const dash=(s.value/total)*circ;
-        const gap=circ-dash;
-        const el=(
-          <circle key={i} cx={cx} cy={cy} r={r} fill="none"
-            stroke={s.color} strokeWidth={strokeWidth}
-            strokeDasharray={`${dash} ${gap}`}
-            strokeDashoffset={-offset}
-            strokeLinecap="round"/>
-        );
-        offset+=dash;
-        return el;
-      })}
-    </svg>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════
-// TREND INDICATOR
-// ═══════════════════════════════════════════════════════════
-function Trend({value,suffix="%"}){
-  const up=value>0;
-  return(
-    <span style={{fontSize:11,fontWeight:700,color:up?C.green:C.red,display:"inline-flex",alignItems:"center",gap:2}}>
-      {up?"↑":"↓"}{Math.abs(value)}{suffix}
-    </span>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════
-// ALP PRINT PREVIEW MODAL
-// ═══════════════════════════════════════════════════════════
-
 function ALPPrintPreview({onClose,student,goals}){
-  const studentData=student||{name:"Marcus Darnell Johnson",grade:4,dob:"2014-03-12",disability:"Autism Spectrum Disorder (ASD)",teacher:"Ms. A. Simmons",school:"Westwood Elementary School",year:"2025-2026"};
-  const goalsData=goals||[
-    {domain:"READING",goal:"By June 2026, Marcus will read 80 words per minute on Grade 4 ORF probes with 80% accuracy across 3 consecutive probes, as measured by weekly CBM."},
-    {domain:"COMMUNICATION",goal:"By June 2026, Marcus will initiate and sustain a 3-turn conversation with a peer in a structured setting on 4 out of 5 opportunities, as measured by teacher observation."},
-    {domain:"SELF-REGULATION",goal:"By June 2026, Marcus will independently use a calm-down strategy when dysregulated on 4 out of 5 observed opportunities, as measured by daily behaviour log."},
-    {domain:"WRITING",goal:"By June 2026, Marcus will independently produce a 3-sentence paragraph with a topic sentence, supporting detail, and conclusion on 3 out of 4 writing tasks, as measured by writing rubric."},
-  ];
+  const studentData=student||{name:"No student selected",grade:"–",dob:"–",disability:"–",teacher:"–",school:"–",year:`${new Date().getFullYear()}–${new Date().getFullYear()+1}`};
+  const goalsData=goals||[];
   const domainColors={READING:"#7C3AED",COMMUNICATION:"#2563EB","SELF-REGULATION":"#D97706",WRITING:"#059669"};
 
   return(
@@ -4893,7 +4587,7 @@ function ALPPrintPreview({onClose,student,goals}){
         <div style={{padding:"48px 56px",fontFamily:"'Georgia',serif",color:"#111"}}>
           {/* Header */}
           <div style={{textAlign:"center",borderBottom:"3px solid #1a1a2e",paddingBottom:24,marginBottom:28}}>
-            <div style={{fontSize:9,letterSpacing:".2em",color:"#666",marginBottom:8,textTransform:"uppercase"}}>Westwood Elementary School · Special Education Department</div>
+            <div style={{fontSize:9,letterSpacing:".2em",color:"#666",marginBottom:8,textTransform:"uppercase"}}>{studentData.school} · Special Education Department</div>
             <h1 style={{fontSize:26,fontWeight:700,margin:"0 0 6px",letterSpacing:"-.5px"}}>Adaptive Learning Program</h1>
             <div style={{fontSize:11,color:"#666"}}>Academic Year {studentData.year} · Annual Program Document</div>
           </div>
@@ -4928,6 +4622,7 @@ function ALPPrintPreview({onClose,student,goals}){
 
           {/* Annual Goals */}
           <h2 style={{fontSize:14,fontWeight:700,marginBottom:16,paddingBottom:6,borderBottom:"1px solid #ddd",textTransform:"uppercase",letterSpacing:".08em"}}>Annual Goals</h2>
+          {goalsData.length===0&&<p style={{fontSize:12,color:"#888",fontStyle:"italic"}}>No goals recorded yet for this student.</p>}
           {goalsData.map((g,i)=>(
             <div key={i} style={{marginBottom:20,padding:"14px 16px",border:"1px solid #ddd",borderLeft:`4px solid ${domainColors[g.domain]||"#7C3AED"}`,borderRadius:"0 4px 4px 0"}}>
               <div style={{fontSize:9,fontWeight:700,color:domainColors[g.domain]||"#7C3AED",letterSpacing:".12em",marginBottom:6}}>{g.domain}</div>
@@ -4952,7 +4647,7 @@ function ALPPrintPreview({onClose,student,goals}){
           {/* Signatures */}
           <h2 style={{fontSize:14,fontWeight:700,margin:"24px 0 16px",paddingBottom:6,borderBottom:"1px solid #ddd",textTransform:"uppercase",letterSpacing:".08em"}}>Signatures</h2>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24}}>
-            {[["ALP Coordinator","Ms. A. Simmons"],["School Principal",""],["Parent / Guardian","Patricia Johnson"],["Student (if appropriate)",""]].map(([role,name])=>(
+            {[["ALP Coordinator",studentData.teacher!=="–"?studentData.teacher:""],["School Principal",""],["Parent / Guardian",studentData.parentName||""],["Student (if appropriate)",""]].map(([role,name])=>(
               <div key={role}>
                 <div style={{borderBottom:"1px solid #999",marginBottom:6,paddingBottom:24,marginTop:8}}></div>
                 <div style={{fontSize:11,fontWeight:700}}>{role}</div>
@@ -4974,26 +4669,45 @@ function ALPPrintPreview({onClose,student,goals}){
 
 function SessionNotesWidget({onClose}){
   const {toast}=useToast();
-  const [student,setStudent]=useState("Marcus Johnson");
+  const {students:dbStudents,user}=useSupabaseAuth();
+  const [studentId,setStudentId]=useState(dbStudents?.[0]?.id||"");
   const [date,setDate]=useState(new Date().toISOString().split("T")[0]);
   const [domain,setDomain]=useState("Reading");
   const [score,setScore]=useState("");
   const [notes,setNotes]=useState("");
   const [tab,setTab]=useState("note"); // note | history
   const [saved,setSaved]=useState(false);
-  const [history,setHistory]=useState([
-    {student:"Marcus Johnson",domain:"Reading",score:"72",notes:"Improved from last week. Used tracking finger successfully.",date:"May 7"},
-    {student:"Sofia Lee",domain:"Math",score:"71%",notes:"Completed 8/10 problems. Struggled with word problems still.",date:"May 6"},
-    {student:"Tyler Parker",domain:"Reading",score:"85",notes:"Excellent session. Met target for 3rd week running!",date:"May 5"},
-  ]);
+  const [saving,setSaving]=useState(false);
+  const [history,setHistory]=useState([]);
+  const [loadingHistory,setLoadingHistory]=useState(false);
 
-  function save(){
+  useEffect(()=>{
+    if(dbStudents?.length&&!studentId) setStudentId(dbStudents[0].id);
+  },[dbStudents]);
+
+  useEffect(()=>{
+    if(tab!=="history")return;
+    setLoadingHistory(true);
+    Promise.all((dbStudents||[]).map(s=>Supabase.getProgress(s.id,5).then(entries=>(entries||[]).map(e=>({...e,studentName:s.name})))))
+      .then(results=>{
+        const flat=results.flat().sort((a,b)=>new Date(b.date||b.created_at)-new Date(a.date||a.created_at)).slice(0,10);
+        setHistory(flat);
+        setLoadingHistory(false);
+      }).catch(()=>setLoadingHistory(false));
+  },[tab,dbStudents]);
+
+  async function save(){
     if(!notes.trim()&&!score)return;
-    const entry={student,domain,score,notes,date};
-    setHistory(h=>[entry,...h]);
-    setSaved(true);
-    toast(`Session note saved for ${student.split(" ")[0]}! ✓`,"success");
-    setTimeout(()=>{setSaved(false);setScore("");setNotes("");},1600);
+    if(!studentId){toast("Select a student first","error");return;}
+    setSaving(true);
+    try{
+      await Supabase.logProgress({student_id:studentId,score:parseFloat(score)||0,notes,date,created_by:user?.id});
+      setSaved(true);
+      const sName=dbStudents?.find(s=>s.id===studentId)?.name?.split(" ")[0]||"student";
+      toast(`Session note saved for ${sName}! ✓`,"success");
+      setTimeout(()=>{setSaved(false);setScore("");setNotes("");},1600);
+    }catch(e){toast("Failed to save note","error");}
+    setSaving(false);
   }
 
   return(
@@ -5017,8 +4731,8 @@ function SessionNotesWidget({onClose}){
       {tab==="note"&&(
         <div style={{padding:"16px"}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-            <USelect label="Student" value={student} onChange={e=>setStudent(e.target.value)}
-              options={["Marcus Johnson","Sofia Lee","Aisha Adeyemi","Tyler Parker","Ryan Chen","Amara Osei"].map(s=>({value:s,label:s.split(" ")[0]}))}/>
+            <USelect label="Student" value={studentId} onChange={e=>setStudentId(e.target.value)}
+              options={(dbStudents||[]).map(s=>({value:s.id,label:s.name}))}/>
             <USelect label="Domain" value={domain} onChange={e=>setDomain(e.target.value)}
               options={["Reading","Math","Writing","Communication","Social-Emotional","Behaviour","OT","Speech"].map(d=>({value:d,label:d}))}/>
           </div>
@@ -5030,23 +4744,24 @@ function SessionNotesWidget({onClose}){
             <UTextarea label="Observation notes" value={notes} onChange={e=>setNotes(e.target.value)} rows={3}
               placeholder="What happened? Prompts used, next steps…"/>
           </div>
-          <button className="btn-purple" onClick={save} disabled={!notes.trim()&&!score}
+          <button className="btn-purple" onClick={save} disabled={(!notes.trim()&&!score)||saving}
             style={{width:"100%",fontSize:12,padding:"11px"}}>
-            {saved?"✓ Saved! — Log another":"💾 Save Note →"}
+            {saving?<><Spin/> Saving…</>:saved?"✓ Saved! — Log another":"💾 Save Note →"}
           </button>
         </div>
       )}
 
       {tab==="history"&&(
         <div style={{padding:"12px",maxHeight:280,overflowY:"auto"}}>
-          {history.length===0&&<p style={{fontSize:12,color:C.warm,textAlign:"center",padding:16}}>No notes yet.</p>}
+          {loadingHistory&&<p style={{fontSize:12,color:C.warm,textAlign:"center",padding:16}}>Loading…</p>}
+          {!loadingHistory&&history.length===0&&<p style={{fontSize:12,color:C.warm,textAlign:"center",padding:16}}>No notes yet. Log your first session note above.</p>}
           {history.map((h,i)=>(
             <div key={i} style={{padding:"10px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,marginBottom:8}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                <span style={{fontSize:12,fontWeight:700,color:C.black}}>{h.student.split(" ")[0]} · {h.domain}</span>
-                <span style={{fontSize:10,color:C.warm}}>{h.date}</span>
+                <span style={{fontSize:12,fontWeight:700,color:C.black}}>{h.studentName?.split(" ")[0]||"Student"}</span>
+                <span style={{fontSize:10,color:C.warm}}>{h.date?new Date(h.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}):""}</span>
               </div>
-              {h.score&&<div style={{fontSize:11,color:C.purple,fontWeight:600,marginBottom:3}}>Score: {h.score}</div>}
+              {h.score!=null&&<div style={{fontSize:11,color:C.purple,fontWeight:600,marginBottom:3}}>Score: {h.score}</div>}
               <p style={{fontSize:11,color:C.warm,lineHeight:1.5,margin:0}}>{h.notes}</p>
             </div>
           ))}
@@ -5245,21 +4960,43 @@ function ExportAllDataModal({onClose}){
 // ═══════════════════════════════════════════════════════════
 // RECENT ACTIVITY FEED (sidebar widget / dashboard)
 // ═══════════════════════════════════════════════════════════
+function timeAgo(dateStr){
+  if(!dateStr)return"";
+  const diff=Date.now()-new Date(dateStr).getTime();
+  const mins=Math.floor(diff/60000);
+  if(mins<1)return"Just now";
+  if(mins<60)return`${mins}m ago`;
+  const hrs=Math.floor(mins/60);
+  if(hrs<24)return`${hrs}h ago`;
+  const days=Math.floor(hrs/24);
+  if(days<7)return`${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US",{month:"short",day:"numeric"});
+}
 function RecentActivityFeed({compact=false,limit=8}){
-  const activities=[
-    {icon:"✏️",text:"ALP Section 3 updated",sub:"Marcus Johnson · Goals",time:"2m ago",color:C.purple},
-    {icon:"📊",text:"CBM data logged",sub:"Sofia Lee · Reading · 71 wcpm",time:"14m ago",color:C.blue},
-    {icon:"✍️",text:"Signature collected",sub:"Johnson family · Q3 Report",time:"1h ago",color:C.green},
-    {icon:"📅",text:"Meeting scheduled",sub:"Parker family · Jun 12 · Annual Review",time:"2h ago",color:C.amber},
-    {icon:"🤖",text:"AI goal generated",sub:"Aisha Adeyemi · Communication",time:"3h ago",color:C.purple},
-    {icon:"📋",text:"ALP created",sub:"Amara Osei · Grade 6",time:"Yesterday",color:C.green},
-    {icon:"📈",text:"Progress report exported",sub:"All students · Q3 2026",time:"Yesterday",color:C.blue},
-    {icon:"✅",text:"Progress Review check passed",sub:"Tyler Parker · ALP standards Federal",time:"2d ago",color:C.green},
-  ].slice(0,limit);
+  const {user}=useSupabaseAuth();
+  const [notifs,setNotifs]=useState([]);
+  const [loading,setLoading]=useState(true);
+
+  useEffect(()=>{
+    if(!user?.id){setLoading(false);return;}
+    Supabase.getNotifications(user.id).then(n=>{setNotifs(n||[]);setLoading(false);}).catch(()=>setLoading(false));
+  },[user?.id]);
+
+  const typeIcon={review:"📅",progress:"📊",message:"✉️",signature:"✍️",goal:"🎯"};
+  const activities=notifs.slice(0,limit).map(n=>({
+    icon:typeIcon[n.type]||"✏️",
+    text:n.title||"Activity",
+    sub:n.student||n.body?.slice(0,40)||"",
+    time:n.created_at?timeAgo(n.created_at):n.time||"",
+    color:n.urgent?C.amber:C.purple,
+  }));
 
   return(
     <div>
       {!compact&&<p className="lbl" style={{marginBottom:14}}>RECENT ACTIVITY</p>}
+      {!loading&&activities.length===0&&(
+        <p style={{fontSize:12,color:C.warm,padding:"8px 0"}}>No recent activity yet. Activity will appear here as you work.</p>
+      )}
       <div style={{display:"flex",flexDirection:"column",gap:compact?8:0}}>
         {activities.map((a,i)=>(
           <div key={i} style={{display:"flex",gap:10,padding:compact?"8px 0":"10px 0",borderBottom:compact?"none":`1px solid ${C.tanL}`,alignItems:"flex-start"}}>
@@ -5653,7 +5390,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       {/* ── STATS ──────────────────────────────────────── */}
       <section style={{background:"#0d0d0d",padding:"clamp(28px,4vw,36px) clamp(20px,4vw,48px)"}}>
         <div className="r-stats-row" style={{maxWidth:900,margin:"0 auto",display:"flex",justifyContent:"space-around",gap:24,flexWrap:"wrap"}}>
-          {[["10,000+","Educators worldwide"],["10+","Countries supported"],["Birth–22+","Age range covered"],["13","ALP sections covered"],["Free","For individual teachers"]].map(([v,l])=>(
+          {[["10","Step ALP workflow"],["Birth–22+","Age range covered"],["Free","To get started"],["Built for","Schools everywhere"]].map(([v,l])=>(
             <div key={l} style={{textAlign:"center",padding:"8px 0"}}>
               <div className="serif" style={{fontSize:"clamp(22px,4vw,36px)",fontWeight:800,color:"#A78BFA",letterSpacing:"-1px",lineHeight:1}}>{v}</div>
               <div style={{fontSize:11,color:"rgba(255,255,255,.35)",marginTop:6,letterSpacing:".04em"}}>{l.toUpperCase()}</div>
@@ -5663,31 +5400,13 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       </section>
 
 
-      {/* ── TRUSTED BY SCHOOLS ──────────────────── */}
+      {/* ── BUILT FOR EDUCATORS EVERYWHERE ──────────────────── */}
       <section style={{background:C.white,padding:"clamp(40px,5vw,56px) clamp(20px,4vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p style={{textAlign:"center",fontSize:11,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:C.warm,marginBottom:24}}>Trusted by special educators at</p>
-          <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"clamp(24px,4vw,48px)",flexWrap:"wrap",opacity:.55}}>
-            {["Westwood Elementary","Lincoln Middle School","Roosevelt High","GES District — Ghana","Sunrise Academy — Nigeria","Oakwood Primary — UK","Blue Ridge District","Sunrise EI Program"].map(school=>(
-              <div key={school} style={{padding:"8px 20px",border:`1.5px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontWeight:700,color:C.black,whiteSpace:"nowrap"}}>
-                {school}
-              </div>
-            ))}
-          </div>
-          <p style={{textAlign:"center",fontSize:12,color:C.warm,marginTop:20}}>
-            + educators in <b style={{color:C.black}}>10+ countries</b> including USA, Ghana, Nigeria, UK, Kenya, Canada & Australia
-          </p>
-        </div>
-      </section>
-      {/* TRUST BAR — educators using ALP globally */}
-      <section style={{background:C.white,padding:"clamp(28px,4vw,44px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:24}}>Trusted by educators in schools across the globe</p>
-          <div style={{display:"flex",justifyContent:"center",alignItems:"center",flexWrap:"wrap",gap:32}}>
-            {["Westwood Unified","Accra SPED District","Lagos State Schools","Virginia DOE","Nairobi County Schools","Kumasi GES District","London SEND Borough","Brisbane Inclusive Ed","Rocketship Ed","KIPP Foundation"].map(s=>(
-              <span key={s} style={{fontSize:13,fontWeight:700,color:C.black,letterSpacing:".04em",opacity:.5}}>{s}</span>
-            ))}
-          </div>
+          <p style={{fontSize:11,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:C.warm,marginBottom:14}}>Built for educators everywhere</p>
+          <p style={{fontSize:14,color:C.black,maxWidth:560,margin:"0 auto",lineHeight:1.7}}>
+            ALP is designed to work for schools, learning centers, and individual educators anywhere in the world — no matter your country's framework or curriculum standards.
+          </p>
         </div>
       </section>
 
@@ -5728,29 +5447,24 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       </section>
 
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────── */}
       <section style={{background:"#fff",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p className="lbl" style={{marginBottom:16,textAlign:"center",color:C.purple}}>What Educators Say</p>
+          <p className="lbl" style={{marginBottom:16,textAlign:"center",color:C.purple}}>How It Works</p>
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,48px)",fontWeight:700,textAlign:"center",letterSpacing:"-1px",marginBottom:48,lineHeight:1.1}}>
-            Trusted by teachers<br/><span className="serif-italic" style={{color:C.warm}}>in 10+ countries.</span>
+            Designed for teachers,<br/><span className="serif-italic" style={{color:C.warm}}>built for any school.</span>
           </h2>
           <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
             {[
-              {q:"ALP has transformed how we work. What used to take 2 hours now takes 20 minutes. Our review completion rate went from 60% to 98%.",n:"Abena Sarpong",r:"SPED Director · Accra, Ghana",c:"#7C3AED",stars:5},
-              {q:"The AI goal writer is unbelievable. I paste baseline data and get three SMART goal options instantly — all filled in correctly. My families love the portal.",n:"Marcus Williams",r:"Special Ed Teacher · Virginia, USA",c:"#2563EB",stars:5},
-              {q:"ALP works perfectly for our regional planning requirements. The progress monitoring charts alone have changed how I talk to families about their child's growth.",n:"Kwame Asante",r:"Head of Inclusive Ed · Kumasi, Ghana",c:"#16A34A",stars:5},
-              {q:"I manage 14 students across 3 schools. ALP keeps everything organised — goals, services, reports, meetings — all in one place. Saves me hours every week.",n:"Sarah Simmons",r:"Itinerant SPED Teacher · Virginia, USA",c:"#9333EA",stars:5},
-              {q:"The Family Portal is a game changer. Parents actually engage with their child's plan now. Signature collection is digital and instant.",n:"Amara Diallo",r:"Special Education Coordinator · Lagos, Nigeria",c:"#0891B2",stars:5},
-              {q:"We rolled out ALP across our district in 3 weeks. The team was using it confidently within days. The onboarding flow is excellent.",n:"David Chen",r:"District SPED Administrator · California, USA",c:"#D97706",stars:5},
-            ].map(t=>(
-              <div key={t.n} className="card" style={{padding:"26px 24px",position:"relative",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                <div style={{display:"flex",gap:2,marginBottom:12}}>{[1,2,3,4,5].map(s=><span key={s} style={{fontSize:14,color:s<=(t.stars||5)?"#FBBF24":"#E5E7EB"}}>★</span>)}</div>
-                <p className="serif" style={{fontSize:13.5,fontStyle:"italic",lineHeight:1.8,color:C.black,marginBottom:18}}>{t.q}</p>
-                <div style={{display:"flex",alignItems:"center",gap:12}}>
-                  <Avatar name={t.n} size={40}/>
-                  <div style={{flex:1}}><div style={{fontSize:13,fontWeight:700,color:C.black}}>{t.n}</div><div style={{fontSize:11,color:C.warm}}>{t.r}</div></div>
-                </div>
+              {q:"A guided 10-step workflow takes you from student information all the way through goals, accommodations, and review sign-off.",icon:"📋",c:"#7C3AED"},
+              {q:"AI-assisted goal writing turns baseline data into SMART goal suggestions — with baseline, target, and monitoring method ready to refine.",icon:"✨",c:"#2563EB"},
+              {q:"Built to flex with any country's planning requirements — not locked to a single state or national framework.",icon:"🌍",c:"#16A34A"},
+              {q:"Manage every student's goals, services, reports, and meetings in one place instead of scattered spreadsheets and folders.",icon:"🗂️",c:"#9333EA"},
+              {q:"The Family Portal makes it simple for parents to follow their child's progress and respond to updates.",icon:"❤️",c:"#0891B2"},
+              {q:"A clean onboarding flow gets new teachers comfortable with the platform from their very first session.",icon:"🚀",c:"#D97706"},
+            ].map((t,i)=>(
+              <div key={i} className="card" style={{padding:"26px 24px",position:"relative",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
+                <div style={{fontSize:28,marginBottom:14}}>{t.icon}</div>
+                <p className="serif" style={{fontSize:13.5,fontStyle:"italic",lineHeight:1.8,color:C.black}}>{t.q}</p>
               </div>
             ))}
           </div>
@@ -5831,7 +5545,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
             <span className="serif-italic" style={{color:"#A78BFA"}}>learning plans today.</span>
           </h2>
           <p style={{fontSize:"clamp(14px,2vw,18px)",color:"rgba(255,255,255,.55)",lineHeight:1.75,marginBottom:36,maxWidth:520,margin:"0 auto 36px"}}>
-            Join 10,000+ special educators in 10+ countries. Free plan includes all 8 ALP AI tools, up to 10 students, and full access to the ALP Builder.
+            Built for educators everywhere. Free plan includes the full 10-step ALP Builder, AI-assisted goal writing, and progress monitoring for up to 10 students.
           </p>
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
             <button className="btn-purple" onClick={onSignup} style={{fontSize:15,padding:"16px 40px",borderRadius:99,boxShadow:"0 0 40px rgba(124,58,237,.5)"}}>
@@ -6138,13 +5852,13 @@ const NAV_BY_ROLE = {
 };
 
 const ROLE_USERS = {
-  admin:      {name:"Dr. Abena Sarpong",  sub:"District Administrator"},
-  leadership: {name:"Principal Owusu",    sub:"Westwood Elementary"},
-  teacher:    {name:"Ms. Simmons",        sub:"Special Ed · Westwood"},
-  intervention:{name:"Mr. Kofi Mensah",  sub:"Intervention Specialist"},
-  related:    {name:"Ms. Rivera",         sub:"Speech-Language Pathologist"},
-  family:     {name:"Patricia Johnson",   sub:"Parent · Marcus Johnson"},
-  student:    {name:"Marcus Johnson",     sub:"Grade 4 · Student"},
+  admin:      {name:"Admin View",  sub:"District Administrator"},
+  leadership: {name:"Leadership View",    sub:"School Administration"},
+  teacher:    {name:"Teacher",        sub:"Special Education"},
+  intervention:{name:"Intervention View",  sub:"Intervention Specialist"},
+  related:    {name:"Related Services",         sub:"Speech-Language Pathologist"},
+  family:     {name:"Family Portal",   sub:"Parent / Guardian Access"},
+  student:    {name:"Student",     sub:"Student Portal"},
 };
 
 const NAV = NAV_BY_ROLE.teacher; // legacy fallback
@@ -6156,7 +5870,7 @@ function Sidebar({page,setPage}){
   const unread=3;
   function toggleGroup(g){setOpenGroups(o=>o.includes(g)?o.filter(x=>x!==g):[...o,g]);}
 
-  const user={name:"Ms. Simmons",school:"Westwood Elementary",initials:"MS"};
+  const {user:authUser,profile}=useSupabaseAuth(); const userName=profile?.full_name||authUser?.email?.split("@")[0]||"Teacher"; const userSchool=profile?.school||"Your School"; const userInitials=userName.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase()||"ME";
 
   return(
     <aside className="sidebar" style={{width:collapsed?64:220,transition:"width .2s ease",overflow:"hidden",flexShrink:0,display:"flex",flexDirection:"column",position:"relative"}}>
@@ -6540,8 +6254,11 @@ function Students({setPage,onAddStudent}){
             {/* Support Team */}
             <div className="card" style={{padding:"24px 28px"}}>
               <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:16}}>Support Team</h3>
-              {[{name:"Ms. Simmons",role:"ALP Coordinator & Special Ed",icon:"👩‍🏫",color:C.purple},{name:"Ms. Rivera",role:"Speech-Language Pathologist",icon:"🩺",color:C.green},{name:"Mr. Chen",role:"Occupational Therapist",icon:"🤝",color:C.blue},{name:"Mr. Davis",role:"General Education Teacher",icon:"📚",color:C.amber},{name:"Dr. Kim",role:"School Psychologist",icon:"🧠",color:C.red}].map(member=>(
-                <div key={member.name} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"center"}}>
+              {[
+                {name:s.teacher_name||"Not assigned",role:"ALP Coordinator / Teacher",icon:"👩‍🏫",color:C.purple},
+                ...(s.related_services||[]).map(rs=>({name:rs.provider||"Not assigned",role:rs.type||"Related Service",icon:"🩺",color:C.green})),
+              ].map((member,i)=>(
+                <div key={i} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"center"}}>
                   <div style={{width:36,height:36,borderRadius:8,background:member.color+"22",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{member.icon}</div>
                   <div style={{flex:1}}>
                     <div style={{fontSize:13.5,fontWeight:600,color:C.black}}>{member.name}</div>
@@ -7982,50 +7699,84 @@ function ALPBuilder({setPage}){
 function ReviewSummary({setPage}){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
+  const {students:dbStudents,user,profile,updateStudentRecord}=useSupabaseAuth();
   const [activeTab,setActiveTab]=useState("summary");
-  const [notes,setNotes]=useState("Patricia Johnson shared that Marcus has been showing more confidence at home with communication. She mentioned he successfully made a request at a restaurant last week without support. Team agreed that the 3-turn conversation goal should focus more on peer interactions during lunch. Ms. Rivera will develop a home practice sheet for the Calm-Down strategies.");
+  const [notes,setNotes]=useState("");
   const [editNotes,setEditNotes]=useState(false);
-  const meetingDate="May 28, 2026 · 3:00 PM";
-  const attendees=["Ms. Simmons (ALP Coordinator)","Ms. Rivera (SLP)","Patricia Johnson (Parent)","Principal Owusu (Admin)"];
+  const [selectedStudentId,setSelectedStudentId]=useState(null);
+  const [goals,setGoals]=useState([]);
+  const [loading,setLoading]=useState(true);
 
-  const goalsData=[
-    {goal:"Reading Fluency — 80 wcpm",baseline:"52 wcpm",current:"72 wcpm",pct:90,status:"On Track",recommendation:"Maintain current intervention. Consider raising to 85 wcpm."},
-    {goal:"Communication — 3-turn conversations",baseline:"1-turn",current:"2-turn",pct:67,status:"Developing",recommendation:"Continue speech sessions. Add peer interaction practice."},
-    {goal:"Calm-Down Skills — 4/5 opportunities",baseline:"1/5",current:"3/5",pct:75,status:"On Track",recommendation:"Generalise to home environment. Send family strategy sheet."},
-    {goal:"Writing — 3-sentence paragraph",baseline:"1 sentence",current:"2 sentences",pct:50,status:"Needs Support",recommendation:"Add graphic organiser support. Increase writing sessions to 3×/wk."},
-  ];
+  const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
+  const meetingDate=s?.meeting_date?new Date(s.meeting_date).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}):new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+  const attendees=[profile?.full_name||user?.email?.split("@")[0]||"You",s?.parent_name].filter(Boolean);
 
-  const decisions=[
-    {icon:"✅",text:"All 4 annual goals maintained for next academic year"},
-    {icon:"📈",text:"Reading goal target raised from 80 to 85 wcpm"},
-    {icon:"✏️",text:"Writing goal: add graphic organiser as accommodation"},
-    {icon:"🗣",text:"Speech services increased from 2× to 3× per week"},
-    {icon:"📧",text:"Family to receive weekly progress updates via portal"},
-  ];
+  useEffect(()=>{
+    if(dbStudents?.length&&!selectedStudentId) setSelectedStudentId(dbStudents[0].id);
+  },[dbStudents]);
+
+  useEffect(()=>{
+    if(!s?.id){setLoading(false);return;}
+    setLoading(true);
+    Supabase.getGoals(s.id).then(g=>{setGoals(g||[]);setLoading(false);setNotes(s.review_notes||"");});
+  },[s?.id]);
+
+  const goalsData=goals.map(g=>{
+    const pct=g.current_pct||0;
+    const status=pct>=80?"On Track":pct>=50?"Developing":"Needs Support";
+    return{goal:`${g.domain} — ${g.target||"Target not set"}`,baseline:g.baseline||"–",current:g.current_value||`${pct}%`,pct,status,recommendation:pct>=80?"Maintain current intervention. Consider raising the target.":pct>=50?"Continue current supports. Monitor closely.":"Review intervention strategy with the team."};
+  });
+
+  const onTrack=goalsData.filter(g=>g.status==="On Track").length;
+  const developing=goalsData.filter(g=>g.status==="Developing").length;
+  const needsSupport=goalsData.filter(g=>g.status==="Needs Support").length;
+
+  async function saveNotes(){
+    if(s?.id) await updateStudentRecord(s.id,{review_notes:notes});
+    setEditNotes(false);
+    toast("Meeting notes saved","success");
+  }
+
+  if(!s){
+    return(
+      <Page title={<>Review <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Summary</span></>} subtitle="No students yet">
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:48,marginBottom:12}}>📋</div>
+          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>Add a Student First</h3>
+          <p style={{fontSize:13,color:C.warm}}>Review summaries are generated once a student has an ALP with goals.</p>
+        </div>
+      </Page>
+    );
+  }
 
   return(
     <Page title={<>Review <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Summary</span></>}
-      subtitle={`Marcus Johnson · Annual Review · ${meetingDate}`}
+      subtitle={`${s.name} · Annual Review · ${meetingDate}`}
       action={<div style={{display:"flex",gap:8}}>
+        {dbStudents?.length>1&&<select value={selectedStudentId||""} onChange={e=>setSelectedStudentId(e.target.value)} style={{fontSize:11,padding:"8px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>
+          {dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
+        </select>}
         <button className="btn-ghost" onClick={()=>toast("Review summary exported","success")} style={{fontSize:11}}>⬇ Export PDF</button>
         <button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 20px"}}>Edit ALP →</button>
       </div>}>
 
       {/* Tabs */}
       <div style={{display:"flex",gap:6,marginBottom:20}}>
-        {[["summary","Summary"],["goals","Goal Progress"],["decisions","Decisions"],["notes","Meeting Notes"]].map(([id,label])=>(
+        {[["summary","Summary"],["goals","Goal Progress"],["notes","Meeting Notes"]].map(([id,label])=>(
           <button key={id} onClick={()=>setActiveTab(id)} className={activeTab===id?"btn-black":"btn-ghost"} style={{fontSize:11,padding:"8px 16px"}}>{label}</button>
         ))}
       </div>
 
-      {activeTab==="summary"&&(
+      {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading…</div>}
+
+      {!loading&&activeTab==="summary"&&(
         <>
           {/* Meeting info */}
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16,marginBottom:16}}>
             <div className="card" style={{padding:"22px 24px"}}>
               <p className="lbl" style={{marginBottom:14}}>MEETING DETAILS</p>
               <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-                {[["📅","Date & Time",meetingDate],["🏫","Location","Westwood Elementary — Room 14 (Virtual option available)"],["👤","Student","Marcus Darnell Johnson · Grade 4 · ASD"]].map(([ic,label,val])=>(
+                {[["📅","Date & Time",meetingDate],["🏫","School",s.school_name||"Not set"],["👤","Student",`${s.name} · Grade ${s.grade||"–"} · ${s.disability||"ALP"}`]].map(([ic,label,val])=>(
                   <div key={label} style={{padding:"10px 12px",background:C.purpleL,borderRadius:8,flex:1,minWidth:160}}>
                     <div style={{fontSize:11,fontWeight:700,color:C.warm,marginBottom:3}}>{ic} {label}</div>
                     <div style={{fontSize:12,color:C.black}}>{val}</div>
@@ -8034,9 +7785,10 @@ function ReviewSummary({setPage}){
               </div>
               <div style={{marginTop:14}}>
                 <p className="lbl" style={{marginBottom:8,fontSize:8}}>ATTENDEES</p>
+                {attendees.length===0&&<p style={{fontSize:12,color:C.warm}}>No attendees recorded yet.</p>}
                 {attendees.map((a,i)=>(
                   <div key={i} style={{display:"flex",gap:8,alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.tanL}`,fontSize:12,color:C.black}}>
-                    <Avatar name={a.split(" ")[0]+" "+a.split(" ")[1]} size={24}/>
+                    <Avatar name={a} size={24}/>
                     {a}
                   </div>
                 ))}
@@ -8044,28 +7796,43 @@ function ReviewSummary({setPage}){
             </div>
             <div className="card" style={{padding:"22px 24px"}}>
               <p className="lbl" style={{marginBottom:14}}>OVERALL PROGRESS</p>
-              <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
-                <div style={{position:"relative",width:100,height:100}}>
-                  <DonutChart size={100} strokeWidth={12} segments={[{value:2,color:C.green},{value:1,color:C.amber},{value:1,color:C.red}]}/>
-                  <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                    <div style={{textAlign:"center"}}><div className="serif" style={{fontSize:22,fontWeight:800,color:C.black}}>4</div><div style={{fontSize:9,color:C.warm}}>goals</div></div>
+              {goalsData.length>0?(
+                <>
+                  <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
+                    <div style={{position:"relative",width:100,height:100}}>
+                      <DonutChart size={100} strokeWidth={12} segments={[{value:onTrack||0.01,color:C.green},{value:developing,color:C.amber},{value:needsSupport,color:C.red}]}/>
+                      <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        <div style={{textAlign:"center"}}><div className="serif" style={{fontSize:22,fontWeight:800,color:C.black}}>{goalsData.length}</div><div style={{fontSize:9,color:C.warm}}>goals</div></div>
+                      </div>
+                    </div>
                   </div>
+                  {[["On Track",onTrack,C.green],["Developing",developing,C.amber],["Needs Support",needsSupport,C.red]].map(([l,v,c])=>(
+                    <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",fontSize:12}}>
+                      <span style={{color:C.warm}}>{l}</span>
+                      <span style={{fontWeight:700,color:c}}>{v}</span>
+                    </div>
+                  ))}
+                  <button className="btn-purple" onClick={()=>setActiveTab("goals")} style={{width:"100%",fontSize:11,marginTop:12}}>View Details →</button>
+                </>
+              ):(
+                <div style={{textAlign:"center",padding:"20px 0"}}>
+                  <p style={{fontSize:12,color:C.warm,marginBottom:12}}>No goals yet for this student.</p>
+                  <button className="btn-purple" onClick={()=>setPage("builder")} style={{fontSize:11}}>Add Goals in ALP Builder →</button>
                 </div>
-              </div>
-              {[["On Track","2",C.green],["Developing","1",C.amber],["Needs Support","1",C.red]].map(([l,v,c])=>(
-                <div key={l} style={{display:"flex",justifyContent:"space-between",padding:"5px 0",fontSize:12}}>
-                  <span style={{color:C.warm}}>{l}</span>
-                  <span style={{fontWeight:700,color:c}}>{v}</span>
-                </div>
-              ))}
-              <button className="btn-purple" onClick={()=>setActiveTab("goals")} style={{width:"100%",fontSize:11,marginTop:12}}>View Details →</button>
+              )}
             </div>
           </div>
         </>
       )}
 
-      {activeTab==="goals"&&(
+      {!loading&&activeTab==="goals"&&(
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {goalsData.length===0&&(
+            <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+              <p style={{fontSize:13,color:C.warm,marginBottom:16}}>No goals recorded yet.</p>
+              <button className="btn-purple" onClick={()=>setPage("builder")} style={{fontSize:12}}>Add Goals →</button>
+            </div>
+          )}
           {goalsData.map((g,i)=>(
             <div key={i} className="card" style={{padding:"20px 24px"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12,flexWrap:"wrap",gap:8}}>
@@ -8086,30 +7853,17 @@ function ReviewSummary({setPage}){
         </div>
       )}
 
-      {activeTab==="decisions"&&(
-        <div className="card" style={{padding:"24px"}}>
-          <p className="lbl" style={{marginBottom:16}}>DECISIONS & ACTION ITEMS FROM TODAY'S MEETING</p>
-          {decisions.map((d,i)=>(
-            <div key={i} style={{display:"flex",gap:12,padding:"12px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"flex-start"}}>
-              <span style={{fontSize:20,flexShrink:0}}>{d.icon}</span>
-              <p style={{fontSize:13,color:C.black,lineHeight:1.6,margin:0}}>{d.text}</p>
-            </div>
-          ))}
-          <button className="btn-purple" onClick={()=>{toast("Actions sent to team","success");}} style={{marginTop:16,fontSize:11}}>📧 Send to All Attendees →</button>
-        </div>
-      )}
-
-      {activeTab==="notes"&&(
+      {!loading&&activeTab==="notes"&&(
         <div className="card" style={{padding:"24px"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
             <p className="lbl">MEETING NOTES</p>
-            <button className="btn-ghost" style={{fontSize:10}} onClick={()=>setEditNotes(e=>!e)}>{editNotes?"Done":"Edit"}</button>
+            <button className="btn-ghost" style={{fontSize:10}} onClick={()=>editNotes?saveNotes():setEditNotes(true)}>{editNotes?"Save":"Edit"}</button>
           </div>
           {editNotes?(
-            <textarea value={notes} onChange={e=>setNotes(e.target.value)}
+            <textarea value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Document what was discussed, decisions made, and next steps…"
               style={{width:"100%",padding:"12px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:13,fontFamily:"'DM Sans',sans-serif",resize:"vertical",minHeight:200,outline:"none",lineHeight:1.7,boxSizing:"border-box"}}/>
           ):(
-<p style={{fontSize:13,color:C.warm,lineHeight:1.75,whiteSpace:"pre-wrap"}}>{notes||"Patricia Johnson shared that Marcus has been showing more confidence at home with communication. She mentioned he successfully made a request at a restaurant last week without support. Team agreed that the 3-turn conversation goal should focus more on peer interactions during lunch. Ms. Rivera will develop a home practice sheet for the Calm-Down strategies."}</p>
+            <p style={{fontSize:13,color:C.warm,lineHeight:1.75,whiteSpace:"pre-wrap"}}>{notes||"No meeting notes recorded yet. Click Edit to add notes from the review meeting."}</p>
           )}
         </div>
       )}
@@ -8120,13 +7874,15 @@ function ReviewSummary({setPage}){
 function ALPNotice({setPage}){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
+  const {students:dbStudents,user,profile}=useSupabaseAuth();
+  const firstStudent=dbStudents?.[0];
   const [noticeData,setNoticeData]=useState({
-    studentName:"Marcus Darnell Johnson",noticeDate:"2026-05-08",
-    school:"Westwood Elementary School",coordinator:"Ms. Simmons",
-    district:"Westwood School District",parent:"Patricia Johnson",
-    parentEmail:"patricia.johnson@email.com",parentPhone:"+1 (703) 555-0199",
-    meetingDate:"2026-05-22",meetingTime:"14:00",meetingLocation:"Room 204 / Google Meet",
-    responseDeadline:"2026-05-19",deliveryMethod:"email",
+    studentName:firstStudent?.name||"",noticeDate:new Date().toISOString().split("T")[0],
+    school:firstStudent?.school_name||profile?.school||"",coordinator:profile?.full_name||user?.email?.split("@")[0]||"",
+    district:"",parent:firstStudent?.parent_name||"",
+    parentEmail:firstStudent?.parent_email||"",parentPhone:firstStudent?.parent_phone||"",
+    meetingDate:"",meetingTime:"14:00",meetingLocation:"",
+    responseDeadline:"",deliveryMethod:"email",
     content:"This notice is to inform you of your child's ALP meeting, placement, and your rights as a parent/guardian.",
     language:"English",interpreter:false
   });
@@ -8138,7 +7894,7 @@ function ALPNotice({setPage}){
 
   function sendNotice(){
     setSending(true);
-    setTimeout(()=>{setSending(false);setSent(true);toast("Notice sent to Patricia Johnson ✓","success");},1200);
+    setTimeout(()=>{setSending(false);setSent(true);toast(`Notice sent to ${noticeData.parent||"the family"} ✓`,"success");},1200);
   }
 
   if(sent) return(
@@ -8146,7 +7902,7 @@ function ALPNotice({setPage}){
       <div className="card" style={{padding:"40px 32px",textAlign:"center",maxWidth:540,margin:"0 auto"}}>
         <div style={{width:72,height:72,borderRadius:"50%",background:"#DCFCE7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,margin:"0 auto 20px"}}>✉️</div>
         <h3 style={{fontSize:22,fontWeight:800,color:C.black,marginBottom:8,letterSpacing:"-.5px"}}>Notice Sent!</h3>
-        <p style={{fontSize:14,color:C.warm,marginBottom:4}}>Notice delivered to <b style={{color:C.black}}>Patricia Johnson</b></p>
+        <p style={{fontSize:14,color:C.warm,marginBottom:4}}>Notice delivered to <b style={{color:C.black}}>{noticeData.parent||"the family"}</b></p>
         <p style={{fontSize:13,color:C.warm,marginBottom:4}}>via {noticeData.deliveryMethod==="email"?"Email + printed copy":noticeData.deliveryMethod}</p>
         <p style={{fontSize:12,color:C.warm,marginBottom:28}}>Response requested by <b>{noticeData.responseDeadline}</b> · Logged to audit trail</p>
         <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
@@ -8279,6 +8035,8 @@ function CreateALPDoc({setPage}){
   const {toast}=useToast();
   const {copy,copied}=useCopy();
   const {isMobile}=useResponsive();
+  const {students:dbStudents,user,profile}=useSupabaseAuth();
+  const [selectedStudentId,setSelectedStudentId]=useState(null);
   const [showPreview,setShowPreview]=useState(false);
   const [exporting,setExporting]=useState(false);
   const [exportWord,setExportWord]=useState(false);
@@ -8286,6 +8044,11 @@ function CreateALPDoc({setPage}){
   const allSections=["Student Information","Educational Background","Annual Goals","Special Ed Services","Related Services","Accommodations","Learning Environment","Present Levels","Transition Planning","Assessment","Meeting Information","Parental Rights","Signatures"];
   const [sectionsTicked,setSectionsTicked]=useState(allSections.map((_,i)=>i));
   function toggle(i){setSectionsTicked(s=>s.includes(i)?s.filter(x=>x!==i):[...s,i]);}
+
+  useEffect(()=>{
+    if(dbStudents?.length&&!selectedStudentId) setSelectedStudentId(dbStudents[0].id);
+  },[dbStudents]);
+  const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
 
   function handlePrint(){
     toast("Opening print dialog…","info");
@@ -8297,21 +8060,21 @@ function CreateALPDoc({setPage}){
     setTimeout(()=>{setExporting(false);toast(`ALP exported as ${format.toUpperCase()} ✓`,"success");},1400);
   }
 
-  const docMeta=[
-    {label:"Student",value:"Marcus Darnell Johnson"},
-    {label:"Grade",value:"4"},
-    {label:"Disability",value:"Autism Spectrum Disorder"},
-    {label:"School",value:"Westwood Elementary"},
-    {label:"Teacher",value:"Ms. Simmons"},
-    {label:"Academic Year",value:"2025–2026"},
-    {label:"Date Created",value:"Sep 3, 2025"},
+  const docMeta=s?[
+    {label:"Student",value:s.name},
+    {label:"Grade",value:s.grade||"–"},
+    {label:"Disability",value:s.disability||"Not specified"},
+    {label:"School",value:s.school_name||"Not set"},
+    {label:"Teacher",value:profile?.full_name||user?.email?.split("@")[0]||"–"},
+    {label:"Academic Year",value:s.plan_year||`${new Date().getFullYear()}–${new Date().getFullYear()+1}`},
+    {label:"Date Created",value:s.created_at?new Date(s.created_at).toLocaleDateString():"–"},
     {label:"Last Updated",value:new Date().toLocaleDateString()},
-  ];
+  ]:[];
 
   return(
-    <>{showPreview&&<ALPPrintPreview onClose={()=>setShowPreview(false)}/>}
+    <>{showPreview&&<ALPPrintPreview onClose={()=>setShowPreview(false)} student={s?{name:s.name,grade:s.grade||"–",dob:s.dob||"–",disability:s.disability||"–",teacher:profile?.full_name||user?.email?.split("@")[0]||"–",school:s.school_name||"–",year:s.plan_year||`${new Date().getFullYear()}–${new Date().getFullYear()+1}`,parentName:s.parent_name}:null} goals={[]}/>}
     <Page title={<>Create <span className="serif-italic" style={{color:C.warm,fontSize:26}}>ALP Document</span></>}
-      subtitle="Marcus Johnson · All 13 sections complete · Ready to export"
+      subtitle={s?`${s.name} · ${sectionsTicked.length}/${allSections.length} sections selected`:"No student selected"}
       action={<div style={{display:"flex",gap:8}}>
         <button className="btn-ghost" onClick={()=>setShowPreview(true)} style={{fontSize:11,padding:"11px 18px"}}>👁 Preview</button>
         <button className="btn-black" onClick={handlePrint} style={{fontSize:11,padding:"11px 22px"}}>🖨 Print</button>
@@ -8327,7 +8090,7 @@ function CreateALPDoc({setPage}){
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <div>
                 <p className="lbl" style={{marginBottom:4}}>DOCUMENT STATUS</p>
-                <h3 style={{fontSize:16,fontWeight:700,color:C.black}}>Marcus Johnson — ALP 2025–2026</h3>
+                <h3 style={{fontSize:16,fontWeight:700,color:C.black}}>{s?`${s.name} — ALP ${s.plan_year||new Date().getFullYear()+"–"+(new Date().getFullYear()+1)}`:"No student selected"}</h3>
               </div>
               <div style={{textAlign:"center"}}>
                 <div className="serif" style={{fontSize:30,fontWeight:800,color:C.green,lineHeight:1}}>100%</div>
@@ -8371,7 +8134,7 @@ function CreateALPDoc({setPage}){
           {/* Signature status */}
           <div className="card" style={{padding:"22px 24px"}}>
             <p className="lbl" style={{marginBottom:14}}>SIGNATURES</p>
-            {[["Ms. Simmons","ALP Coordinator","✓ Signed","May 8, 2026",C.green],["Ms. Rivera","Speech-Language Pathologist","✓ Signed","May 8, 2026",C.green],["Patricia Johnson","Parent / Guardian","⏳ Pending","Requested May 8",C.amber],["Principal Owusu","School Administrator","○ Not yet","—",C.warm]].map(([name,role,status,date,color])=>(
+            {[[profile?.full_name||user?.email?.split("@")[0]||"You","ALP Coordinator","○ Not yet","—",C.warm],[s?.parent_name||"Parent / Guardian","Parent / Guardian","○ Not yet","—",C.warm]].map(([name,role,status,date,color])=>(
               <div key={name} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,gap:10,flexWrap:"wrap"}}>
                 <div>
                   <div style={{fontSize:13,fontWeight:600,color:C.black}}>{name}</div>
@@ -8380,7 +8143,7 @@ function CreateALPDoc({setPage}){
                 <span style={{fontSize:11,fontWeight:700,color,flexShrink:0}}>{status}</span>
               </div>
             ))}
-            <button className="btn-ghost" onClick={()=>toast("Signature request sent to Patricia Johnson","success")} style={{width:"100%",marginTop:12,fontSize:11}}>📧 Resend to Patricia Johnson</button>
+            <button className="btn-ghost" onClick={()=>toast("Signature request sent","success")} style={{width:"100%",marginTop:12,fontSize:11}}>📧 Request Signatures</button>
           </div>
         </div>
 
@@ -8680,43 +8443,43 @@ function Progress(){
 function FutureReadiness({setPage}){
   const {isMobile}=useResponsive();
   const {toast}=useToast();
-  const [student,setStudent]=useState("marcus");
-  const [checked,setChecked]=useState([0,3,7]);
+  const {students:dbStudents}=useSupabaseAuth();
+  const [studentId,setStudentId]=useState(null);
+  const [checked,setChecked]=useState([]);
   function toggleCheck(i){setChecked(c=>c.includes(i)?c.filter(x=>x!==i):[...c,i]);}
 
-  const students={
-    marcus:{name:"Marcus Johnson",grade:4,disability:"ASD",target:"Supported Employment or Post-Secondary Education"},
-    sofia:{name:"Sofia Lee",grade:5,disability:"ADHD",target:"College Prep Programme"},
-    tyler:{name:"Tyler Parker",grade:3,disability:"SLD",target:"Vocational Training"},
-  };
-  const s=students[student];
+  useEffect(()=>{
+    if(dbStudents?.length&&!studentId) setStudentId(dbStudents[0].id);
+  },[dbStudents]);
+  const dbS=dbStudents?.find(st=>st.id===studentId);
+  const s=dbS?{name:dbS.name,grade:dbS.grade||"–",disability:dbS.disability||"ALP",target:dbS.transition_target||"Not yet set"}:null;
 
   const domains=[
     {icon:"💼",label:"Employment & Career",skills:[
-      {id:0,skill:"Can identify personal interests and strengths",status:"Achieved"},
-      {id:1,skill:"Has completed a job interest survey",status:"In Progress"},
-      {id:2,skill:"Understands workplace expectations and routines",status:"Not Started"},
-      {id:3,skill:"Has participated in a community job shadowing activity",status:"Achieved"},
+      {id:0,skill:"Can identify personal interests and strengths"},
+      {id:1,skill:"Has completed a job interest survey"},
+      {id:2,skill:"Understands workplace expectations and routines"},
+      {id:3,skill:"Has participated in a community job shadowing activity"},
     ]},
     {icon:"🏠",label:"Independent Living",skills:[
-      {id:4,skill:"Can manage a simple budget",status:"In Progress"},
-      {id:5,skill:"Can use public transport independently",status:"Not Started"},
-      {id:6,skill:"Can prepare simple meals",status:"In Progress"},
-      {id:7,skill:"Can make and manage appointments",status:"Achieved"},
+      {id:4,skill:"Can manage a simple budget"},
+      {id:5,skill:"Can use public transport independently"},
+      {id:6,skill:"Can prepare simple meals"},
+      {id:7,skill:"Can make and manage appointments"},
     ]},
     {icon:"🤝",label:"Community Participation",skills:[
-      {id:8,skill:"Participates in at least one community group",status:"In Progress"},
-      {id:9,skill:"Understands personal rights and responsibilities",status:"Not Started"},
-      {id:10,skill:"Can self-advocate in familiar settings",status:"In Progress"},
-      {id:11,skill:"Has a support network beyond family",status:"Not Started"},
+      {id:8,skill:"Participates in at least one community group"},
+      {id:9,skill:"Understands personal rights and responsibilities"},
+      {id:10,skill:"Can self-advocate in familiar settings"},
+      {id:11,skill:"Has a support network beyond family"},
     ]},
     {icon:"🎓",label:"Post-Secondary Education",skills:[
-      {id:12,skill:"Has explored post-secondary options",status:"In Progress"},
-      {id:13,skill:"Understands application process for college/training",status:"Not Started"},
-      {id:14,skill:"Has visited at least one college or training site",status:"Not Started"},
-      {id:15,skill:"Can describe their learning needs to a provider",status:"In Progress"},
+      {id:12,skill:"Has explored post-secondary options"},
+      {id:13,skill:"Understands application process for college/training"},
+      {id:14,skill:"Has visited at least one college or training site"},
+      {id:15,skill:"Can describe their learning needs to a provider"},
     ]},
-  ];
+  ].map(d=>({...d,skills:d.skills.map(sk=>({...sk,status:checked.includes(sk.id)?"Achieved":"Not Started"}))}));
 
   const statusColors={Achieved:C.green,"In Progress":C.amber,"Not Started":C.warm};
   const total=domains.reduce((acc,d)=>acc+d.skills.length,0);
@@ -8734,12 +8497,21 @@ function FutureReadiness({setPage}){
       {/* Student selector */}
       <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
         <span style={{fontSize:12,fontWeight:600,color:C.warm}}>Student:</span>
-        {Object.entries(students).map(([id,st])=>(
-          <button key={id} onClick={()=>setStudent(id)} className={student===id?"btn-black":"btn-ghost"}
+        {(dbStudents||[]).map(st=>(
+          <button key={st.id} onClick={()=>setStudentId(st.id)} className={studentId===st.id?"btn-black":"btn-ghost"}
             style={{fontSize:11,padding:"8px 14px"}}>{st.name.split(" ")[0]}</button>
         ))}
       </div>
 
+      {!s&&(
+        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
+          <div style={{fontSize:40,marginBottom:12}}>🎓</div>
+          <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
+          <p style={{fontSize:13,color:C.warm}}>Add a student to start transition planning.</p>
+        </div>
+      )}
+
+      {s&&(<>
       {/* Overview card */}
       <div className="card" style={{padding:"20px 24px",marginBottom:16,display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
         <Avatar name={s.name} size={52}/>
@@ -8800,6 +8572,7 @@ function FutureReadiness({setPage}){
           ))}
         </div>
       </div>
+      </>)}
     </Page>
   );
 }
@@ -9253,25 +9026,21 @@ function Reports(){
 function Notifications(){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
+  const {user,students:dbStudents}=useSupabaseAuth();
   const [dismissed,setDismissed]=useState([]);
   const [allRead,setAllRead]=useState(false);
   const [filter,setFilter]=useState("all");
   const [selected,setSelected]=useState(null);
+  const [notifs,setNotifs]=useState([]);
+  const [loading,setLoading]=useState(true);
   function dismiss(id){setDismissed(d=>[...d,id]);}
   async function markAllRead(){setAllRead(true);if(user)await Supabase.markAllNotificationsRead(user.id);toast("All notifications marked as read","success");}
 
-  const notifs=[
-    {id:1,type:"review",icon:"📅",title:"Annual Review — Marcus Johnson",body:"Marcus Johnson's annual ALP review is due in 14 days (May 28, 2026). The meeting has been scheduled with the Johnson family. Please ensure all 13 sections are complete before the review date.",time:"2 hours ago",urgent:true,read:false,student:"Marcus Johnson",actions:["Open ALP","Message Family"]},
-    {id:2,type:"progress",icon:"📈",title:"Progress Alert — Amara Osei",body:"3 consecutive data points below the goal trajectory for Reading. Current: 42 wcpm, Goal: 65 wcpm. Consider reviewing the current intervention strategy and discussing at the next team meeting.",time:"4 hours ago",urgent:true,read:false,student:"Amara Osei",actions:["View Progress","Log Data"]},
-    {id:3,type:"signature",icon:"✍️",title:"Signature Received — Sofia Lee",body:"Patricia Johnson has signed the Q3 Progress Report for Marcus Johnson via the Family Portal. The document has been automatically archived and is available in Documents.",time:"Yesterday",urgent:false,read:true,student:"Sofia Lee",actions:["View Document"]},
-    {id:4,type:"message",icon:"✉️",title:"New Message — Johnson Family",body:"Patricia Johnson sent a message: 'Thank you for the progress update! Marcus has been really excited about his reading goals. Can we discuss the speech therapy sessions at the next meeting?'",time:"Yesterday",urgent:false,read:false,student:"Marcus Johnson",actions:["Reply","Open Thread"]},
-    {id:5,type:"goal",icon:"🎯",title:"Goal Milestone — Tyler Parker",body:"Tyler Parker has reached his reading fluency target for the third consecutive week (85 wcpm vs. goal of 80 wcpm). Consider raising the goal per the 3-point rule.",time:"2 days ago",urgent:false,read:true,student:"Tyler Parker",actions:["Update Goal","View Progress"]},
-    {id:6,type:"review",icon:"📅",title:"Review Due — Ryan Chen",body:"Ryan Chen's progress review is coming up on June 18, 2026. 3 of 3 goals are developing. Family has been invited. Evaluation report is due before this date.",time:"2 days ago",urgent:false,read:true,student:"Ryan Chen",actions:["Open ALP","Schedule Meeting"]},
-    {id:7,type:"message",icon:"✉️",title:"Family Portal Message — Lee Family",body:"David Lee sent a message asking about Sofia's math goals and whether there will be additional support available during summer school.",time:"3 days ago",urgent:false,read:true,student:"Sofia Lee",actions:["Reply"]},
-    {id:8,type:"progress",icon:"📊",title:"Weekly Data Reminder",body:"You have 3 students without progress data entries in the past 14 days: Aisha Adeyemi, Ryan Chen, Amara Osei. Regular data entry helps track goal progress accurately.",time:"3 days ago",urgent:false,read:true,student:null,actions:["Log Data"]},
-    {id:9,type:"goal",icon:"🏆",title:"Goal Achieved — Marcus Johnson",body:"Marcus Johnson has met his communication goal for 4 consecutive sessions (3-turn conversations with peers in 4/5 opportunities). Great progress!",time:"4 days ago",urgent:false,read:true,student:"Marcus Johnson",actions:["Update Goal","View ALP"]},
-    {id:10,type:"review",icon:"📅",title:"Annual Review — Aisha Adeyemi",body:"Aisha Adeyemi's annual review is due June 8, 2026. Current plan status: 2 of 4 goals on track. Family invitation has not yet been sent.",time:"5 days ago",urgent:false,read:false,student:"Aisha Adeyemi",actions:["Send Invitation","Open ALP"]},
-  ];
+  useEffect(()=>{
+    if(!user?.id){setLoading(false);return;}
+    Supabase.getNotifications(user.id).then(n=>{setNotifs(n||[]);setLoading(false);}).catch(()=>setLoading(false));
+  },[user?.id]);
+
 
   const typeColors={review:C.amber,progress:C.blue,message:C.green,signature:C.purple,goal:C.green};
   const typeLabels={review:"Review",progress:"Progress",message:"Message",signature:"Signature",goal:"Goal"};
@@ -9307,7 +9076,8 @@ function Notifications(){
 
         {/* Notification list */}
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
-          {visible.length===0&&(
+          {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading notifications…</div>}
+          {!loading&&visible.length===0&&(
             <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
               <div style={{fontSize:44,marginBottom:12}}>🎉</div>
               <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:6}}>All caught up!</h3>
@@ -9413,8 +9183,8 @@ function NotifPrefsTab({save,saved}){
 function Settings(){
   const {toast}=useToast();
   const {user:sUser,profile:sProfile}=useSupabaseAuth();
-  const [displayName,setDisplayName]=useState(sProfile?.full_name||"Ms. Simmons");
-  const [schoolName,setSchoolName]=useState(sProfile?.school||"Westwood Elementary");
+  const [displayName,setDisplayName]=useState(sProfile?.full_name||sUser?.email?.split("@")[0]||"");
+  const [schoolName,setSchoolName]=useState(sProfile?.school||"");
   async function saveSettings(){
     if(user) await Supabase.upsertProfile({id:user.id,full_name:displayName,school:schoolName,updated_at:new Date().toISOString()});
     if(user&&profile){
@@ -9428,9 +9198,9 @@ function Settings(){
   const [showLegal,setShowLegal]=useState(null);
   const [currentPw,setCurrentPw]=useState("");
   const [newPw,setNewPw]=useState("");
-  const [profile,setProfile]=useState({firstName:"Sarah",lastName:"Simmons",email:"ssimmons@westwood.edu",phone:"+1 (703) 555-0142",title:"Special Education Teacher",license:"VA-SPED-2024-8821"});
+  const [profile,setProfile]=useState({firstName:sProfile?.full_name?.split(" ")[0]||"",lastName:sProfile?.full_name?.split(" ").slice(1).join(" ")||"",email:sUser?.email||"",phone:sProfile?.phone||"",title:sProfile?.title||"Special Education Teacher",license:sProfile?.license||""});
   const setP=(k,v)=>setProfile(p=>({...p,[k]:v}));
-  const [school,setSchool]=useState({name:"Westwood Elementary School",id:"WES-2024",district:"Westwood School District",state:"Virginia, USA",framework:"ALP standards_USA",year:"2025–2026"});
+  const [school,setSchool]=useState({name:sProfile?.school||"",id:sProfile?.school_id||"",district:sProfile?.district||"",state:sProfile?.state||"",framework:sProfile?.framework||"ALP standards_USA",year:`${new Date().getFullYear()}–${new Date().getFullYear()+1}`});
   const setSch=(k,v)=>setSchool(p=>({...p,[k]:v}));
   function save(section="Settings"){setSaved(true);toast(`${section} saved successfully ✓`,"success");setTimeout(()=>setSaved(false),2500);}
   function saveProfile(){save("Profile");}
@@ -9449,10 +9219,10 @@ function Settings(){
       {activeTab==="profile"&&(
         <div style={{display:"grid",gridTemplateColumns:"1fr 2fr",gap:24}}>
           <div className="card" style={{padding:"28px",textAlign:"center"}}>
-            <Avatar name="Ms Simmons" size={80}/>
-            <h3 className="serif" style={{fontSize:18,fontWeight:700,marginTop:14,marginBottom:4}}>Ms. Simmons</h3>
+            <Avatar name={displayName||"User"} size={80}/>
+            <h3 className="serif" style={{fontSize:18,fontWeight:700,marginTop:14,marginBottom:4}}>{displayName||sUser?.email||"Your Name"}</h3>
             <p style={{fontSize:13,color:C.warm,marginTop:2}}>Special Education Teacher</p>
-            <p style={{fontSize:12,color:C.tan,marginTop:4}}>Westwood Elementary · Grade 2–6</p>
+            <p style={{fontSize:12,color:C.tan,marginTop:4}}>{schoolName||"Your School"}</p>
             <div style={{marginTop:16,paddingTop:16,borderTop:`1px solid ${C.tanL}`}}>
               <Badge color="purple">Teacher</Badge>
             </div>
@@ -9488,7 +9258,7 @@ function Settings(){
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:24,marginBottom:28}}>
             <UInput label="School Name" value={school.name} onChange={e=>setSch("name",e.target.value)}/>
             <UInput label="School Code" value={school.id} onChange={e=>setSch("id",e.target.value)}/>
-            <UInput label="District" value={school.fullDistrict||"Westwood Unified School District"} onChange={e=>setSch("fullDistrict",e.target.value)}/>
+            <UInput label="District" value={school.fullDistrict||""} onChange={e=>setSch("fullDistrict",e.target.value)} placeholder="Enter your district name"/>
             <UInput label="State / Region" value={school.state} onChange={e=>setSch("state",e.target.value)}/>
             <USelect label="Progress Review Framework" value={school.framework} onChange={e=>setSch("framework",e.target.value)} options={[{value:"ALP standards_USA",label:"ALP standards (USA)"},{value:"SECTION_504",label:"Support Plans"},{value:"VDOE",label:"VDOE Virginia"},{value:"GES_GHANA",label:"Ghana"},{value:"NERDC_NIGERIA",label:"Nigeria"},{value:"KICD_KENYA",label:"Kenya"},{value:"UK_SEND",label:"UK"},{value:"AUSTRALIA_NCCD",label:"Australia NCCD"},{value:"CUSTOM",label:"Custom Framework"}]}/>
             <UInput label="Academic Year" value={school.year} onChange={e=>setSch("year",e.target.value)}/>
@@ -9527,7 +9297,7 @@ function Settings(){
                   <span style={{fontSize:18}}>{r.icon}</span>
                   <span style={{fontSize:12.5,fontWeight:700,color:C.black}}>{r.label}</span>
                 </div>
-                <div className="serif" style={{fontSize:24,fontWeight:700,color:r.color,letterSpacing:"-1px"}}>{[1,8,14,3][ROLES.indexOf(r)]}</div>
+                <div className="serif" style={{fontSize:24,fontWeight:700,color:r.color,letterSpacing:"-1px"}}>{r.id==="teacher"?1:0}</div>
                 <div style={{fontSize:11,color:C.warm}}>users</div>
               </div>
             ))}
@@ -9535,24 +9305,15 @@ function Settings(){
 
           {/* Users Table */}
           <div className="card" style={{padding:0,overflow:"hidden",marginBottom:20}}>
-            <div style={{padding:"16px 22px",borderBottom:`1px solid ${C.tanL}`,display:"flex",gap:12}}>
+            <div style={{padding:"16px 22px",borderBottom:`1px solid ${C.tanL}`,display:"flex",gap:12,justifyContent:"space-between",alignItems:"center"}}>
               <input placeholder="Search users…" className="u-input" style={{maxWidth:240}}/>
-              <select className="u-select" style={{width:"auto",paddingRight:32}}>
-                {["All Roles",...ROLES.map(r=>r.label)].map(o=><option key={o}>{o}</option>)}
-              </select>
+              <button className="btn-purple" style={{fontSize:11,padding:"9px 18px"}} onClick={()=>toast("Team invites are coming in a future update","info")}>+ Invite Team Member</button>
             </div>
             <table className="data-table" style={{minWidth:520}}>
               <thead><tr>{["User","Role","School","Last Active","Status",""].map(h=><th key={h}>{h}</th>)}</tr></thead>
               <tbody>
                 {[
-                  {name:"Dr. Abena Sarpong",role:"Administrator",roleId:"admin",school:"District Office",active:"Today",status:"active"},
-                  {name:"Principal Owusu",role:"School Leadership",roleId:"leadership",school:"Westwood Elementary",active:"Today",status:"active"},
-                  {name:"Ms. Simmons",role:"Special Ed Teacher",roleId:"teacher",school:"Westwood Elementary",active:"2 hours ago",status:"active"},
-                  {name:"Mr. Kofi Mensah",role:"Intervention Specialist",roleId:"intervention",school:"Westwood Elementary",active:"Yesterday",status:"active"},
-                  {name:"Ms. Rivera",role:"Related Services",roleId:"related",school:"Westwood Elementary",active:"Today",status:"active"},
-                  {name:"Mr. Davis",role:"General Ed Teacher",roleId:"teacher",school:"Westwood Elementary",active:"3 days ago",status:"active"},
-                  {name:"Patricia Johnson",role:"Family / Parent",roleId:"family",school:"External",active:"May 3",status:"active"},
-                  {name:"Pending Invite",role:"Special Ed Teacher",roleId:"teacher",school:"Riverside High",active:"—",status:"pending"},
+                  {name:displayName||sUser?.email?.split("@")[0]||"You",role:"Teacher / Coordinator",roleId:"teacher",school:schoolName||"Your School",active:"Now",status:"active"},
                 ].map((user,i)=>{
                   const roleData=ROLES.find(r=>r.id===user.roleId)||ROLES[2];
                   return(
@@ -9735,8 +9496,14 @@ const NAV_FULL=[
 
 function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent}){
   const {role,roleData,setRole}=useRole();
+  const {profile,user:authUser,students:dbStudents}=useSupabaseAuth();
   const nav=NAV_BY_ROLE[role]||NAV_BY_ROLE.teacher;
-  const user=ROLE_USERS[role]||ROLE_USERS.teacher;
+  const baseUser=ROLE_USERS[role]||ROLE_USERS.teacher;
+  const user=role==="teacher"
+    ?{name:profile?.full_name||authUser?.email?.split("@")[0]||"Teacher",sub:`Special Education · ${profile?.school||"Your School"}`}
+    :role==="student"
+    ?{name:dbStudents?.[0]?.name||"Student",sub:dbStudents?.[0]?`Grade ${dbStudents[0].grade||"–"} · Student`:"Student Portal"}
+    :baseUser;
   const [showRolePicker,setShowRolePicker]=useState(false);
   return(
     <>
