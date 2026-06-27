@@ -627,12 +627,10 @@ function DInput({label,value,onChange,placeholder,type="text"}){return(<div styl
 // ─── ROLE SYSTEM ───────────────────────────────────────────
 const ROLES = [
   {id:"admin",       label:"Administrator",         icon:"🏛",  color:"#DC2626", badge:"ADMIN",    desc:"Full district-level access · All schools · Billing"},
-  {id:"leadership",  label:"School Leadership",     icon:"👔",  color:"#2563EB", badge:"LEAD",     desc:"School-wide oversight · Staff · Reports"},
-  {id:"teacher",     label:"Special Ed Teacher",    icon:"👩‍🏫", color:"#7C3AED", badge:"TEACHER",  desc:"Caseload · ALP Builder · Progress monitoring"},
+  {id:"leadership",  label:"Director / School Head",icon:"👔",  color:"#2563EB", badge:"DIRECTOR", desc:"Review Queue · Compliance · Audit Log · Reports"},
+  {id:"teacher",     label:"Teacher",               icon:"👩‍🏫", color:"#7C3AED", badge:"TEACHER",  desc:"Caseload · ALP Builder · Progress monitoring"},
   {id:"intervention",label:"Intervention Specialist",icon:"📊", color:"#D97706", badge:"RTI",      desc:"RTI tiers · Intervention plans · CBM data"},
   {id:"related",     label:"Related Services",      icon:"🩺",  color:"#16A34A", badge:"SERVICES", desc:"SLP · OT · PT · Session notes · Goal progress"},
-  {id:"family",      label:"Family / Parent",       icon:"❤️",  color:"#EC4899", badge:"FAMILY",   desc:"Messages · Progress · Signatures · Meetings"},
-  {id:"student",     label:"Student",               icon:"🎓",  color:"#0891B2", badge:"STUDENT",  desc:"My ALP · My Goals · My Progress"},
 ];
 
 const RoleCtx = createContext({role:"teacher", roleData:ROLES[2], setRole:()=>{}});
@@ -1061,7 +1059,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
   const caseTools=[
     {icon:"📋",name:"ALP Caseload Command",desc:"Your entire caseload — every student, every program, every deadline — in one calm, clear dashboard. Filter by intervention tier, review date, or status. Know exactly where every student stands, every day."},
     {icon:"📸",name:"ALP Student Snapshot",desc:"A one-page, printable overview of every student's ALP — built for the whole school, not just the SPED team. Every general education teacher knows exactly who needs support, what accommodations apply, and how to help."},
-    {icon:"📅",name:"ALP Meeting Scheduler",desc:"Schedule ALP review meetings, family conferences, and team check-ins without the back-and-forth. Automated reminders, calendar sync, and notifications sent to every team member — so no meeting is ever missed."},
+    {icon:"📅",name:"ALP Review Meetings",desc:"Schedule ALP review meetings and team check-ins. Use the ALP Support Notice to generate formal meeting notices and send them to parents. Keep every review on time, every year."},
     {icon:"🧮",name:"ALP Accommodations Hub",desc:"Every student, every accommodation, every assessment — in one master view. Share the Accommodations Hub with your entire school staff so every teacher knows exactly what every learner needs, every day."},
     {icon:"🔒",name:"ALP Privacy Shield",desc:"Student data is sensitive. ALP Privacy Shield gives administrators full control over who sees what — role-based permissions, audit trails on every action, and privacy standards/secure data handling built in from day one."},
     {icon:"📤",name:"ALP Document Exporter",desc:"Export any Adaptive Learning Program as a professionally formatted, audit-ready PDF or Word document in one click. Timestamped, formatted and ready — ready to send to families, district offices, or government agencies instantly."},
@@ -1415,7 +1413,7 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
               </div>
               <div style={{background:"#DCFCE7",borderRadius:14,padding:"24px 26px"}}>
                 <p className="lbl" style={{marginBottom:12,color:C.green}}>THE ALP APPROACH</p>
-                <p style={{fontSize:14,color:C.warm,lineHeight:1.75}}>A guided 10-step workflow, AI-assisted goal writing, real-time progress tracking, and a built-in family portal — so plans take minutes to draft instead of hours, and nothing falls through the cracks.</p>
+                <p style={{fontSize:14,color:C.warm,lineHeight:1.75}}>A guided 10-step workflow, AI-assisted goal writing, real-time progress tracking, and a professional PDF export system — so plans take minutes to complete instead of hours, and every approved ALP reaches families in a clean, readable document.</p>
               </div>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:16}}>
@@ -1506,7 +1504,7 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
       name:"Professional",
       price:billing==="monthly"?"$9":"$7",
       period:"/mo per teacher",tag:"MOST POPULAR",color:C.purple,bg:C.black,textColor:C.cream,
-      desc:"The complete ALP system — global support, family portal with e-signature, desktop apps, and unlimited AI tools all included.",
+      desc:"The complete ALP system — global support, professional PDF export, director approval workflow, and unlimited AI tools all included.",
       features:["Unlimited students","ALP AI Intelligence Suite — all 8 tools unlimited","Full 13-section ALP Builder","Real-time CBM progress monitoring + alerts","Family portal with e-signature","All multi-region support","ALP Student Snapshot for gen-ed teachers","ALP Accommodations Hub","Caseload dashboard","PDF + Word export","Automated ALP scheduling","Priority email & chat support"],
       missing:[],
       cta:"Start 14-Day Free Trial",style:"btn-purple",
@@ -2042,11 +2040,10 @@ function InviteUserModal({onClose}){
   const [tab,setTab]=useState("single");
 
   const roles=[
-    {id:"teacher",label:"SPED Teacher",icon:"👩‍🏫",desc:"Build plans, track goals, family communication"},
-    {id:"director",label:"SPED Director",icon:"🏫",desc:"Oversight, reports, multi-school view"},
+    {id:"teacher",label:"Teacher",icon:"👩‍🏫",desc:"Build ALPs, track goals, submit for review"},
+    {id:"director",label:"Director / School Head",icon:"🏫",desc:"Review Queue, approvals, compliance oversight"},
+    {id:"admin",label:"Administrator",icon:"📋",desc:"User management, system settings, security"},
     {id:"related",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT — service session tracking"},
-    {id:"admin",label:"School Admin",icon:"📋",desc:"Staff management, data exports"},
-    {id:"family",label:"Family Member",icon:"❤️",desc:"View plans, messages, meeting access"},
   ];
 
   function sendInvite(){
@@ -2245,12 +2242,14 @@ function GlobalSearch({onClose,setPage}){
   const [q,setQ]=useState("");
   const results=[
     ...(dbStudents||[]).slice(0,5).map(s=>({icon:"👥",label:s.name,sub:`Grade ${s.grade||"–"} · ${s.disability||"ALP Student"}`,page:"students",category:"Students"})),
-    {icon:"✏️",label:"ALP Builder",sub:"Create or edit Adaptive Learning Programs",page:"builder",category:"Pages"},
+    {icon:"✏️",label:"ALP Builder",sub:"Create or edit Accelerated Learning Plans",page:"builder",category:"Pages"},
     {icon:"📈",label:"Progress Monitoring",sub:"CBM data, trendlines, goal tracking",page:"progress",category:"Pages"},
-    {icon:"❤️",label:"Family Portal",sub:"Messages, signatures, documents, meetings",page:"family",category:"Pages"},
-    {icon:"📊",label:"Reports & Analytics",sub:"Progress Review, audit trail, exports",page:"reports",category:"Pages"},
-    {icon:"⚙️",label:"Settings",sub:"Profile, school, users, billing",page:"settings",category:"Pages"},
-    {icon:"🔔",label:"Notifications",sub:"Alerts, deadlines, messages",page:"notifications",category:"Pages"},
+    {icon:"👁️",label:"Review Queue",sub:"Director review — approve or request changes",page:"reviewqueue",category:"Pages"},
+    {icon:"📊",label:"Reports & Analytics",sub:"Progress review, audit trail, exports",page:"reports",category:"Pages"},
+    {icon:"📋",label:"Compliance Dashboard",sub:"Completion rates, overdue reviews, plan status",page:"compliance",category:"Pages"},
+    {icon:"🔍",label:"Audit Log",sub:"Full record of all changes, who made them and when",page:"auditlog",category:"Pages"},
+    {icon:"⚙️",label:"Settings",sub:"Profile, school, users, security",page:"settings",category:"Pages"},
+    {icon:"🔔",label:"Notifications",sub:"Alerts, deadlines, review requests",page:"notifications",category:"Pages"},
     {icon:"🎯",label:"Future Readiness",sub:"Transition goals, career planning",page:"future",category:"Pages"},
     {icon:"🎯",label:"Goals Tracker",sub:"All active goals, progress, status across caseload",page:"goals",category:"Pages"},
     {icon:"📁",label:"Documents",sub:"Upload, manage and share student files and reports",page:"documents",category:"Pages"},
@@ -2258,8 +2257,8 @@ function GlobalSearch({onClose,setPage}){
     {icon:"❓",label:"Help Center",sub:"Documentation, FAQs, guides, contact support",page:"help",category:"Pages"},
     {icon:"✨",label:"What's New",sub:"Changelog, release notes, version history",page:"changelog",category:"Pages"},
     {icon:"📝",label:"New Session Note",sub:"Log a quick observation or CBM score",page:"progress",category:"Actions"},
+    {icon:"📄",label:"Generate ALP PDF",sub:"Export a professional ALP document for printing or sharing",page:"create",category:"Actions"},
     {icon:"📤",label:"Export All Data",sub:"Download student records, plans, progress",page:"documents",category:"Actions"},
-    {icon:"📅",label:"Schedule Meeting",sub:"Book a family meeting or team review",page:"family",category:"Actions"},
     {icon:"➕",label:"Add New Student",sub:"Create a student profile and start their ALP",page:"students",category:"Actions"},
     {icon:"🎉",label:"Onboarding Guide",sub:"Setup guide for new users",action:()=>setShowOnboarding&&setShowOnboarding(true),category:"Actions"},
   ].filter(r=>!q||r.label.toLowerCase().includes(q.toLowerCase())||r.sub.toLowerCase().includes(q.toLowerCase()));
@@ -2617,7 +2616,7 @@ function MeetingSchedulerModal({onClose}){
         </div>
         <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-            <USelect label="Student & Family" value={form.family} onChange={e=>{setF("family",e.target.value);setF("student",(families.find(f=>f[0]===e.target.value)||["",""])[1].split(" — ")[0]||"");}} options={families.map(([v,l])=>({value:v,label:l.split(" — ")[0]}))}/>
+            <USelect label="Student" value={form.family} onChange={e=>{setF("family",e.target.value);setF("student",(families.find(f=>f[0]===e.target.value)||["",""])[1].split(" — ")[0]||"");}} options={families.map(([v,l])=>({value:v,label:l.split(" — ")[0]}))}/>
             <USelect label="Meeting Type" value={form.type} onChange={e=>setF("type",e.target.value)} options={meetingTypes.map(t=>({value:t,label:t}))}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
@@ -2879,10 +2878,10 @@ function HelpCenter(){
       {q:"How do I track multiple goals for one student?",a:"Each student can have up to 10 annual goals. Go to ALP Builder Section 3 to add goals. All goals appear in the Goals Tracker page and are tracked separately in Progress Monitoring."},
     ]},
     {label:"Family Portal",icon:"❤️",items:[
-      {q:"How do I invite families to the portal?",a:"In Family Portal → Messages tab → click 'Compose' → select the family → write your message. Families receive an email invitation with a secure link to access their child's portal."},
+      {q:"How do I share an approved ALP with parents?",a:"Once an ALP is approved, go to Create ALP Doc, select the student, and click Export PDF. The PDF can be printed, emailed as an attachment, or shared via any secure file sharing tool your school uses."},
       {q:"Can families sign documents digitally?",a:"Yes! Go to Family Portal → Signatures tab. Upload any document and send it for e-signature. Families receive an email notification and can sign on any device."},
-      {q:"What can family members see in the portal?",a:"Families can see their child's progress reports, annual goals, meeting notes, and any documents shared with them. They cannot see internal staff notes or other students' information."},
-      {q:"How do I schedule a meeting with a family?",a:"Click the '📅 Schedule Meeting' button in Family Portal or use the Meetings tab. Select the family, date, time, format (virtual/in-person), and send calendar invites to all attendees."},
+      {q:"What does the approved ALP PDF contain?",a:"The exported ALP PDF includes all 10 completed steps: student information, present levels, annual goals, accommodations, interventions, progress monitoring data, and the review sign-off with signatures."},
+      {q:"How do I schedule an ALP review meeting?",a:"Use the ALP Support Notice (⚠️ in the sidebar) to generate and send a formal meeting notice to parents. Set the meeting date, time, and location — the notice can be printed or emailed directly from the platform."},
     ]},
     {label:"Account & Settings",icon:"⚙️",items:[
       {q:"How do I change my password?",a:"Go to Settings → Profile tab → scroll to Security section → enter your current password and new password → click Save. Passwords must be at least 8 characters."},
@@ -2907,9 +2906,9 @@ function HelpCenter(){
       {q:"How often should I enter progress data?",a:"Best practice is weekly for reading and math CBM. Communication and social-emotional goals are typically logged monthly or after each session. ALP sends a reminder if no data has been entered in 30+ days."},
     ]},
     {icon:"❤️",title:"Family Portal",items:[
-      {q:"How do I send a document for signature?",a:"In the Family Portal, go to the Signatures tab and click 'Request Signature'. Select the document, the family member, and the deadline. They receive an email with a secure link to sign digitally."},
-      {q:"Can parents see the full ALP?",a:"Yes — family portal access is configurable per student. By default, families see goals, progress data, accommodations, and documents shared with them. Sensitive evaluation data can be restricted."},
-      {q:"How do I schedule a meeting with a family?",a:"Go to Family Portal > Meetings tab, then click 'Schedule Meeting'. Select the family, meeting type, date, time, and format (virtual/in-person). The family receives an email notification and calendar invite."},
+      {q:"How do I document that a parent received the ALP?",a:"Use the ALP Support Notice page to generate a formal notice of meeting and plan placement. Print two copies — one for the parent and one for the student file. The ALP PDF export itself serves as the official plan document."},
+      {q:"How do parents receive the completed ALP?",a:"After the ALP is approved, the teacher exports a professional PDF from the Create ALP Doc page. This PDF can be emailed, printed, or shared via the school's preferred method. Parents do not need an account."},
+
     ]},
     {icon:"✅",title:"Progress Review",items:[
       {q:"Which support frameworks does ALP support?",a:"ALP currently supports: USA, Support Plans, VDOE Virginia, Ghana, Nigeria, Kenya, UK, Australia NCCD, and Canada Provincial IEPs. More frameworks are added regularly."},
@@ -3388,7 +3387,7 @@ function SignUp({onLogin,onBack}){
               <UInput label="Full Name" value={form.name} onChange={e=>set("name",e.target.value)} placeholder="Ms. Abena Mensah"/>
               <UInput label="School Email" value={form.email} onChange={e=>set("email",e.target.value)} type="email" placeholder="you@school.edu"/>
               <UInput label="School / Organisation" value={form.school} onChange={e=>set("school",e.target.value)} placeholder="Westwood Elementary School"/>
-              <USelect label="Your Role" value={form.role} onChange={e=>set("role",e.target.value)} options={[{value:"teacher",label:"Special Ed Teacher"},{value:"director",label:"SPED Director"},{value:"leadership",label:"School Leadership"},{value:"admin",label:"District Admin"},{value:"related",label:"Related Services (SLP/OT/PT)"},{value:"family",label:"Family / Parent"},{value:"other",label:"Other"}]}/>
+              <USelect label="Your Role" value={form.role} onChange={e=>set("role",e.target.value)} options={[{value:"teacher",label:"Teacher"},{value:"director",label:"Director / School Head"},{value:"admin",label:"Administrator"},{value:"related",label:"Related Services (SLP/OT/PT)"},{value:"other",label:"Other"}]}/>
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span className="lbl" style={{fontSize:9}}>Password</span><span onClick={()=>setShowPw(s=>!s)} style={{fontSize:11,color:C.purple,cursor:"pointer"}}>{showPw?"Hide":"Show"}</span></div>
                 <input className="u-input" type={showPw?"text":"password"} value={form.password} onChange={e=>set("password",e.target.value)} placeholder="At least 8 characters"/>
@@ -3634,201 +3633,6 @@ function RelatedServicesDashboard({setPage}){
           </div>
         </div>
       )}
-    </Page>
-  );
-}
-
-function StudentDashboard({setPage}){
-  const {isMobile}=useResponsive();
-  const {toast}=useToast();
-  const {students:dbStudents}=useSupabaseAuth();
-  const [selectedGoal,setSelectedGoal]=useState(null);
-  const [goals,setGoals]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const s=dbStudents?.[0]||null;
-
-  useEffect(()=>{
-    if(!s?.id){setLoading(false);return;}
-    Supabase.getGoals(s.id).then(g=>{setGoals(g||[]);setLoading(false);});
-  },[s?.id]);
-
-  const domainIcons={Reading:"📖",Math:"🔢",Writing:"✏️",Communication:"💬","Social-Emotional":"🧘",Behaviour:"🌟",OT:"✋",Speech:"💬"};
-  const displayGoals=goals.map(g=>({icon:domainIcons[g.domain]||"🎯",label:g.domain,target:g.target||"Not set",current:g.baseline||"–",pct:g.current_pct||0,color:(g.current_pct||0)>=70?C.green:(g.current_pct||0)>=40?C.amber:C.blue,tip:"Keep practising — you're making progress!"}));
-  const badgesEarned=displayGoals.filter(g=>g.pct>=80).length;
-
-  if(!s){
-    return(
-      <Page title={<>Hi there! <span className="serif-italic" style={{color:C.warm,fontSize:26}}>👋</span></>} subtitle="Your learning plan">
-        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
-          <div style={{fontSize:48,marginBottom:12}}>🎒</div>
-          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Student Selected</h3>
-          <p style={{fontSize:13,color:C.warm}}>Once a student is added, their personalized dashboard will appear here.</p>
-        </div>
-      </Page>
-    );
-  }
-
-  return(
-    <Page title={<>Hi, <span className="serif-italic" style={{color:C.warm,fontSize:26}}>{s.name.split(" ")[0]}! 👋</span></>}
-      subtitle={`Your learning plan · Grade ${s.grade||"–"} · ${s.school_name||"Your School"}`}>
-
-      {/* Welcome card */}
-      <div className="card" style={{padding:"22px 26px",marginBottom:16,background:"linear-gradient(135deg,#7C3AED,#6D28D9)",color:"#fff"}}>
-        <div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
-          <div style={{width:56,height:56,borderRadius:"50%",background:"rgba(255,255,255,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,flexShrink:0}}>😊</div>
-          <div style={{flex:1}}>
-            <h3 style={{fontSize:18,fontWeight:700,marginBottom:4}}>{displayGoals.length>0?"Keep up the great work!":"Welcome to your learning plan!"}</h3>
-            <p style={{fontSize:13,opacity:.8}}>{displayGoals.length>0?`You have ${displayGoals.length} goal${displayGoals.length!==1?"s":""} to work toward this year.`:"Your goals will show here once your teacher sets them up."}</p>
-          </div>
-        </div>
-      </div>
-
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16,marginBottom:16}}>
-        {/* Goals */}
-        <div className="card" style={{padding:"22px 24px"}}>
-          <p className="lbl" style={{marginBottom:16}}>MY GOALS THIS YEAR</p>
-          {loading&&<p style={{fontSize:12,color:C.warm}}>Loading…</p>}
-          {!loading&&displayGoals.length===0&&<p style={{fontSize:12,color:C.warm}}>No goals set yet. Check back soon!</p>}
-          {displayGoals.map((g,i)=>(
-            <div key={i} style={{marginBottom:16,padding:"14px",border:`1.5px solid ${selectedGoal===i?g.color:C.tanL}`,borderRadius:12,cursor:"pointer",background:selectedGoal===i?g.color+"08":"transparent",transition:"all .2s"}}
-              onClick={()=>setSelectedGoal(selectedGoal===i?null:i)}>
-              <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:8}}>
-                <span style={{fontSize:22}}>{g.icon}</span>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:13,fontWeight:700,color:C.black}}>{g.label}</div>
-                  <div style={{fontSize:11,color:C.warm}}>Goal: {g.target}</div>
-                </div>
-                <span style={{fontSize:14,fontWeight:800,color:g.color}}>{g.pct}%</span>
-              </div>
-              <div style={{height:10,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${g.pct}%`,background:g.color,borderRadius:99,transition:"width .6s"}}/>
-              </div>
-              {selectedGoal===i&&<div style={{marginTop:10,fontSize:12,color:g.color,fontWeight:600,padding:"8px 10px",background:g.color+"14",borderRadius:8}}>💡 {g.tip}</div>}
-            </div>
-          ))}
-        </div>
-
-        {/* Badges */}
-        <div style={{display:"flex",flexDirection:"column",gap:14}}>
-          <div className="card" style={{padding:"20px"}}>
-            <p className="lbl" style={{marginBottom:12}}>MY PROGRESS 🏆</p>
-            {badgesEarned>0?(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-                {displayGoals.filter(g=>g.pct>=80).map((g,i)=>(
-                  <div key={i} style={{textAlign:"center",padding:"10px 6px",borderRadius:10,background:C.purpleL}} title={`${g.label} — On Track`}>
-                    <div style={{fontSize:22}}>{g.icon}</div>
-                    <div style={{fontSize:9,color:C.warm,marginTop:3,lineHeight:1.2}}>{g.label}</div>
-                  </div>
-                ))}
-              </div>
-            ):(
-              <p style={{fontSize:12,color:C.warm}}>Keep working toward your goals to earn badges!</p>
-            )}
-          </div>
-        </div>
-      </div>
-    </Page>
-  );
-}
-
-
-function FamilyDashboard({setPage}){
-  const {isMobile}=useResponsive();
-  const {toast}=useToast();
-  const {students:dbStudents,user}=useSupabaseAuth();
-  const [signed,setSigned]=useState([]);
-  const [goals,setGoals]=useState([]);
-  const [messages,setMessages]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const s=dbStudents?.[0]||null;
-
-  useEffect(()=>{
-    if(!s?.id){setLoading(false);return;}
-    Promise.all([Supabase.getGoals(s.id),Supabase.getFamilyMessages(s.id)]).then(([g,m])=>{
-      setGoals(g||[]);setMessages(m||[]);setLoading(false);
-    }).catch(()=>setLoading(false));
-  },[s?.id]);
-
-  const domainColor={Reading:C.green,Math:C.blue,Writing:C.amber,Communication:C.purple};
-  const displayGoals=goals.map(g=>({label:g.domain,desc:`${g.baseline||"–"} → Target: ${g.target||"–"}`,pct:g.current_pct||0,color:domainColor[g.domain]||C.purple,status:(g.current_pct||0)>=80?"On Track":(g.current_pct||0)>=50?"Developing":"Needs Support"}));
-  const unreadCount=messages.filter(m=>!m.read&&m.from_id!==user?.id).length;
-
-  if(!s){
-    return(
-      <Page title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Portal</span></>} subtitle="No student linked yet">
-        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
-          <div style={{fontSize:48,marginBottom:12}}>👨‍👩‍👧</div>
-          <h3 className="serif" style={{fontSize:20,fontWeight:700,marginBottom:8}}>No Student Linked</h3>
-          <p style={{fontSize:13,color:C.warm}}>Once a student is added, family updates will appear here.</p>
-        </div>
-      </Page>
-    );
-  }
-
-  return(
-    <Page title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Portal</span></>}
-      subtitle={`${s.name} · ${s.school_name||"Your School"}`}>
-
-      {/* Metric cards */}
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr 1fr":"repeat(3,1fr)",gap:12,marginBottom:16}}>
-        {[["MESSAGES",unreadCount,"Unread from school",C.blue,"✉️"],["GOALS",displayGoals.length,"Active this year",C.purple,"🎯"],["AVG PROGRESS",displayGoals.length?`${Math.round(displayGoals.reduce((a,g)=>a+g.pct,0)/displayGoals.length)}%`:"–","On track this year",C.green,"📈"]].map(([l,v,sub,c,ic])=>(
-          <div key={l} className="card" style={{padding:"18px 20px",cursor:"pointer"}} onClick={()=>setPage("family")}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-              <div>
-                <p className="lbl" style={{marginBottom:6,fontSize:8}}>{l}</p>
-                <div className="serif" style={{fontSize:24,fontWeight:700,color:c,lineHeight:1}}>{v}</div>
-                <p style={{fontSize:10,color:C.warm,marginTop:4}}>{sub}</p>
-              </div>
-              <span style={{fontSize:24,opacity:.15}}>{ic}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"2fr 1fr",gap:16}}>
-        {/* Student's progress */}
-        <div className="card" style={{padding:"22px 24px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <p className="lbl">{s.name.toUpperCase().split(" ")[0]}'S PROGRESS</p>
-            <button className="btn-ghost" style={{fontSize:10}} onClick={()=>setPage("family")}>Full View →</button>
-          </div>
-          {loading&&<p style={{fontSize:12,color:C.warm}}>Loading…</p>}
-          {!loading&&displayGoals.length===0&&<p style={{fontSize:12,color:C.warm}}>No goals recorded yet. Check back soon!</p>}
-          {displayGoals.map((g,i)=>(
-            <div key={i} style={{marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
-                <div>
-                  <div style={{fontSize:13,fontWeight:600,color:C.black}}>{g.label}</div>
-                  <div style={{fontSize:11,color:C.warm}}>{g.desc}</div>
-                </div>
-                <span style={{fontSize:10,fontWeight:700,color:g.color,background:g.color+"18",padding:"2px 8px",borderRadius:99,flexShrink:0,marginLeft:8}}>{g.status}</span>
-              </div>
-              <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-                <div style={{height:"100%",width:`${g.pct}%`,background:g.color,borderRadius:99,transition:"width .5s"}}/>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Right panel */}
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {/* Recent messages */}
-          <div className="card" style={{padding:"20px"}}>
-            <p className="lbl" style={{marginBottom:12}}>MESSAGES</p>
-            {messages.length===0&&<p style={{fontSize:12,color:C.warm}}>No messages yet.</p>}
-            {messages.slice(0,3).map((m,i)=>(
-              <div key={i} style={{padding:"9px 0",borderBottom:i<Math.min(messages.length,3)-1?`1px solid ${C.tanL}`:"none",cursor:"pointer"}} onClick={()=>setPage("family")}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontSize:12,fontWeight:!m.read?700:400,color:!m.read?C.black:C.warm}}>{m.from_name||"School"}</span>
-                  <span style={{fontSize:10,color:C.warm}}>{m.created_at?timeAgo(m.created_at):""}</span>
-                </div>
-                <p style={{fontSize:11,color:C.warm,margin:"3px 0 0",overflow:"hidden",whiteSpace:"nowrap",textOverflow:"ellipsis"}}>{m.body}</p>
-              </div>
-            ))}
-            <button className="btn-ghost" style={{width:"100%",marginTop:10,fontSize:11}} onClick={()=>setPage("family")}>View All Messages →</button>
-          </div>
-        </div>
-      </div>
     </Page>
   );
 }
@@ -5191,11 +4995,10 @@ function OnboardingModal({onClose,setPage}){
     {title:"You're all set! 🚀",sub:"Here's where to start."},
   ];
   const roles=[
-    {id:"teacher",label:"Special Ed Teacher",icon:"👩‍🏫",desc:"Build plans, track goals"},
-    {id:"director",label:"SPED Director",icon:"🏫",desc:"Oversight & reports"},
-    {id:"admin",label:"School Admin",icon:"📋",desc:"Staff & data management"},
+    {id:"teacher",label:"Teacher",icon:"👩‍🏫",desc:"Build ALPs, track goals"},
+    {id:"director",label:"Director / School Head",icon:"🏫",desc:"Review Queue & approvals"},
+    {id:"admin",label:"Administrator",icon:"📋",desc:"Staff & system management"},
     {id:"related",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT support"},
-    {id:"family",label:"Family Member",icon:"❤️",desc:"View plans & communicate"},
   ];
 
   function finish(){
@@ -5292,7 +5095,7 @@ function OnboardingModal({onClose,setPage}){
                 <p style={{fontSize:13,color:C.warm,lineHeight:1.6}}>Your workspace is ready. Here's what to do first:</p>
               </div>
               <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:24}}>
-                {[["1","Add your first student","→ Students page"],["2","Build their ALP","→ ALP Builder"],["3","Invite a family","→ Family Portal"]].map(([n,action,where])=>(
+                {[["1","Add your first student","→ Students page"],["2","Build their ALP","→ ALP Builder"],["3","Generate ALP PDF","→ Create ALP Doc"]].map(([n,action,where])=>(
                   <div key={n} style={{display:"flex",gap:12,alignItems:"center",padding:"10px 14px",border:`1px solid ${C.tanL}`,borderRadius:8}}>
                     <div style={{width:24,height:24,borderRadius:"50%",background:C.purple,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,flexShrink:0}}>{n}</div>
                     <div><div style={{fontSize:13,fontWeight:600,color:C.black}}>{action}</div><div style={{fontSize:11,color:C.warm}}>{where}</div></div>
@@ -5416,7 +5219,7 @@ function usePageTitle(page, unread=0){
   useEffect(()=>{
     const titles={
       dashboard:"Dashboard",students:"Students",builder:"ALP Builder",
-      progress:"Progress",family:"Family Portal",reports:"Reports",
+      progress:"Progress",reports:"Reports",
       notifications:"Notifications",settings:"Settings",help:"Help",
       goals:"Goals",documents:"Documents",timeline:"Timeline",
       changelog:"What's New",future:"Future Readiness",review:"Review",
@@ -5524,7 +5327,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         <h1 className="serif hero-fade-2" style={{fontSize:"clamp(54px,7vw,96px)",fontWeight:800,lineHeight:1.02,letterSpacing:"-2.5px",marginBottom:32,maxWidth:820,color:"#fff"}}>
           Supporting Every<br/><span className="serif-italic" style={{color:"#a78bfa"}}>Learner's Growth.</span>
         </h1>
-        <p className="hero-fade-3" style={{fontSize:18,color:"rgba(255,255,255,.7)",maxWidth:520,lineHeight:1.78,marginBottom:52}}>A complete student intervention and progress monitoring system — designed to help schools worldwide support every learner through structured plans, real-time tracking, and family collaboration.</p>
+        <p className="hero-fade-3" style={{fontSize:18,color:"rgba(255,255,255,.7)",maxWidth:520,lineHeight:1.78,marginBottom:52}}>A complete student intervention and progress monitoring system — designed to help schools worldwide support every learner through structured plans, real-time tracking, and professional ALP documentation.</p>
         <div className="r-hero-btns hero-fade-4" style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
           <button onClick={onSignup||onEnter} style={{fontSize:11,padding:"15px 38px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>🚀 Start Free →</button>
           <button onClick={()=>setShowDownload(true)} style={{fontSize:11,padding:"14px 34px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"transparent",color:"#fff",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.borderColor="#fff"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.5)"}>⬇ Download Desktop App</button>
@@ -5590,7 +5393,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
               {icon:"📋",title:"13-Section Builder",desc:"Complete adaptive learning program in one guided flow. Every section, every field.",color:C.red},
               {icon:"👥",title:"Multi-Role System",desc:"Teachers, directors, admins, families, students — each with their own view.",color:C.purple},
               {icon:"🌍",title:"Global Frameworks",desc:"ALP standards USA, Ghana, UK, Nigeria, Kenya and more.",color:C.blue},
-              {icon:"📤",title:"Export & Reporting",desc:"PDF documents, audit trails, district reports, family-friendly summaries.",color:C.green},
+              {icon:"📤",title:"Export & Reporting",desc:"Professional PDF documents, audit trails, compliance reports, district summaries.",color:C.green},
             ].map(f=>(
               <div key={f.title} className="card" style={{padding:"24px 22px",transition:"all .2s",cursor:"pointer"}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=f.color;e.currentTarget.style.transform="translateY(-3px)";}}
@@ -5981,34 +5784,26 @@ const NAV_BY_ROLE = {
   leadership:[
     {group:"OVERVIEW",items:[{id:"dashboard",label:"Leadership Dashboard",icon:"👔"},{id:"students",label:"All Students",icon:"👥"},{id:"reviewqueue",label:"Review Queue",icon:"👁️"}]},
     {group:"PLANS",items:[{id:"builder",label:"ALP Builder",icon:"✏️"},{id:"review",label:"Review Schedule",icon:"✅"},{id:"compliance",label:"Compliance Dashboard",icon:"📋"},{id:"future",label:"Future Readiness",icon:"🎯"}]},
-    {group:"REPORTS",items:[{id:"reports",label:"School Reports",icon:"📊"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"3"}]},
-    {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"settings",label:"Settings",icon:"⚙️"}]},
+    {group:"REPORTS",items:[{id:"reports",label:"School Reports",icon:"📊"},{id:"auditlog",label:"Audit Log",icon:"🔍"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"3"}]},
+    {group:"COLLABORATION",items:[{id:"settings",label:"Settings",icon:"⚙️"}]},
   ],
   teacher:[
     {group:"OVERVIEW",items:[{id:"dashboard",label:"Dashboard",icon:"⊞"},{id:"students",label:"My Students",icon:"👥"}]},
     {group:"ALP BUILDER",items:[{id:"builder",label:"ALP Builder",icon:"✏️",badge:"New"},{id:"quickalp",label:"Quick ALP",icon:"⚡"},{id:"studentprofile",label:"Student Profile",icon:"🪪"},{id:"progress",label:"Progress",icon:"📈"},{id:"goals",label:"Goals",icon:"🎯"}]},
     {group:"WORKFLOW",items:[{id:"future",label:"Future Readiness",icon:"🎯"},{id:"review",label:"Review Summary",icon:"✅"},{id:"reviewqueue",label:"Review Queue",icon:"👁️"},{id:"notice",label:"ALP Notice",icon:"⚠️"},{id:"create",label:"Create ALP Doc",icon:"📄"},{id:"timeline",label:"Timeline",icon:"🕐"},{id:"documents",label:"Documents",icon:"📁"}]},
-    {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"reports",label:"Reports",icon:"📊"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"4"},{id:"settings",label:"Settings",icon:"⚙️"}]},
+    {group:"COLLABORATION",items:[{id:"reports",label:"Reports",icon:"📊"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"4"},{id:"settings",label:"Settings",icon:"⚙️"}]},
   ],
   intervention:[
     {group:"OVERVIEW",items:[{id:"dashboard",label:"Dashboard",icon:"⊞"},{id:"students",label:"My Caseload",icon:"👥"}]},
     {group:"RTI",items:[{id:"progress",label:"Progress Monitoring",icon:"📈"},{id:"builder",label:"Intervention Plans",icon:"✏️"}]},
     {group:"WORKFLOW",items:[{id:"review",label:"Review Summary",icon:"✅"},{id:"reports",label:"Effectiveness Reports",icon:"📊"}]},
-    {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"notifications",label:"Alerts",icon:"🔔",badge:"2"},{id:"settings",label:"Settings",icon:"⚙️"}]},
+    {group:"COLLABORATION",items:[{id:"notifications",label:"Alerts",icon:"🔔",badge:"2"},{id:"settings",label:"Settings",icon:"⚙️"}]},
   ],
   related:[
     {group:"OVERVIEW",items:[{id:"dashboard",label:"Dashboard",icon:"⊞"},{id:"students",label:"My Students",icon:"👥"}]},
     {group:"SERVICES",items:[{id:"progress",label:"Goal Progress",icon:"📈"},{id:"builder",label:"Session Notes",icon:"✏️"}]},
     {group:"REPORTS",items:[{id:"reports",label:"Service Reports",icon:"📊"},{id:"notifications",label:"Notifications",icon:"🔔",badge:"3"}]},
-    {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"settings",label:"Settings",icon:"⚙️"}]},
-  ],
-  family:[
-    {group:"MY CHILD",items:[{id:"family",label:"Messages",icon:"💬"},{id:"progress",label:"Progress",icon:"📈"}]},
-    {group:"DOCUMENTS",items:[{id:"create",label:"Documents",icon:"📄"},{id:"notice",label:"My Rights",icon:"📋"}]},
-  ],
-  student:[
-    {group:"MY LEARNING",items:[{id:"dashboard",label:"My ALP",icon:"🎓"},{id:"progress",label:"My Goals",icon:"🎯"}]},
-    {group:"SUPPORT",items:[{id:"family",label:"My Team",icon:"❤️"}]},
+    {group:"COLLABORATION",items:[{id:"settings",label:"Settings",icon:"⚙️"}]},
   ],
 };
 
@@ -6018,8 +5813,6 @@ const ROLE_USERS = {
   teacher:    {name:"Teacher",        sub:"Special Education"},
   intervention:{name:"Intervention View",  sub:"Intervention Specialist"},
   related:    {name:"Related Services",         sub:"Speech-Language Pathologist"},
-  family:     {name:"Family Portal",   sub:"Parent / Guardian Access"},
-  student:    {name:"Student",     sub:"Student Portal"},
 };
 
 const NAV = NAV_BY_ROLE.teacher; // legacy fallback
@@ -6149,7 +5942,7 @@ function Dashboard({setPage,onAddStudent}){
     {id:1,label:"Create your first student profile",done:dbStudentsRaw&&dbStudentsRaw.length>0,page:"students"},
     {id:2,label:"Build an ALP with the AI Goal Architect",done:false,page:"builder"},
     {id:3,label:"Log a progress data point",done:false,page:"progress"},
-    {id:4,label:"Invite a family member to the portal",done:false,page:"family"},
+    {id:4,label:"Generate and share an approved ALP PDF",done:false,page:"create"},
     {id:5,label:"Generate your first progress report",done:false,page:"reports"},
   ];
   const doneCount=checkItems.filter(c=>c.done).length;
@@ -6641,7 +6434,7 @@ function StudentProfile({setPage}){
                     <span style={{fontSize:13,color:C.black}}>{v}</span>
                   </div>
                 ))}
-                <button className="btn-purple" style={{marginTop:14,fontSize:11,width:"100%"}} onClick={()=>{toast("Opening family portal…","info");setPage("family");}}>📧 Message Family →</button>
+                <button className="btn-purple" style={{marginTop:14,fontSize:11,width:"100%"}} onClick={()=>setPage("create")}>📄 Generate ALP PDF →</button>
               </div>
               <div className="card" style={{padding:"22px 24px"}}>
                 <p className="lbl" style={{marginBottom:14}}>SUPPORT TEAM</p>
@@ -8932,225 +8725,6 @@ function FutureReadiness({setPage}){
   );
 }
 
-function FamilyPortal(){
-  const {toast}=useToast();
-  const {isMobile}=useResponsive();
-  const {students:dbStudents,user,profile}=useSupabaseAuth();
-  const [tab,setTab]=useState("messages");
-  const [messages,setMessages]=useState([]);
-  const [loading,setLoading]=useState(true);
-  const [compose,setCompose]=useState(false);
-  const [msgSubject,setMsgSubject]=useState("");
-  const [msgBody,setMsgBody]=useState("");
-  const [selectedStudentId,setSelectedStudentId]=useState(null);
-  const [sending,setSending]=useState(false);
-  const [signed,setSigned]=useState([]);
-
-  const s=dbStudents?.find(st=>st.id===selectedStudentId)||dbStudents?.[0]||null;
-
-  useEffect(()=>{
-    if(dbStudents?.length&&!selectedStudentId) setSelectedStudentId(dbStudents[0].id);
-  },[dbStudents]);
-
-  useEffect(()=>{
-    if(!s?.id)return;
-    setLoading(true);
-    Supabase.getFamilyMessages(s.id).then(m=>{setMessages(m||[]);setLoading(false);});
-  },[s?.id]);
-
-  async function handleSend(){
-    if(!msgBody.trim()){toast("Write a message","error");return;}
-    if(!s?.id){toast("Select a student","error");return;}
-    setSending(true);
-    try{
-      await Supabase.sendFamilyMessage({
-        student_id:s.id,
-        from_id:user?.id,
-        from_name:profile?.full_name||user?.email?.split("@")[0]||"Teacher",
-        to_email:s.family_email||s.parent_email||"",
-        subject:msgSubject||`Update — ${s.name}`,
-        body:msgBody,
-        message_type:"update",
-      });
-      toast("Message sent!","success");
-      setCompose(false);setMsgBody("");setMsgSubject("");
-      const updated=await Supabase.getFamilyMessages(s.id);
-      setMessages(updated||[]);
-    }catch(e){toast("Failed to send","error");}
-    setSending(false);
-  }
-
-  const TABS=[["messages","💬 Messages"],["documents","📄 Documents"],["goals","🎯 Goals"],["contact","📞 Contact"]];
-
-  return(
-    <Page title={<>Family <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Portal</span></>}
-      subtitle={s?`${s.name} · ${s.family_email||s.parent_email||"No email on file"}`:"Select a student"}
-      action={<div style={{display:"flex",gap:8}}>
-        {dbStudents?.length>1&&(
-          <select value={selectedStudentId||""} onChange={e=>setSelectedStudentId(e.target.value)} style={{fontSize:11,padding:"8px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,background:C.white,color:C.black}}>
-            {dbStudents.map(st=><option key={st.id} value={st.id}>{st.name}</option>)}
-          </select>
-        )}
-        <button className="btn-black" onClick={()=>setCompose(true)} style={{fontSize:11,padding:"10px 20px"}}>✉️ Message Family</button>
-      </div>}>
-
-      {/* Compose Modal */}
-      {compose&&(
-        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setCompose(false)}>
-          <div className="card fade-up" style={{width:"100%",maxWidth:520,padding:0}}>
-            <div style={{padding:"20px 26px 16px",borderBottom:`1px solid ${C.tanL}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div><p className="lbl" style={{color:C.purple,marginBottom:4}}>NEW MESSAGE</p><h3 style={{fontSize:18,fontWeight:800,color:C.black}}>Message {s?.name?.split(" ")[1]||""} Family</h3></div>
-              <button onClick={()=>setCompose(false)} style={{fontSize:22,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>×</button>
-            </div>
-            <div style={{padding:"22px 26px",display:"flex",flexDirection:"column",gap:14}}>
-              <div style={{padding:"10px 14px",background:C.purpleL,borderRadius:8,fontSize:12,color:C.warm}}>
-                To: <b style={{color:C.black}}>{s?.family_email||s?.parent_email||"No email on file"}</b>
-                {(!s?.family_email&&!s?.parent_email)&&<span style={{color:C.red}}> — Add parent email in student profile first</span>}
-              </div>
-              <UInput label="Subject" value={msgSubject} onChange={e=>setMsgSubject(e.target.value)} placeholder={`Update about ${s?.name||"student"}…`}/>
-              <UTextarea label="Message" value={msgBody} onChange={e=>setMsgBody(e.target.value)} rows={5} placeholder="Write your message to the family…"/>
-              <div style={{display:"flex",gap:10}}>
-                <button className="btn-ghost" onClick={()=>setCompose(false)} style={{flex:1,fontSize:12}}>Cancel</button>
-                <button className="btn-purple" onClick={handleSend} disabled={sending||(!s?.family_email&&!s?.parent_email)} style={{flex:2,fontSize:12,padding:"13px"}}>
-                  {sending?<><Spin/> Sending…</>:"Send Message →"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {!s&&(
-        <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
-          <div style={{fontSize:48,marginBottom:12}}>👨‍👩‍👧</div>
-          <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:8}}>No Students Yet</h3>
-          <p style={{fontSize:13,color:C.warm}}>Add students to use the Family Portal.</p>
-        </div>
-      )}
-
-      {s&&(
-        <>
-          {/* Tab bar */}
-          <div style={{display:"flex",overflowX:"auto",gap:0,borderBottom:`2px solid ${C.tanL}`,marginBottom:20}}>
-            {TABS.map(([id,label])=>(
-              <button key={id} onClick={()=>setTab(id)} style={{padding:"10px 18px",border:"none",background:"transparent",cursor:"pointer",
-                borderBottom:tab===id?`3px solid ${C.purple}`:"3px solid transparent",
-                color:tab===id?C.purple:C.warm,fontWeight:tab===id?700:400,fontSize:12,
-                fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",transition:"all .15s"}}>
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {/* Contact Tab */}
-          {tab==="contact"&&(
-            <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:16}}>
-              <div className="card" style={{padding:"22px 24px"}}>
-                <p className="lbl" style={{marginBottom:14}}>PARENT / GUARDIAN</p>
-                {[["Name",s.parent_name||s.family_name||"Not recorded"],["Email",s.family_email||s.parent_email||"Not recorded"],["Phone",s.family_phone||s.parent_phone||"Not recorded"],["Relationship",s.relationship||"Guardian"]].map(([k,v])=>(
-                  <div key={k} style={{display:"flex",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,gap:12}}>
-                    <span style={{fontSize:11,fontWeight:700,color:C.warm,width:100,flexShrink:0}}>{k}</span>
-                    <span style={{fontSize:13,color:C.black}}>{v}</span>
-                  </div>
-                ))}
-                <button className="btn-purple" style={{marginTop:16,fontSize:11,width:"100%"}} onClick={()=>setCompose(true)}>✉️ Send Message →</button>
-              </div>
-              <div className="card" style={{padding:"22px 24px"}}>
-                <p className="lbl" style={{marginBottom:14}}>STUDENT OVERVIEW</p>
-                {[["Name",s.name],["Grade",s.grade||"–"],["School",s.school_name||"–"],["Plan",s.plan||"ALP"],["Status",s.status||"Active"],["Teacher",profile?.full_name||"–"]].map(([k,v])=>(
-                  <div key={k} style={{display:"flex",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,gap:12}}>
-                    <span style={{fontSize:11,fontWeight:700,color:C.warm,width:100,flexShrink:0}}>{k}</span>
-                    <span style={{fontSize:13,color:C.black}}>{v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Messages Tab */}
-          {tab==="messages"&&(
-            <div>
-              {loading&&<div style={{textAlign:"center",padding:40,color:C.warm}}>Loading messages…</div>}
-              {!loading&&messages.length===0&&(
-                <div className="card" style={{padding:"48px 32px",textAlign:"center"}}>
-                  <div style={{fontSize:40,marginBottom:12}}>💬</div>
-                  <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:8}}>No Messages Yet</h3>
-                  <p style={{fontSize:13,color:C.warm,marginBottom:20}}>Send the first message to {s.name}'s family to get started.</p>
-                  <button className="btn-purple" onClick={()=>setCompose(true)} style={{fontSize:12}}>✉️ Send First Message →</button>
-                </div>
-              )}
-              {!loading&&messages.length>0&&(
-                <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                  {messages.map((m,i)=>(
-                    <div key={i} className="card" style={{padding:"18px 22px",borderLeft:`3px solid ${m.from_id===user?.id?C.purple:C.green}`}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,flexWrap:"wrap",gap:8}}>
-                        <div>
-                          <span style={{fontSize:12,fontWeight:700,color:m.from_id===user?.id?C.purple:C.green}}>{m.from_id===user?.id?"You → Family":"Family → You"}</span>
-                          {m.subject&&<span style={{fontSize:12,color:C.black,fontWeight:600,marginLeft:10}}>{m.subject}</span>}
-                        </div>
-                        <span style={{fontSize:11,color:C.warm,flexShrink:0}}>{m.created_at?new Date(m.created_at).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"–"}</span>
-                      </div>
-                      <p style={{fontSize:13,color:C.warm,lineHeight:1.7,margin:0}}>{m.body}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Goals Tab */}
-          {tab==="goals"&&(
-            <div style={{display:"flex",flexDirection:"column",gap:12}}>
-              <GoalsSummaryForFamily studentId={s.id}/>
-            </div>
-          )}
-
-          {/* Documents Tab */}
-          {tab==="documents"&&(
-            <div className="card" style={{padding:"32px",textAlign:"center"}}>
-              <div style={{fontSize:40,marginBottom:12}}>📄</div>
-              <h3 className="serif" style={{fontSize:18,fontWeight:700,marginBottom:8}}>ALP Documents</h3>
-              <p style={{fontSize:13,color:C.warm,marginBottom:20}}>Generated documents for {s.name} will appear here. Generate your first document from the ALP Builder.</p>
-              <button className="btn-purple" onClick={()=>{}} style={{fontSize:12}}>Generate Document →</button>
-            </div>
-          )}
-        </>
-      )}
-    </Page>
-  );
-}
-
-function GoalsSummaryForFamily({studentId}){
-  const [goals,setGoals]=useState([]);
-  const [loading,setLoading]=useState(true);
-  useEffect(()=>{
-    if(!studentId)return;
-    Supabase.getGoals(studentId).then(g=>{setGoals(g||[]);setLoading(false);});
-  },[studentId]);
-  if(loading)return<div style={{textAlign:"center",padding:32,color:C.warm}}>Loading goals…</div>;
-  if(goals.length===0)return<div className="card" style={{padding:"32px",textAlign:"center",color:C.warm}}>No goals created yet. Complete the ALP Builder to add goals.</div>;
-  return goals.map(g=>{
-    const pct=g.current_pct||0;
-    const color=pct>=80?C.green:pct>=50?C.amber:C.red;
-    return(
-      <div key={g.id} className="card" style={{padding:"18px 22px"}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-          <span style={{fontSize:11,fontWeight:700,background:color+"18",color,padding:"2px 10px",borderRadius:99}}>{g.domain}</span>
-          <span style={{fontSize:16,fontWeight:800,color}}>{pct}%</span>
-        </div>
-        <p style={{fontSize:13,color:C.black,lineHeight:1.6,margin:"0 0 10px"}}>{g.goal_text}</p>
-        <div style={{height:6,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-          <div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:99}}/>
-        </div>
-        <div style={{display:"flex",gap:16,fontSize:11,color:C.warm,marginTop:8}}>
-          {g.baseline&&<span><b style={{color:C.black}}>Baseline:</b> {g.baseline}</span>}
-          {g.target&&<span><b style={{color:C.black}}>Target:</b> {g.target}</span>}
-        </div>
-      </div>
-    );
-  });
-}
-
 // ═══════════════════════════════════════════════════════════
 // REPORTS
 // ═══════════════════════════════════════════════════════════
@@ -9309,7 +8883,7 @@ function Reports(){
     {id:"alp",icon:"📋",label:"Individual ALP Report",desc:"Complete ALP document for one student — all sections, goals, and services.",formats:["PDF"],time:"~10 sec",needsStudent:true},
     {id:"progress",icon:"📈",label:"Student Progress Report",desc:"Visual progress report with goal tracking, data points, and trend analysis.",formats:["PDF"],time:"~15 sec",needsStudent:true},
     {id:"class",icon:"👥",label:"Class Caseload Report",desc:`All ${totalStudents} students in your caseload — plan status and review dates.`,formats:["PDF"],time:"~20 sec",needsStudent:false},
-    {id:"family",icon:"❤️",label:"Family Progress Report",desc:"Parent-friendly summary — plain language, visual progress, next steps.",formats:["PDF"],time:"~8 sec",needsStudent:true},
+
   ];
 
   async function generateReport(type){
@@ -10180,7 +9754,7 @@ const NAV_FULL=[
   {group:"OVERVIEW",items:[{id:"dashboard",label:"Dashboard",icon:"⊞"},{id:"students",label:"Students",icon:"👥",badge:"38"}]},
   {group:"ALP BUILDER",items:[{id:"builder",label:"ALP Builder",icon:"✏️",badge:"New"},{id:"quickalp",label:"Quick ALP",icon:"⚡"},{id:"studentprofile",label:"Student Profile",icon:"🪪"},{id:"progress",label:"Progress",icon:"📈"}]},
   {group:"WORKFLOW",items:[{id:"future",label:"Future Readiness",icon:"🎯"},{id:"review",label:"Review Summary",icon:"✅"},{id:"notice",label:"ALP Notice",icon:"⚠️"},{id:"create",label:"Create ALP Doc",icon:"📄"}]},
-  {group:"COLLABORATION",items:[{id:"family",label:"Family Portal",icon:"❤️"},{id:"reports",label:"Reports",icon:"📊"}]},
+  {group:"COLLABORATION",items:[{id:"reports",label:"Reports",icon:"📊"}]},
   {group:"ACCOUNT",items:[{id:"notifications",label:"Notifications",icon:"🔔",badge:"3"},{id:"settings",label:"Settings",icon:"⚙️"},{id:"help",label:"Help Center",icon:"❓"},{id:"changelog",label:"What's New",icon:"✨",badge:"v2.4"}]},
 ];
 
@@ -10226,7 +9800,7 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
             {showRolePicker&&(
               <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:4,borderTop:"1px solid rgba(255,255,255,.1)",paddingTop:10}}>
                 {ROLES.map(r=>(
-                  <button key={r.id} onClick={e=>{e.stopPropagation();setRole(r.id);setPage(r.id==="family"?"family":r.id==="student"?"dashboard":"dashboard");setShowRolePicker(false);}}
+                  <button key={r.id} onClick={e=>{e.stopPropagation();setRole(r.id);setPage("dashboard");setShowRolePicker(false);}}
                     style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",borderRadius:6,background:role===r.id?"rgba(124,58,237,.3)":"transparent",border:"none",cursor:"pointer",width:"100%",textAlign:"left",transition:"background .12s"}}
                     onMouseEnter={e=>{if(role!==r.id)e.currentTarget.style.background="rgba(255,255,255,.08)";}}
                     onMouseLeave={e=>{if(role!==r.id)e.currentTarget.style.background="transparent";}}>
@@ -10306,7 +9880,7 @@ function AppInner(){
       const diff=startX-endX;
       if(Math.abs(diff)<80)return; // min swipe distance
       // Only swipe on main app pages, not landing/login
-      const appPages=["dashboard","students","builder","progress","future","review","notice","create","family","reports","notifications","settings","help","changelog","goals","documents","timeline"];
+      const appPages=["dashboard","students","builder","progress","future","review","notice","create","reports","notifications","settings","help","changelog","goals","documents","timeline","reviewqueue","compliance","auditlog","studentprofile","quickalp"];
       if(!appPages.includes(page))return;
       const idx=appPages.indexOf(page);
       if(diff>0&&idx<appPages.length-1)setPage(appPages[idx+1]); // swipe left → next
@@ -10347,7 +9921,7 @@ function AppInner(){
 
   async function handleLogin(selectedRole){
     setRole(selectedRole);
-    const startPage={family:"family",student:"dashboard",related:"progress",intervention:"progress"}[selectedRole]||"dashboard";
+    const startPage={related:"progress",intervention:"progress"}[selectedRole]||"dashboard";
     setPage(startPage);
     setScreen("app");
     // Show onboarding for new signups
@@ -10360,7 +9934,7 @@ function AppInner(){
   }
 
   const pages={
-    dashboard:role==="director"?<DirectorDashboard setPage={setPage}/>:role==="related"?<RelatedServicesDashboard setPage={setPage}/>:role==="student"?<StudentDashboard setPage={setPage}/>:role==="family"?<FamilyDashboard setPage={setPage}/>:role==="admin"?<AdminDashboard setPage={setPage}/>:role==="intervention"?<InterventionDashboard setPage={setPage}/>:role==="leadership"?<LeadershipDashboard setPage={setPage}/>:<Dashboard setPage={setPage} onAddStudent={()=>setShowAddStudent(true)}/>,
+    dashboard:role==="director"?<DirectorDashboard setPage={setPage}/>:role==="related"?<RelatedServicesDashboard setPage={setPage}/>:role==="admin"?<AdminDashboard setPage={setPage}/>:role==="intervention"?<InterventionDashboard setPage={setPage}/>:role==="leadership"?<LeadershipDashboard setPage={setPage}/>:<Dashboard setPage={setPage} onAddStudent={()=>setShowAddStudent(true)}/>,
     students:<Students setPage={setPage} onAddStudent={()=>setShowAddStudent(true)}/>,
     builder:<ALPBuilder setPage={setPage}/>,
     progress:<Progress/>,
@@ -10368,7 +9942,6 @@ function AppInner(){
     review:<ReviewSummary setPage={setPage}/>,
     notice:<ALPNotice setPage={setPage}/>,
     create:<CreateALPDoc setPage={setPage}/>,
-    family:<FamilyPortal/>,
     reports:<Reports/>,
     notifications:<Notifications/>,
     settings:<Settings/>,
