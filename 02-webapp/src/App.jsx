@@ -1497,7 +1497,7 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
       name:"Free",price:"$0",period:"forever",tag:null,color:"#6B7280",bg:C.white,textColor:C.black,
       desc:"ALP AI Intelligence Suite tools completely free for individual teachers. Forever. Because educators deserve support, not barriers.",
       features:["Up to 10 students","ALP Goal Architect — unlimited","ALP Present Levels Coach","ALP Behaviour Blueprint","ALP Reading Adapter","ALP Intervention Planner","ALP Lesson Differentiator","ALP Progress Probe Generator","PDF export (3/month)"],
-      missing:["Caseload dashboard","Family portal","Progress tracking engine","ALP Student Snapshot","E-signature","Automated scheduling"],
+      missing:["Caseload dashboard","10-step guided ALP workflow","Progress tracking engine","Director approval workflow","Compliance dashboard","Automated deadline tracking"],
       cta:"Create Free Account",style:"btn-outline",
     },
     {
@@ -1534,7 +1534,7 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
     {f:"ALP Reading Adapter",a:"✓ All plans",p:"✓ All plans"},
     {f:"ALP Intervention Planner",a:"✓ All plans",p:"✓ All plans"},
     {f:"Progress Monitoring (AI)",a:"✓ CBM + auto-alerts",p:"✓ Basic"},
-    {f:"Family Portal",a:"✓ Pro & above",p:"✗ Not included"},
+    {f:"PDF Export",a:"✓ All plans",p:"✗ Not included"},
     {f:"E-Signature",a:"✓ Pro & above",p:"✗ Not included"},
     {f:"Global Support (Ghana, Nigeria, UK…)",a:"✓ 10+ frameworks",p:"✗ USA only"},
     {f:"Desktop App (offline access)",a:"✓ Windows/Mac/Linux",p:"✗ Web only"},
@@ -1546,7 +1546,7 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
 
   const faqs=[
     {q:"Is ALP really free for individual teachers?",a:"Yes. All 8 tools in the ALP AI Intelligence Suite are free for individual teachers, forever: ALP Goal Architect, ALP Present Levels Coach, ALP Behaviour Blueprint, ALP Reading Adapter, ALP Intervention Planner, ALP Progress Probe Generator, ALP Learner Profile Builder, and ALP Lesson Differentiator. We believe educators deserve support, not paywalls."},
-    {q:"How does ALP compare to other learning plan software?",a:"ALP's Professional plan starts at $9/month and includes features most IEP software charges extra for or doesn't offer at all — global support frameworks (Ghana GES, Nigeria, UK, and more), a full family portal with e-signature, desktop apps for offline access, and support for students from birth to age 22+."},
+    {q:"How does ALP compare to other learning plan software?",a:"ALP's Professional plan starts at $9/month and includes features most IEP software charges extra for — global support frameworks (Ghana GES, Nigeria, UK, and more), a guided 10-step ALP workflow, director approval workflow, compliance dashboard, real-time progress tracking, and professional PDF export. All included at one price."},
     {q:"Is there a free trial on paid plans?",a:"Yes — every paid plan comes with a 14-day free trial. No credit card required. You get full access to all features during the trial period."},
     {q:"Do you support Ghana or Nigeria educators?",a:"Yes — ALP was built with African and global schools in mind from day one. We support Ghana, Nigeria, Kenya, WCED South Africa, UK, Australia NCCD, and all US frameworks (ALP standards, Support Plans) out of the box."},
     {q:"Can I use ALP for students from birth to age 22?",a:"Absolutely. ALP supports early intervention (birth–3), preschool (ages 3–5), school age (6–13), transition (14–21), and adult transition (18–22+). The ALP Builder automatically adjusts required sections and requirements based on the student's age."},
@@ -1676,7 +1676,7 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
     {icon:"📋",tag:"GUIDE",title:"Getting Started with ALP",desc:"From account setup to your first complete ALP in 20 minutes.",time:"10 min read",color:C.purple},
     {icon:"🤖",tag:"AI TUTORIAL",title:"Using the ALP AI Intelligence Suite",desc:"Generate SMART goals, BIPs, ALP Present Levels Coach statements, and lesson plans with AI. Step-by-step with real examples.",time:"8 min read",color:"#2563EB"},
     {icon:"📈",tag:"GUIDE",title:"Progress Monitoring 101",desc:"Understanding CBM, trendlines, and when to intervene. Set up your data system and read the charts.",time:"12 min read",color:"#16A34A"},
-    {icon:"👨‍👩‍👧",tag:"GUIDE",title:"Family Collaboration Best Practices",desc:"Using the Family Portal — progress updates, meeting scheduling, e-signatures, and home language communication.",time:"7 min read",color:"#D97706"},
+    {icon:"📄",tag:"GUIDE",title:"Sharing Approved ALPs with Families",desc:"How to export, print, and deliver completed ALP PDFs to parents and guardians — no parent login required.",time:"5 min"},
     {icon:"⚖️",tag:"GUIDE",title:"ALP Plan Reviewiew Checklist (USA)",desc:"Every required element for a effective ALP under ALP standards and Support Plans.",time:"15 min read",color:"#DC2626"},
     {icon:"🌍",tag:"GUIDE",title:"Ghana SPED Framework Guide",desc:"Building ALPs aligned to the Ghana Education Service's SPED framework and inclusive education policy.",time:"12 min read",color:"#0891B2"},
     {icon:"🧠",tag:"AI GUIDE",title:"Writing Better BIPs with AI",desc:"How to use the ALP Behaviour Blueprint to create comprehensive behavior intervention plans in minutes.",time:"9 min read",color:C.purple},
@@ -1693,7 +1693,7 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
     {title:"Build Your First ALP — Full Walkthrough",desc:"A complete ALP built from scratch in real time.",dur:"18:42",icon:"📋"},
     {title:"ALP AI Goal Writing Live Demo",desc:"See the AI generate 3 SMART goals from baseline data.",dur:"6:28",icon:"🤖"},
     {title:"ALP Behaviour Blueprint — Live Demo",desc:"Watch the Behaviour Blueprint create a full intervention plan in under 3 minutes.",dur:"2:58",icon:"🧠"},
-    {title:"Family Portal — Parent Experience",desc:"What families see and how they interact with teachers.",dur:"9:15",icon:"👨‍👩‍👧"},
+    {title:"PDF Export & Sharing",desc:"Exporting the approved ALP as a professional PDF and sharing it with families.",dur:"5:00",icon:"📄"},
     {title:"Ghana Progress Review Walkthrough",desc:"Building a effective ALP for Ghana's GES framework.",dur:"14:05",icon:"🌍"},
     {title:"Progress Monitoring Setup",desc:"Configure CBM tracking and alerts step by step.",dur:"11:20",icon:"📈"},
     {title:"ALP Caseload Command Tour",desc:"Managing your full caseload in one view.",dur:"7:55",icon:"📅"},
@@ -2877,9 +2877,9 @@ function HelpCenter(){
       {q:"Can I export progress reports?",a:"Yes. In Reports → Progress tab → click 'Export'. You can generate PDF or Excel summaries for individual students or your entire caseload."},
       {q:"How do I track multiple goals for one student?",a:"Each student can have up to 10 annual goals. Go to ALP Builder Section 3 to add goals. All goals appear in the Goals Tracker page and are tracked separately in Progress Monitoring."},
     ]},
-    {label:"Family Portal",icon:"❤️",items:[
+    {label:"PDF & Sharing",icon:"📄",items:[
       {q:"How do I share an approved ALP with parents?",a:"Once an ALP is approved, go to Create ALP Doc, select the student, and click Export PDF. The PDF can be printed, emailed as an attachment, or shared via any secure file sharing tool your school uses."},
-      {q:"Can families sign documents digitally?",a:"Yes! Go to Family Portal → Signatures tab. Upload any document and send it for e-signature. Families receive an email notification and can sign on any device."},
+      {q:"How do parents confirm receipt of the ALP?",a:"Print two copies of the exported ALP PDF at the review meeting — one for the parent and one for the student file. The ALP Support Notice page generates a formal written notification you can send home as well."},
       {q:"What does the approved ALP PDF contain?",a:"The exported ALP PDF includes all 10 completed steps: student information, present levels, annual goals, accommodations, interventions, progress monitoring data, and the review sign-off with signatures."},
       {q:"How do I schedule an ALP review meeting?",a:"Use the ALP Support Notice (⚠️ in the sidebar) to generate and send a formal meeting notice to parents. Set the meeting date, time, and location — the notice can be printed or emailed directly from the platform."},
     ]},
@@ -2893,7 +2893,7 @@ function HelpCenter(){
     {icon:"🚀",title:"Getting Started",items:[
       {q:"How do I add my first student?",a:"Go to Students in the sidebar, then click '+ Add Student'. Enter the student's name, grade, and primary disability. You'll be taken straight to the ALP Builder to start their plan."},
       {q:"How do I build my first ALP?",a:"Click ALP Builder in the sidebar. The builder walks you through all 13 sections — student info, present levels, annual goals, services, accommodations, and more. ALP AI can write your goals for you: just click 'AI Goal Architect' in any goal section."},
-      {q:"What's the difference between Free and Professional?",a:"Free gives you all 8 ALP AI tools forever, for up to 10 students. Professional ($9/mo) adds unlimited students, real-time progress monitoring, family portal with e-signature, and all multi-region support."},
+      {q:"What's the difference between Free and Professional?",a:"Free gives you all 8 ALP AI tools forever, for up to 10 students. Professional ($9/mo) adds unlimited students, real-time progress monitoring, director approval workflow, compliance dashboard, audit log, version history, and priority support."},
     ]},
     {icon:"✏️",title:"ALP Builder",items:[
       {q:"How does the AI Goal Architect work?",a:"In any goal section, click 'AI Goal Architect'. Enter the student's baseline data and select the domain. Claude generates 3 SMART goal options — you select the ones you want and they're added to the ALP instantly."},
@@ -2905,7 +2905,7 @@ function HelpCenter(){
       {q:"What does the 3-point rule mean?",a:"If 3 consecutive data points fall below the goal line, the system flags it as an alert and suggests an intervention change. If 3 consecutive points are above, it suggests raising the goal."},
       {q:"How often should I enter progress data?",a:"Best practice is weekly for reading and math CBM. Communication and social-emotional goals are typically logged monthly or after each session. ALP sends a reminder if no data has been entered in 30+ days."},
     ]},
-    {icon:"❤️",title:"Family Portal",items:[
+    {icon:"📄",title:"PDF & Communication",items:[
       {q:"How do I document that a parent received the ALP?",a:"Use the ALP Support Notice page to generate a formal notice of meeting and plan placement. Print two copies — one for the parent and one for the student file. The ALP PDF export itself serves as the official plan document."},
       {q:"How do parents receive the completed ALP?",a:"After the ALP is approved, the teacher exports a professional PDF from the Create ALP Doc page. This PDF can be emailed, printed, or shared via the school's preferred method. Parents do not need an account."},
 
@@ -2962,7 +2962,7 @@ function HelpCenter(){
               {title:"Building your first ALP","duration":"5:32",icon:"✏️",tag:"Guide"},
               {title:"Using AI Goal Architect","duration":"3:45",icon:"✦",tag:"AI Tools"},
               {title:"Logging progress data","duration":"2:58",icon:"📊",tag:"Progress"},
-              {title:"Family Portal walkthrough","duration":"4:10",icon:"❤️",tag:"Family"},
+              {title:"PDF Export & Sharing walkthrough","duration":"3:45",icon:"📄",tag:"Workflow"},
               {title:"Generating reports","duration":"3:22",icon:"📄",tag:"Reports"},
             ].map(v=>(
               <div key={v.title} className="card" style={{padding:"14px 16px",cursor:"pointer",transition:"all .2s"}}
@@ -3296,7 +3296,7 @@ function SignUp({onLogin,onBack}){
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
   const plans=[
     {id:"free",name:"Free",price:"$0",desc:"ALP AI tools forever. Up to 10 students.",color:"#6B7280",features:["AI Goal Architect","Present Levels Coach","Behaviour Blueprint","10 students max"]},
-    {id:"professional",name:"Professional",price:"$9/mo",desc:"Everything — unlimited students, progress tools, family portal.",color:"#7C3AED",features:["Unlimited students","All AI tools","Global support","Family portal + e-signature"],popular:true},
+    {id:"professional",name:"Professional",price:"$9/mo",desc:"Everything — unlimited students, director approvals, compliance dashboard, and professional PDF export.",color:"#7C3AED",features:["Unlimited students","All AI tools","Director approvals & audit log","Professional PDF export"],popular:true},
     {id:"school",name:"School",price:"$29/mo",desc:"Admin dashboard, district reporting, bulk import.",color:"#16A34A",features:["Everything in Pro","Admin dashboard","Staff management","Priority support"]},
   ];
   async function handleCreate(){
@@ -5388,7 +5388,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
             {[
               {icon:"✦",title:"AI Goal Architect",desc:"Generate 3 SMART goal options from baseline data in seconds. ALP standards, GES & SEND aligned.",color:C.purple},
               {icon:"📈",title:"Progress Monitoring",desc:"CBM probes, trendlines, 3-point rule alerts. Weekly data that drives decisions.",color:C.blue},
-              {icon:"❤️",title:"Family Portal",desc:"Digital signatures, shared documents, meeting scheduler, real-time progress access.",color:C.green},
+              {icon:"📄",title:"PDF Export",desc:"Professional ALP documents ready to print, email, or archive — generated from real student data.",color:C.green},
               {icon:"✅",title:"Progress Engine",desc:"10+ global frameworks. Real-time tracking flags missing elements before reviews.",color:C.amber},
               {icon:"📋",title:"13-Section Builder",desc:"Complete adaptive learning program in one guided flow. Every section, every field.",color:C.red},
               {icon:"👥",title:"Multi-Role System",desc:"Teachers, directors, admins, families, students — each with their own view.",color:C.purple},
@@ -5423,7 +5423,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
               {q:"AI-assisted goal writing turns baseline data into SMART goal suggestions — with baseline, target, and monitoring method ready to refine.",icon:"✨",c:"#2563EB"},
               {q:"Built to flex with any country's planning requirements — not locked to a single state or national framework.",icon:"🌍",c:"#16A34A"},
               {q:"Manage every student's goals, services, reports, and meetings in one place instead of scattered spreadsheets and folders.",icon:"🗂️",c:"#9333EA"},
-              {q:"The Family Portal makes it simple for parents to follow their child's progress and respond to updates.",icon:"❤️",c:"#0891B2"},
+              {q:"Once an ALP is approved, generate a professional PDF in one click — ready to print, email, or keep on file for every student.",icon:"📄",c:"#0891B2"},
               {q:"A clean onboarding flow gets new teachers comfortable with the platform from their very first session.",icon:"🚀",c:"#D97706"},
             ].map((t,i)=>(
               <div key={i} className="card" style={{padding:"26px 24px",position:"relative",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
@@ -5559,7 +5559,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
             {[
               {title:"Platform",links:[
                 {label:"ALP Builder",fn:onSignup},{label:"Progress Monitoring",fn:onSignup},
-                {label:"Family Portal",fn:onSignup},{label:"AI Goal Architect",fn:onSignup},
+                {label:"PDF Export",fn:onSignup},{label:"AI Goal Architect",fn:onSignup},
                 {label:"All Features",fn:()=>setNavPage("Features")},
               ]},
               {title:"For Schools",links:[
@@ -5955,7 +5955,7 @@ function Dashboard({setPage,onAddStudent}){
   ]:[
     {icon:"👋",text:"Welcome! Add your first student to get started",time:"",color:C.purple},
     {icon:"📋",text:"Build an ALP using the 10-step ALP Builder",time:"",color:C.blue},
-    {icon:"👨‍👩‍👧","text":"Invite families to the Family Portal",time:"",color:C.green},
+    {icon:"📄","text":"Generate and share approved ALP PDFs with families",time:"",color:C.green},
   ];
 
   const dueDates=[];
@@ -8138,7 +8138,7 @@ function ALPNotice({setPage}){
           <div className="card" style={{padding:"20px"}}>
             <p className="lbl" style={{marginBottom:14}}>DELIVERY</p>
             <USelect label="Method" value={noticeData.deliveryMethod} onChange={e=>setND("deliveryMethod",e.target.value)}
-              options={[{value:"email",label:"Email + printed copy"},{value:"email-only",label:"Email only"},{value:"portal",label:"Family portal"},{value:"mail",label:"US Mail (hard copy)"}]}/>
+              options={[{value:"email",label:"Email + printed copy"},{value:"email-only",label:"Email only"},{value:"print",label:"Print only (no email)"},{value:"mail",label:"US Mail (hard copy)"}]}/>
             <div style={{marginTop:12}}>
               <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,cursor:"pointer",marginTop:10}}>
                 <input type="checkbox" checked={noticeData.interpreter} onChange={e=>setND("interpreter",e.target.checked)} style={{accentColor:C.purple,width:15,height:15}}/>
@@ -8300,7 +8300,7 @@ function CreateALPDoc({setPage}){
           <div className="card" style={{padding:"22px"}}>
             <p className="lbl" style={{marginBottom:14}}>EXPORT FORMAT</p>
             <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:18}}>
-              {[["pdf","📄","PDF Document","Best for sharing & printing"],["word","📝","Word (.docx)","Editable by admin or family"],["html","🌐","Web Page","Accessible online view"]].map(([id,icon,label,desc])=>(
+              {[["pdf","📄","PDF Document","Best for sharing & printing"],["word","📝","Word (.docx)","Editable by staff or administrator"],["html","🌐","Web Page","Accessible online view"]].map(([id,icon,label,desc])=>(
                 <label key={id} style={{display:"flex",gap:12,padding:"12px 14px",border:`1.5px solid ${format===id?C.purple:C.tanL}`,borderRadius:10,cursor:"pointer",background:format===id?C.purpleL:"transparent",transition:"all .15s"}} onClick={()=>setFormat(id)}>
                   <div style={{width:18,height:18,borderRadius:"50%",border:`2px solid ${format===id?C.purple:C.tanL}`,background:format===id?C.purple:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
                     {format===id&&<div style={{width:7,height:7,borderRadius:"50%",background:"#fff"}}/>}
@@ -8322,8 +8322,8 @@ function CreateALPDoc({setPage}){
 
           <div className="card" style={{padding:"20px",background:"linear-gradient(135deg,#7C3AED11,#A855F711)"}}>
             <p className="lbl" style={{marginBottom:12,color:C.purple}}>SHARE WITH FAMILY</p>
-            <p style={{fontSize:12,color:C.warm,marginBottom:14,lineHeight:1.6}}>Send a read-only link to the family portal so they can view the ALP anytime.</p>
-            <button className="btn-purple" onClick={()=>toast("Shared with Johnson family via Family Portal ✓","success")} style={{width:"100%",fontSize:11}}>
+            <p style={{fontSize:12,color:C.warm,marginBottom:14,lineHeight:1.6}}>Generate and download the approved ALP as a PDF to email or print for the parent/guardian.</p>
+            <button className="btn-purple" onClick={()=>setPage&&setPage("create")} style={{width:"100%",fontSize:11}}>
               Share with Johnson Family →
             </button>
           </div>
@@ -9660,7 +9660,7 @@ function Settings(){
                 <div className="serif" style={{fontSize:28,fontWeight:800,marginBottom:4}}>Professional</div>
                 <div style={{fontSize:14,opacity:.8,marginBottom:16}}>$9/mo per teacher · Billed monthly</div>
                 <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
-                  {["Unlimited students","All AI tools","Family portal","Priority support"].map(f=>(
+                  {["Unlimited students","All AI tools","Director approvals","Priority support"].map(f=>(
                     <span key={f} style={{fontSize:11,background:"rgba(255,255,255,.15)",padding:"3px 10px",borderRadius:99}}>{f}</span>
                   ))}
                 </div>
@@ -9772,8 +9772,6 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
   const baseUser=ROLE_USERS[role]||ROLE_USERS.teacher;
   const user=role==="teacher"
     ?{name:profile?.full_name||authUser?.email?.split("@")[0]||"Teacher",sub:`Special Education · ${profile?.school||"Your School"}`}
-    :role==="student"
-    ?{name:dbStudents?.[0]?.name||"Student",sub:dbStudents?.[0]?`Grade ${dbStudents[0].grade||"–"} · Student`:"Student Portal"}
     :baseUser;
   const [showRolePicker,setShowRolePicker]=useState(false);
   return(
