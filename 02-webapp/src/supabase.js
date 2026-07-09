@@ -61,14 +61,20 @@ export async function upsertProfile(profile) {
 }
 
 // ── Student helpers ──────────────────────────────────────────────
-export async function getStudents(teacherId) {
+export async function getStudents(teacherId, role) {
   if (!supabase) return [];
   const query = supabase.from('students').select(`
     *,
     goals(count),
     progress_entries(count)
   `).order('name');
-  if (teacherId) query.eq('teacher_id', teacherId);
+  // Teachers see only their own caseload. Director/Admin/Leadership/Intervention/
+  // Related Services see the full student list (read access only — write/delete
+  // permissions for non-owners are still enforced separately by RLS and UI gates).
+  const fullVisibilityRoles = ['admin', 'director', 'leadership', 'intervention', 'related_service'];
+  if (teacherId && !fullVisibilityRoles.includes(role)) {
+    query.eq('teacher_id', teacherId);
+  }
   const { data } = await query;
   return data || [];
 }
@@ -287,10 +293,29 @@ export async function createNotification({ user_id, type = 'general', title, bod
 }
 
 export async function getReviewersForOrg() {
-  // Directors/admins who should be notified when an ALP is submitted for review
+  // Directors/admins/leadership who should be notified when an ALP is submitted for review
+  // NOTE: The DB role column may be 'director', 'admin', OR 'leadership' depending
+  // on how the account was created. We query all three to avoid silent notification failure.
   if (!supabase) return [];
-  const { data } = await supabase.from('profiles').select('id, full_name, role').in('role', ['director', 'admin']);
+  const { data } = await supabase.from('profiles').select('id, full_name, role').in('role', ['director', 'admin', 'leadership']);
   return data || [];
+}
+
+// ── User invitations — real server-side invite via Edge Function ──
+// Calls the 'invite-user' Edge Function, which is authorization-checked
+// and holds the service role key safely server-side. Never call
+// supabase.auth.admin.* directly from browser code — that requires the
+// service role key which must never reach the client.
+export async function inviteUser({ email, role, fullName, school }) {
+  if (!supabase) return { error: { message: 'Demo mode — Supabase not configured' } };
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return { error: { message: 'Not logged in' } };
+  const { data, error } = await supabase.functions.invoke('invite-user', {
+    body: { email, role, fullName, school },
+  });
+  if (error) return { error: { message: error.message || 'Failed to send invite' } };
+  if (data?.error) return { error: { message: data.error } };
+  return { data };
 }
 
 export async function signInWithGoogle() {

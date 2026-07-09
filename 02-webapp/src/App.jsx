@@ -84,15 +84,75 @@ async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", 
     fieldRow([["Baseline", g.baseline], ["Target", g.target], ["Progress", `${g.current_pct || 0}%`]]);
   });
 
+  // ── Accommodations (Step 6) — from alp_data JSONB blob ──
+  const alpData = student?.alp_data || {};
+  const accoms = alpData.accommodations || {};
+  const accomCategories = { presentation: "Presentation", response: "Response", setting: "Setting", timing: "Timing & Scheduling" };
+  const hasAccoms = Object.values(accoms).some(arr => Array.isArray(arr) && arr.length > 0) || alpData.customAccomm;
+  if (hasAccoms) {
+    heading("Accommodations & Supports");
+    Object.entries(accomCategories).forEach(([key, label]) => {
+      const list = accoms[key] || [];
+      if (list.length) {
+        ensureSpace(20);
+        doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...black);
+        doc.text(`${label}:`, margin, y); y += 14;
+        list.forEach(item => { body(`• ${item}`); });
+      }
+    });
+    if (alpData.customAccomm) {
+      body(`Additional accommodations: ${alpData.customAccomm}`);
+    }
+  }
+
+  // ── Interventions (Step 7) — from alp_data JSONB blob ──
+  const interventions = alpData.interventions || [];
+  if (interventions.length) {
+    heading("Intervention Plans");
+    interventions.forEach((iv, i) => {
+      ensureSpace(60);
+      doc.setFont("helvetica","bold"); doc.setFontSize(10.5); doc.setTextColor(...purple);
+      doc.text(`${i + 1}. ${iv.program || "Intervention"}`, margin, y); y += 14;
+      fieldRow([
+        ["Status", iv.status || "—"],
+        ["Frequency", iv.frequency || "—"],
+        ["Duration", iv.duration || "—"],
+        ["Staff", iv.staff || "—"],
+      ]);
+    });
+  }
+
+  // ── Future Readiness / Transition (Step 9) — from alp_data ──
+  const transTarget = alpData.transitionTarget || student?.transition_target;
+  const postSecGoal = alpData.postSecGoal;
+  if (transTarget || postSecGoal) {
+    heading("Future Readiness & Transition");
+    if (transTarget) body(`Transition Target: ${transTarget}`);
+    if (postSecGoal) body(`Post-Secondary Goal: ${postSecGoal}`);
+    if (alpData.transitionDomain) body(`Domain: ${alpData.transitionDomain}`);
+  }
+
   heading("Meeting / Review Notes");
   body(notes || "No notes recorded.");
 
-  heading("Signatures");
+  heading("Parent / Guardian Information & Signatures");
   fieldRow([
-    ["ALP Coordinator", reviewer || "_______________________"],
-    ["Parent / Guardian", student?.parent_name || "_______________________"],
-    ["Date", new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })],
+    ["Student", student?.name || "—"],
+    ["Parent / Guardian", student?.parent_name || "—"],
+    ["Parent Email", student?.parent_email || "—"],
+    ["Parent Phone", student?.parent_phone || "—"],
+    ["ALP Coordinator", reviewer || "—"],
+    ["Date of Meeting", new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })],
   ]);
+  y += 10;
+  // Signature lines
+  ["ALP Coordinator Signature", "Parent / Guardian Signature"].forEach(label => {
+    ensureSpace(40);
+    doc.setFont("helvetica","normal"); doc.setFontSize(9.5); doc.setTextColor(...warm);
+    doc.text(label + ":", margin, y);
+    doc.setDrawColor(180,180,180); doc.line(margin + 140, y, W - margin, y);
+    y += 24;
+  });
 
   doc.setFontSize(8); doc.setTextColor(...warm);
   doc.text(`Generated ${new Date().toLocaleString()} — ALP Platform`, margin, doc.internal.pageSize.getHeight() - 30);
@@ -664,7 +724,7 @@ function SupabaseAuthProvider({children}){
       if(u){
         const p=await Supabase.getProfile(u.id);
         setProfile(p);
-        refreshStudents(u.id);
+        refreshStudents(u.id,p?.role||"teacher"); // pass role directly — profile state hasn't committed yet here
         refreshNotifications(u.id);
       } else { setProfile(null);setStudents([]); }
       setLoading(false);
@@ -678,7 +738,7 @@ function SupabaseAuthProvider({children}){
     return unsub;
   },[user]);
 
-  function refreshStudents(uid){ Supabase.getStudents(uid).then(d=>setStudents(d||[])); }
+  function refreshStudents(uid,roleOverride){ Supabase.getStudents(uid,roleOverride||realRole).then(d=>setStudents(d||[])); }
   function refreshNotifications(uid){ Supabase.getNotifications(uid).then(d=>{ setNotifications(d||[]); setUnreadCount((d||[]).filter(n=>!n.read).length); }); }
 
   async function createStudentRecord(s){ if(!user)return{error:"Not logged in"};const r=await Supabase.createStudent({...s,teacher_id:user.id});if(!r.error){refreshStudents(user.id);await Supabase.logAuditEvent({user_id:user.id,action:"create_student",table_name:"students",record_id:r.data?.id,student_id:r.data?.id,details:{name:s.name}});}return r; }
@@ -1293,7 +1353,7 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
   const roles=[
     {icon:"👩‍🏫",title:"Special Education Teacher",sub:"Reduce paperwork, increase student outcomes.",color:"#7C3AED",bg:"#EDE9FE",
      desc:"You spend hours on documentation that could be spent with students. ALP cuts writing time from 2 hours to 20 minutes — with AI doing the heavy lifting on goals, BIPs, and present levels.",
-     features:["Build complete 13-section ALPs in 20 min","AI ALP Goal Architect, ALP Behaviour Blueprint, ALP Present Levels Coach","Caseload dashboard — all students in one view","Progress monitoring with CBM auto-alerts","Family portal with e-signature"]},
+     features:["Build complete ALPs in 20 min","AI ALP Goal Architect, ALP Behaviour Blueprint, ALP Present Levels Coach","Caseload dashboard — all students in one view","Progress monitoring with CBM auto-alerts","Professional PDF export for sharing with families"]},
     {icon:"🎓",title:"Special Education Director",sub:"Increase quality, ensure consistency, support your team at scale.",color:"#2563EB",bg:"#DBEAFE",
      desc:"Real-time plan visibility across every teacher and student in your school or district. Know exactly who needs attention — before the auditor arrives.",
      features:["School-wide progress dashboard","Overdue review date alerts","Audit-ready one-click reports","Staff caseload visibility & management","privacy standards & data privacy certified"]},
@@ -1505,7 +1565,7 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
       price:billing==="monthly"?"$9":"$7",
       period:"/mo per teacher",tag:"MOST POPULAR",color:C.purple,bg:C.black,textColor:C.cream,
       desc:"The complete ALP system — global support, professional PDF export, director approval workflow, and unlimited AI tools all included.",
-      features:["Unlimited students","ALP AI Intelligence Suite — all 8 tools unlimited","Full 13-section ALP Builder","Real-time CBM progress monitoring + alerts","Family portal with e-signature","All multi-region support","ALP Student Snapshot for gen-ed teachers","ALP Accommodations Hub","Caseload dashboard","PDF + Word export","Automated ALP scheduling","Priority email & chat support"],
+      features:["Unlimited students","ALP AI Intelligence Suite — all 8 tools unlimited","Full 10-step ALP Builder","Real-time CBM progress monitoring + alerts","Director approval workflow + audit log","All multi-region support","ALP Student Snapshot for gen-ed teachers","ALP Accommodations Hub","Caseload dashboard","Professional PDF export","Automated review date tracking","Priority email & chat support"],
       missing:[],
       cta:"Start 14-Day Free Trial",style:"btn-purple",
     },
@@ -1568,8 +1628,8 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
         <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap",marginBottom:36}}>
           <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Most affordable plan</span>
           <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Global support included</span>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Family portal included</span>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Desktop apps included</span>
+          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Director approval workflow</span>
+          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ PDF export included</span>
         </div>
         <div style={{display:"inline-flex",background:C.white,border:`1px solid ${C.tanL}`,borderRadius:99,padding:4,gap:4,marginBottom:52}}>
           {["monthly","annual"].map(b=>(
@@ -1699,7 +1759,7 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
     {title:"ALP Caseload Command Tour",desc:"Managing your full caseload in one view.",dur:"7:55",icon:"📅"},
   ];
   const downloads=[
-    {icon:"📄",title:"Blank ALP Template",desc:"Printable 13-section ALP form, ALP standards-aligned."},
+    {icon:"📄",title:"Blank ALP Template",desc:"Printable 10-step ALP form, ALP standards-aligned."},
     {icon:"📊",title:"Progress Monitoring Data Sheet",desc:"CBM tracking sheets for reading, math, and behavior."},
     {icon:"📋",title:"Family Rights Summary",desc:"Plain-language parent rights — available in 8 languages."},
     {icon:"🗂",title:"ALP Quick Reference Card",desc:"One-page cheat sheet for new educators. Print and post it."},
@@ -1925,7 +1985,7 @@ Any educator supporting a learner with structured needs — from a special educa
 // ARTICLE CONTENT DATABASE
 function ArticleModal({article,onClose}){
   if(!article)return null;
-  const data=ARTICLES[article.title]||{tag:article.tag||"ARTICLE",time:article.time||"5 min read",color:"#7C3AED",body:"ALP is designed to help special educators build better learning plans, faster. This guide covers key concepts, practical strategies, and how to use the platform effectively.\n\n**Getting Started**\nStart with the student's Present Level of Performance, then build annual goals and choose appropriate services. ALP guides you through all 13 required sections step by step.\n\n**AI Tools**\nThe AI Goal Architect generates 3 SMART goal options from your baseline data. The Present Levels Coach helps write functional academic and developmental narratives.\n\n**Progress Monitoring**\nLog CBM probes weekly. ALP tracks trends and flags students who are falling behind. Use the 3-point rule to adjust goals and interventions based on real data.\n\n**Family Partnership**\nUse the Family Portal to share progress, collect signatures, and schedule meetings. Research shows family engagement is one of the strongest predictors of student success in special education."};
+  const data=ARTICLES[article.title]||{tag:article.tag||"ARTICLE",time:article.time||"5 min read",color:"#7C3AED",body:"ALP is designed to help special educators build better learning plans, faster. This guide covers key concepts, practical strategies, and how to use the platform effectively.\n\n**Getting Started**\nStart with the student's Present Level of Performance, then build annual goals and choose appropriate services. ALP guides you through all 13 required sections step by step.\n\n**AI Tools**\nThe AI Goal Architect generates 3 SMART goal options from your baseline data. The Present Levels Coach helps write functional academic and developmental narratives.\n\n**Progress Monitoring**\nLog CBM probes weekly. ALP tracks trends and flags students who are falling behind. Use the 3-point rule to adjust goals and interventions based on real data.\n\n**Family Communication**\nAfter a plan is approved, export a professional ALP PDF from the Create ALP Doc page. Print, email, or share with parents through your school's standard process. Research shows family engagement is one of the strongest predictors of student success in special education."};
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="card fade-up" style={{width:"100%",maxWidth:640,maxHeight:"88vh",overflowY:"auto",padding:0}}>
@@ -2043,19 +2103,32 @@ function InviteUserModal({onClose}){
     {id:"teacher",label:"Teacher",icon:"👩‍🏫",desc:"Build ALPs, track goals, submit for review"},
     {id:"director",label:"Director / School Head",icon:"🏫",desc:"Review Queue, approvals, compliance oversight"},
     {id:"admin",label:"Administrator",icon:"📋",desc:"User management, system settings, security"},
-    {id:"related",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT — service session tracking"},
+    {id:"intervention",label:"Intervention Specialist",icon:"📊",desc:"RTI tiers, intervention plans, CBM data"},
+    {id:"related_service",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT — service session tracking"},
   ];
 
-  function sendInvite(){
+  const [sendErrors,setSendErrors]=useState([]);
+  const {profile}=useSupabaseAuth();
+
+  async function sendInvite(){
+    setSendErrors([]);
     if(tab==="bulk"){
       const emails=bulk.split(/[\n,]/).map(e=>e.trim()).filter(Boolean);
       if(!emails.length){toast("Add at least one email address","error");return;}
       setSending(true);
-      setTimeout(()=>{setSending(false);setSent(true);toast(`${emails.length} invitations sent!`,"success");},1000);
+      const results=await Promise.all(emails.map(em=>Supabase.inviteUser({email:em,role,school})));
+      setSending(false);
+      const failed=results.map((r,i)=>r.error?{email:emails[i],message:r.error.message}:null).filter(Boolean);
+      const succeeded=results.length-failed.length;
+      if(succeeded>0){setSent(true);toast(`${succeeded} of ${emails.length} invitation${emails.length!==1?"s":""} sent!`,succeeded===emails.length?"success":"info");}
+      if(failed.length){setSendErrors(failed);if(succeeded===0)toast("All invitations failed — see details below","error");}
     } else {
       if(!email.includes("@")){toast("Enter a valid email address","error");return;}
       setSending(true);
-      setTimeout(()=>{setSending(false);setSent(true);toast(`Invitation sent to ${email}`,"success");},1000);
+      const r=await Supabase.inviteUser({email,role,school:school||profile?.school});
+      setSending(false);
+      if(r.error){toast(r.error.message||"Failed to send invite","error");setSendErrors([{email,message:r.error.message}]);return;}
+      setSent(true);toast(`Invitation sent to ${email}`,"success");
     }
   }
 
@@ -2064,9 +2137,15 @@ function InviteUserModal({onClose}){
       <div className="card fade-up" style={{width:"100%",maxWidth:440,padding:"40px 32px",textAlign:"center"}}>
         <div style={{width:64,height:64,borderRadius:"50%",background:"#DCFCE7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 16px"}}>✉️</div>
         <h3 className="serif" style={{fontSize:22,fontWeight:800,marginBottom:8}}>Invitation{tab==="bulk"?"s":""} Sent!</h3>
-        <p style={{fontSize:13,color:C.warm,marginBottom:24}}>{tab==="bulk"?`Multiple invitations sent`:`Invite sent to ${email}`}. They'll receive a link to create their account.</p>
+        <p style={{fontSize:13,color:C.warm,marginBottom:sendErrors.length?12:24}}>{tab==="bulk"?`Multiple invitations sent`:`Invite sent to ${email}`}. They'll receive a link to create their account.</p>
+        {sendErrors.length>0&&(
+          <div style={{textAlign:"left",background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:8,padding:"10px 14px",marginBottom:20}}>
+            <p style={{fontSize:11,fontWeight:700,color:C.red,marginBottom:6}}>{sendErrors.length} did not send:</p>
+            {sendErrors.map((e,i)=>(<p key={i} style={{fontSize:11,color:C.red,margin:"2px 0"}}>{e.email} — {e.message}</p>))}
+          </div>
+        )}
         <div style={{display:"flex",gap:10}}>
-          <button className="btn-ghost" onClick={()=>{setSent(false);setEmail("");setBulk("");}} style={{flex:1,fontSize:12}}>Send Another</button>
+          <button className="btn-ghost" onClick={()=>{setSent(false);setEmail("");setBulk("");setSendErrors([]);}} style={{flex:1,fontSize:12}}>Send Another</button>
           <button className="btn-purple" onClick={onClose} style={{flex:1,fontSize:12}}>Done</button>
         </div>
       </div>
@@ -2121,6 +2200,13 @@ function InviteUserModal({onClose}){
                   style={{width:"100%",padding:"10px 12px",border:`1px solid ${C.tanL}`,borderRadius:8,fontSize:12,fontFamily:"'DM Sans',sans-serif",resize:"vertical",outline:"none",color:C.black,boxSizing:"border-box",lineHeight:1.6}}/>
                 {bulk&&<p style={{fontSize:11,color:C.warm,marginTop:4}}>{bulk.split(/[\n,]/).filter(e=>e.trim()).length} email{bulk.split(/[\n,]/).filter(e=>e.trim()).length!==1?"s":""} detected</p>}
               </div>
+            </div>
+          )}
+
+          {sendErrors.length>0&&!sent&&(
+            <div style={{background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:8,padding:"10px 14px",marginTop:16}}>
+              <p style={{fontSize:11,fontWeight:700,color:C.red,marginBottom:4}}>Send failed:</p>
+              {sendErrors.map((e,i)=>(<p key={i} style={{fontSize:11,color:C.red,margin:"2px 0"}}>{e.email} — {e.message}</p>))}
             </div>
           )}
 
@@ -2435,18 +2521,21 @@ function QuickAddStudentModal({onClose,onAdded}){
   const setF=(k,v)=>setForm(p=>({...p,[k]:v}));
 
   async function submit(){
-    if(!form.name||!form.grade||!form.disability)return;
+    if(!form.name?.trim()){toast("Student name is required","error");return;}
+    if(form.name.trim().length < 2){toast("Please enter the student's full name","error");return;}
+    if(!form.grade){toast("Please select a grade level","error");return;}
+    if(!form.disability){toast("Please select a disability / area of need","error");return;}
     if(createStudentRecord){
       const {error}=await createStudentRecord({
-        name:form.name, grade:form.grade, disability:form.disability,
+        name:form.name.trim(), grade:form.grade, disability:form.disability,
         dob:form.dob||null, status:"Active", plan:"ALP",
         plan_date:new Date().toISOString().split("T")[0]
       });
       if(error&&typeof error==="object"&&error.message&&!error.message.includes("Demo")){
-        toast("Could not save student. Try again.","error"); return;
+        toast("Could not save student — "+error.message,"error"); return;
       }
     }
-    toast(form.name+" added to your caseload!","success");
+    toast(form.name.trim()+" added to your caseload!","success");
     onAdded&&onAdded();
     onClose();
   }
@@ -3384,10 +3473,10 @@ function SignUp({onLogin,onBack}){
             <h3 style={{fontSize:22,fontWeight:800,color:C.black,marginBottom:4,letterSpacing:"-.5px"}}>Create your account</h3>
             <p style={{fontSize:13,color:C.warm,marginBottom:24}}>Plan: <b style={{color:C.purple}}>{plans.find(p=>p.id===plan)?.name}</b> · <span style={{cursor:"pointer",color:C.warm,textDecoration:"underline"}} onClick={()=>setStep("plan")}>Change</span></p>
             <div style={{display:"flex",flexDirection:"column",gap:20,marginBottom:24}}>
-              <UInput label="Full Name" value={form.name} onChange={e=>set("name",e.target.value)} placeholder="Ms. Abena Mensah"/>
+              <UInput label="Full Name" value={form.name} onChange={e=>set("name",e.target.value)} placeholder="Full name"/>
               <UInput label="School Email" value={form.email} onChange={e=>set("email",e.target.value)} type="email" placeholder="you@school.edu"/>
-              <UInput label="School / Organisation" value={form.school} onChange={e=>set("school",e.target.value)} placeholder="Westwood Elementary School"/>
-              <USelect label="Your Role" value={form.role} onChange={e=>set("role",e.target.value)} options={[{value:"teacher",label:"Teacher"},{value:"director",label:"Director / School Head"},{value:"admin",label:"Administrator"},{value:"related",label:"Related Services (SLP/OT/PT)"},{value:"other",label:"Other"}]}/>
+              <UInput label="School / Organisation" value={form.school} onChange={e=>set("school",e.target.value)} placeholder="Your school or organisation name"/>
+              <USelect label="Your Role" value={form.role} onChange={e=>set("role",e.target.value)} options={[{value:"teacher",label:"Teacher"},{value:"director",label:"Director / School Head"},{value:"admin",label:"Administrator"},{value:"intervention",label:"Intervention Specialist"},{value:"related_service",label:"Related Services (SLP/OT/PT)"}]}/>
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span className="lbl" style={{fontSize:9}}>Password</span><span onClick={()=>setShowPw(s=>!s)} style={{fontSize:11,color:C.purple,cursor:"pointer"}}>{showPw?"Hide":"Show"}</span></div>
                 <input className="u-input" type={showPw?"text":"password"} value={form.password} onChange={e=>set("password",e.target.value)} placeholder="At least 8 characters"/>
@@ -4019,27 +4108,27 @@ function ChangelogPage(){
     ]},
     {version:"v2.4.1",date:"Apr 2026",badge:"",badgeColor:C.warm,items:[
       {type:"new",text:"ALP Builder completion tracking — green dots show saved sections"},
-      {type:"new",text:"Print Preview — formatted 13-section ALP document with print/export"},
+      {type:"new",text:"Print Preview — formatted 10-step ALP document with print/export"},
       {type:"new",text:"Documents page — upload, search, tab filters, download/link buttons"},
       {type:"new",text:"Timeline page — per-student ALP activity history with event types"},
       {type:"new",text:"Data Import modal — CSV/PowerSchool/Infinite Campus with preview"},
       {type:"new",text:"Dashboard — DonutChart, MiniBarChart, Trend indicator"},
       {type:"new",text:"Reports — Progress tab with student table and trend chart"},
       {type:"improved",text:"Notifications — full detail panel, 10 notification types, filter pills"},
-      {type:"improved",text:"Family Portal — compose form state, meeting scheduler, unread badge"},
+      {type:"improved",text:"ALP Builder — step progress persistence, auto-save indicator, unread badge"},
       {type:"improved",text:"Settings — billing tab with invoice history, language selector, theme toggle"},
       {type:"improved",text:"Pricing — annual/monthly toggle with savings badge"},
     ]},
     {version:"v2.4.0",date:"Mar 2026",badge:"Major",badgeColor:C.purple,items:[
       {type:"new",text:"Goals Tracker page — filterable table with progress bars and status badges"},
-      {type:"new",text:"ALP Print Preview modal — full 13-section document preview"},
+      {type:"new",text:"ALP Print Preview modal — full 10-step document preview"},
       {type:"new",text:"Session Notes FAB — floating quick note taker from any page"},
       {type:"new",text:"Global Search (⌘K) — pages, actions, students"},
       {type:"new",text:"AI Chat Widget — ask ALP AI about goals, planning, strategies"},
       {type:"new",text:"QuickAddStudentModal — 3-step flow with services selection"},
       {type:"new",text:"MeetingSchedulerModal — attendees, format, calendar invites"},
       {type:"improved",text:"ALP Builder — 13 sections all wired, autosave, keyboard navigation"},
-      {type:"improved",text:"Family Portal — message threads, e-signatures, meeting scheduler"},
+      {type:"improved",text:"PDF Export — multi-page layout, goal sections, signature blocks, transition data"},
     ]},
     {version:"v2.3.0",date:"Feb 2026",badge:"",badgeColor:C.warm,items:[
       {type:"new",text:"8 role-specific dashboards (Teacher, Director, Admin, SLP, Student, Family, Intervention, Leadership)"},
@@ -4998,7 +5087,8 @@ function OnboardingModal({onClose,setPage}){
     {id:"teacher",label:"Teacher",icon:"👩‍🏫",desc:"Build ALPs, track goals"},
     {id:"director",label:"Director / School Head",icon:"🏫",desc:"Review Queue & approvals"},
     {id:"admin",label:"Administrator",icon:"📋",desc:"Staff & system management"},
-    {id:"related",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT support"},
+    {id:"intervention",label:"Intervention Specialist",icon:"📊",desc:"RTI tiers & CBM data"},
+    {id:"related_service",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT support"},
   ];
 
   function finish(){
@@ -5030,7 +5120,7 @@ function OnboardingModal({onClose,setPage}){
           {step===0&&(
             <div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:24}}>
-                {[["✏️","Build ALP Plans","13-section guided builder"],["📊","Track Progress","Weekly CBM data & charts"],["❤️","Family Portal","Messages, signatures, meetings"]].map(([ic,title,desc])=>(
+                {[["✏️","Build ALP Plans","10-step guided builder"],["📊","Track Progress","Weekly CBM data & charts"],["📄","Export & Share","Professional PDF for families"]].map(([ic,title,desc])=>(
                   <div key={title} style={{textAlign:"center",padding:"16px 10px",border:`1px solid ${C.tanL}`,borderRadius:12}}>
                     <div style={{fontSize:26,marginBottom:8}}>{ic}</div>
                     <div style={{fontSize:12,fontWeight:700,color:C.black,marginBottom:3}}>{title}</div>
@@ -6125,7 +6215,7 @@ function Students({setPage,onAddStudent}){
         action={<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           <button className="btn-ghost" onClick={()=>setSel(null)} style={{fontSize:11}}>← All Students</button>
           <button className="btn-ghost" disabled={archiving} onClick={handleArchive} style={{fontSize:11,color:C.amber}}>📦 Archive</button>
-          {["director","admin"].includes(realRole)&&<button className="btn-ghost" onClick={()=>setShowDeleteConfirm(true)} style={{fontSize:11,color:C.red}}>🗑 Delete Permanently</button>}
+          {["director","admin","leadership"].includes(realRole)&&<button className="btn-ghost" onClick={()=>setShowDeleteConfirm(true)} style={{fontSize:11,color:C.red}}>🗑 Delete Permanently</button>}
           <button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 24px"}}>Edit ALP</button>
         </div>}>
 
@@ -6951,8 +7041,8 @@ function ALPBuilder({setPage}){
   const selectedStudent=dbStudents?.[0]||null;
   const ss=selectedStudent;
   const alpStatus=ss?.alp_status||"draft";
-  const isLocked=(alpStatus==="approved"||alpStatus==="in_review")&&!["director","admin"].includes(realRole);
-  const canApprove=["director","admin"].includes(realRole);
+  const isLocked=(alpStatus==="approved"||alpStatus==="in_review")&&!["director","admin","leadership"].includes(realRole);
+  const canApprove=["director","admin","leadership"].includes(realRole);
   const [submitting,setSubmitting]=useState(false);
   const [reviewDecisionNotes,setReviewDecisionNotes]=useState("");
   const [showReviewPanel,setShowReviewPanel]=useState(false);
@@ -6989,10 +7079,11 @@ function ALPBuilder({setPage}){
   }
 
   /* ── Step 1 */
+  const defaultReviewDate=new Date(Date.now()+365*86400000).toISOString().split("T")[0];
   const blankSData={
     firstName:"",lastName:"",dob:"",gender:"",
     grade:"",studentId:"",school:"",
-    enrollDate:"",tier:"Tier 2",photo:null,notes:"",
+    enrollDate:"",reviewDate:defaultReviewDate,tier:"Tier 2",photo:null,notes:"",
     parentName:"",parentEmail:"",
     parentPhone:"",emergencyContact:"",
     /* Step 2 */
@@ -7022,21 +7113,26 @@ function ALPBuilder({setPage}){
     meetingDate:new Date().toISOString().split("T")[0],reviewNotes:"",
   };
 
-  // Pre-fill from selected Supabase student if available
+  // Pre-fill from selected Supabase student if available.
+  // alp_data (JSONB blob) takes precedence for Step 6-9 fields since those
+  // columns don't exist individually — it is merged last so explicit DB
+  // columns (name, DOB, etc.) always win over any stale blob data.
   const prefilled=ss?{
     ...blankSData,
+    ...(ss.alp_data||{}),         // restore Step 6-9 from blob first (may be overridden below)
     firstName:ss.name?.split(" ")[0]||"",
     lastName:ss.name?.split(" ").slice(1).join(" ")||"",
     dob:ss.dob||"",gender:ss.gender||"",grade:ss.grade||"",
     studentId:ss.student_id||"",school:ss.school_name||"",
-    enrollDate:ss.enrollment_date||"",tier:ss.tier||"Tier 2",
+    enrollDate:ss.enrollment_date||"",reviewDate:ss.review_date||defaultReviewDate,tier:ss.tier||"Tier 2",
     parentName:ss.parent_name||"",parentEmail:ss.parent_email||"",
     parentPhone:ss.parent_phone||"",
     strengths:ss.strengths||"",growthAreas:ss.growth_areas||"",
     learningConcerns:ss.concerns||"",interests:ss.interests||"",
     learningStyle:ss.learning_style||"",languages:ss.language||"",
     assessor:user?.email?.split("@")[0]||"",
-    meetingDate:new Date().toISOString().split("T")[0],
+    meetingDate:ss.meeting_date||new Date().toISOString().split("T")[0],
+    reviewNotes:ss.review_notes||"",
   }:blankSData;
 
   const [sData,setSData]=useState(prefilled);
@@ -7051,6 +7147,7 @@ function ALPBuilder({setPage}){
   const completion=Math.round((completedSteps.length/TOTAL)*100);
 
   async function next(){
+    if(!ss?.id&&step>1){toast("No student selected — please go back to Step 1 and select or create a student before continuing","error");return;}
     if(!completedSteps.includes(step)) setCompletedSteps(s=>[...s,step]);
     if(step===TOTAL){
       // Save all goals to Supabase on final step
@@ -7076,6 +7173,8 @@ function ALPBuilder({setPage}){
           parent_phone:sData.parentPhone,notes:sData.notes,
           alp_completed:true,alp_completed_date:new Date().toISOString(),
           review_notes:sData.reviewNotes,meeting_date:sData.meetingDate,
+          review_date:sData.reviewDate||defaultReviewDate,
+          alp_data:sData, // full 10-step blob — preserves Steps 6-9 across sessions
         }).catch(()=>{});
         // Document Version History — immutable snapshot of this completed draft
         await saveVersionSnapshot(ss.id,sData,"Step 10 completed — full ALP draft",alpStatus).catch(()=>{});
@@ -7127,6 +7226,8 @@ function ALPBuilder({setPage}){
               learning_style:sData.learningStyle,language:sData.languages,
               parent_name:sData.parentName,parent_email:sData.parentEmail,
               parent_phone:sData.parentPhone,tier:sData.tier,notes:sData.notes,
+              review_date:sData.reviewDate||defaultReviewDate,
+              alp_data:sData, // full 10-step blob — preserves Steps 6-9 across sessions
             });
             await saveVersionSnapshot(ss.id,sData,`Manual save at Step ${step}`,alpStatus);
             toast("ALP saved to Supabase ✓ — version recorded","success");
@@ -7237,6 +7338,7 @@ function ALPBuilder({setPage}){
                   <UInput label="Student ID" value={sData.studentId} onChange={e=>SD("studentId",e.target.value)}/>
                   <UInput label="School / Organisation" value={sData.school} onChange={e=>SD("school",e.target.value)}/>
                   <UInput label="Enrolment Date" value={sData.enrollDate} onChange={e=>SD("enrollDate",e.target.value)} type="date"/>
+                  <UInput label="Annual Review Date" value={sData.reviewDate} onChange={e=>SD("reviewDate",e.target.value)} type="date" hint="Compliance dashboard tracks this date — set within 12 months"/>
                 </div>
               </div>
               <div className="card" style={{padding:"22px 24px"}}>
@@ -8740,7 +8842,7 @@ function ReviewQueue({setPage}){
   const [busy,setBusy]=useState(false);
   const [tab,setTab]=useState("in_review");
 
-  const isReviewer=["director","admin"].includes(realRole);
+  const isReviewer=["director","admin","leadership"].includes(realRole);
   const queue={
     in_review:(dbStudents||[]).filter(s=>s.alp_status==="in_review"),
     approved:(dbStudents||[]).filter(s=>s.alp_status==="approved"),
@@ -9079,20 +9181,21 @@ function ComplianceDashboard({setPage}){
       .then(pairs=>{setGoalCounts(Object.fromEntries(pairs));setLoading(false);});
   },[dbStudents]);
 
-  const total=dbStudents?.length||0;
+  const activeStudents=(dbStudents||[]).filter(s=>s.alp_status!=="archived");
+  const total=activeStudents.length||0;
   const byStatus={
-    draft:dbStudents?.filter(s=>!s.alp_status||s.alp_status==="draft").length||0,
-    in_review:dbStudents?.filter(s=>s.alp_status==="in_review").length||0,
-    approved:dbStudents?.filter(s=>s.alp_status==="approved").length||0,
-    changes_requested:dbStudents?.filter(s=>s.alp_status==="changes_requested").length||0,
-    archived:dbStudents?.filter(s=>s.alp_status==="archived").length||0,
+    draft:activeStudents.filter(s=>!s.alp_status||s.alp_status==="draft").length||0,
+    in_review:activeStudents.filter(s=>s.alp_status==="in_review").length||0,
+    approved:activeStudents.filter(s=>s.alp_status==="approved").length||0,
+    changes_requested:activeStudents.filter(s=>s.alp_status==="changes_requested").length||0,
+    archived:(dbStudents||[]).filter(s=>s.alp_status==="archived").length||0,
   };
   const completionPct=total>0?Math.round((byStatus.approved/total)*100):0;
-  const overdue=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)<new Date())||[];
-  const dueSoon=dbStudents?.filter(s=>s.review_date&&new Date(s.review_date)>=new Date()&&new Date(s.review_date)<=new Date(Date.now()+30*86400000))||[];
-  const missingGoals=dbStudents?.filter(s=>!goalCounts[s.id])||[];
-  const missingPresentLevels=dbStudents?.filter(s=>!s.strengths&&!s.growth_areas)||[];
-  const missingParentContact=dbStudents?.filter(s=>!s.parent_email&&!s.parent_phone)||[];
+  const overdue=activeStudents.filter(s=>s.review_date&&new Date(s.review_date)<new Date())||[];
+  const dueSoon=activeStudents.filter(s=>s.review_date&&new Date(s.review_date)>=new Date()&&new Date(s.review_date)<=new Date(Date.now()+30*86400000))||[];
+  const missingGoals=activeStudents.filter(s=>!goalCounts[s.id])||[];
+  const missingPresentLevels=activeStudents.filter(s=>!s.strengths&&!s.growth_areas)||[];
+  const missingParentContact=activeStudents.filter(s=>!s.parent_email&&!s.parent_phone)||[];
 
   return(
     <Page title={<>Compliance <span className="serif-italic" style={{color:C.warm,fontSize:26}}>Dashboard</span></>}
@@ -9203,7 +9306,7 @@ function AuditLogPage({setPage}){
   const [loading,setLoading]=useState(true);
   const [filterAction,setFilterAction]=useState("all");
   const [filterStudent,setFilterStudent]=useState("");
-  const isAuthorized=["director","admin"].includes(realRole);
+  const isAuthorized=["director","admin","leadership"].includes(realRole);
 
   useEffect(()=>{
     if(!isAuthorized)return;
@@ -9621,14 +9724,12 @@ function Settings(){
                 </tr></thead>
                 <tbody>
                   {[
-                    ["View all students","✓","✓","Own","Own","Own"],
+                    ["View all students","✓","✓","Own","✓","✓"],
                     ["Create / Edit ALPs","✓","✓","✓","✓","—"],
                     ["Export documents","✓","✓","✓","✓","—"],
                     ["View progress reports","✓","✓","—","—","—"],
                     ["Manage users","✓","—","—","—","—"],
                     ["Billing access","✓","—","—","—","—"],
-                    ["Family portal access","✓","✓","✓","✓","✓"],
-                    ["Send signature requests","✓","✓","✓","—","—"],
                   ].map(([perm,...vals])=>(
                     <tr key={perm}>
                       <td style={{fontWeight:500,color:C.black}}>{perm}</td>
@@ -9764,7 +9865,7 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
   const baseNav=NAV_BY_ROLE[role]||NAV_BY_ROLE.teacher;
   // Review Queue visibility is driven by the REAL authenticated role (profile.role),
   // never the cosmetic "preview as" switcher — so a real director always sees it.
-  const isRealReviewer=["director","admin"].includes(realRole);
+  const isRealReviewer=["director","admin","leadership"].includes(realRole);
   const hasReviewQueueGroup=baseNav.some(g=>g.items.some(i=>i.id==="reviewqueue"));
   const nav=isRealReviewer&&!hasReviewQueueGroup
     ?[{group:"APPROVALS",items:[{id:"reviewqueue",label:"Review Queue",icon:"👁️",badge:"New"},{id:"compliance",label:"Compliance",icon:"📋"},{id:"auditlog",label:"Audit Log",icon:"🔍"}]},...baseNav]
