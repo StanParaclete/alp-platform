@@ -125,15 +125,34 @@ jobs:
             exit 1
           fi
 
-      # Three names for one product reads as carelessness to a district.
-      # An invalid role must fail the invite, never become a teacher.
+      # An invalid role must fail the invite, never quietly become a
+      # teacher account.
+      #
+      # This guard used to grep the migrations for the string "Invalid
+      # role", which was correct when handle_new_user still READ a role
+      # out of signup metadata and had to reject bad values. It no
+      # longer reads one at all — every self-registration is hardcoded
+      # to 'teacher'/'pending' with a null org — so the string vanished
+      # and the guard failed against a schema that is strictly safer
+      # than the one it was written for.
+      #
+      # The defence now lives in two places, and this checks both.
       - name: Invalid roles are rejected, not downgraded
         run: |
-          if ! grep -q "Invalid role" supabase/migrations/*.sql; then
-            echo "::error::handle_new_user no longer rejects unknown roles."
-            echo "An invite carrying role=parent would silently create a teacher account."
-            exit 1
-          fi
+          fail=0
+          grep -q "VALID_ROLES" supabase/functions/invite-user/authorize.ts || {
+            echo "::error::authorize.ts no longer defines a role allow-list."
+            echo "An invite carrying role=parent could reach the database."
+            fail=1; }
+          grep -qE "VALID_ROLES\.includes\(" supabase/functions/invite-user/authorize.ts || {
+            echo "::error::authorize.ts defines VALID_ROLES but never checks against it."
+            fail=1; }
+          grep -qE "values \(new\.id, null, new\.email, v_full_name, 'teacher', 'pending'" \
+            supabase/migrations/*.sql || {
+            echo "::error::handle_new_user no longer hardcodes an unprivileged profile."
+            echo "Self-registration must land as teacher/pending with a null org."
+            fail=1; }
+          exit $fail
 
       # The primary-guardian switch must stay atomic and ownership-checked.
       - name: Primary guardian change is atomic
@@ -203,6 +222,20 @@ jobs:
       # only route into staff access — the authentication boundary for
       # the whole product. Its rules live in authorize.ts precisely so
       # they can be tested; this job is that test.
+      # test:invite bundles with esbuild before running, so this job
+      # needs the dependencies installed. It previously had no Node
+      # setup at all and would have failed on a missing binary rather
+      # than on anything about the code.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: 02-webapp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: 02-webapp
+        run: npm ci
+
       - name: Invitation authorization tests
         working-directory: 02-webapp
         run: npm run test:invite
