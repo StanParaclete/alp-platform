@@ -1,3 +1,19 @@
+// ═══════════════════════════════════════════════════════════════════
+// invite-user — SINGLE FILE, for the Supabase Dashboard editor
+//
+// Identical logic to supabase/functions/invite-user/, with
+// authorize.ts inlined so it can be pasted into the browser editor,
+// which handles one file at a time.
+//
+// The repo remains the source of truth: the dashboard editor has no
+// versioning or rollback, so edit there only to deploy, and make real
+// changes in supabase/functions/invite-user/ where the split-out
+// authorize.ts is unit-tested by 02-webapp/tests/invite-authorization.
+//
+// Deploy: Edge Functions → Deploy a new function → Via Editor →
+//         name it exactly "invite-user" → paste this → Deploy.
+// ═══════════════════════════════════════════════════════════════════
+
 // ════════════════════════════════════════════════════════════
 // ALP Platform — Edge Function: invite-user
 // Fixes F8: InviteUserModal previously had no backend at all
@@ -16,12 +32,97 @@
 //   (SUPABASE_URL is already available automatically in every Edge Function)
 // ════════════════════════════════════════════════════════════
 
-import { authorizeInvite } from "./authorize.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.0";
+
+// ── Inlined from authorize.ts ──────────────────────────────────────
+
+const VALID_ROLES = ["teacher", "director", "admin", "intervention", "related"];
+
+/** Roles permitted to invite anyone at all. */
+const INVITER_ROLES = ["director", "admin"];
+
+/**
+ * Decide whether an invitation may proceed.
+ *
+ * @param caller  {role, orgId, status} — read server-side from profiles
+ * @param request {role, orgId, email}  — from the request body, untrusted
+ * @returns {ok:true, assign:{role, orgId}} | {ok:false, status, error}
+ *
+ * On success `assign` is what the server should write. It is built from
+ * the CALLER's org, never the request's, so a forged org_id cannot move
+ * anyone into another school even if every other check passed.
+ */
+function authorizeInvite(caller, request) {
+  // ── The caller must be a provisioned staff account ──────────────
+  // An unauthenticated caller arrives here as null. A signed-up but
+  // unprovisioned account arrives with status "pending" and no org —
+  // that account can no more invite people than a stranger can.
+  if (!caller) {
+    return { ok: false, status: 401, error: "Sign in to invite staff" };
+  }
+  if (caller.status !== "active" || !caller.orgId) {
+    return {
+      ok: false, status: 403,
+      error: "Your account is not yet assigned to a school",
+    };
+  }
+  if (!INVITER_ROLES.includes(caller.role)) {
+    return {
+      ok: false, status: 403,
+      error: "Only Directors and Administrators can invite staff",
+    };
+  }
+
+  // ── The requested role must be one of the five ──────────────────
+  // Rejected outright, never downgraded to something valid: an invite
+  // that quietly becomes a teacher account is an invite nobody
+  // reviewed.
+  if (!request?.role || !VALID_ROLES.includes(request.role)) {
+    return {
+      ok: false, status: 400,
+      error: `Role must be one of: ${VALID_ROLES.join(", ")}`,
+    };
+  }
+
+  // ── Privilege ceiling ───────────────────────────────────────────
+  // A director inviting an admin, then signing in to that admin
+  // account, is a one-step escalation past their own tier.
+  if (request.role === "admin" && caller.role !== "admin") {
+    return {
+      ok: false, status: 403,
+      error: "Only Administrators can invite other Administrators",
+    };
+  }
+
+  // ── Tenant binding ──────────────────────────────────────────────
+  // A supplied org id is only ever compared, never used. Anything
+  // other than the caller's own org is refused rather than silently
+  // corrected, so a client trying it gets an error instead of a
+  // surprise.
+  if (request.orgId && request.orgId !== caller.orgId) {
+    return {
+      ok: false, status: 403,
+      error: "Cannot invite users into another organisation",
+    };
+  }
+
+  if (!request.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.email)) {
+    return { ok: false, status: 400, error: "A valid email address is required" };
+  }
+
+  return {
+    ok: true,
+    assign: {
+      role: request.role,
+      orgId: caller.orgId,   // the caller's, always — never the request's
+    },
+  };
+}
+
 
 // Five staff roles. Parent/student logins were removed in June 2026 —
 // families receive the approved ALP as a PDF, they do not have accounts.
-const VALID_ROLES = ["teacher", "director", "admin", "intervention", "related"];
+// The single declaration lives in the inlined authorization block below.
 
 // Set ALLOWED_ORIGINS as a comma-separated secret to override.
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ??

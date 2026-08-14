@@ -33,3 +33,9 @@ release/
 .expo/
  # no-op
 02-webapp/dist/
+
+# Credentials
+client_secret*.json
+*credentials*.json
+*.pem
+*.p12

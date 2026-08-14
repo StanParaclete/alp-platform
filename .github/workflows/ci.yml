@@ -1,0 +1,331 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  # ══════════════════════════════════════════════════════════════════
+  # The RLS policies are the only barrier between a public anon key and
+  # every student record. This job is the reason CI exists.
+  # ══════════════════════════════════════════════════════════════════
+  rls-tests:
+    name: RLS policy tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Postgres 16 + pgTAP
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-16 postgresql-16-pgtap
+
+      - name: Start Postgres
+        run: |
+          sudo systemctl start postgresql@16-main || sudo pg_ctlcluster 16 main start
+          sudo -u postgres psql -c "select version();"
+
+      - name: Run RLS tests
+        run: |
+          sudo cp -r supabase /tmp/alp-ci
+          sudo chown -R postgres:postgres /tmp/alp-ci
+          sudo -u postgres bash -c 'cd /tmp/alp-ci && PGHOST=/var/run/postgresql bash tests/run-local.sh'
+
+  guardrails:
+    name: Regression guards
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── The June 2026 product decision ──────────────────────────
+      # Parent and student logins were removed deliberately. Families
+      # receive the approved ALP as a PDF. Guardians are staff-managed
+      # contact records with no accounts.
+      #
+      # This guard exists because that decision is invisible in the
+      # code — nothing looks wrong about adding a "parent" role — and
+      # it has already been reintroduced once by accident on a branch.
+      - name: No parent or student login
+        run: |
+          fail=0
+          if grep -rniE 'id:[[:space:]]*"(parent|family|student|guardian)"' 02-webapp/src; then
+            echo "::error::A parent/student/family login role was reintroduced."
+            echo "Decision: families receive ALP PDFs; guardians are staff-managed records."
+            fail=1
+          fi
+          if grep -rniE "'(parent|student)'" supabase/migrations/*.sql | grep -i "user_role"; then
+            echo "::error::A parent/student value was added to the user_role enum."
+            fail=1
+          fi
+          if ls 02-webapp/src/FamilyPortal.jsx 2>/dev/null; then
+            echo "::error::FamilyPortal.jsx is a parent-facing surface and must not ship."
+            fail=1
+          fi
+          # Guardians must never acquire authentication. `guardian_id`
+          # is deliberately not used anywhere — the consent FK is named
+          # guardian_contact_id so a name like this can only mean auth.
+          if grep -rniE "guardian_id|guardian_?login|guardian_?session|parent_portal|parentLogin" \
+               02-webapp/src supabase/migrations; then
+            echo "::error::Guardian authentication surface detected. Guardians are contact records only."
+            fail=1
+          fi
+          exit $fail
+
+      # A redirect to a host you no longer control is a live risk: if the
+      # project is deleted and the subdomain is later claimed by someone
+      # else, growwithalp.com forwards requests to a stranger. The
+      # Express/Prisma backend that /api/* pointed at no longer exists.
+      - name: No proxy to the retired backend
+        run: |
+          if grep -rniE "railway\.app|alp-backend-production" netlify.toml 02-webapp/src 2>/dev/null \
+             | grep -vE "^[^:]+:[0-9]+:[[:space:]]*#"; then
+            echo "::error::A redirect or call to the retired Railway backend has returned."
+            echo "This build talks to Supabase directly. There is no backend to proxy to."
+            exit 1
+          fi
+
+      # Netlify reads netlify.toml from the repository root. A copy
+      # inside 02-webapp/ declaring base = "02-webapp" is ignored, and
+      # the site silently builds with the dashboard's settings instead.
+      - name: Exactly one netlify.toml, at the repo root
+        run: |
+          fail=0
+          [ -f netlify.toml ] || { echo "::error::netlify.toml is missing from the repo root."; fail=1; }
+          if [ -f 02-webapp/netlify.toml ]; then
+            echo "::error::A second netlify.toml exists in 02-webapp/. Keep one, at the root."
+            fail=1
+          fi
+          exit $fail
+
+      # An API key in a Vite bundle is not a secret: VITE_* is inlined
+      # at build time and ends up readable in dist/.
+      - name: No AI keys in the browser bundle
+        run: |
+          fail=0
+          if grep -rn "api.anthropic.com" 02-webapp/src --include=*.js --include=*.jsx | grep -v "^\s*//" | grep -vE "^[^:]+:[0-9]+:\s*//"; then
+            echo "::error::Direct browser call to the Anthropic API. Use the ai-assist Edge Function."
+            fail=1
+          fi
+          if grep -rniE "VITE_ANTHROPIC|VITE_.*API_KEY|x-api-key" 02-webapp/src; then
+            echo "::error::An API key is being read in client code. Vite inlines VITE_* into the public bundle."
+            fail=1
+          fi
+          exit $fail
+
+      # Terminology has been reverted twice by partial find-and-replace.
+      # "IEP" is allowed only in the deliberate comparison prose that
+      # explains how ALP differs from an IEP.
+      - name: No stray IEP/SPED terminology
+        run: |
+          hits=$(grep -rnE '\b(SPED|Special Ed(ucation)?)\b' 02-webapp/src 02-webapp/index.html || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::Legacy SPED/Special Education terminology. Use ALP / Student Support / SNE."
+            exit 1
+          fi
+
+      # Three names for one product reads as carelessness to a district.
+      # An invalid role must fail the invite, never become a teacher.
+      - name: Invalid roles are rejected, not downgraded
+        run: |
+          if ! grep -q "Invalid role" supabase/migrations/*.sql; then
+            echo "::error::handle_new_user no longer rejects unknown roles."
+            echo "An invite carrying role=parent would silently create a teacher account."
+            exit 1
+          fi
+
+      # The primary-guardian switch must stay atomic and ownership-checked.
+      - name: Primary guardian change is atomic
+        run: |
+          fail=0
+          grep -q "does not belong to student" supabase/migrations/*.sql || {
+            echo "::error::set_primary_guardian no longer verifies guardian ownership."; fail=1; }
+          grep -q "rpc('set_primary_guardian'" 02-webapp/src/supabase.js || {
+            echo "::error::Client is not using the atomic RPC for primary-guardian changes."; fail=1; }
+          exit $fail
+
+      # Parents and students have no application views. Guardian and
+      # meeting-attendee language is legitimate and must stay.
+      - name: No claim that families or students have their own views
+        run: |
+          if grep -rniE "families, students|family portal|parent portal|student portal" \
+               02-webapp/src 02-webapp/index.html; then
+            echo "::error::Public copy claims a parent/student application view that does not exist."
+            exit 1
+          fi
+
+      # raw_user_meta_data is set by the PUBLIC signup endpoint and is
+      # attacker-controlled. Reading role or org_id from it once let a
+      # visitor sign up as admin of an existing school.
+      - name: Signup metadata is never trusted for role or org
+        run: |
+          if grep -nE "meta->>'(role|org_id)'" supabase/migrations/*.sql \
+             | grep -v "^\s*--"; then
+            echo "::error::handle_new_user is reading role/org_id from raw_user_meta_data."
+            echo "That field is attacker-controlled: a public signup could grant itself admin of any school."
+            exit 1
+          fi
+
+      # The third door into privilege escalation, after signup metadata
+      # and the invite endpoint. profiles_update_self constrains WHICH
+      # row you may write, not WHAT you may write into it, so without
+      # this trigger any teacher could PATCH their own row to
+      # role=admin and org_id=<another school> and read that school's
+      # entire caseload. Found by the tenant-isolation probe, Aug 2026.
+      - name: Profile privileges are frozen against client writes
+        run: |
+          fail=0
+          grep -q "guard_profile_privileges" supabase/migrations/*.sql || {
+            echo "::error::The profiles privilege guard is gone."
+            echo "Without it a teacher can PATCH their own profiles row to role=admin, org_id=<any school>."
+            fail=1; }
+          grep -q "profiles_guard_privileges" supabase/migrations/*.sql || {
+            echo "::error::The BEFORE UPDATE trigger on profiles is not being created."; fail=1; }
+          exit $fail
+
+      # Rule 1, client half. The trigger reverts these fields, so a
+      # client that sends them fails silently and confusingly — the
+      # save appears to work and the value does not change. Nothing in
+      # the app has any reason to write them.
+      - name: No client-side writes to privileged profile fields
+        run: |
+          hits=$(grep -rnE "from\('profiles'\)" -A4 02-webapp/src \
+                 | grep -E "\b(role|org_id|status|invited_by)\s*:" || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::Client code is writing a privileged profile field."
+            echo "role/org_id/status are server-controlled — see SECURITY_RULES.md rule 1."
+            exit 1
+          fi
+
+      # Public signup can no longer grant a role, so invite-user is the
+      # only route into staff access — the authentication boundary for
+      # the whole product. Its rules live in authorize.ts precisely so
+      # they can be tested; this job is that test.
+      - name: Invitation authorization tests
+        working-directory: 02-webapp
+        run: npm run test:invite
+
+      - name: One product name
+        run: |
+          if grep -rnE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
+            echo "::error::Use 'Accelerated Learning Plan' — it is the name on the wordmark and the domain."
+            exit 1
+          fi
+
+      # A new table without RLS is readable by anyone holding the anon key.
+      - name: Every public table enables RLS
+        run: |
+          missing=0
+          for t in $(grep -ohE 'create table if not exists public\.[a-z_]+' \
+                       supabase/migrations/*.sql | awk -F'public.' '{print $2}' | sort -u); do
+            if ! grep -qE "alter table public\.$t[[:space:]]+enable row level security" \
+                   supabase/migrations/*.sql; then
+              echo "::error::Table public.$t has no 'enable row level security'."
+              missing=1
+            fi
+          done
+          exit $missing
+
+      # Role ids in the UI must exist in the database enum, or invites
+      # are rejected by the Edge Function with no obvious cause.
+      - name: UI roles match the database enum
+        run: |
+          enum=$(grep -A2 "create type user_role" supabase/migrations/*.sql | grep -oE "'[a-z_]+'" | tr -d "'" | sort -u)
+          fail=0
+          for r in $(grep -oE 'id:"[a-z_]+"' 02-webapp/src/App.jsx | sed 's/id:"//;s/"//' | sort -u); do
+            case " $enum " in
+              *" $r "*) ;;
+              *) if grep -q "id:\"$r\".*label:" 02-webapp/src/App.jsx; then
+                   echo "::warning::UI role '$r' is not in the user_role enum"
+                 fi ;;
+            esac
+          done
+          exit $fail
+
+  # ══════════════════════════════════════════════════════════════════
+  # Tenant isolation. The probe normally runs against a real project
+  # during UAT, which CI cannot do. Instead it runs against a mock that
+  # can be switched between correct and deliberately broken behaviour.
+  #
+  # The second half is the part that matters: a probe that passes
+  # against a leaking database is worse than no probe, because a clean
+  # run gets trusted. If the leaky run does NOT report breaches, the
+  # probe has stopped working and this job fails.
+  # ══════════════════════════════════════════════════════════════════
+  tenant-isolation:
+    name: Tenant isolation probe
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Detector self-test
+        run: node uat/probe-selftest.mjs
+
+      - name: Probe reports clean against a correctly isolated database
+        run: |
+          node uat/mock-supabase.mjs --port 8099 --mode secure &
+          sleep 2
+          SUPABASE_URL=http://localhost:8099 SUPABASE_ANON_KEY=anon \
+          A_EMAIL=a@a.edu A_PASSWORD=pass-a \
+          B_EMAIL=b@b.edu B_PASSWORD=pass-b \
+          FUNCTIONS_URL=http://localhost:8099/functions/v1 \
+          PROBE_SIGNUP_EMAIL=ci-probe@example.invalid \
+          P_EMAIL=p@p.edu P_PASSWORD=pass-p P_EXPECT=pending \
+          node uat/tenant-isolation-probe.mjs --allow-delete
+
+      - name: Probe detects a deliberately leaking database
+        run: |
+          node uat/mock-supabase.mjs --port 8100 --mode leaky &
+          sleep 2
+          set +e
+          SUPABASE_URL=http://localhost:8100 SUPABASE_ANON_KEY=anon \
+          A_EMAIL=a@a.edu A_PASSWORD=pass-a \
+          B_EMAIL=b@b.edu B_PASSWORD=pass-b \
+          FUNCTIONS_URL=http://localhost:8100/functions/v1 \
+          PROBE_SIGNUP_EMAIL=ci-probe-leaky@example.invalid \
+          P_EMAIL=p@p.edu P_PASSWORD=pass-p P_EXPECT=pending \
+          node uat/tenant-isolation-probe.mjs --allow-delete > leaky.log 2>&1
+          code=$?
+          cat leaky.log
+          if [ $code -ne 1 ]; then
+            echo "::error::The probe did not report a breach against a database with NO tenant isolation."
+            echo "The probe is broken. A green run against the real project would mean nothing."
+            exit 1
+          fi
+          echo "Probe correctly reported $(grep -c 'BREACH' leaky.log) breaches."
+
+  build:
+    name: Web app build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: 02-webapp/package-lock.json
+
+      - run: npm ci
+        working-directory: 02-webapp
+
+      - name: Build
+        working-directory: 02-webapp
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder-anon-key
+        run: npm run build
+
+      # Catch the failure mode where a key reaches the shipped bundle
+      # despite the source-level guard above.
+      - name: No secrets in dist
+        working-directory: 02-webapp
+        run: |
+          if grep -rlE "sk-ant-|service_role" dist/ 2>/dev/null; then
+            echo "::error::A secret was found in the built bundle."
+            exit 1
+          fi

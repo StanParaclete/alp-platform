@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, createContext, useRef, useCallback } from "react";
 import * as Supabase from "./supabase.js";
+import { suggestGoals, personaliseGoal, askAlpAi, AiUnavailable } from "./ai.js";
 
 // ═══════════════════════════════════════════════════════════
 // PDF GENERATION — real, professional ALP document export
@@ -11,7 +12,7 @@ async function loadJsPDF() {
   return _jsPDFModule.jsPDF;
 }
 
-async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", school = "" }) {
+async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", school = "", guardians = [] }) {
   const jsPDF = await loadJsPDF();
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const W = doc.internal.pageSize.getWidth();
@@ -68,6 +69,36 @@ async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", 
     ["School", student?.school_name || school], ["Plan Year", student?.plan_year],
     ["Status", (student?.alp_status || "draft").replace("_", " ").toUpperCase()],
   ]);
+
+  // ── Parent / Guardian ──
+  // Read from student_guardians. The primary contact is who this PDF
+  // is addressed to; the database enforces at most one per student via
+  // a partial unique index, so there is no ambiguity to resolve here.
+  if (guardians.length) {
+    const primary = guardians.find(g => g.is_primary) || guardians[0];
+    heading("Parent / Guardian");
+    fieldRow([
+      ["Name", primary.parent_name],
+      ["Relationship", primary.relationship],
+      ["Phone", primary.parent_phone],
+      ["Email", primary.parent_email],
+      ...(primary.address ? [["Address", primary.address]] : []),
+    ]);
+
+    const others = guardians.filter(g => g.id !== primary.id);
+    if (others.length) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9.5); doc.setTextColor(...black);
+      ensureSpace(16); doc.text("Additional contacts:", margin, y); y += 16;
+      others.forEach(g => {
+        ensureSpace(14);
+        doc.setFont("helvetica", "normal"); doc.setTextColor(...warm);
+        doc.text([g.parent_name, g.relationship, g.parent_phone, g.parent_email]
+          .filter(Boolean).join(" · "), margin, y);
+        y += 14;
+      });
+      y += 10;
+    }
+  }
 
   heading("Present Levels");
   body(student?.strengths ? `Strengths: ${student.strengths}` : "Strengths: Not recorded.");
@@ -136,11 +167,13 @@ async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", 
   body(notes || "No notes recorded.");
 
   heading("Parent / Guardian Information & Signatures");
+  const _sig = guardians.find(g => g.is_primary) || guardians[0] || null;
   fieldRow([
     ["Student", student?.name || "—"],
-    ["Parent / Guardian", student?.parent_name || "—"],
-    ["Parent Email", student?.parent_email || "—"],
-    ["Parent Phone", student?.parent_phone || "—"],
+    ["Parent / Guardian", _sig?.parent_name || "—"],
+    ["Relationship", _sig?.relationship || "—"],
+    ["Parent Email", _sig?.parent_email || "—"],
+    ["Parent Phone", _sig?.parent_phone || "—"],
     ["ALP Coordinator", reviewer || "—"],
     ["Date of Meeting", new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })],
   ]);
@@ -687,10 +720,10 @@ function DInput({label,value,onChange,placeholder,type="text"}){return(<div styl
 // ─── ROLE SYSTEM ───────────────────────────────────────────
 const ROLES = [
   {id:"admin",       label:"Administrator",         icon:"🏛",  color:"#DC2626", badge:"ADMIN",    desc:"Full district-level access · All schools · Billing"},
-  {id:"leadership",  label:"Director / School Head",icon:"👔",  color:"#2563EB", badge:"DIRECTOR", desc:"Review Queue · Compliance · Audit Log · Reports"},
+  {id:"director",    label:"Leadership / Director",icon:"👔",  color:"#2563EB", badge:"DIRECTOR", desc:"Review Queue · Compliance · Audit Log · Reports"},
   {id:"teacher",     label:"Teacher",               icon:"👩‍🏫", color:"#7C3AED", badge:"TEACHER",  desc:"Caseload · ALP Builder · Progress monitoring"},
   {id:"intervention",label:"Intervention Specialist",icon:"📊", color:"#D97706", badge:"RTI",      desc:"RTI tiers · Intervention plans · CBM data"},
-  {id:"related",     label:"Related Services",      icon:"🩺",  color:"#16A34A", badge:"SERVICES", desc:"SLP · OT · PT · Session notes · Goal progress"},
+  {id:"related", label:"Related Services",  icon:"🩺",  color:"#16A34A", badge:"SERVICES", desc:"SLP · OT · PT · Session notes · Goal progress"},
 ];
 
 const RoleCtx = createContext({role:"teacher", roleData:ROLES[2], setRole:()=>{}});
@@ -871,31 +904,20 @@ function AIModal({student,onAdd,onClose}){
   async function generate(){
     setLoading(true);setErr(null);setGoals([]);setSelected([]);setGenerated(false);
     try{
-      const r=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-6",
-          max_tokens:1600,
-          system:"You are an expert special education consultant helping teachers write SMART annual goals. Goals must be Specific, Measurable, Achievable, Relevant, and Time-bound. Always include a measurement method. Write in plain language families can understand. Return ONLY valid JSON.",
-          messages:[{role:"user",content:`Write 3 different SMART annual goals for:
-Student: ${student.name||"the student"}, Grade ${student.grade||"K-12"}, ${student.disability||"with special needs"}
-Domain: ${domain.replace(/_/g," ")}
-Current baseline: ${baseline||"below grade level"}
-${context?"Additional context: "+context:""}
-
-Return ONLY this JSON array (no explanation):
-[{"goalText":"By June 2026, [Name] will [observable behaviour] in [conditions] with [accuracy/frequency], as measured by [method].","baseline":"${baseline||"current level"}","target":"specific endpoint","monitoring":"Weekly","domain":"${domain}"}]`}]
-        })
+      // Was a direct browser call to api.anthropic.com with no API key
+      // and no anthropic-version header — a guaranteed 401 in
+      // production. Now routed through the ai-assist Edge Function,
+      // which holds the key. The student's name is no longer sent:
+      // the model returns a [Name] placeholder and we substitute it
+      // here, so no student PII leaves our systems for this feature.
+      const raw=await suggestGoals({
+        grade:student.grade, disability:student.disability,
+        domain, baseline, context,
       });
-      const d=await r.json();
-      const raw=(d.content&&d.content[0]?d.content[0].text:null)||"[]";
-      const m=raw.match(/\[[\s\S]*\]/);
-      if(!m)throw new Error("Invalid response");
-      setGoals(JSON.parse(m[0]));
+      setGoals(raw.map(g=>({...g,goalText:personaliseGoal(g.goalText,student.name)})));
       setGenerated(true);
     }catch(e){
-      setErr("Could not generate goals. Check your internet connection and try again.");
+      setErr(e instanceof AiUnavailable ? e.message : "Could not generate goals. Please try again.");
     }
     setLoading(false);
   }
@@ -1026,7 +1048,7 @@ function DownloadModal({onClose}){
           ))}
         </div>
         <div style={{padding:"14px 16px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,marginBottom:20}}>
-          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free forever for individual teachers  ·  ✓ Offline access  ·  ✓ Auto-updates  ·  ✓ Sync across devices</p>
+          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free plan for schools — access through your school  ·  ✓ Offline access  ·  ✓ Auto-updates  ·  ✓ Sync across devices</p>
         </div>
         <button onClick={onClose} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:99,padding:"9px 28px",fontSize:12,color:"rgba(255,255,255,.5)",cursor:"pointer",transition:"all .15s"}}
           onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.12)";e.currentTarget.style.color="#fff";}}
@@ -1118,15 +1140,15 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
   ];
   const caseTools=[
     {icon:"📋",name:"ALP Caseload Command",desc:"Your entire caseload — every student, every program, every deadline — in one calm, clear dashboard. Filter by intervention tier, review date, or status. Know exactly where every student stands, every day."},
-    {icon:"📸",name:"ALP Student Snapshot",desc:"A one-page, printable overview of every student's ALP — built for the whole school, not just the SPED team. Every general education teacher knows exactly who needs support, what accommodations apply, and how to help."},
+    {icon:"📸",name:"ALP Student Snapshot",desc:"A one-page, printable overview of every student's ALP — built for the whole school, not just the ALP team. Every classroom teacher knows exactly who needs support, what accommodations apply, and how to help."},
     {icon:"📅",name:"ALP Review Meetings",desc:"Schedule ALP review meetings and team check-ins. Use the ALP Support Notice to generate formal meeting notices and send them to parents. Keep every review on time, every year."},
     {icon:"🧮",name:"ALP Accommodations Hub",desc:"Every student, every accommodation, every assessment — in one master view. Share the Accommodations Hub with your entire school staff so every teacher knows exactly what every learner needs, every day."},
     {icon:"🔒",name:"ALP Privacy Shield",desc:"Student data is sensitive. ALP Privacy Shield gives administrators full control over who sees what — role-based permissions, audit trails on every action, and privacy standards/secure data handling built in from day one."},
-    {icon:"📤",name:"ALP Document Exporter",desc:"Export any Adaptive Learning Program as a professionally formatted, audit-ready PDF or Word document in one click. Timestamped, formatted and ready — ready to send to families, district offices, or government agencies instantly."},
+    {icon:"📤",name:"ALP Document Exporter",desc:"Export any Accelerated Learning Plan as a professionally formatted, audit-ready PDF or Word document in one click. Timestamped, formatted and ready — ready to send to families, district offices, or government agencies instantly."},
   ];
   const frameworks=[
     {f:"🇺🇸",n:"ALP standards (USA)",d:"All 50 states"},{f:"🇺🇸",n:"Support Plans",d:"ADA Support Plans"},
-    {f:"🇬🇭",n:"Ghana",d:"SPED Framework"},{f:"🇳🇬",n:"Nigeria",d:"SPED Policy"},
+    {f:"🇬🇭",n:"Ghana",d:"SNE Framework"},{f:"🇳🇬",n:"Nigeria",d:"SNE Policy"},
     {f:"🇰🇪",n:"Kenya",d:"Inclusive Ed"},{f:"🇿🇦",n:"WCED S.Africa",d:"SIAS Framework"},
     {f:"🇬🇧",n:"UK",d:"Code of Practice"},{f:"🇨🇦",n:"Canada",d:"Provincial IEPs"},
     {f:"🇦🇺",n:"Australia",d:"Disability Std"},{f:"🌍",n:"Custom",d:"Any framework"},
@@ -1161,7 +1183,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
             </div>
             <button className="btn-purple" onClick={onSignup||onEnter} style={{fontSize:11,padding:"12px 24px",flexShrink:0}}>Try Now, It's Free!</button>
           </div>
-          <p style={{fontSize:15,color:C.warm,marginBottom:36,maxWidth:620,lineHeight:1.7}}>Eight purpose-built tools in the ALP AI Intelligence Suite — designed exclusively for Adaptive Learning Programs. Every tool is free for individual teachers, forever. Powered by ALP AI to save you hours each week.</p>
+          <p style={{fontSize:15,color:C.warm,marginBottom:36,maxWidth:620,lineHeight:1.7}}>Eight purpose-built tools in the ALP AI Intelligence Suite — designed exclusively for Accelerated Learning Plans. Every tool is free for individual teachers, forever. Powered by ALP AI to save you hours each week.</p>
           <hr className="rule" style={{marginBottom:36}}/>
           <div className="r-feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
             {aiTools.map(t=>(
@@ -1277,7 +1299,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
           </div>
           <div className="card" style={{padding:"28px",background:C.purpleL}}>
             <p className="lbl" style={{marginBottom:16,color:C.purple}}>PROGRESS OVERVIEW — MARCUS JOHNSON</p>
-            {[["Annual Goals (3 of 3)","✓ Complete",C.green],["Present Levels","✓ Complete",C.green],["Special Ed Services","✓ Complete",C.green],["Related Services","✓ Complete",C.green],["Accommodations","✓ Complete",C.green],["Transition Planning","⚠️ Section 16 missing age",C.amber],["Family Signature","⏳ Awaiting response",C.amber],["Assessment Participation","✓ Complete",C.green]].map(([item,status,color])=>(
+            {[["Annual Goals (3 of 3)","✓ Complete",C.green],["Present Levels","✓ Complete",C.green],["Student Support Services","✓ Complete",C.green],["Related Services","✓ Complete",C.green],["Accommodations","✓ Complete",C.green],["Transition Planning","⚠️ Section 16 missing age",C.amber],["Family Signature","⏳ Awaiting response",C.amber],["Assessment Participation","✓ Complete",C.green]].map(([item,status,color])=>(
               <div key={item} style={{display:"flex",justifyContent:"space-between",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,fontSize:13}}>
                 <span style={{color:C.black}}>{item}</span>
                 <span style={{color,fontWeight:600}}>{status}</span>
@@ -1317,7 +1339,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
           </h2>
           <p style={{fontSize:15,color:"rgba(255,255,255,.5)",maxWidth:560,margin:"0 auto 40px",lineHeight:1.7}}>Switch frameworks in one click. ALP adapts to your country's documentation requirements automatically.</p>
           <div style={{display:"flex",justifyContent:"center",flexWrap:"wrap",gap:12}}>
-            {[["🇺🇸","USA","ALP standards · Support Plans"],["🇬🇭","Ghana","Inclusive Ed Policy"],["🇬🇧","UK","EHC Plan · Code of Practice"],["🇳🇬","Nigeria","National Special Ed Policy"],["🇰🇪","Kenya","SNE Policy Framework"],["🇨🇦","Canada","Provincial IEP Standards"],["🇦🇺","Australia","Nationally Consistent Collection"],["🌍","Africa Regional","Multi-country NGO plans"]].map(([flag,country,framework])=>(
+            {[["🇺🇸","USA","ALP standards · Support Plans"],["🇬🇭","Ghana","Inclusive Ed Policy"],["🇬🇧","UK","EHC Plan · Code of Practice"],["🇳🇬","Nigeria","National Special Needs Education Policy"],["🇰🇪","Kenya","SNE Policy Framework"],["🇨🇦","Canada","Provincial Learning Plan Standards"],["🇦🇺","Australia","Nationally Consistent Collection"],["🌍","Africa Regional","Multi-country NGO plans"]].map(([flag,country,framework])=>(
               <div key={country} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(124,58,237,.25)",borderRadius:14,padding:"18px 20px",minWidth:140,textAlign:"center"}}>
                 <div style={{fontSize:28,marginBottom:8}}>{flag}</div>
                 <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:3}}>{country}</div>
@@ -1334,7 +1356,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
           <h2 className="serif" style={{fontSize:"clamp(28px,5vw,52px)",fontWeight:800,color:"#fff",letterSpacing:"-1.5px",lineHeight:1.08,marginBottom:16}}>
             Start building better<br/><span className="serif-italic" style={{color:"#DDD6FE"}}>plans today.</span>
           </h2>
-          <p style={{fontSize:16,color:"rgba(255,255,255,.7)",marginBottom:32,lineHeight:1.7}}>Free for individual teachers. Forever. No credit card.</p>
+          <p style={{fontSize:16,color:"rgba(255,255,255,.7)",marginBottom:32,lineHeight:1.7}}>Free plan available for schools. Forever. No credit card.</p>
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
             <button onClick={onSignup} style={{fontSize:14,padding:"15px 36px",borderRadius:99,background:"#fff",color:C.purple,fontWeight:700,border:"none",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="scale(1.03)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>Get Started Free →</button>
             <button onClick={onDemo} style={{fontSize:13,padding:"14px 28px",borderRadius:99,background:"rgba(255,255,255,.15)",color:"#fff",border:"1px solid rgba(255,255,255,.3)",cursor:"pointer",fontWeight:600}}>Book a Demo</button>
@@ -1351,10 +1373,10 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
 // ═══════════════════════════════════════════════════════════════════
 function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
   const roles=[
-    {icon:"👩‍🏫",title:"Special Education Teacher",sub:"Reduce paperwork, increase student outcomes.",color:"#7C3AED",bg:"#EDE9FE",
+    {icon:"👩‍🏫",title:"ALP Teacher",sub:"Reduce paperwork, increase student outcomes.",color:"#7C3AED",bg:"#EDE9FE",
      desc:"You spend hours on documentation that could be spent with students. ALP cuts writing time from 2 hours to 20 minutes — with AI doing the heavy lifting on goals, BIPs, and present levels.",
      features:["Build complete ALPs in 20 min","AI ALP Goal Architect, ALP Behaviour Blueprint, ALP Present Levels Coach","Caseload dashboard — all students in one view","Progress monitoring with CBM auto-alerts","Professional PDF export for sharing with families"]},
-    {icon:"🎓",title:"Special Education Director",sub:"Increase quality, ensure consistency, support your team at scale.",color:"#2563EB",bg:"#DBEAFE",
+    {icon:"🎓",title:"ALP Director",sub:"Increase quality, ensure consistency, support your team at scale.",color:"#2563EB",bg:"#DBEAFE",
      desc:"Real-time plan visibility across every teacher and student in your school or district. Know exactly who needs attention — before the auditor arrives.",
      features:["School-wide progress dashboard","Overdue review date alerts","Audit-ready one-click reports","Staff caseload visibility & management","privacy standards & data privacy certified"]},
     {icon:"🏫",title:"Gen-Ed Teacher",sub:"Tools to support ALL of your students.",color:"#16A34A",bg:"#DCFCE7",
@@ -1601,12 +1623,12 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
     {f:"ALP Student Snapshot",a:"✓ Pro & above",p:"✓ Pro & above"},
     {f:"ALP Accommodations Hub",a:"✓ School & above",p:"✓ School & above"},
     {f:"Age Range",a:"Birth–22+",p:"Ages 5–21 only"},
-    {f:"Price for SPED teams",a:"$9/mo",p:"$10–15/mo"},
+    {f:"Price for student support teams",a:"$9/mo",p:"$10–15/mo"},
   ];
 
   const faqs=[
     {q:"Is ALP really free for individual teachers?",a:"Yes. All 8 tools in the ALP AI Intelligence Suite are free for individual teachers, forever: ALP Goal Architect, ALP Present Levels Coach, ALP Behaviour Blueprint, ALP Reading Adapter, ALP Intervention Planner, ALP Progress Probe Generator, ALP Learner Profile Builder, and ALP Lesson Differentiator. We believe educators deserve support, not paywalls."},
-    {q:"How does ALP compare to other learning plan software?",a:"ALP's Professional plan starts at $9/month and includes features most IEP software charges extra for — global support frameworks (Ghana GES, Nigeria, UK, and more), a guided 10-step ALP workflow, director approval workflow, compliance dashboard, real-time progress tracking, and professional PDF export. All included at one price."},
+    {q:"How does ALP compare to other learning plan software?",a:"ALP's Professional plan starts at $9/month and includes features most learning-plan software charges extra for — global support frameworks (Ghana GES, Nigeria, UK, and more), a guided 10-step ALP workflow, director approval workflow, compliance dashboard, real-time progress tracking, and professional PDF export. All included at one price."},
     {q:"Is there a free trial on paid plans?",a:"Yes — every paid plan comes with a 14-day free trial. No credit card required. You get full access to all features during the trial period."},
     {q:"Do you support Ghana or Nigeria educators?",a:"Yes — ALP was built with African and global schools in mind from day one. We support Ghana, Nigeria, Kenya, WCED South Africa, UK, Australia NCCD, and all US frameworks (ALP standards, Support Plans) out of the box."},
     {q:"Can I use ALP for students from birth to age 22?",a:"Absolutely. ALP supports early intervention (birth–3), preschool (ages 3–5), school age (6–13), transition (14–21), and adult transition (18–22+). The ALP Builder automatically adjusts required sections and requirements based on the student's age."},
@@ -1738,15 +1760,15 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
     {icon:"📈",tag:"GUIDE",title:"Progress Monitoring 101",desc:"Understanding CBM, trendlines, and when to intervene. Set up your data system and read the charts.",time:"12 min read",color:"#16A34A"},
     {icon:"📄",tag:"GUIDE",title:"Sharing Approved ALPs with Families",desc:"How to export, print, and deliver completed ALP PDFs to parents and guardians — no parent login required.",time:"5 min"},
     {icon:"⚖️",tag:"GUIDE",title:"ALP Plan Reviewiew Checklist (USA)",desc:"Every required element for a effective ALP under ALP standards and Support Plans.",time:"15 min read",color:"#DC2626"},
-    {icon:"🌍",tag:"GUIDE",title:"Ghana SPED Framework Guide",desc:"Building ALPs aligned to the Ghana Education Service's SPED framework and inclusive education policy.",time:"12 min read",color:"#0891B2"},
+    {icon:"🌍",tag:"GUIDE",title:"Ghana SNE Framework Guide",desc:"Building ALPs aligned to the Ghana Education Service's SNE framework and inclusive education policy.",time:"12 min read",color:"#0891B2"},
     {icon:"🧠",tag:"AI GUIDE",title:"Writing Better BIPs with AI",desc:"How to use the ALP Behaviour Blueprint to create comprehensive behavior intervention plans in minutes.",time:"9 min read",color:C.purple},
     {icon:"⚡",tag:"TUTORIAL",title:"ALP Intervention Planner — Tier 1, 2 & 3",desc:"Build structured interventions for every learner tier using the ALP Intervention Planner. Includes real examples for reading, math, behavior, and social-emotional learning across all age groups.",time:"11 min read",color:"#16A34A"},
-    {icon:"📰",tag:"GUIDE",title:"ALP vs Traditional Plans — What's the Difference?",desc:"A clear explanation of how the Adaptive Learning Program differs from traditional learning plans and why it matters globally.",time:"6 min read",color:"#6B7280"},
+    {icon:"📰",tag:"GUIDE",title:"ALP vs Traditional Plans — What's the Difference?",desc:"A clear explanation of how the Accelerated Learning Plan differs from traditional learning plans and why it matters globally.",time:"6 min read",color:"#6B7280"},
   ];
   const workshops=[
     {icon:"🖥",title:"ALP AI Tools for Educators",date:"Every Tuesday · 4:00 PM EST",desc:"Live workshop on using ALP's ALP AI Intelligence Suite for goal writing, BIPs, and progress monitoring. Free for all educators.",cta:"Register Free"},
     {icon:"🌍",title:"ALP for African Schools",date:"Every Thursday · 3:00 PM WAT",desc:"Focused on Ghana, Nigeria, and Kenya frameworks. Presented in English with open Q&A.",cta:"Register Free"},
-    {icon:"📊",title:"Progress Monitoring Masterclass",date:"1st Friday of month · 2:00 PM EST",desc:"Deep dive into CBM, trendline analysis, and data-driven decision making for SPED educators worldwide.",cta:"Register Free"},
+    {icon:"📊",title:"Progress Monitoring Masterclass",date:"1st Friday of month · 2:00 PM EST",desc:"Deep dive into CBM, trendline analysis, and data-driven decision making for ALP educators worldwide.",cta:"Register Free"},
   ];
   const videos=[
     {title:"ALP Platform — 3 Minute Overview",desc:"Every major feature in 3 minutes.",dur:"3:14",icon:"🎬"},
@@ -1902,7 +1924,7 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
               {icon:"📊",title:"Progress Monitoring Masterclass",date:"1st Fri · 2 PM EST",desc:"CBM, trendlines, 3-point rule.",cta:"Register",live:true},
               {icon:"✅",title:"ALP Essentials",date:"Recorded · 58 min",desc:"various regions.",cta:"Watch",live:false},
               {icon:"❤️",title:"Family Engagement",date:"Recorded · 42 min",desc:"Portal, signatures, engagement.",cta:"Watch",live:false},
-              {icon:"🤖",title:"AI Tools for SPED",date:"Recorded · 34 min",desc:"Goal Architect, Coach, Blueprint.",cta:"Watch",live:false},
+              {icon:"🤖",title:"AI Tools for Student Support",date:"Recorded · 34 min",desc:"Goal Architect, Coach, Blueprint.",cta:"Watch",live:false},
               {icon:"🌍",title:"Global Progress Review Workshop",date:"Recorded · 61 min",desc:"GES, NERDC, UK, KICD.",cta:"Watch",live:false},
             ].map(w=>(
               <div key={w.title} className="card" style={{padding:"20px",position:"relative"}}>
@@ -1940,7 +1962,7 @@ After 6–8 data points, draw a line of best fit through your data. Compare it t
 The 3-point rule: if 3 data points in a row are below the goal line, change the intervention. If 3 points are above, consider raising the goal.
 
 ALP's Progress Monitoring dashboard does all of this automatically — trendlines, alerts, and decision rules are built in.`},
-  "Writing SMART Goals":{tag:"GUIDE",time:"8 min read",color:"#7C3AED",body:`SMART goals are the foundation of every effective Adaptive Learning Program. SMART stands for Specific, Measurable, Achievable, Relevant, and Time-bound.
+  "Writing SMART Goals":{tag:"GUIDE",time:"8 min read",color:"#7C3AED",body:`SMART goals are the foundation of every effective Accelerated Learning Plan. SMART stands for Specific, Measurable, Achievable, Relevant, and Time-bound.
 
 **The anatomy of a SMART goal**
 Every ALP goal should follow this structure: "By [date], [student name] will [behaviour] with [criterion], as measured by [method], across [settings/trials]."
@@ -1959,7 +1981,7 @@ Every ALP goal should follow this structure: "By [date], [student name] will [be
 
 ALP's AI Goal Architect generates SMART goals automatically from your baseline data.`},
   "Global Progress Review Frameworks":{tag:"GUIDE",time:"10 min read",color:"#2563EB",body:`ALP supports multi-region support. Here is what each one requires:\n\n**ALP standards (USA)**\nThe Individuals with Disabilities Education Act requires schools to provide a Free Appropriate Public Education (FAPE) to eligible students with disabilities. A complete IEP/ALP must include: present levels of academic achievement, measurable annual goals, description of services, participation in state assessments, and transition planning for students 16+.\n\n**Ghana**\nGhana Education Service requires the Inclusive Education Policy to be followed. An ALP must document the student's learning profile, adapted curriculum, support services, and family engagement plan.\n\n**UK Code of Practice**\nThe Education, Health and Care (EHC) plan replaces the old statement of SEN. It must cover all areas of a child's life — education, health, and social care — and be person-centred.\n\n**Nigeria**\nThe National Educational Research and Development Council guidelines require documentation of the learner's needs assessment, individualized support plan, and regular review meetings with families.\n\nALP automatically checks your plan against your configured framework and flags any missing elements before your review date.`},
-  "ALP vs Traditional Plans — What's the Difference?":{tag:"GUIDE",time:"6 min read",color:"#6B7280",body:`The Adaptive Learning Program (ALP) is not just another name for an IEP or learning plan. It is a globally-designed, AI-powered framework for documenting and monitoring the progress of any student with structured learning needs — regardless of country, disability label, or age.
+  "ALP vs Traditional Plans — What's the Difference?":{tag:"GUIDE",time:"6 min read",color:"#6B7280",body:`The Accelerated Learning Plan (ALP) is not just another name for an IEP or learning plan. It is a globally-designed, AI-powered framework for documenting and monitoring the progress of any student with structured learning needs — regardless of country, disability label, or age.
 
 **Traditional learning plans** (IEPs, EHCPs, SLPs) are typically:
 - Paper-based or locked in proprietary software
@@ -2050,7 +2072,7 @@ function StudentDetailModal({student,onClose,onOpenALP}){
           {/* Info */}
           <div style={{marginBottom:20}}>
             <p className="lbl" style={{marginBottom:12}}>Student Information</p>
-            {[["School",student.school_name||"Not set"],["Teacher",student.teacher_name||"Not assigned"],["Services",student.services||"Not recorded"],["Accommodations",student.accommodations?.length?student.accommodations.join(" · "):"Not recorded"],["Emergency Contact",student.parent_phone?`Parent — ${student.parent_phone}`:"Not recorded"]].map(([k,v])=>(
+            {[["School",student.school_name||"Not set"],["Teacher",student.teacher_name||"Not assigned"],["Services",student.services||"Not recorded"],["Accommodations",student.accommodations?.length?student.accommodations.join(" · "):"Not recorded"],["Emergency Contact","See guardian contacts"]].map(([k,v])=>(
               <div key={k} style={{display:"flex",gap:12,padding:"9px 0",borderBottom:`1px solid ${C.tanL}`}}>
                 <span style={{fontSize:12,fontWeight:700,color:C.warm,width:140,flexShrink:0}}>{k}</span>
                 <span style={{fontSize:13,color:C.black}}>{v}</span>
@@ -2104,7 +2126,7 @@ function InviteUserModal({onClose}){
     {id:"director",label:"Director / School Head",icon:"🏫",desc:"Review Queue, approvals, compliance oversight"},
     {id:"admin",label:"Administrator",icon:"📋",desc:"User management, system settings, security"},
     {id:"intervention",label:"Intervention Specialist",icon:"📊",desc:"RTI tiers, intervention plans, CBM data"},
-    {id:"related_service",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT — service session tracking"},
+    {id:"related",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT — service session tracking"},
   ];
 
   const [sendErrors,setSendErrors]=useState([]);
@@ -2421,21 +2443,16 @@ function AIChatWidget({onClose}){
     setMsgs(m=>[...m,{role:"user",text:userMsg}]);
     setLoading(true);
     try{
-      const r=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-6",
-          max_tokens:500,
-          system:"You are ALP AI — a warm, expert assistant for special education teachers using the ALP (Accelerated Learning Program) platform. Help with SMART goals, present levels, intervention strategies, ALP sections, and planning questions. Be concise (under 120 words), use bullet points for lists, and always be encouraging. Never use regulatory or legal language. Focus on practical, teacher-friendly advice.",
-          messages:[...msgs.filter(m=>m.role!=="assistant"||msgs.indexOf(m)>0).map(m=>({role:m.role,content:m.text})),{role:"user",content:userMsg}]
-        })
-      });
-      const d=await r.json();
-      const reply=(d.content&&d.content[0]?d.content[0].text:null)||"I couldn't process that. Please try again.";
+      // Routed through the ai-assist Edge Function — see note above.
+      const reply=await askAlpAi([
+        ...msgs.map(m=>({role:m.role,content:m.text})),
+        {role:"user",content:userMsg},
+      ]);
       setMsgs(m=>[...m,{role:"assistant",text:reply}]);
     }catch(e){
-      setMsgs(m=>[...m,{role:"assistant",text:"⚠️ Connection issue. Check your internet and try again — or ask a simpler question.",isError:true}]);
+      setMsgs(m=>[...m,{role:"assistant",
+        text:e instanceof AiUnavailable ? e.message
+          : "Connection issue. Check your internet and try again.",isError:true}]);
     }
     setLoading(false);
   }
@@ -2671,7 +2688,7 @@ function MeetingSchedulerModal({onClose}){
 
   const meetingTypes=["Annual Review","Progress Check","Goal Review","Initial Evaluation","Re-evaluation","Team Meeting","Parent Conference","Transition Planning"];
   const timeSlots=["08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30"];
-  const families=(dbStudents||[]).map(s=>[s.id,`${s.name} — ${s.parent_name||s.name.split(" ")[1]||"Family"}`]);
+  const families=(dbStudents||[]).map(s=>[s.id,`${s.name} — Family`]);
 
   function schedule(){
     setSending(true);
@@ -3354,7 +3371,7 @@ function ContactModal({onClose,type="demo"}){
           </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}}>
             <USelect label="Your Role" value={form.role} onChange={e=>set("role",e.target.value)}
-              options={[["teacher","SPED Teacher"],["director","SPED Director"],["admin","School Admin"],["slp","Related Services"],["other","Other"]].map(([v,l])=>({value:v,label:l}))}/>
+              options={[["teacher","ALP Teacher"],["director","ALP Director"],["admin","School Admin"],["slp","Related Services"],["other","Other"]].map(([v,l])=>({value:v,label:l}))}/>
             <USelect label="Number of Students" value={form.students} onChange={e=>set("students",e.target.value)}
               options={["1-10","11-50","51-200","201-500","500+"].map(v=>({value:v,label:v}))}/>
           </div>
@@ -3391,8 +3408,12 @@ function SignUp({onLogin,onBack}){
   async function handleCreate(){
     if(!form.name||!form.email||!form.password)return;
     setLoading(true);
+    // No role and no org_id are sent. The server ignores both from the
+    // public signup endpoint — they are attacker-controlled there —
+    // and passing them anyway would imply to the next reader that they
+    // do something.
     const {data,error:e}=await Supabase.signUp(form.email,form.password,{
-      full_name:form.name, role:form.role, school:form.school
+      full_name:form.name, school:form.school
     });
     setLoading(false);
     if(e){
@@ -3417,9 +3438,9 @@ function SignUp({onLogin,onBack}){
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,46px)",fontWeight:800,color:"#fff",lineHeight:1.1,marginBottom:20,letterSpacing:"-1px"}}>
             Join educators<br/><span style={{color:"#A78BFA"}}>building better plans.</span>
           </h2>
-          <p style={{fontSize:14,color:"rgba(255,255,255,.55)",lineHeight:1.75,maxWidth:360,marginBottom:40}}>Build effective Adaptive Learning Programs in minutes. Free forever for individual teachers — no credit card required.</p>
+          <p style={{fontSize:14,color:"rgba(255,255,255,.55)",lineHeight:1.75,maxWidth:360,marginBottom:40}}>Build effective Accelerated Learning Plans in minutes. Free plan for schools — access through your school — no credit card required.</p>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
-            {[["✓ Free forever for individual teachers",""],["✓ AI tools included — no extra cost",""],["✓ various regions & more",""],["✓ Set up in under 5 minutes",""]].map(([t])=>(
+            {[["✓ Free plan for schools — access through your school",""],["✓ AI tools included — no extra cost",""],["✓ various regions & more",""],["✓ Set up in under 5 minutes",""]].map(([t])=>(
               <div key={t} style={{display:"flex",alignItems:"center",gap:10,fontSize:13,color:"rgba(255,255,255,.7)"}}><span style={{color:"#A78BFA",fontWeight:700}}>{t.slice(0,1)}</span>{t.slice(2)}</div>
             ))}
           </div>
@@ -3476,7 +3497,27 @@ function SignUp({onLogin,onBack}){
               <UInput label="Full Name" value={form.name} onChange={e=>set("name",e.target.value)} placeholder="Full name"/>
               <UInput label="School Email" value={form.email} onChange={e=>set("email",e.target.value)} type="email" placeholder="you@school.edu"/>
               <UInput label="School / Organisation" value={form.school} onChange={e=>set("school",e.target.value)} placeholder="Your school or organisation name"/>
-              <USelect label="Your Role" value={form.role} onChange={e=>set("role",e.target.value)} options={[{value:"teacher",label:"Teacher"},{value:"director",label:"Director / School Head"},{value:"admin",label:"Administrator"},{value:"intervention",label:"Intervention Specialist"},{value:"related_service",label:"Related Services (SLP/OT/PT)"}]}/>
+              {/* ── No role selector here, deliberately ──────────────
+                  A public signup form must never offer "Administrator"
+                  or "Director" to whoever is on the other end of it.
+                  The server already ignores any role in the signup
+                  payload, so this dropdown could not actually grant
+                  anything — but leaving it would still be dishonest:
+                  someone picks Administrator and silently receives a
+                  pending teacher account.
+
+                  It is also the affordance that made the original
+                  privilege-escalation hole obvious to anyone who
+                  opened the page. Your role is assigned by your school
+                  when they provision your account. */}
+              <div style={{padding:"12px 14px",background:C.purpleL,borderRadius:9,
+                border:`1px solid ${C.border}`}}>
+                <p style={{fontSize:12,color:C.purpleD,lineHeight:1.6,margin:0}}>
+                  Your role is set by your school when they add you to their ALP
+                  workspace. If your school already uses ALP, ask your director
+                  to send you an invitation instead.
+                </p>
+              </div>
               <div>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span className="lbl" style={{fontSize:9}}>Password</span><span onClick={()=>setShowPw(s=>!s)} style={{fontSize:11,color:C.purple,cursor:"pointer"}}>{showPw?"Hide":"Show"}</span></div>
                 <input className="u-input" type={showPw?"text":"password"} value={form.password} onChange={e=>set("password",e.target.value)} placeholder="At least 8 characters"/>
@@ -3645,7 +3686,7 @@ function RelatedServicesDashboard({setPage}){
 
   const caseload=(dbStudents||[]).map(s=>{
     const pct=s.current_pct||0;
-    return{id:s.id,name:s.name,grade:s.grade||"–",disability:s.disability||"ALP",service:"Related Services",freq:"Per IEP",goal:s.strengths?s.strengths.slice(0,40)+"…":"Not yet set",progress:pct,trend:pct>=70?"↑":pct>=40?"→":"↓"};
+    return{id:s.id,name:s.name,grade:s.grade||"–",disability:s.disability||"ALP",service:"Related Services",freq:"Per ALP",goal:s.strengths?s.strengths.slice(0,40)+"…":"Not yet set",progress:pct,trend:pct>=70?"↑":pct>=40?"→":"↓"};
   });
   const total=caseload.length;
   const goalsMet=total>0?Math.round(caseload.reduce((a,c)=>a+c.progress,0)/total):0;
@@ -4641,8 +4682,8 @@ function ALPPrintPreview({onClose,student,goals}){
         <div style={{padding:"48px 56px",fontFamily:"'Georgia',serif",color:"#111"}}>
           {/* Header */}
           <div style={{textAlign:"center",borderBottom:"3px solid #1a1a2e",paddingBottom:24,marginBottom:28}}>
-            <div style={{fontSize:9,letterSpacing:".2em",color:"#666",marginBottom:8,textTransform:"uppercase"}}>{studentData.school} · Special Education Department</div>
-            <h1 style={{fontSize:26,fontWeight:700,margin:"0 0 6px",letterSpacing:"-.5px"}}>Adaptive Learning Program</h1>
+            <div style={{fontSize:9,letterSpacing:".2em",color:"#666",marginBottom:8,textTransform:"uppercase"}}>{studentData.school} · Student Support Department</div>
+            <h1 style={{fontSize:26,fontWeight:700,margin:"0 0 6px",letterSpacing:"-.5px"}}>Accelerated Learning Plan</h1>
             <div style={{fontSize:11,color:"#666"}}>Academic Year {studentData.year} · Annual Program Document</div>
           </div>
 
@@ -5088,7 +5129,7 @@ function OnboardingModal({onClose,setPage}){
     {id:"director",label:"Director / School Head",icon:"🏫",desc:"Review Queue & approvals"},
     {id:"admin",label:"Administrator",icon:"📋",desc:"Staff & system management"},
     {id:"intervention",label:"Intervention Specialist",icon:"📊",desc:"RTI tiers & CBM data"},
-    {id:"related_service",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT support"},
+    {id:"related",label:"Related Services",icon:"🗣",desc:"SLP, OT, PT support"},
   ];
 
   function finish(){
@@ -5481,7 +5522,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
               {icon:"📄",title:"PDF Export",desc:"Professional ALP documents ready to print, email, or archive — generated from real student data.",color:C.green},
               {icon:"✅",title:"Progress Engine",desc:"10+ global frameworks. Real-time tracking flags missing elements before reviews.",color:C.amber},
               {icon:"📋",title:"13-Section Builder",desc:"Complete adaptive learning program in one guided flow. Every section, every field.",color:C.red},
-              {icon:"👥",title:"Multi-Role System",desc:"Teachers, directors, admins, families, students — each with their own view.",color:C.purple},
+              {icon:"👥",title:"Multi-Role System",desc:"Teachers, directors, administrators, intervention specialists, and related services staff — each with the tools they need.",color:C.purple},
               {icon:"🌍",title:"Global Frameworks",desc:"ALP standards USA, Ghana, UK, Nigeria, Kenya and more.",color:C.blue},
               {icon:"📤",title:"Export & Reporting",desc:"Professional PDF documents, audit trails, compliance reports, district summaries.",color:C.green},
             ].map(f=>(
@@ -5592,7 +5633,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         <div style={{maxWidth:700,margin:"0 auto",textAlign:"center"}}>
           <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(124,58,237,.2)",border:"1px solid rgba(124,58,237,.4)",borderRadius:99,padding:"6px 16px",marginBottom:24}}>
             <span style={{width:8,height:8,borderRadius:"50%",background:"#A78BFA",display:"inline-block"}}/>
-            <span style={{fontSize:12,color:"#A78BFA",fontWeight:600}}>Free for individual teachers — forever</span>
+            <span style={{fontSize:12,color:"#A78BFA",fontWeight:600}}>Free plan available for schools — forever</span>
           </div>
           <h2 className="serif" style={{fontSize:"clamp(32px,6vw,64px)",fontWeight:800,color:"#fff",letterSpacing:"-2px",lineHeight:1.05,marginBottom:20}}>
             Start building better<br/>
@@ -5636,7 +5677,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"clamp(28px,4vw,48px)",marginBottom:"clamp(36px,5vw,56px)"}}>
             <div>
               <div className="serif" style={{fontSize:26,fontWeight:800,marginBottom:10,color:"#fff",fontStyle:"italic",letterSpacing:"-0.5px"}}>ALP.</div>
-              <p style={{fontSize:13,color:"rgba(255,255,255,.5)",lineHeight:1.75,marginBottom:16}}>Accelerated Learning Program.<br/>Supporting every learner's growth — worldwide.</p>
+              <p style={{fontSize:13,color:"rgba(255,255,255,.5)",lineHeight:1.75,marginBottom:16}}>Accelerated Learning Plan.<br/>Supporting every learner's growth — worldwide.</p>
               <p style={{fontSize:11,color:"rgba(255,255,255,.3)",lineHeight:1.6}}>Shalom Estate, Adenta Municipality<br/>Ghana, West Africa</p>
               <div style={{marginTop:16,display:"flex",gap:10}}>
                 {[["🌍","https://www.growwithalp.com"],["✉️","mailto:hello@growwithalp.com"]].map(([icon,href])=>(
@@ -5900,7 +5941,7 @@ const NAV_BY_ROLE = {
 const ROLE_USERS = {
   admin:      {name:"Admin View",  sub:"District Administrator"},
   leadership: {name:"Leadership View",    sub:"School Administration"},
-  teacher:    {name:"Teacher",        sub:"Special Education"},
+  teacher:    {name:"Teacher",        sub:"Student Support"},
   intervention:{name:"Intervention View",  sub:"Intervention Specialist"},
   related:    {name:"Related Services",         sub:"Speech-Language Pathologist"},
 };
@@ -6215,7 +6256,7 @@ function Students({setPage,onAddStudent}){
         action={<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
           <button className="btn-ghost" onClick={()=>setSel(null)} style={{fontSize:11}}>← All Students</button>
           <button className="btn-ghost" disabled={archiving} onClick={handleArchive} style={{fontSize:11,color:C.amber}}>📦 Archive</button>
-          {["director","admin","leadership"].includes(realRole)&&<button className="btn-ghost" onClick={()=>setShowDeleteConfirm(true)} style={{fontSize:11,color:C.red}}>🗑 Delete Permanently</button>}
+          {["director","admin"].includes(realRole)&&<button className="btn-ghost" onClick={()=>setShowDeleteConfirm(true)} style={{fontSize:11,color:C.red}}>🗑 Delete Permanently</button>}
           <button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 24px"}}>Edit ALP</button>
         </div>}>
 
@@ -6326,7 +6367,7 @@ function Students({setPage,onAddStudent}){
             {/* Family Data */}
             <div className="card" style={{padding:"24px 28px"}}>
               <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:16}}>Family Information</h3>
-              {[["Parent/Guardian",s.parent_name||"Not recorded"],["Relationship",s.relationship||"Guardian"],["Phone",s.parent_phone||"Not recorded"],["Email",s.parent_email||"Not recorded"],["Language",s.language||"English"],["Portal account",s.parent_portal?"Active":"Not set up"],["Preferred contact",s.contact_pref||"Portal message"]].map(([k,v])=>(
+              {[["Parent/Guardian",_pg?.parent_name||"Not recorded"],["Relationship",_pg?.relationship||"Not recorded"],["Phone",_pg?.parent_phone||"Not recorded"],["Email",_pg?.parent_email||"Not recorded"],["Address",_pg?.address||"Not recorded"],["Other contacts",_gs.length>1?`${_gs.length-1} more on file`:"None"]].map(([k,v])=>(
                 <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${C.tanL}`}}>
                   <span style={{fontSize:13,color:C.warm}}>{k}</span>
                   <span style={{fontSize:13,fontWeight:600,color:C.black,textAlign:"right",maxWidth:"55%"}}>{v}</span>
@@ -6340,7 +6381,7 @@ function Students({setPage,onAddStudent}){
               <h3 className="serif" style={{fontSize:16,fontWeight:700,marginBottom:16}}>Support Team</h3>
               {[
                 {name:s.teacher_name||"Not assigned",role:"ALP Coordinator / Teacher",icon:"👩‍🏫",color:C.purple},
-                ...(s.related_services||[]).map(rs=>({name:rs.provider||"Not assigned",role:rs.type||"Related Service",icon:"🩺",color:C.green})),
+                ...(s.relateds||[]).map(rs=>({name:rs.provider||"Not assigned",role:rs.type||"Related Service",icon:"🩺",color:C.green})),
               ].map((member,i)=>(
                 <div key={i} style={{display:"flex",gap:12,padding:"10px 0",borderBottom:`1px solid ${C.tanL}`,alignItems:"center"}}>
                   <div style={{width:36,height:36,borderRadius:8,background:member.color+"22",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{member.icon}</div>
@@ -6370,7 +6411,7 @@ function Students({setPage,onAddStudent}){
           <div className="card" style={{padding:"24px 28px",textAlign:"center"}}>
             <div style={{fontSize:36,marginBottom:12}}>{activeTab==="services"?"🛠":"📄"}</div>
             <p className="serif" style={{fontSize:18,fontWeight:700,marginBottom:8}}>{activeTab==="services"?"Services & Accommodations":"Documents"}</p>
-            <p style={{fontSize:13,color:C.warm}}>{activeTab==="services"?"Special Education · Speech-Language · OT · Extended Time":"ALP_Marcus_2026.pdf · Evaluation_2024.pdf · Progress_Q3.pdf"}</p>
+            <p style={{fontSize:13,color:C.warm}}>{activeTab==="services"?"Student Support · Speech-Language · OT · Extended Time":"ALP_Marcus_2026.pdf · Evaluation_2024.pdf · Progress_Q3.pdf"}</p>
           </div>
         )}
       </Page>
@@ -6422,7 +6463,7 @@ function Students({setPage,onAddStudent}){
 
 
 // ═══════════════════════════════════════════════════════════
-// STUDENT PROFILE — Virginia IEP-style 9-tab hub
+// STUDENT PROFILE — 9-tab hub
 // Real data from Supabase student record
 // ═══════════════════════════════════════════════════════════
 function StudentProfile({setPage}){
@@ -6436,6 +6477,18 @@ function StudentProfile({setPage}){
 
   // Use first student or selected
   const s=dbStudents?.find(st=>st.id===selectedId)||dbStudents?.[0]||null;
+
+  // Guardian contacts come from student_guardians, not from columns on
+  // students — those never existed, so these panels always showed
+  // "Not recorded" regardless of what staff had entered.
+  const [_gs,setGs]=useState([]);
+  const _pg=_gs.find(g=>g.is_primary)||_gs[0]||null;
+  useEffect(()=>{
+    let cancelled=false;
+    if(!s?.id){setGs([]);return;}
+    Supabase.getGuardians(s.id).then(r=>{if(!cancelled)setGs(r||[]);}).catch(()=>{});
+    return()=>{cancelled=true;};
+  },[s?.id]);
 
   useEffect(()=>{
     if(!s?.id)return;
@@ -6482,7 +6535,7 @@ function StudentProfile({setPage}){
         <button className="btn-black" onClick={()=>setPage("builder")} style={{fontSize:11,padding:"11px 20px"}}>✏️ Edit ALP</button>
       </div>}>
 
-      {/* Virginia IEP-style tab bar */}
+      {/* Student profile tab bar */}
       <div style={{display:"flex",overflowX:"auto",gap:0,borderBottom:`2px solid ${C.tanL}`,marginBottom:20,WebkitOverflowScrolling:"touch"}}>
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setActiveTab(t.id)}
@@ -6518,7 +6571,7 @@ function StudentProfile({setPage}){
             <div style={{display:"flex",flexDirection:"column",gap:14}}>
               <div className="card" style={{padding:"22px 24px"}}>
                 <p className="lbl" style={{marginBottom:14}}>PARENT / GUARDIAN</p>
-                {[["Name",s.parent_name||"Not recorded"],["Phone",s.parent_phone||"Not recorded"],["Email",s.parent_email||"Not recorded"],["Relationship",s.relationship||"Guardian"]].map(([k,v])=>(
+                {[["Name",_pg?.parent_name||"Not recorded"],["Phone",_pg?.parent_phone||"Not recorded"],["Email",_pg?.parent_email||"Not recorded"],["Relationship",_pg?.relationship||"Not recorded"]].map(([k,v])=>(
                   <div key={k} style={{display:"flex",padding:"9px 0",borderBottom:`1px solid ${C.tanL}`,gap:12}}>
                     <span style={{fontSize:11,fontWeight:700,color:C.warm,width:100,flexShrink:0}}>{k}</span>
                     <span style={{fontSize:13,color:C.black}}>{v}</span>
@@ -6532,7 +6585,7 @@ function StudentProfile({setPage}){
                   <span style={{fontSize:12,color:C.warm,display:"block",marginBottom:4}}>ALP Coordinator</span>
                   <span style={{fontSize:13,fontWeight:600,color:C.black}}>{s.teacher_name||user?.email?.split("@")[0]||"Not assigned"}</span>
                 </div>
-                {(s.related_services||[]).map((rs,i)=>(
+                {(s.relateds||[]).map((rs,i)=>(
                   <div key={i} style={{padding:"10px 0",borderBottom:`1px solid ${C.tanL}`}}>
                     <span style={{fontSize:12,color:C.warm,display:"block",marginBottom:4}}>{rs.type||"Related Service"}</span>
                     <span style={{fontSize:13,fontWeight:600,color:C.black}}>{rs.provider||"Not assigned"}</span>
@@ -7028,6 +7081,186 @@ function QuickALP({setPage}){
 // ═══════════════════════════════════════════════════════════
 // ALP BUILDER
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// GUARDIAN CONTACTS — Step 1 of the ALP Builder
+//
+// Guardians are CONTACT RECORDS, not users. No account, no login, no
+// session, no role. This section is the only place they are created,
+// and it is staff-only like every other part of the builder.
+//
+// Replaces four flat fields (parentName / parentEmail / parentPhone /
+// emergencyContact) that were written to columns on `students` which
+// do not exist, so the values were silently lost on save. A child
+// frequently has two contactable guardians — separated parents, a
+// grandparent, a foster carer — and one set of fields cannot hold that
+// without collapsing the second into free text nobody can dial.
+// ═══════════════════════════════════════════════════════════
+const RELATIONSHIPS=["Mother","Father","Guardian","Grandparent","Foster Parent","Other"];
+
+function GuardianContacts({studentId,disabled}){
+  const {toast}=useToast();
+  const [rows,setRows]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [editing,setEditing]=useState(null); // guardian id, or "new"
+  const [draft,setDraft]=useState(null);
+  const [busy,setBusy]=useState(false);
+
+  const load=useCallback(async()=>{
+    if(!studentId){setRows([]);setLoading(false);return;}
+    try{setRows(await Supabase.getGuardians(studentId));}
+    catch{toast("Could not load guardian contacts","error");}
+    setLoading(false);
+  },[studentId,toast]);
+
+  useEffect(()=>{load();},[load]);
+
+  function startAdd(){
+    setEditing("new");
+    setDraft({parent_name:"",relationship:"Mother",relationship_other:"",
+      parent_phone:"",parent_email:"",address:"",
+      // First guardian added is primary by default — the common case is
+      // one contact, and making the teacher tick a box for it is friction.
+      is_primary:rows.length===0});
+  }
+
+  function startEdit(g){
+    const known=RELATIONSHIPS.includes(g.relationship);
+    setEditing(g.id);
+    setDraft({...g,
+      relationship:known?g.relationship:"Other",
+      relationship_other:known?"":(g.relationship||"")});
+  }
+
+  async function save(){
+    if(!studentId){toast("Save the student first","error");return;}
+    if(!draft.parent_name.trim()){toast("Guardian name is required","error");return;}
+    setBusy(true);
+    const relationship=draft.relationship==="Other"
+      ? (draft.relationship_other.trim()||"Other")
+      : draft.relationship;
+    const payload={
+      student_id:studentId,parent_name:draft.parent_name.trim(),
+      relationship,parent_phone:draft.parent_phone?.trim()||null,
+      parent_email:draft.parent_email?.trim()||null,
+      address:draft.address?.trim()||null,
+    };
+    // Always insert as non-primary, then promote via the RPC.
+    // Inserting a second guardian with is_primary:true would violate
+    // the partial unique index before we ever got to promote it, and
+    // the teacher would see a raw constraint error for doing something
+    // entirely reasonable.
+    const r=editing==="new"
+      ? await Supabase.addGuardian({...payload,is_primary:false})
+      : await Supabase.updateGuardian(editing,payload);
+    if(r?.error){toast(r.error.message||"Could not save guardian","error");setBusy(false);return;}
+
+    if(draft.is_primary){
+      const id=editing==="new"?r?.data?.id:editing;
+      // One transaction server-side: verify the guardian belongs to
+      // this student, clear the old primary, set the new one.
+      const pr=id?await Supabase.setPrimaryGuardian(studentId,id):null;
+      if(pr?.error){
+        toast(pr.error.message||"Saved, but could not set primary contact","error");
+        setBusy(false);setEditing(null);setDraft(null);load();return;
+      }
+    }
+    setBusy(false);setEditing(null);setDraft(null);
+    toast(editing==="new"?"Guardian added ✓":"Guardian updated ✓","success");
+    load();
+  }
+
+  async function remove(g){
+    if(!window.confirm(`Remove ${g.parent_name} from this student's contacts?`))return;
+    const r=await Supabase.deleteGuardian(g.id);
+    if(r?.error){toast("Could not remove guardian","error");return;}
+    toast("Guardian removed","success");load();
+  }
+
+  async function makePrimary(g){
+    const r=await Supabase.setPrimaryGuardian(studentId,g.id);
+    if(r?.error){toast("Could not set primary contact","error");return;}
+    toast(`${g.parent_name} is now the primary contact`,"success");load();
+  }
+
+  const D=(k,v)=>setDraft(p=>({...p,[k]:v}));
+
+  return(
+    <div className="card" style={{padding:"22px 24px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+        <p className="lbl" style={{margin:0}}>PARENT / GUARDIAN CONTACT</p>
+        {!disabled&&studentId&&editing===null&&
+          <button className="btn-ghost" style={{fontSize:10,padding:"6px 12px"}} onClick={startAdd}>+ Add guardian</button>}
+      </div>
+
+      {!studentId&&<p style={{fontSize:12,color:C.warm,lineHeight:1.6,margin:0}}>
+        Save the student first, then add their guardian contacts here.</p>}
+
+      {studentId&&loading&&<p style={{fontSize:12,color:C.warm,margin:0}}>Loading…</p>}
+
+      {studentId&&!loading&&rows.length===0&&editing===null&&
+        <p style={{fontSize:12,color:C.warm,lineHeight:1.6,margin:0}}>
+          No guardian recorded yet. The primary guardian is who the approved
+          ALP PDF and the Support Notice are addressed to.</p>}
+
+      {/* ── Existing guardians ── */}
+      {rows.map(g=>editing===g.id?null:(
+        <div key={g.id} style={{display:"flex",alignItems:"flex-start",gap:12,padding:"11px 0",
+          borderBottom:`1px solid ${C.tanL}`}}>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+              <span style={{fontSize:13,fontWeight:700,color:C.black}}>{g.parent_name}</span>
+              {g.relationship&&<span style={{fontSize:11,color:C.warm}}>{g.relationship}</span>}
+              {g.is_primary&&<span style={{fontSize:9,fontWeight:700,letterSpacing:".08em",
+                padding:"2px 7px",borderRadius:5,background:C.purpleL,color:C.purpleD}}>PRIMARY</span>}
+            </div>
+            <div style={{fontSize:11,color:C.warm,marginTop:3}}>
+              {[g.parent_phone,g.parent_email].filter(Boolean).join(" · ")||"No contact details"}
+            </div>
+          </div>
+          {!disabled&&<div style={{display:"flex",gap:6,flexShrink:0}}>
+            {!g.is_primary&&<button className="btn-ghost" style={{fontSize:9,padding:"5px 9px"}}
+              onClick={()=>makePrimary(g)}>Make primary</button>}
+            <button className="btn-ghost" style={{fontSize:9,padding:"5px 9px"}}
+              onClick={()=>startEdit(g)}>Edit</button>
+            <button className="btn-ghost" style={{fontSize:9,padding:"5px 9px",color:C.red}}
+              onClick={()=>remove(g)}>Remove</button>
+          </div>}
+        </div>
+      ))}
+
+      {/* ── Add / edit form ── */}
+      {editing!==null&&draft&&(
+        <div style={{marginTop:14,padding:"16px",background:C.bg,borderRadius:10,
+          border:`1px solid ${C.border}`}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:12}}>
+            <UInput label="Full Name" value={draft.parent_name} onChange={e=>D("parent_name",e.target.value)}/>
+            <USelect label="Relationship" value={draft.relationship} onChange={e=>D("relationship",e.target.value)}
+              options={RELATIONSHIPS.map(r=>({value:r,label:r}))}/>
+            {draft.relationship==="Other"&&
+              <UInput label="Relationship (specify)" value={draft.relationship_other}
+                onChange={e=>D("relationship_other",e.target.value)} placeholder="e.g. Aunt"/>}
+            <UInput label="Phone" value={draft.parent_phone||""} onChange={e=>D("parent_phone",e.target.value)} placeholder="+233 20 000 0000"/>
+            <UInput label="Email" value={draft.parent_email||""} onChange={e=>D("parent_email",e.target.value)} type="email"/>
+            <UInput label="Address" value={draft.address||""} onChange={e=>D("address",e.target.value)}/>
+          </div>
+          <label style={{display:"flex",alignItems:"center",gap:8,fontSize:12,color:C.black,
+            cursor:"pointer",marginBottom:14}}>
+            <input type="checkbox" checked={!!draft.is_primary} onChange={e=>D("is_primary",e.target.checked)}/>
+            Primary contact — receives the ALP PDF and Support Notice
+          </label>
+          <div style={{display:"flex",gap:8}}>
+            <button className="btn-purple" style={{fontSize:11,padding:"9px 18px"}}
+              disabled={busy} onClick={save}>{busy?"Saving…":"Save guardian"}</button>
+            <button className="btn-ghost" style={{fontSize:11,padding:"9px 18px"}}
+              onClick={()=>{setEditing(null);setDraft(null);}}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ALPBuilder({setPage}){
   const {toast}=useToast();
   const {isMobile}=useResponsive();
@@ -7041,8 +7274,8 @@ function ALPBuilder({setPage}){
   const selectedStudent=dbStudents?.[0]||null;
   const ss=selectedStudent;
   const alpStatus=ss?.alp_status||"draft";
-  const isLocked=(alpStatus==="approved"||alpStatus==="in_review")&&!["director","admin","leadership"].includes(realRole);
-  const canApprove=["director","admin","leadership"].includes(realRole);
+  const isLocked=(alpStatus==="approved"||alpStatus==="in_review")&&!["director","admin"].includes(realRole);
+  const canApprove=["director","admin"].includes(realRole);
   const [submitting,setSubmitting]=useState(false);
   const [reviewDecisionNotes,setReviewDecisionNotes]=useState("");
   const [showReviewPanel,setShowReviewPanel]=useState(false);
@@ -7169,8 +7402,10 @@ function ALPBuilder({setPage}){
           strengths:sData.strengths,growth_areas:sData.growthAreas,
           concerns:sData.learningConcerns,interests:sData.interests,
           learning_style:sData.learningStyle,tier:sData.tier,
-          parent_name:sData.parentName,parent_email:sData.parentEmail,
-          parent_phone:sData.parentPhone,notes:sData.notes,
+          // Guardian contacts live on student_guardians, managed by
+          // <GuardianContacts/>. They were previously written here to
+          // columns that do not exist on students, so they were lost.
+          notes:sData.notes,
           alp_completed:true,alp_completed_date:new Date().toISOString(),
           review_notes:sData.reviewNotes,meeting_date:sData.meetingDate,
           review_date:sData.reviewDate||defaultReviewDate,
@@ -7224,8 +7459,7 @@ function ALPBuilder({setPage}){
               strengths:sData.strengths,growth_areas:sData.growthAreas,
               concerns:sData.learningConcerns,interests:sData.interests,
               learning_style:sData.learningStyle,language:sData.languages,
-              parent_name:sData.parentName,parent_email:sData.parentEmail,
-              parent_phone:sData.parentPhone,tier:sData.tier,notes:sData.notes,
+              tier:sData.tier,notes:sData.notes,
               review_date:sData.reviewDate||defaultReviewDate,
               alp_data:sData, // full 10-step blob — preserves Steps 6-9 across sessions
             });
@@ -7341,15 +7575,7 @@ function ALPBuilder({setPage}){
                   <UInput label="Annual Review Date" value={sData.reviewDate} onChange={e=>SD("reviewDate",e.target.value)} type="date" hint="Compliance dashboard tracks this date — set within 12 months"/>
                 </div>
               </div>
-              <div className="card" style={{padding:"22px 24px"}}>
-                <p className="lbl" style={{marginBottom:16}}>PARENT / GUARDIAN</p>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
-                  <UInput label="Full Name" value={sData.parentName} onChange={e=>SD("parentName",e.target.value)}/>
-                  <UInput label="Email" value={sData.parentEmail} onChange={e=>SD("parentEmail",e.target.value)}/>
-                  <UInput label="Phone" value={sData.parentPhone} onChange={e=>SD("parentPhone",e.target.value)}/>
-                  <UInput label="Emergency Contact" value={sData.emergencyContact} onChange={e=>SD("emergencyContact",e.target.value)}/>
-                </div>
-              </div>
+              <GuardianContacts studentId={ss?.id} disabled={isLocked}/>
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:14}}>
               <div className="card" style={{padding:"22px 24px"}}>
@@ -7959,7 +8185,7 @@ function ReviewSummary({setPage}){
         </select>}
         <button className="btn-ghost" onClick={async()=>{
           toast("Generating PDF…","info");
-          const doc=await generateALPPdf({student:s,goals,notes,reviewer:profile?.full_name||user?.email,school:s.school_name});
+          const doc=await generateALPPdf({student:s,goals,notes,reviewer:profile?.full_name||user?.email,school:s.school_name,guardians:await Supabase.getGuardians(s.id)});
           doc.save(`ALP_${s.name.replace(/\s+/g,"_")}.pdf`);
           toast("ALP PDF downloaded ✓","success");
         }} style={{fontSize:11}}>⬇ Export PDF</button>
@@ -8122,14 +8348,34 @@ function ALPNotice({setPage}){
   const [noticeData,setNoticeData]=useState({
     studentName:firstStudent?.name||"",noticeDate:new Date().toISOString().split("T")[0],
     school:firstStudent?.school_name||profile?.school||"",coordinator:profile?.full_name||user?.email?.split("@")[0]||"",
-    district:"",parent:firstStudent?.parent_name||"",
-    parentEmail:firstStudent?.parent_email||"",parentPhone:firstStudent?.parent_phone||"",
+    // Populated from student_guardians below. These read
+    // firstStudent.parent_name etc, which are columns that do not
+    // exist on students, so the notice always opened blank.
+    district:"",parent:"",parentEmail:"",parentPhone:"",
     meetingDate:"",meetingTime:"14:00",meetingLocation:"",
     responseDeadline:"",deliveryMethod:"email",
     content:"This notice is to inform you of your child's ALP meeting, placement, and your rights as a parent/guardian.",
     language:"English",interpreter:false
   });
   const setND=(k,v)=>setNoticeData(p=>({...p,[k]:v}));
+
+  // Pull the primary guardian for this student. Staff can still edit
+  // the fields before sending — this fills them in rather than
+  // locking them, since a notice occasionally goes to someone other
+  // than the usual primary contact.
+  useEffect(()=>{
+    let cancelled=false;
+    if(!firstStudent?.id)return;
+    Supabase.getPrimaryGuardian(firstStudent.id).then(g=>{
+      if(cancelled||!g)return;
+      setNoticeData(p=>({...p,
+        parent:p.parent||g.parent_name||"",
+        parentEmail:p.parentEmail||g.parent_email||"",
+        parentPhone:p.parentPhone||g.parent_phone||"",
+      }));
+    }).catch(()=>{});
+    return()=>{cancelled=true;};
+  },[firstStudent?.id]);
   const [reasons,setReasons]=useState({below:true,disability:true,behavioral:false,transition:false,reevaluation:false,amendment:false});
   const [proposedActions,setProposedActions]=useState({placement:true,goals:true,services:true,accommodations:false,transfer:false});
   const [sent,setSent]=useState(false);
@@ -8284,7 +8530,7 @@ function CreateALPDoc({setPage}){
   const [exporting,setExporting]=useState(false);
   const [exportWord,setExportWord]=useState(false);
   const [format,setFormat]=useState("pdf");
-  const allSections=["Student Information","Educational Background","Annual Goals","Special Ed Services","Related Services","Accommodations","Learning Environment","Present Levels","Transition Planning","Assessment","Meeting Information","Parental Rights","Signatures"];
+  const allSections=["Student Information","Educational Background","Annual Goals","Student Support Services","Related Services","Accommodations","Learning Environment","Present Levels","Transition Planning","Assessment","Meeting Information","Parental Rights","Signatures"];
   const [sectionsTicked,setSectionsTicked]=useState(allSections.map((_,i)=>i));
   function toggle(i){setSectionsTicked(s=>s.includes(i)?s.filter(x=>x!==i):[...s,i]);}
 
@@ -8303,7 +8549,7 @@ function CreateALPDoc({setPage}){
     setExporting(true);
     try{
       const goals=await Supabase.getGoals(s.id);
-      const doc=await generateALPPdf({student:s,goals,notes:s.review_notes,reviewer:profile?.full_name||user?.email,school:s.school_name});
+      const doc=await generateALPPdf({student:s,goals,notes:s.review_notes,reviewer:profile?.full_name||user?.email,school:s.school_name,guardians:await Supabase.getGuardians(s.id)});
       doc.save(`ALP_${s.name.replace(/\s+/g,"_")}.pdf`);
       toast("ALP exported as PDF ✓","success");
     }catch(e){toast("Export failed","error");}
@@ -8842,7 +9088,7 @@ function ReviewQueue({setPage}){
   const [busy,setBusy]=useState(false);
   const [tab,setTab]=useState("in_review");
 
-  const isReviewer=["director","admin","leadership"].includes(realRole);
+  const isReviewer=["director","admin"].includes(realRole);
   const queue={
     in_review:(dbStudents||[]).filter(s=>s.alp_status==="in_review"),
     approved:(dbStudents||[]).filter(s=>s.alp_status==="approved"),
@@ -9014,7 +9260,7 @@ function Reports(){
       } else {
         const goals=s?.id?await Supabase.getGoals(s.id):[];
         const progress=s?.id?await Supabase.getProgress(s.id,50):[];
-        const doc=await generateALPPdf({student:s,goals,notes:s?.review_notes||(type.id==="progress"?`Progress summary — ${progress.length} data points on file.`:""),reviewer:profile?.full_name||user?.email,school:s?.school_name});
+        const doc=await generateALPPdf({student:s,goals,notes:s?.review_notes||(type.id==="progress"?`Progress summary — ${progress.length} data points on file.`:""),reviewer:profile?.full_name||user?.email,school:s?.school_name,guardians:s?.id?await Supabase.getGuardians(s.id):[]});
         doc.save(`ALP_${type.id}_${studentName.replace(/\s+/g,"_")}_${new Date().toISOString().split("T")[0]}.pdf`);
       }
       toast(`${type.label} downloaded as PDF!`,"success");
@@ -9306,7 +9552,7 @@ function AuditLogPage({setPage}){
   const [loading,setLoading]=useState(true);
   const [filterAction,setFilterAction]=useState("all");
   const [filterStudent,setFilterStudent]=useState("");
-  const isAuthorized=["director","admin","leadership"].includes(realRole);
+  const isAuthorized=["director","admin"].includes(realRole);
 
   useEffect(()=>{
     if(!isAuthorized)return;
@@ -9565,7 +9811,7 @@ function Settings(){
   const [showLegal,setShowLegal]=useState(null);
   const [currentPw,setCurrentPw]=useState("");
   const [newPw,setNewPw]=useState("");
-  const [profile,setProfile]=useState({firstName:sProfile?.full_name?.split(" ")[0]||"",lastName:sProfile?.full_name?.split(" ").slice(1).join(" ")||"",email:sUser?.email||"",phone:sProfile?.phone||"",title:sProfile?.title||"Special Education Teacher",license:sProfile?.license||""});
+  const [profile,setProfile]=useState({firstName:sProfile?.full_name?.split(" ")[0]||"",lastName:sProfile?.full_name?.split(" ").slice(1).join(" ")||"",email:sUser?.email||"",phone:sProfile?.phone||"",title:sProfile?.title||"ALP Teacher",license:sProfile?.license||""});
   const setP=(k,v)=>setProfile(p=>({...p,[k]:v}));
   const [school,setSchool]=useState({name:sProfile?.school||"",id:sProfile?.school_id||"",district:sProfile?.district||"",state:sProfile?.state||"",framework:sProfile?.framework||"ALP standards_USA",year:`${new Date().getFullYear()}–${new Date().getFullYear()+1}`});
   const setSch=(k,v)=>setSchool(p=>({...p,[k]:v}));
@@ -9588,7 +9834,7 @@ function Settings(){
           <div className="card" style={{padding:"28px",textAlign:"center"}}>
             <Avatar name={displayName||"User"} size={80}/>
             <h3 className="serif" style={{fontSize:18,fontWeight:700,marginTop:14,marginBottom:4}}>{displayName||sUser?.email||"Your Name"}</h3>
-            <p style={{fontSize:13,color:C.warm,marginTop:2}}>Special Education Teacher</p>
+            <p style={{fontSize:13,color:C.warm,marginTop:2}}>ALP Teacher</p>
             <p style={{fontSize:12,color:C.tan,marginTop:4}}>{schoolName||"Your School"}</p>
             <div style={{marginTop:16,paddingTop:16,borderTop:`1px solid ${C.tanL}`}}>
               <Badge color="purple">Teacher</Badge>
@@ -9865,14 +10111,14 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
   const baseNav=NAV_BY_ROLE[role]||NAV_BY_ROLE.teacher;
   // Review Queue visibility is driven by the REAL authenticated role (profile.role),
   // never the cosmetic "preview as" switcher — so a real director always sees it.
-  const isRealReviewer=["director","admin","leadership"].includes(realRole);
+  const isRealReviewer=["director","admin"].includes(realRole);
   const hasReviewQueueGroup=baseNav.some(g=>g.items.some(i=>i.id==="reviewqueue"));
   const nav=isRealReviewer&&!hasReviewQueueGroup
     ?[{group:"APPROVALS",items:[{id:"reviewqueue",label:"Review Queue",icon:"👁️",badge:"New"},{id:"compliance",label:"Compliance",icon:"📋"},{id:"auditlog",label:"Audit Log",icon:"🔍"}]},...baseNav]
     :baseNav;
   const baseUser=ROLE_USERS[role]||ROLE_USERS.teacher;
   const user=role==="teacher"
-    ?{name:profile?.full_name||authUser?.email?.split("@")[0]||"Teacher",sub:`Special Education · ${profile?.school||"Your School"}`}
+    ?{name:profile?.full_name||authUser?.email?.split("@")[0]||"Teacher",sub:`Student Support · ${profile?.school||"Your School"}`}
     :baseUser;
   const [showRolePicker,setShowRolePicker]=useState(false);
   return(
@@ -10033,7 +10279,16 @@ function AppInner(){
   }
 
   const pages={
-    dashboard:role==="director"?<DirectorDashboard setPage={setPage}/>:role==="related"?<RelatedServicesDashboard setPage={setPage}/>:role==="admin"?<AdminDashboard setPage={setPage}/>:role==="intervention"?<InterventionDashboard setPage={setPage}/>:role==="leadership"?<LeadershipDashboard setPage={setPage}/>:<Dashboard setPage={setPage} onAddStudent={()=>setShowAddStudent(true)}/>,
+    // Role ids now match the user_role enum in the database.
+    //
+    // "director" routes to LeadershipDashboard, not DirectorDashboard,
+    // deliberately: the role id used to be "leadership", so
+    // LeadershipDashboard is the view directors have actually been
+    // using and it is the slightly richer of the two (academic year,
+    // school name). DirectorDashboard was unreachable and stays
+    // unreferenced — left in place rather than deleted so nothing is
+    // lost, but it is dead code and a candidate for removal.
+    dashboard:role==="director"?<LeadershipDashboard setPage={setPage}/>:role==="related"?<RelatedServicesDashboard setPage={setPage}/>:role==="admin"?<AdminDashboard setPage={setPage}/>:role==="intervention"?<InterventionDashboard setPage={setPage}/>:<Dashboard setPage={setPage} onAddStudent={()=>setShowAddStudent(true)}/>,
     students:<Students setPage={setPage} onAddStudent={()=>setShowAddStudent(true)}/>,
     builder:<ALPBuilder setPage={setPage}/>,
     progress:<Progress/>,
@@ -10289,7 +10544,7 @@ We aim to respond to all privacy enquiries within 5 business days.`},
 function TermsPage({setPage,setNavPage}){
   const {isMobile}=useResponsive();
   const sections=[
-    {title:"What ALP is",content:`ALP (Adaptive Learning Program) is a software platform that helps special education teachers plan, track, and communicate student support programmes.
+    {title:"What ALP is",content:`ALP (Accelerated Learning Plan) is a software platform that helps special education teachers plan, track, and communicate student support programmes.
 
 ALP is a TOOL — it helps you do your job. It does not replace professional judgement, legal obligations, or official processes. Decisions about student support plans remain entirely with the qualified professionals and institutions using the platform.`},
     {title:"Who can use ALP",content:`ALP is for:

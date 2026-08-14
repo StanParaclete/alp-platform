@@ -1,24 +1,64 @@
+# ══════════════════════════════════════════════════════════════════
+# ALP Platform — Netlify build configuration
+#
+# THIS FILE MUST LIVE AT THE REPOSITORY ROOT.
+# Netlify reads netlify.toml from the root of the repo. A copy sitting
+# inside 02-webapp/ declaring `base = "02-webapp"` is self-referential
+# and gets ignored, which is where this file used to be.
+#
+# One config file only. Two — root and base directory — is ambiguous
+# and Netlify's resolution between them is not worth relying on.
+# ══════════════════════════════════════════════════════════════════
+
 [build]
   base    = "02-webapp"
   command = "npm run build"
-  publish = "02-webapp/dist"
+  publish = "dist"          # relative to base → 02-webapp/dist
 
 [build.environment]
   NODE_VERSION = "20"
 
+# ── SPA routing ────────────────────────────────────────────────────
+# Every path serves index.html so client-side routing works on refresh
+# and on deep links.
 [[redirects]]
   from   = "/*"
   to     = "/index.html"
   status = 200
 
+# ── REMOVED: the /api/* proxy to Railway ───────────────────────────
+# The previous config forwarded /api/* to
+# alp-backend-production.up.railway.app — the Express/Prisma backend
+# from the pre-Supabase architecture. It is deleted rather than
+# commented out for two reasons:
+#
+#   1. There is no backend to proxy to. This build talks to Supabase
+#      directly; Edge Functions are called at their own hostname.
+#   2. A redirect to a hostname you no longer control is a real risk.
+#      If that Railway project is deleted and the subdomain is later
+#      claimed by someone else, growwithalp.com starts forwarding
+#      requests — with whatever they carry — to a stranger.
+#
+# It was also dead in practice: the `/*` rule above matches first, and
+# Netlify applies the first matching redirect.
+
+# ── Security headers ───────────────────────────────────────────────
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options          = "SAMEORIGIN"
-    X-Content-Type-Options   = "nosniff"
-    Referrer-Policy          = "strict-origin-when-cross-origin"
+    X-Frame-Options        = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
 
+# Hashed filenames, so they can be cached indefinitely.
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cached, so a deploy takes effect immediately rather than
+# leaving users on a stale bundle pointing at an old Supabase project.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
