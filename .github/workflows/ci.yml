@@ -103,11 +103,11 @@ jobs:
       - name: No AI keys in the browser bundle
         run: |
           fail=0
-          if grep -rn "api.anthropic.com" 02-webapp/src --include=*.js --include=*.jsx | grep -v "^\s*//" | grep -vE "^[^:]+:[0-9]+:\s*//"; then
+          if grep -rnE "api\.(anthropic|deepseek|openai)\.com" 02-webapp/src --include=*.js --include=*.jsx | grep -vE "^[^:]+:[0-9]+:\s*//"; then
             echo "::error::Direct browser call to the Anthropic API. Use the ai-assist Edge Function."
             fail=1
           fi
-          if grep -rniE "VITE_ANTHROPIC|VITE_.*API_KEY|x-api-key" 02-webapp/src; then
+          if grep -rniE "VITE_(ANTHROPIC|DEEPSEEK|OPENAI)|VITE_.*API_KEY|x-api-key|sk-ant-|sk-[a-f0-9]{32}" 02-webapp/src; then
             echo "::error::An API key is being read in client code. Vite inlines VITE_* into the public bundle."
             fail=1
           fi

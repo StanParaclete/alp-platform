@@ -94,7 +94,7 @@ unit-tested module, and regenerate the paste file from there.
 | Name | Where it comes from |
 |---|---|
 | `SUPABASE_SERVICE_ROLE_KEY` | Settings → API → `service_role` |
-| `ANTHROPIC_API_KEY` | console.anthropic.com |
+| `DEEPSEEK_API_KEY` | platform.deepseek.com |
 | `ALLOWED_ORIGINS` | `https://growwithalp.com,https://www.growwithalp.com` |
 
 The service role key bypasses RLS entirely. It belongs here and nowhere else
