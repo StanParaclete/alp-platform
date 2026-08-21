@@ -195,7 +195,7 @@ async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", 
 
 
 // ═══════════════════════════════════════════════════════════
-// ALP PLATFORM — ADAPTIVE LEARNING PROGRAM
+// ALP PLATFORM — ACCELERATED LEARNING PLAN
 // Built by Stan Paraclete · www.stanparaclete.com
 // ═══════════════════════════════════════════════════════════
 
@@ -1076,7 +1076,7 @@ function SubNav({active,setNavPage,onEnter,onSignup,onDemo}){
       <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",minWidth:0,flex:1,overflow:"hidden"}} onClick={()=>{setNavPage(null);setMobileOpen(false);}}>
         <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
         <span className="serif" style={{fontSize:15,fontWeight:700,flexShrink:0}}>ALP</span>
-        <span className="landing-nav-tagline" style={{fontSize:10,color:C.warm,letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PROGRAM</span>
+        <span className="landing-nav-tagline" style={{fontSize:10,color:C.warm,letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PLAN</span>
       </div>
       <div className="landing-nav-links" style={{display:"flex",gap:28,fontSize:13.5,flexShrink:0}}>
         {links.map(n=>(
@@ -3433,7 +3433,7 @@ function SignUp({onLogin,onBack}){
         <div style={{position:"relative",zIndex:1}}>
           <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",marginBottom:48}} onClick={onBack}>
             <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:40,height:40,borderRadius:10,objectFit:"cover"}}/>
-            <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff"}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em"}}>ACCELERATED LEARNING PROGRAM</div></div>
+            <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff"}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em"}}>ACCELERATED LEARNING PLAN</div></div>
           </div>
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,46px)",fontWeight:800,color:"#fff",lineHeight:1.1,marginBottom:20,letterSpacing:"-1px"}}>
             Join educators<br/><span style={{color:"#A78BFA"}}>building better plans.</span>
@@ -5414,340 +5414,281 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
   if(navPage==="Resources")   return <ResourcesPage setNavPage={setNavPage} onEnter={onEnter} onSignup={onSignup} onDemo={onDemo}/>;
 
   return(
-    <div style={{minHeight:"100vh",background:"#ffffff",overflowX:"hidden",width:"100%"}}>
-      {showDownload&&<DownloadModal onClose={()=>setShowDownload(false)}/>}
-      <>
-      <nav style={{position:"sticky",top:0,zIndex:100,background:"#111",backdropFilter:"blur(14px)",borderBottom:"1px solid rgba(255,255,255,.08)",display:"flex",alignItems:"center",padding:"0 clamp(16px,4vw,48px)",height:62,gap:16}}>
-        <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:1,overflow:"hidden"}}>
-          <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:32,height:32,borderRadius:8,objectFit:"cover",flexShrink:0}}/>
-          <span className="serif" style={{fontSize:15,fontWeight:700,color:"#fff",flexShrink:0}}>ALP</span>
-          <span className="landing-nav-tagline" style={{fontSize:10,color:"rgba(255,255,255,.6)",letterSpacing:".1em",textTransform:"uppercase",marginLeft:2}}>ACCELERATED LEARNING PROGRAM</span>
-        </div>
-        <div className="landing-nav-links" style={{display:"flex",gap:28,fontSize:13.5,flexShrink:0}}>
-          {["Features","For Schools","Pricing","Resources"].map(n=>(
-            <span key={n} onClick={()=>setNavPage(n)}
-              style={{cursor:"pointer",transition:"color .15s",fontWeight:navPage===n?700:400,color:"rgba(255,255,255,.85)",borderBottom:navPage===n?"2px solid #fff":"2px solid transparent",paddingBottom:2,whiteSpace:"nowrap"}}
-              onMouseEnter={e=>e.currentTarget.style.color="#fff"}
-              onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.85)"}>{n}</span>
-          ))}
-        </div>
-        <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
-          <ThemeToggle/>
-          <button className="landing-nav-desktop" onClick={onEnter} style={{padding:"8px 18px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.15)",color:"#fff",border:"1.5px solid rgba(255,255,255,.4)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.25)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}>Log in</button>
-          <button className="landing-nav-desktop" onClick={onSignup||onEnter} style={{padding:"8px 18px",fontSize:11,fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>Sign Up Free</button>
-          <button className={`landing-nav-hamburger${mobileNavOpen?" open":""}`} onClick={()=>setMobileNavOpen(o=>!o)} aria-label="Menu">
-            <span style={{background:"#fff"}}/><span style={{background:"#fff"}}/><span style={{background:"#fff"}}/>
-          </button>
-        </div>
-      </nav>
-      {mobileNavOpen&&(
-        <div style={{position:"fixed",top:62,left:0,right:0,zIndex:99,background:"#111",borderBottom:"1px solid rgba(255,255,255,.1)",padding:"8px 20px 20px",boxShadow:"0 8px 24px rgba(0,0,0,.5)"}}>
-          {["Features","For Schools","Pricing","Resources"].map(n=>(
-            <div key={n} onClick={()=>{setNavPage(n);setMobileNavOpen(false);}} style={{padding:"14px 0",fontSize:15,fontWeight:500,color:"rgba(255,255,255,.9)",borderBottom:"1px solid rgba(255,255,255,.08)",cursor:"pointer"}}>{n}</div>
-          ))}
-          <div style={{display:"flex",gap:10,marginTop:16}}>
-            <button onClick={()=>{onEnter();setMobileNavOpen(false);}} style={{flex:1,padding:"12px",fontSize:12,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",background:"rgba(255,255,255,.12)",color:"#fff",border:"1px solid rgba(255,255,255,.3)",borderRadius:99,cursor:"pointer"}}>Log In</button>
-            <button onClick={()=>{(onSignup||onEnter)();setMobileNavOpen(false);}} style={{flex:1,padding:"12px",fontSize:12,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer"}}>Sign Up Free</button>
-          </div>
-        </div>
-      )}
-      </>
+    <div className="lp">
+      <style>{`
+.lp{--ink:#241B3D;--ink-soft:#372A5A;--paper:#FAF8FC;--rule:#E0D9EC;--accent:#6D28D9;--lbody:#453C57;--lmuted:#6B6280;
+  background:var(--paper);color:var(--lbody);font-size:17px;line-height:1.7;min-height:100vh;overflow-x:hidden;width:100%}
+.lp a{color:inherit;text-decoration:none}
+.lp img,.lp svg{display:block;max-width:100%}
+.lp-serif{font-family:'Playfair Display',Georgia,serif;font-weight:400;letter-spacing:-.012em}
+.lp-wrap{max-width:1240px;margin:0 auto;padding:0 36px}
+.lp-util{background:var(--ink);color:rgba(255,255,255,.66);font-size:13px}
+.lp-util .lp-wrap{display:flex;align-items:center;justify-content:flex-end;gap:28px;height:42px}
+.lp-util button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0}
+.lp-util button:hover{color:#fff}
+.lp-head{background:var(--paper);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:100}
+.lp-head .lp-wrap{display:flex;align-items:center;gap:44px;height:92px}
+.lp-logo{display:flex;align-items:center;gap:12px;cursor:pointer}
+.lp-logo b{font-family:'Playfair Display',Georgia,serif;font-size:30px;font-weight:400;color:var(--ink);letter-spacing:.04em;line-height:1}
+.lp-logo i{font-style:normal;font-size:10px;letter-spacing:.19em;text-transform:uppercase;color:var(--lmuted);display:block;margin-top:5px}
+.lp-nav{display:flex;gap:34px;margin-left:auto;font-size:15px}
+.lp-nav button{background:none;border:0;font:inherit;color:var(--ink);padding:34px 0;border-bottom:2px solid transparent;cursor:pointer}
+.lp-nav button:hover{border-bottom-color:var(--accent)}
+.lp-cta{border:1px solid var(--ink);background:none;color:var(--ink);padding:12px 26px;font:inherit;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:.15s}
+.lp-cta:hover{background:var(--ink);color:var(--paper)}
+.lp-hero{position:relative;min-height:600px;display:flex;align-items:flex-end;background:var(--ink)}
+.lp-hero-img{position:absolute;inset:0;background:linear-gradient(180deg,rgba(36,27,61,.15) 0%,rgba(36,27,61,.82) 78%),repeating-linear-gradient(126deg,rgba(255,255,255,.02) 0 1px,transparent 1px 54px),radial-gradient(ellipse at 68% 18%,#4C3A82 0%,#241B3D 68%)}
+.lp-hero .lp-wrap{position:relative;padding:0 36px 84px;width:100%}
+.lp-hero h1{font-size:clamp(38px,5.6vw,66px);line-height:1.1;color:#fff;max-width:17ch;margin:0}
+.lp-hero p{color:rgba(255,255,255,.78);font-size:19px;max-width:50ch;margin:22px 0 0}
+.lp-sec{padding:104px 0}
+.lp-lede{max-width:64ch;margin:0 auto 62px;text-align:center}
+.lp-lede h2{font-size:clamp(29px,3.7vw,42px);line-height:1.2;color:var(--ink);margin:0 0 16px}
+.lp-lede p{color:var(--lmuted);font-size:18px;margin:0}
+.lp-q3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:56px;text-align:center}
+.lp-q svg{margin:0 auto 22px;stroke:var(--accent);fill:none;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.lp-eyebrow{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.lp-q h3{font-family:'Playfair Display',Georgia,serif;font-size:23px;font-weight:400;color:var(--ink);margin:0 0 10px}
+.lp-q p{font-size:16px;color:var(--lmuted);max-width:32ch;margin:0 auto}
+.lp-center{text-align:center;margin-top:58px}
+.lp-link{font-size:15px;letter-spacing:.05em;color:var(--ink);border-bottom:1px solid var(--accent);padding-bottom:4px;background:none;border-top:0;border-left:0;border-right:0;font-family:inherit;cursor:pointer}
+.lp-panel{background:#fff;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.lp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:26px}
+.lp-card{position:relative;display:block;background:var(--ink);min-height:300px;overflow:hidden;border:0;padding:0;cursor:pointer;text-align:left;width:100%}
+.lp-card-img{position:absolute;inset:0;opacity:.5;transition:.2s}
+.lp-card:nth-child(1) .lp-card-img{background:radial-gradient(ellipse at 40% 30%,#5B4A94,#241B3D)}
+.lp-card:nth-child(2) .lp-card-img{background:radial-gradient(ellipse at 60% 40%,#6E4E96,#241B3D)}
+.lp-card:nth-child(3) .lp-card-img{background:radial-gradient(ellipse at 35% 60%,#4A3E86,#241B3D)}
+.lp-card:nth-child(4) .lp-card-img{background:radial-gradient(ellipse at 55% 35%,#7A4E92,#241B3D)}
+.lp-card:hover .lp-card-img{opacity:.68}
+.lp-mono{position:absolute;top:22px;left:24px;font-family:'Playfair Display',Georgia,serif;font-size:52px;color:rgba(255,255,255,.28);line-height:1}
+.lp-clabel{position:absolute;left:24px;right:24px;bottom:24px;color:#fff}
+.lp-clabel b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:400;margin-bottom:6px}
+.lp-clabel span{font-size:14px;color:rgba(255,255,255,.74);line-height:1.5}
+.lp-mosaic{display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:190px 190px;gap:16px}
+.lp-mosaic div{position:relative;background:var(--ink-soft)}
+.lp-mosaic div:first-child{grid-row:span 2;background:linear-gradient(150deg,#4C3A82,#241B3D)}
+.lp-mosaic div:nth-child(2){background:linear-gradient(150deg,#6E4E96,#372A5A)}
+.lp-mosaic div:nth-child(3){background:linear-gradient(150deg,#4A3E86,#372A5A)}
+.lp-mosaic div:nth-child(4){background:linear-gradient(150deg,#7A4E92,#372A5A)}
+.lp-mosaic div:nth-child(5){background:linear-gradient(150deg,#5B4A94,#372A5A)}
+.lp-mosaic span{position:absolute;bottom:12px;left:14px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.lp-trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:34px}
+.lp-tcard{background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
+.lp-timg{display:block;height:212px;margin-bottom:22px;background:linear-gradient(150deg,#4C3A82,#241B3D)}
+.lp-trio>button:nth-child(2) .lp-timg{background:linear-gradient(150deg,#6E4E96,#241B3D)}
+.lp-trio>button:nth-child(3) .lp-timg{background:linear-gradient(150deg,#4A3E86,#241B3D)}
+.lp-tcard h4{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:400;color:var(--ink);margin:0 0 8px}
+.lp-tcard p{font-size:16px;color:var(--lmuted);margin:0 0 14px}
+.lp-faq{background:#fff;border-top:1px solid var(--rule)}
+.lp-faq-list{max-width:840px;margin:0 auto}
+.lp details{border-bottom:1px solid var(--rule)}
+.lp summary{cursor:pointer;list-style:none;padding:26px 40px 26px 0;font-size:18px;color:var(--ink);position:relative}
+.lp summary::-webkit-details-marker{display:none}
+.lp summary::after{content:"+";position:absolute;right:6px;top:24px;font-size:22px;color:var(--accent)}
+.lp details[open] summary::after{content:"\\2013"}
+.lp details p{padding:0 40px 26px 0;color:var(--lmuted);font-size:16px;margin:0}
+.lp-quick{background:var(--ink);color:#fff;padding:66px 0}
+.lp-quick h5{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 26px;font-weight:400}
+.lp-qrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px}
+.lp-qrow button{border:1px solid rgba(255,255,255,.2);background:none;color:#fff;font:inherit;font-size:15px;padding:22px 20px;cursor:pointer;transition:.15s}
+.lp-qrow button:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.4)}
+.lp-foot{background:var(--ink-soft);color:rgba(255,255,255,.7);padding:74px 0 36px;font-size:15px}
+.lp-fgrid{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:46px}
+.lp-fgrid h5{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 18px;font-weight:400}
+.lp-fgrid ul{list-style:none;display:grid;gap:11px;margin:0;padding:0}
+.lp-fgrid button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0;text-align:left}
+.lp-fgrid button:hover{color:#fff}
+.lp-fbrand p{color:rgba(255,255,255,.62);max-width:32ch;margin:14px 0 0;font-size:15px}
+.lp-badges{display:flex;flex-wrap:wrap;gap:11px;margin-top:48px;padding-top:28px;border-top:1px solid rgba(255,255,255,.14)}
+.lp-badge{font-size:11px;letter-spacing:.11em;text-transform:uppercase;border:1px solid rgba(255,255,255,.24);padding:8px 15px;color:rgba(255,255,255,.7)}
+.lp-colophon{margin-top:28px;font-size:13px;color:rgba(255,255,255,.42);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:900px){
+  .lp-nav{display:none}
+  .lp-head .lp-wrap{height:76px;gap:16px}
+  .lp-hero{min-height:440px}
+  .lp-mosaic{grid-template-columns:1fr 1fr;grid-template-rows:150px 150px 150px}
+  .lp-mosaic div:first-child{grid-row:span 1;grid-column:span 2}
+  .lp-fgrid{grid-template-columns:1fr 1fr;gap:34px}
+  .lp-sec{padding:70px 0}
+  .lp-wrap{padding:0 22px}
+  .lp-hero .lp-wrap{padding:0 22px 56px}
+}
+@media(prefers-reduced-motion:reduce){.lp *{transition:none!important}}
+      `}</style>
 
-      <section style={{background:"#18003d",padding:"0"}}><div style={{padding:"clamp(48px,8vw,96px) clamp(20px,4vw,48px) clamp(48px,6vw,80px)",maxWidth:1100,margin:"0 auto"}} className="fade-up">
-        <p className="lbl hero-fade-1" style={{marginBottom:24,color:"#a78bfa",letterSpacing:".14em",display:"flex",alignItems:"center",gap:8}}><span style={{background:"linear-gradient(90deg,#7C3AED,#A855F7)",padding:"3px 10px",borderRadius:99,color:"#fff",fontSize:10}}>NEW</span>Now available · Spring 2026 · 10+ global frameworks</p>
-        <h1 className="serif hero-fade-2" style={{fontSize:"clamp(54px,7vw,96px)",fontWeight:800,lineHeight:1.02,letterSpacing:"-2.5px",marginBottom:32,maxWidth:820,color:"#fff"}}>
-          Supporting Every<br/><span className="serif-italic" style={{color:"#a78bfa"}}>Learner's Growth.</span>
-        </h1>
-        <p className="hero-fade-3" style={{fontSize:18,color:"rgba(255,255,255,.7)",maxWidth:520,lineHeight:1.78,marginBottom:52}}>A complete student intervention and progress monitoring system — designed to help schools worldwide support every learner through structured plans, real-time tracking, and professional ALP documentation.</p>
-        <div className="r-hero-btns hero-fade-4" style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap"}}>
-          <button onClick={onSignup||onEnter} style={{fontSize:11,padding:"15px 38px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:C.purple,color:"#fff",border:"none",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>🚀 Start Free →</button>
-          <button onClick={()=>setShowDownload(true)} style={{fontSize:11,padding:"14px 34px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"transparent",color:"#fff",border:"1.5px solid rgba(255,255,255,.5)",borderRadius:99,cursor:"pointer",transition:"all .18s",display:"inline-flex",alignItems:"center",gap:8}} onMouseEnter={e=>e.currentTarget.style.borderColor="#fff"} onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.5)"}>⬇ Download Desktop App</button>
-          <button style={{fontSize:11,padding:"14px 28px",fontWeight:700,letterSpacing:".09em",textTransform:"uppercase",background:"rgba(255,255,255,.1)",color:"rgba(255,255,255,.8)",border:"1px solid rgba(255,255,255,.2)",borderRadius:99,cursor:"pointer",transition:"all .18s"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.2)"} onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.1)"} onClick={onDemo}>📅 Schedule a Demo</button>
-        </div>
-        <div style={{display:"flex",gap:"clamp(20px,4vw,56px)",marginTop:"clamp(32px,5vw,64px)",paddingTop:"clamp(24px,4vw,48px)",flexWrap:"wrap",borderTop:"1px solid rgba(255,255,255,.1)"}}>
-          {[["10+","Countries supported"],["ALP standards & GES","Global frameworks"],["ALP AI","Goal generation"],["privacy standards","Private & secure"]].map(([v,l])=><div key={l}><div className="serif" style={{fontSize:24,fontWeight:700,color:"#fff"}}>{v}</div><div style={{fontSize:12,color:"rgba(255,255,255,.6)",marginTop:2}}>{l}</div></div>)}
-        </div>
-      </div></section>
+      <div className="lp-util"><div className="lp-wrap">
+        <button onClick={()=>setNavPage("Resources")}>Help centre</button>
+        <button onClick={onEnter}>Sign in</button>
+      </div></div>
 
-      <div className="ticker-wrap">
-        <div className="ticker-inner">
-          {[...Array(8)].map((_,i)=><span key={i} style={{display:"flex",alignItems:"center",gap:28,paddingRight:56,fontSize:11,fontWeight:700,letterSpacing:".14em",textTransform:"uppercase",color:C.warm}}>
-            <span className="pulse" style={{width:5,height:5,borderRadius:"50%",background:C.purple,display:"inline-block"}}/>ALP Standards
-            <span className="pulse" style={{width:5,height:5,borderRadius:"50%",background:C.purple,display:"inline-block"}}/>ALP AI Goal Generation
-            <span className="pulse" style={{width:5,height:5,borderRadius:"50%",background:C.purple,display:"inline-block"}}/>Family Collaboration
-            <span className="pulse" style={{width:5,height:5,borderRadius:"50%",background:C.purple,display:"inline-block"}}/>Progress Monitoring
-            <span className="pulse" style={{width:5,height:5,borderRadius:"50%",background:C.purple,display:"inline-block"}}/>Ghana · UK · Nigeria · Australia NCCD
-          </span>)}
+      <header className="lp-head"><div className="lp-wrap">
+        <div className="lp-logo" onClick={()=>setNavPage(null)}>
+          <img src="/assets/logos/alp-logo.png" alt="" style={{width:38,height:38,borderRadius:6,objectFit:"cover"}}/>
+          <span><b>ALP</b><i>Accelerated Learning Plan</i></span>
+        </div>
+        <nav className="lp-nav">
+          <button onClick={()=>setNavPage("Features")}>Product</button>
+          <button onClick={()=>setNavPage("For Schools")}>For schools</button>
+          <button onClick={()=>setNavPage("Pricing")}>Pricing</button>
+          <button onClick={()=>setNavPage("Resources")}>Resources</button>
+        </nav>
+        <button className="lp-cta" onClick={onSignup||onEnter}>Start free</button>
+      </div></header>
+
+      <div className="lp-hero">
+        <div className="lp-hero-img"/>
+        <div className="lp-wrap">
+          <h1 className="lp-serif">Every learner gets a plan worth following.</h1>
+          <p>Planning software for the staff who support learners with additional needs.</p>
         </div>
       </div>
 
+      <section className="lp-sec"><div className="lp-wrap">
+        <div className="lp-lede">
+          <h2 className="lp-serif">Written by teachers, not by templates</h2>
+          <p>A plan is only useful if the person who wrote it can act on it next Tuesday. Three things we hold to.</p>
+        </div>
+        <div className="lp-q3">
+          <div className="lp-q">
+            <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><path d="M14 41V17a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v24"/><path d="M20 22h12M20 29h12M20 36h7"/><path d="M14 41h24"/></svg>
+            <p className="lp-eyebrow">Measurable</p>
+            <h3>Goals you can defend</h3>
+            <p>Every goal states a behaviour, a condition and how it will be measured.</p>
+          </div>
+          <div className="lp-q">
+            <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><path d="M11 38l8-9 7 5 6-11 9 7"/><path d="M11 14v27h30"/></svg>
+            <p className="lp-eyebrow">Evidenced</p>
+            <h3>Progress you can show</h3>
+            <p>Weekly entries build the record before the review meeting, not during it.</p>
+          </div>
+          <div className="lp-q">
+            <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true"><circle cx="20" cy="20" r="6"/><circle cx="34" cy="24" r="5"/><path d="M11 41c0-6 4-10 9-10s9 4 9 10"/><path d="M31 41c0-5 3-8 7-8"/></svg>
+            <p className="lp-eyebrow">Shared</p>
+            <h3>Families kept close</h3>
+            <p>Guardians are contact records held by staff, never accounts that sign in.</p>
+          </div>
+        </div>
+        <div className="lp-center"><button className="lp-link" onClick={()=>setNavPage("Features")}>Explore the platform</button></div>
+      </div></section>
 
-      {/* ── STATS ──────────────────────────────────────── */}
-      <section style={{background:"#0d0d0d",padding:"clamp(28px,4vw,36px) clamp(20px,4vw,48px)"}}>
-        <div className="r-stats-row" style={{maxWidth:900,margin:"0 auto",display:"flex",justifyContent:"space-around",gap:24,flexWrap:"wrap"}}>
-          {[["10","Step ALP workflow"],["Birth–22+","Age range covered"],["Free","To get started"],["Built for","Schools everywhere"]].map(([v,l])=>(
-            <div key={l} style={{textAlign:"center",padding:"8px 0"}}>
-              <div className="serif" style={{fontSize:"clamp(22px,4vw,36px)",fontWeight:800,color:"#A78BFA",letterSpacing:"-1px",lineHeight:1}}>{v}</div>
-              <div style={{fontSize:11,color:"rgba(255,255,255,.35)",marginTop:6,letterSpacing:".04em"}}>{l.toUpperCase()}</div>
-            </div>
+      <section className="lp-sec lp-panel"><div className="lp-wrap">
+        <div className="lp-lede">
+          <h2 className="lp-serif">This is where it starts</h2>
+          <p>Four ways into ALP, depending on what brought you here.</p>
+        </div>
+        <div className="lp-cards">
+          {[
+            {k:"G",t:"Goal writing",d:"Draft measurable goals from a baseline."},
+            {k:"P",t:"Progress",d:"Record evidence week by week."},
+            {k:"R",t:"Review queue",d:"Directors approve without chasing paper."},
+            {k:"F",t:"Family updates",d:"Share progress in plain language."},
+          ].map(c=>(
+            <button key={c.k} className="lp-card" onClick={()=>setNavPage("Features")}>
+              <span className="lp-card-img"/>
+              <span className="lp-mono">{c.k}</span>
+              <span className="lp-clabel"><b>{c.t}</b><span>{c.d}</span></span>
+            </button>
           ))}
         </div>
-      </section>
+      </div></section>
 
-
-      {/* ── BUILT FOR EDUCATORS EVERYWHERE ──────────────────── */}
-      <section style={{background:C.white,padding:"clamp(40px,5vw,56px) clamp(20px,4vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
-          <p style={{fontSize:11,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:C.warm,marginBottom:14}}>Built for educators everywhere</p>
-          <p style={{fontSize:14,color:C.black,maxWidth:560,margin:"0 auto",lineHeight:1.7}}>
-            ALP is designed to work for schools, learning centers, and individual educators anywhere in the world — no matter your country's framework or curriculum standards.
-          </p>
+      <section className="lp-sec"><div className="lp-wrap">
+        <div className="lp-lede">
+          <h2 className="lp-serif">Grounded in the classroom</h2>
+          <p>Built alongside the staff who write these plans every term.</p>
         </div>
-      </section>
-
-
-
-
-      {/* ── KEY FEATURES STRIP ──────────────────────────── */}
-      <section style={{background:C.white,padding:"clamp(48px,6vw,72px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p className="lbl" style={{textAlign:"center",marginBottom:16,color:C.purple}}>Everything You Need</p>
-          <h2 className="serif" style={{fontSize:"clamp(26px,4vw,46px)",fontWeight:700,textAlign:"center",letterSpacing:"-1px",marginBottom:48,lineHeight:1.1}}>
-            Built specifically for<br/><span className="serif-italic" style={{color:C.warm}}>special education.</span>
-          </h2>
-          <div className="r-feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:20}}>
-            {[
-              {icon:"✦",title:"AI Goal Architect",desc:"Generate 3 SMART goal options from baseline data in seconds. ALP standards, GES & SEND aligned.",color:C.purple},
-              {icon:"📈",title:"Progress Monitoring",desc:"CBM probes, trendlines, 3-point rule alerts. Weekly data that drives decisions.",color:C.blue},
-              {icon:"📄",title:"PDF Export",desc:"Professional ALP documents ready to print, email, or archive — generated from real student data.",color:C.green},
-              {icon:"✅",title:"Progress Engine",desc:"10+ global frameworks. Real-time tracking flags missing elements before reviews.",color:C.amber},
-              {icon:"📋",title:"13-Section Builder",desc:"Complete adaptive learning program in one guided flow. Every section, every field.",color:C.red},
-              {icon:"👥",title:"Multi-Role System",desc:"Teachers, directors, administrators, intervention specialists, and related services staff — each with the tools they need.",color:C.purple},
-              {icon:"🌍",title:"Global Frameworks",desc:"ALP standards USA, Ghana, UK, Nigeria, Kenya and more.",color:C.blue},
-              {icon:"📤",title:"Export & Reporting",desc:"Professional PDF documents, audit trails, compliance reports, district summaries.",color:C.green},
-            ].map(f=>(
-              <div key={f.title} className="card" style={{padding:"24px 22px",transition:"all .2s",cursor:"pointer"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=f.color;e.currentTarget.style.transform="translateY(-3px)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor=C.tanL;e.currentTarget.style.transform="none";}}>
-                <div style={{width:40,height:40,borderRadius:10,background:f.color+"18",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,marginBottom:14}}>{f.icon}</div>
-                <h3 style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:6}}>{f.title}</h3>
-                <p style={{fontSize:12,color:C.warm,lineHeight:1.6}}>{f.desc}</p>
-              </div>
-            ))}
-          </div>
-          <div style={{textAlign:"center",marginTop:32}}>
-            <button className="btn-purple" onClick={()=>setNavPage("Features")} style={{fontSize:12,padding:"13px 32px"}}>See All Features →</button>
-          </div>
+        <div className="lp-mosaic">
+          <div><span>Photograph</span></div>
+          <div><span>Photograph</span></div>
+          <div><span>Photograph</span></div>
+          <div><span>Photograph</span></div>
+          <div><span>Photograph</span></div>
         </div>
-      </section>
+      </div></section>
 
+      <section className="lp-sec lp-panel"><div className="lp-wrap">
+        <div className="lp-lede">
+          <h2 className="lp-serif">For schools</h2>
+          <p>You are handing us records about named children. Start here.</p>
+        </div>
+        <div className="lp-trio">
+          <button className="lp-tcard" onClick={()=>setNavPage("For Schools")}>
+            <span className="lp-timg"/><h4>Security</h4>
+            <p>How each school&rsquo;s records stay separate, and how we prove it on every release.</p>
+            <span className="lp-link">Learn more</span>
+          </button>
+          <button className="lp-tcard" onClick={()=>setNavPage("Pricing")}>
+            <span className="lp-timg"/><h4>Pricing</h4>
+            <p>Free for individual teachers. Clear per-school pricing, published.</p>
+            <span className="lp-link">Learn more</span>
+          </button>
+          <button className="lp-tcard" onClick={onDemo||onSignup||onEnter}>
+            <span className="lp-timg"/><h4>Getting started</h4>
+            <p>What adopting ALP looks like, from one teacher to a whole department.</p>
+            <span className="lp-link">Learn more</span>
+          </button>
+        </div>
+      </div></section>
 
-      <section style={{background:"#fff",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p className="lbl" style={{marginBottom:16,textAlign:"center",color:C.purple}}>How It Works</p>
-          <h2 className="serif" style={{fontSize:"clamp(28px,4vw,48px)",fontWeight:700,textAlign:"center",letterSpacing:"-1px",marginBottom:48,lineHeight:1.1}}>
-            Designed for teachers,<br/><span className="serif-italic" style={{color:C.warm}}>built for any school.</span>
-          </h2>
-          <div className="r-3col" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
-            {[
-              {q:"A guided 10-step workflow takes you from student information all the way through goals, accommodations, and review sign-off.",icon:"📋",c:"#7C3AED"},
-              {q:"AI-assisted goal writing turns baseline data into SMART goal suggestions — with baseline, target, and monitoring method ready to refine.",icon:"✨",c:"#2563EB"},
-              {q:"Built to flex with any country's planning requirements — not locked to a single state or national framework.",icon:"🌍",c:"#16A34A"},
-              {q:"Manage every student's goals, services, reports, and meetings in one place instead of scattered spreadsheets and folders.",icon:"🗂️",c:"#9333EA"},
-              {q:"Once an ALP is approved, generate a professional PDF in one click — ready to print, email, or keep on file for every student.",icon:"📄",c:"#0891B2"},
-              {q:"A clean onboarding flow gets new teachers comfortable with the platform from their very first session.",icon:"🚀",c:"#D97706"},
-            ].map((t,i)=>(
-              <div key={i} className="card" style={{padding:"26px 24px",position:"relative",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-3px)"} onMouseLeave={e=>e.currentTarget.style.transform="none"}>
-                <div style={{fontSize:28,marginBottom:14}}>{t.icon}</div>
-                <p className="serif" style={{fontSize:13.5,fontStyle:"italic",lineHeight:1.8,color:C.black}}>{t.q}</p>
-              </div>
-            ))}
-          </div>
+      <section className="lp-sec lp-faq"><div className="lp-wrap">
+        <div className="lp-lede"><h2 className="lp-serif">Frequently asked questions</h2></div>
+        <div className="lp-faq-list">
+          <details><summary>Is ALP really free for individual teachers?</summary><p>Yes. One teacher, one caseload, no card. Paid plans begin when a school wants shared review, roles and reporting across staff.</p></details>
+          <details><summary>Can guardians log in and see their child&rsquo;s plan?</summary><p>No. Guardians are contact records held by staff. There are no guardian accounts, which removes a whole category of access risk around children&rsquo;s records.</p></details>
+          <details><summary>How is one school&rsquo;s data kept separate from another&rsquo;s?</summary><p>Isolation is enforced in the database itself, not in application code. A staff member&rsquo;s role and school are set server-side and cannot be changed from their browser.</p></details>
+          <details><summary>What happens to our data if we stop using ALP?</summary><p>You can export every plan as a document, and request deletion of your school&rsquo;s records.</p></details>
+          <details><summary>Does ALP work on a phone?</summary><p>Yes. It runs in any modern browser on a laptop, tablet or phone. There is nothing to install.</p></details>
         </div>
-      </section>
+      </div></section>
 
-      <section style={{background:"#fff",padding:"0"}}><div style={{padding:"clamp(48px,7vw,96px) clamp(20px,4vw,48px)",maxWidth:1100,margin:"0 auto"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:12}}>
-          <div>
-            <p className="lbl" style={{marginBottom:14}}>Platform Features</p>
-            <h2 className="serif" style={{fontSize:"clamp(36px,5vw,60px)",fontWeight:700,lineHeight:1.08,letterSpacing:"-1.5px"}}>Everything your<br/><span className="serif-italic" style={{color:C.warm}}>school needs.</span></h2>
-          </div>
-          <button style={{width:42,height:42,border:`1.5px solid ${C.black}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:15,background:"transparent",transition:"all .18s",marginBottom:6}} onMouseEnter={e=>e.currentTarget.style.background=C.black} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>↗</button>
+      <div className="lp-quick"><div className="lp-wrap">
+        <h5>Quick links</h5>
+        <div className="lp-qrow">
+          <button onClick={onSignup||onEnter}>Start free</button>
+          <button onClick={onDemo||onEnter}>Book a demo</button>
+          <button onClick={()=>setNavPage("For Schools")}>Security</button>
+          <button onClick={()=>setNavPage("Pricing")}>Pricing</button>
+          <button onClick={()=>setNavPage("Resources")}>Help centre</button>
         </div>
-        <hr className="rule" style={{margin:"32px 0 48px"}}/>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))"}}>
-          {features.map((f,i)=><div key={f.n} style={{padding:"36px 32px",borderRight:(i+1)%3!==0?`1px solid ${C.tanL}`:"none",borderBottom:i<3?`1px solid ${C.tanL}`:"none",transition:"background .2s"}} onMouseEnter={e=>e.currentTarget.style.background=C.white} onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-            <div style={{fontSize:11,fontWeight:700,color:C.purple,letterSpacing:".1em",marginBottom:16}}>{f.n}</div>
-            <div className="serif" style={{fontSize:19,fontWeight:700,lineHeight:1.2}}><span className="serif-italic" style={{color:C.warm,marginRight:4}}>{f.italic}</span>{f.title}</div>
-            <p style={{fontSize:13,color:C.warm,lineHeight:1.75,marginTop:12}}>{f.desc}</p>
-          </div>)}
-        </div></div></section>
+      </div></div>
 
-      <section style={{background:C.black,padding:"clamp(52px,8vw,96px) clamp(20px,5vw,48px)"}}>
-        <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p className="lbl" style={{color:"#9A8A78",marginBottom:20}}>Access ALP your way</p>
-          <h2 className="serif" style={{fontSize:"clamp(36px,5vw,64px)",fontWeight:700,color:C.cream,letterSpacing:"-1.5px",marginBottom:64,lineHeight:1.08}}>Your Platform.<br/><span className="serif-italic" style={{color:"#A78BFA"}}>Your Device.</span></h2>
-          <div className="r-platform-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:1,background:"#2D2D2D"}}>
-            {[
-              {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11",ver:"v2.4.1"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.46 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>,label:"macOS",sub:"macOS 12+",ver:"v2.4.1"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50"><ellipse cx="21" cy="31" rx="14" ry="15" fill="#1a1a1a"/><ellipse cx="21" cy="33" rx="7.5" ry="9.5" fill="#f0ece0"/><ellipse cx="21" cy="11" rx="9.5" ry="10.5" fill="#1a1a1a"/><ellipse cx="21" cy="12.5" rx="5.5" ry="6.5" fill="#f0ece0"/><circle cx="18" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="24" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="18.6" cy="8.9" r="0.65" fill="#fff"/><circle cx="24.6" cy="8.9" r="0.65" fill="#fff"/><ellipse cx="21" cy="14.5" rx="2.8" ry="1.7" fill="#f5a623"/><ellipse cx="8" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(-8 8 30)"/><ellipse cx="34" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(8 34 30)"/><ellipse cx="16" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/><ellipse cx="26" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/></svg>,label:"Linux",sub:"Ubuntu / Debian",ver:"v2.4.1"}
-            ].map(p=>(
-              <div key={p.label} style={{background:"#1A1A1A",padding:"40px 32px",display:"flex",flexDirection:"column",alignItems:"flex-start"}}>
-                {p.svg
-                  ?<div style={{width:52,height:52,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"flex-start"}}>{p.svg}</div>
-                  :<div style={{fontSize:34,marginBottom:12}}>{p.icon}</div>
-                }
-                <div className="serif" style={{fontSize:21,fontWeight:700,color:C.cream,marginBottom:4}}>{p.label}</div>
-                <div style={{fontSize:12,color:"#9A8A78",marginBottom:20}}>{p.sub}</div>
-                {p.cta
-                  ?<button className="btn-purple" onClick={onEnter} style={{fontSize:11,padding:"10px 22px"}}>Open in Browser</button>
-                  :<button className="btn-ghost" onClick={()=>setShowDownload(true)} style={{fontSize:11,color:"#9A8A78",borderColor:"#333"}}>{p.ver} — Download</button>
-                }
-              </div>
-            ))}
+      <footer className="lp-foot"><div className="lp-wrap">
+        <div className="lp-fgrid">
+          <div className="lp-fbrand">
+            <span className="lp-serif" style={{fontSize:30,color:"#fff",letterSpacing:".04em"}}>ALP</span>
+            <p>Accelerated Learning Plan &mdash; planning software for the staff who support learners with additional needs.</p>
           </div>
+          <div><h5>Product</h5><ul>
+            <li><button onClick={()=>setNavPage("Features")}>Overview</button></li>
+            <li><button onClick={()=>setNavPage("Features")}>Goal writing</button></li>
+            <li><button onClick={()=>setNavPage("Features")}>Progress</button></li>
+            <li><button onClick={()=>setNavPage("Features")}>Reporting</button></li>
+          </ul></div>
+          <div><h5>For schools</h5><ul>
+            <li><button onClick={()=>setNavPage("For Schools")}>Why ALP</button></li>
+            <li><button onClick={()=>setNavPage("For Schools")}>Security</button></li>
+            <li><button onClick={()=>setNavPage("Pricing")}>Pricing</button></li>
+            <li><button onClick={()=>setNavPage("Resources")}>Resources</button></li>
+          </ul></div>
+          <div><h5>Information</h5><ul>
+            <li><button onClick={()=>setNavPage("Privacy")}>Privacy notice</button></li>
+            <li><button onClick={()=>setNavPage("Terms")}>Terms</button></li>
+            <li><button onClick={()=>setNavPage("Data")}>Data processing</button></li>
+            <li><button onClick={onDemo||onEnter}>Contact</button></li>
+          </ul></div>
         </div>
-      </section>
-
-      
-
-
-      {/* ── INTEGRATIONS STRIP ──────────────────── */}
-      <section style={{background:C.white,padding:"clamp(32px,4vw,48px) clamp(20px,4vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p style={{textAlign:"center",fontSize:11,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:C.warm,marginBottom:20}}>Connects with the tools your school already uses</p>
-          <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"clamp(16px,3vw,40px)",flexWrap:"wrap"}}>
-            {[["📊","PowerSchool"],["🏫","Infinite Campus"],["📧","Google Workspace"],["💻","Microsoft 365"],["🔒","Clever SSO"],["📋","Frontline"],["📁","Google Drive"],["📤","CSV Import"]].map(([icon,name])=>(
-              <div key={name} style={{display:"flex",alignItems:"center",gap:6,fontSize:13,color:C.warm,fontWeight:500,opacity:.65}}>
-                <span style={{fontSize:18}}>{icon}</span>
-                <span>{name}</span>
-              </div>
-            ))}
-          </div>
+        <div className="lp-badges">
+          <span className="lp-badge">Row-level isolation</span>
+          <span className="lp-badge">Audit logging</span>
+          <span className="lp-badge">EU-hosted data</span>
+          <span className="lp-badge">No guardian logins</span>
         </div>
-      </section>
-      {/* ── FINAL CTA ────────────────────────────── */}
-      <section style={{background:"linear-gradient(135deg,#0B0718 0%,#1a0a3e 50%,#0B0718 100%)",padding:"clamp(72px,10vw,120px) clamp(20px,4vw,48px)"}}>
-        <div style={{maxWidth:700,margin:"0 auto",textAlign:"center"}}>
-          <div style={{display:"inline-flex",alignItems:"center",gap:8,background:"rgba(124,58,237,.2)",border:"1px solid rgba(124,58,237,.4)",borderRadius:99,padding:"6px 16px",marginBottom:24}}>
-            <span style={{width:8,height:8,borderRadius:"50%",background:"#A78BFA",display:"inline-block"}}/>
-            <span style={{fontSize:12,color:"#A78BFA",fontWeight:600}}>Free plan available for schools — forever</span>
-          </div>
-          <h2 className="serif" style={{fontSize:"clamp(32px,6vw,64px)",fontWeight:800,color:"#fff",letterSpacing:"-2px",lineHeight:1.05,marginBottom:20}}>
-            Start building better<br/>
-            <span className="serif-italic" style={{color:"#A78BFA"}}>learning plans today.</span>
-          </h2>
-          <p style={{fontSize:"clamp(14px,2vw,18px)",color:"rgba(255,255,255,.55)",lineHeight:1.75,marginBottom:36,maxWidth:520,margin:"0 auto 36px"}}>
-            Built for educators everywhere. Free plan includes the full 10-step ALP Builder, AI-assisted goal writing, and progress monitoring for up to 10 students.
-          </p>
-          <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap",marginBottom:28}}>
-            <button className="btn-purple" onClick={onSignup} style={{fontSize:15,padding:"16px 40px",borderRadius:99,boxShadow:"0 0 40px rgba(124,58,237,.5)"}}>
-              Get Started Free →
-            </button>
-            <button onClick={onDemo} style={{fontSize:14,padding:"16px 32px",borderRadius:99,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.2)",color:"#fff",cursor:"pointer",fontWeight:600,transition:"all .2s"}}
-              onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,.15)"}
-              onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.08)"}>
-              📅 Book a Demo
-            </button>
-          </div>
-          <div style={{display:"flex",justifyContent:"center",gap:"clamp(16px,3vw,32px)",flexWrap:"wrap"}}>
-            {["No credit card","Free forever plan","Cancel anytime","Secure & private"].map(t=>(
-              <div key={t} style={{display:"flex",alignItems:"center",gap:6,fontSize:12,color:"rgba(255,255,255,.4)"}}>
-                <span style={{color:"#A78BFA",fontSize:14}}>✓</span>{t}
-              </div>
-            ))}
-          </div>
+        <div className="lp-colophon">
+          <span>&copy; {new Date().getFullYear()} ALP. Built by Stan Paraclete.</span>
+          <span>Accra, Ghana &middot; Columbus, Georgia</span>
         </div>
-      </section>
-      {/* ── NEWSLETTER ─────────────────────────────── */}
-      <section style={{background:"linear-gradient(135deg,#4C1D95,#7C3AED)",padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)"}}>
-        <div style={{maxWidth:640,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:16,color:"rgba(255,255,255,.6)"}}>Stay Updated</p>
-          <h2 className="serif" style={{fontSize:"clamp(26px,4vw,44px)",fontWeight:800,color:"#fff",letterSpacing:"-1px",marginBottom:12,lineHeight:1.1}}>
-            Get ALP tips & planning<br/>updates in your inbox.
-          </h2>
-          <p style={{fontSize:14,color:"rgba(255,255,255,.6)",marginBottom:32,lineHeight:1.7}}>Join 8,000+ special educators. No spam — unsubscribe anytime.</p>
-          <NewsletterForm/>
-        </div>
-      </section>
-<footer style={{background:"#0d0d0d",padding:"clamp(40px,6vw,72px) clamp(20px,5vw,48px) 0"}}>
-        <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:"clamp(28px,4vw,48px)",marginBottom:"clamp(36px,5vw,56px)"}}>
-            <div>
-              <div className="serif" style={{fontSize:26,fontWeight:800,marginBottom:10,color:"#fff",fontStyle:"italic",letterSpacing:"-0.5px"}}>ALP.</div>
-              <p style={{fontSize:13,color:"rgba(255,255,255,.5)",lineHeight:1.75,marginBottom:16}}>Accelerated Learning Plan.<br/>Supporting every learner's growth — worldwide.</p>
-              <p style={{fontSize:11,color:"rgba(255,255,255,.3)",lineHeight:1.6}}>Shalom Estate, Adenta Municipality<br/>Ghana, West Africa</p>
-              <div style={{marginTop:16,display:"flex",gap:10}}>
-                {[["🌍","https://www.growwithalp.com"],["✉️","mailto:hello@growwithalp.com"]].map(([icon,href])=>(
-                  <a key={href} href={href} target="_blank" rel="noopener noreferrer" style={{width:34,height:34,borderRadius:8,background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,textDecoration:"none",transition:"all .18s"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="rgba(124,58,237,.4)"}
-                    onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.08)"}>{icon}</a>
-                ))}
-              </div>
-            </div>
-            {[
-              {title:"Platform",links:[
-                {label:"ALP Builder",fn:onSignup},{label:"Progress Monitoring",fn:onSignup},
-                {label:"PDF Export",fn:onSignup},{label:"AI Goal Architect",fn:onSignup},
-                {label:"All Features",fn:()=>setNavPage("Features")},
-              ]},
-              {title:"For Schools",links:[
-                {label:"For Teachers",fn:onSignup},{label:"For Schools & Districts",fn:()=>setNavPage("For Schools")},
-                {label:"Pricing",fn:()=>setNavPage("Pricing")},{label:"NGO & Gov",fn:onDemo},
-                {label:"Book a Demo",fn:onDemo},
-              ]},
-              {title:"Resources",links:[
-                {label:"Help Center",fn:()=>setNavPage("Resources")},{label:"Blog & Guides",fn:()=>setNavPage("Resources")},
-                {label:"Webinars",fn:()=>setNavPage("Resources")},{label:"Contact Us",fn:onDemo},
-                {label:"Schedule Demo",fn:onDemo},
-              ]},
-              {title:"Legal",links:[
-                {label:"Privacy Policy",fn:()=>setNavPage("Privacy")},
-                {label:"Terms of Service",fn:()=>setNavPage("Terms")},
-                {label:"Data & Security",fn:()=>setNavPage("Data")},
-                {label:"Request a DPA",fn:()=>window.open("mailto:legal@growwithalp.com?subject=DPA+Request","_blank")},
-              ]},
-            ].map(({title,links})=>(
-              <div key={title}>
-                <p style={{fontSize:10,fontWeight:800,letterSpacing:".14em",textTransform:"uppercase",color:"rgba(255,255,255,.35)",marginBottom:18}}>{title}</p>
-                {links.map(({label,fn})=>(
-                  <div key={label} onClick={fn} style={{fontSize:13,color:"rgba(255,255,255,.55)",marginBottom:11,cursor:"pointer",transition:"color .15s"}}
-                    onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
-                    onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.55)"}>{label}</div>
-                ))}
-              </div>
-            ))}
-          </div>
-          <div style={{borderTop:"1px solid rgba(255,255,255,.08)",padding:"clamp(18px,2.5vw,24px) 0",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
-            <span style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>© 2026 ALP Platform Inc. All rights reserved.</span>
-            <div style={{display:"flex",gap:20,alignItems:"center",flexWrap:"wrap"}}>
-              <span style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:"rgba(255,255,255,.3)"}}>
-                <span className="pulse" style={{width:6,height:6,borderRadius:"50%",background:"#34D399",display:"inline-block"}}/>
-                Systems Operational
-              </span>
-              <span style={{fontSize:11,color:"rgba(255,255,255,.3)"}}>
-                Built by{" "}
-                <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer"
-                  style={{color:"#A78BFA",fontWeight:700,textDecoration:"none"}}
-                  onMouseEnter={e=>e.currentTarget.style.textDecoration="underline"}
-                  onMouseLeave={e=>e.currentTarget.style.textDecoration="none"}>Stan Paraclete</a>
-                {" · "}
-                <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer"
-                  style={{color:"rgba(255,255,255,.35)",textDecoration:"none"}}
-                  onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
-                  onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.35)"}>stanparaclete.com</a>
-                {" · "}
-                <a href="https://www.growwithalp.com" target="_blank" rel="noopener noreferrer"
-                  style={{color:"rgba(255,255,255,.35)",textDecoration:"none"}}
-                  onMouseEnter={e=>e.currentTarget.style.color="#A78BFA"}
-                  onMouseLeave={e=>e.currentTarget.style.color="rgba(255,255,255,.35)"}>growwithalp.com</a>
-              </span>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div></footer>
     </div>
   );
 }
@@ -5800,7 +5741,7 @@ function Login({onLogin, onBack}){
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:64}}>
             <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={onBack}>
               <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:44,height:44,borderRadius:11,objectFit:"cover"}}/>
-              <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff",lineHeight:1}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em",marginTop:1}}>ACCELERATED LEARNING PROGRAM</div></div>
+              <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff",lineHeight:1}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em",marginTop:1}}>ACCELERATED LEARNING PLAN</div></div>
             </div>
             <button onClick={onBack} style={{fontSize:12,color:"rgba(255,255,255,.4)",background:"none",border:"1px solid rgba(255,255,255,.15)",borderRadius:99,padding:"6px 14px",cursor:"pointer"}}>← Website</button>
           </div>
@@ -10128,7 +10069,7 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
         <div style={{padding:"20px 18px 14px",borderBottom:"1px solid rgba(255,255,255,.07)"}}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:36,height:36,borderRadius:9,objectFit:"cover",flexShrink:0}}/>
-            <div><div className="serif" style={{fontSize:14,fontWeight:700,color:C.cream,lineHeight:1}}>ALP</div><div style={{fontSize:8,color:"rgba(255,255,255,.35)",textTransform:"uppercase",letterSpacing:".1em",marginTop:1}}>ACCELERATED LEARNING PROGRAM</div></div>
+            <div><div className="serif" style={{fontSize:14,fontWeight:700,color:C.cream,lineHeight:1}}>ALP</div><div style={{fontSize:8,color:"rgba(255,255,255,.35)",textTransform:"uppercase",letterSpacing:".1em",marginTop:1}}>ACCELERATED LEARNING PLAN</div></div>
           </div>
           {/* Role indicator */}
           <div style={{marginTop:12,padding:"8px 10px",background:"rgba(255,255,255,.05)",borderRadius:8,border:"1px solid rgba(255,255,255,.08)",cursor:"pointer",transition:"all .15s"}}

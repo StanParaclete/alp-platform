@@ -242,7 +242,7 @@ jobs:
 
       - name: One product name
         run: |
-          if grep -rnE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
+          if grep -rniE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
             echo "::error::Use 'Accelerated Learning Plan' — it is the name on the wordmark and the domain."
             exit 1
           fi
