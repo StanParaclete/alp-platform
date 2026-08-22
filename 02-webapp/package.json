@@ -17,8 +17,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.1.0",
-    "esbuild": "^0.24.0"
+    "esbuild": "^0.24.0",
+    "jsdom": "^25.0.1",
+    "vite": "^5.1.0"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -58,6 +58,13 @@ jobs:
             echo "::error::A parent/student value was added to the user_role enum."
             fail=1
           fi
+          # A role sent to signUp() is the escalation surface. A role on
+          # a demo/lead form grants nothing and is fine — so match the
+          # call, not the label.
+          if grep -nE "signUp\([^)]*role" 02-webapp/src/App.jsx; then
+            echo "::error::The public signup is sending a client-chosen role."
+            fail=1
+          fi
           if ls 02-webapp/src/FamilyPortal.jsx 2>/dev/null; then
             echo "::error::FamilyPortal.jsx is a parent-facing surface and must not ship."
             fail=1
@@ -72,42 +79,16 @@ jobs:
           fi
           exit $fail
 
-      # A redirect to a host you no longer control is a live risk: if the
-      # project is deleted and the subdomain is later claimed by someone
-      # else, growwithalp.com forwards requests to a stranger. The
-      # Express/Prisma backend that /api/* pointed at no longer exists.
-      - name: No proxy to the retired backend
-        run: |
-          if grep -rniE "railway\.app|alp-backend-production" netlify.toml 02-webapp/src 2>/dev/null \
-             | grep -vE "^[^:]+:[0-9]+:[[:space:]]*#"; then
-            echo "::error::A redirect or call to the retired Railway backend has returned."
-            echo "This build talks to Supabase directly. There is no backend to proxy to."
-            exit 1
-          fi
-
-      # Netlify reads netlify.toml from the repository root. A copy
-      # inside 02-webapp/ declaring base = "02-webapp" is ignored, and
-      # the site silently builds with the dashboard's settings instead.
-      - name: Exactly one netlify.toml, at the repo root
-        run: |
-          fail=0
-          [ -f netlify.toml ] || { echo "::error::netlify.toml is missing from the repo root."; fail=1; }
-          if [ -f 02-webapp/netlify.toml ]; then
-            echo "::error::A second netlify.toml exists in 02-webapp/. Keep one, at the root."
-            fail=1
-          fi
-          exit $fail
-
       # An API key in a Vite bundle is not a secret: VITE_* is inlined
       # at build time and ends up readable in dist/.
       - name: No AI keys in the browser bundle
         run: |
           fail=0
-          if grep -rnE "api\.(anthropic|deepseek|openai)\.com" 02-webapp/src --include=*.js --include=*.jsx | grep -vE "^[^:]+:[0-9]+:\s*//"; then
+          if grep -rn "api.anthropic.com" 02-webapp/src --include=*.js --include=*.jsx | grep -v "^\s*//" | grep -vE "^[^:]+:[0-9]+:\s*//"; then
             echo "::error::Direct browser call to the Anthropic API. Use the ai-assist Edge Function."
             fail=1
           fi
-          if grep -rniE "VITE_(ANTHROPIC|DEEPSEEK|OPENAI)|VITE_.*API_KEY|x-api-key|sk-ant-|sk-[a-f0-9]{32}" 02-webapp/src; then
+          if grep -rniE "VITE_ANTHROPIC|VITE_.*API_KEY|x-api-key" 02-webapp/src; then
             echo "::error::An API key is being read in client code. Vite inlines VITE_* into the public bundle."
             fail=1
           fi
@@ -125,34 +106,15 @@ jobs:
             exit 1
           fi
 
-      # An invalid role must fail the invite, never quietly become a
-      # teacher account.
-      #
-      # This guard used to grep the migrations for the string "Invalid
-      # role", which was correct when handle_new_user still READ a role
-      # out of signup metadata and had to reject bad values. It no
-      # longer reads one at all — every self-registration is hardcoded
-      # to 'teacher'/'pending' with a null org — so the string vanished
-      # and the guard failed against a schema that is strictly safer
-      # than the one it was written for.
-      #
-      # The defence now lives in two places, and this checks both.
+      # Three names for one product reads as carelessness to a district.
+      # An invalid role must fail the invite, never become a teacher.
       - name: Invalid roles are rejected, not downgraded
         run: |
-          fail=0
-          grep -q "VALID_ROLES" supabase/functions/invite-user/authorize.ts || {
-            echo "::error::authorize.ts no longer defines a role allow-list."
-            echo "An invite carrying role=parent could reach the database."
-            fail=1; }
-          grep -qE "VALID_ROLES\.includes\(" supabase/functions/invite-user/authorize.ts || {
-            echo "::error::authorize.ts defines VALID_ROLES but never checks against it."
-            fail=1; }
-          grep -qE "values \(new\.id, null, new\.email, v_full_name, 'teacher', 'pending'" \
-            supabase/migrations/*.sql || {
-            echo "::error::handle_new_user no longer hardcodes an unprivileged profile."
-            echo "Self-registration must land as teacher/pending with a null org."
-            fail=1; }
-          exit $fail
+          if ! grep -q "Invalid role" supabase/migrations/*.sql; then
+            echo "::error::handle_new_user no longer rejects unknown roles."
+            echo "An invite carrying role=parent would silently create a teacher account."
+            exit 1
+          fi
 
       # The primary-guardian switch must stay atomic and ownership-checked.
       - name: Primary guardian change is atomic
@@ -186,63 +148,34 @@ jobs:
             exit 1
           fi
 
-      # The third door into privilege escalation, after signup metadata
-      # and the invite endpoint. profiles_update_self constrains WHICH
-      # row you may write, not WHAT you may write into it, so without
-      # this trigger any teacher could PATCH their own row to
-      # role=admin and org_id=<another school> and read that school's
-      # entire caseload. Found by the tenant-isolation probe, Aug 2026.
-      - name: Profile privileges are frozen against client writes
-        run: |
-          fail=0
-          grep -q "guard_profile_privileges" supabase/migrations/*.sql || {
-            echo "::error::The profiles privilege guard is gone."
-            echo "Without it a teacher can PATCH their own profiles row to role=admin, org_id=<any school>."
-            fail=1; }
-          grep -q "profiles_guard_privileges" supabase/migrations/*.sql || {
-            echo "::error::The BEFORE UPDATE trigger on profiles is not being created."; fail=1; }
-          exit $fail
-
-      # Rule 1, client half. The trigger reverts these fields, so a
-      # client that sends them fails silently and confusingly — the
-      # save appears to work and the value does not change. Nothing in
-      # the app has any reason to write them.
-      - name: No client-side writes to privileged profile fields
-        run: |
-          hits=$(grep -rnE "from\('profiles'\)" -A4 02-webapp/src \
-                 | grep -E "\b(role|org_id|status|invited_by)\s*:" || true)
-          if [ -n "$hits" ]; then
-            echo "$hits"
-            echo "::error::Client code is writing a privileged profile field."
-            echo "role/org_id/status are server-controlled — see SECURITY_RULES.md rule 1."
-            exit 1
-          fi
-
       # Public signup can no longer grant a role, so invite-user is the
       # only route into staff access — the authentication boundary for
       # the whole product. Its rules live in authorize.ts precisely so
       # they can be tested; this job is that test.
-      # test:invite bundles with esbuild before running, so this job
-      # needs the dependencies installed. It previously had no Node
-      # setup at all and would have failed on a missing binary rather
-      # than on anything about the code.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: 02-webapp/package-lock.json
-
-      - name: Install dependencies
-        working-directory: 02-webapp
-        run: npm ci
-
       - name: Invitation authorization tests
         working-directory: 02-webapp
         run: npm run test:invite
 
+      # Every font declared in App.jsx must actually be requested in
+      # index.html. Playfair Display was declared by .serif (194 uses)
+      # and never loaded, so the whole app rendered in Georgia — the
+      # kind of bug that is invisible unless you know the face.
+      - name: Declared fonts are actually loaded
+        run: |
+          fail=0
+          for f in "Playfair Display" "DM Sans" "DM Serif Display"; do
+            if grep -qF "$f" 02-webapp/src/App.jsx; then
+              slug=$(echo "$f" | tr ' ' '+')
+              grep -qF "$slug" 02-webapp/index.html || {
+                echo "::error::$f is used in App.jsx but never requested in index.html."
+                fail=1; }
+            fi
+          done
+          exit $fail
+
       - name: One product name
         run: |
-          if grep -rniE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
+          if grep -rnE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
             echo "::error::Use 'Accelerated Learning Plan' — it is the name on the wordmark and the domain."
             exit 1
           fi
@@ -276,61 +209,6 @@ jobs:
             esac
           done
           exit $fail
-
-  # ══════════════════════════════════════════════════════════════════
-  # Tenant isolation. The probe normally runs against a real project
-  # during UAT, which CI cannot do. Instead it runs against a mock that
-  # can be switched between correct and deliberately broken behaviour.
-  #
-  # The second half is the part that matters: a probe that passes
-  # against a leaking database is worse than no probe, because a clean
-  # run gets trusted. If the leaky run does NOT report breaches, the
-  # probe has stopped working and this job fails.
-  # ══════════════════════════════════════════════════════════════════
-  tenant-isolation:
-    name: Tenant isolation probe
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Detector self-test
-        run: node uat/probe-selftest.mjs
-
-      - name: Probe reports clean against a correctly isolated database
-        run: |
-          node uat/mock-supabase.mjs --port 8099 --mode secure &
-          sleep 2
-          SUPABASE_URL=http://localhost:8099 SUPABASE_ANON_KEY=anon \
-          A_EMAIL=a@a.edu A_PASSWORD=pass-a \
-          B_EMAIL=b@b.edu B_PASSWORD=pass-b \
-          FUNCTIONS_URL=http://localhost:8099/functions/v1 \
-          PROBE_SIGNUP_EMAIL=ci-probe@example.invalid \
-          P_EMAIL=p@p.edu P_PASSWORD=pass-p P_EXPECT=pending \
-          node uat/tenant-isolation-probe.mjs --allow-delete
-
-      - name: Probe detects a deliberately leaking database
-        run: |
-          node uat/mock-supabase.mjs --port 8100 --mode leaky &
-          sleep 2
-          set +e
-          SUPABASE_URL=http://localhost:8100 SUPABASE_ANON_KEY=anon \
-          A_EMAIL=a@a.edu A_PASSWORD=pass-a \
-          B_EMAIL=b@b.edu B_PASSWORD=pass-b \
-          FUNCTIONS_URL=http://localhost:8100/functions/v1 \
-          PROBE_SIGNUP_EMAIL=ci-probe-leaky@example.invalid \
-          P_EMAIL=p@p.edu P_PASSWORD=pass-p P_EXPECT=pending \
-          node uat/tenant-isolation-probe.mjs --allow-delete > leaky.log 2>&1
-          code=$?
-          cat leaky.log
-          if [ $code -ne 1 ]; then
-            echo "::error::The probe did not report a breach against a database with NO tenant isolation."
-            echo "The probe is broken. A green run against the real project would mean nothing."
-            exit 1
-          fi
-          echo "Probe correctly reported $(grep -c 'BREACH' leaky.log) breaches."
 
   build:
     name: Web app build

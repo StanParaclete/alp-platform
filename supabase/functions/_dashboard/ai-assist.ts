@@ -98,11 +98,11 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json(headers, { error: "Method not allowed" }, 405);
 
   try {
-    const apiKey = Deno.env.get("DEEPSEEK_API_KEY");
+    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
     if (!apiKey) {
       // Explicit rather than a confusing upstream 401.
       return json(headers, {
-        error: "AI features are not configured. Ask your administrator to set DEEPSEEK_API_KEY.",
+        error: "AI features are not configured. Ask your administrator to set ANTHROPIC_API_KEY.",
       }, 503);
     }
 
@@ -164,35 +164,28 @@ Deno.serve(async (req) => {
         .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
         .map((m: any) => ({ role: m.role, content: m.content.slice(0, 4000) }));
       if (messages.length === 0) return json(headers, { error: "Nothing to send" }, 400);
-      // Kept from the Anthropic version. DeepSeek does not require a
-      // leading user turn, but a history starting with an assistant
-      // reply is a client bug either way, and dropping it is harmless.
-      if (messages[0].role !== "user") messages.shift();
+      if (messages[0].role !== "user") messages.shift();   // Anthropic requires a user turn first
       if (messages.length === 0) return json(headers, { error: "Nothing to send" }, 400);
     }
 
-    // DeepSeek speaks the OpenAI chat-completions shape, which differs
-    // from Anthropic's in three ways that all matter here:
-    //   - auth is a Bearer token, not an x-api-key header
-    //   - the system prompt is the first MESSAGE, not a separate field
-    //   - the reply is choices[0].message.content, not content[0].text
-    const upstream = await fetch("https://api.deepseek.com/chat/completions", {
+    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,   // never leaves this function
+        "x-api-key": apiKey,              // never leaves this function
+        "anthropic-version": "2023-06-01", // required; the old client omitted it
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "claude-sonnet-4-6",
         max_tokens: MAX_TOKENS[mode],
-        messages: [{ role: "system", content: SYSTEM[mode] }, ...messages],
-        stream: false,
+        system: SYSTEM[mode],
+        messages,
       }),
     });
 
     if (!upstream.ok) {
       const detail = await upstream.text();
-      console.error("deepseek error", upstream.status, detail.slice(0, 400));
+      console.error("anthropic error", upstream.status, detail.slice(0, 400));
       // Don't forward upstream error bodies — they can contain account
       // and billing details the browser has no business seeing.
       return json(headers, {
@@ -203,7 +196,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await upstream.json();
-    const text = data?.choices?.[0]?.message?.content ?? "";
+    const text = data?.content?.[0]?.text ?? "";
     return json(headers, { text });
 
   } catch (err) {
