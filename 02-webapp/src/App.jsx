@@ -7357,6 +7357,77 @@ const RELATIONSHIPS=["Mother","Father","Guardian","Grandparent","Foster Parent",
 // to plot, rather than drawing an empty rail that implies zero
 // progress. A goal without a baseline is unmeasured, not failing.
 // ═══════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════
+// PENDING ACCOUNT
+//
+// Signup deliberately cannot grant a role or an organisation —
+// those come only from a school inviting you (see
+// supabase/functions/invite-user). That is the right security
+// model, but it left a hole: a person who signs up successfully
+// had nothing to greet them. Every query returned zero rows and
+// the app looked broken rather than waiting.
+//
+// This is the screen for the gap between "account created" and
+// "school added me". It says what happened, what happens next,
+// and what to do if nothing does.
+// ═══════════════════════════════════════════════════════════
+function PendingAccount({profile,email,onSignOut}){
+  const [copied,setCopied]=useState(false);
+  const addr=profile?.email||email||"";
+
+  return (
+    <div style={{minHeight:"100vh",background:C.bg,display:"flex",
+      alignItems:"center",justifyContent:"center",padding:"24px"}}>
+      <div className="card settle" style={{maxWidth:520,width:"100%",padding:"38px 34px"}}>
+        <img src="/assets/logos/alp-logo.png" alt="" width={38} height={38}
+          style={{borderRadius:10,marginBottom:24}}/>
+
+        <h2 className="serif" style={{fontSize:28,margin:"0 0 14px",color:C.black}}>
+          You&rsquo;re signed up. Your school needs to add you next.
+        </h2>
+
+        <p style={{fontSize:16,lineHeight:1.62,color:C.warm,margin:"0 0 26px"}}>
+          ALP accounts are created by schools, so a director or administrator at
+          your school has to connect this account before you can see students or
+          build plans. It takes them under a minute.
+        </p>
+
+        <div style={{padding:"16px 18px",background:C.bg,borderRadius:12,
+          border:`1px solid ${C.border}`,marginBottom:24}}>
+          <p className="lbl" style={{margin:"0 0 8px"}}>Send them this address</p>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+            <code style={{fontSize:15,color:C.black,fontWeight:600,letterSpacing:"-.01em"}}>{addr}</code>
+            <button className="btn-ghost" style={{fontSize:11,padding:"6px 12px"}}
+              onClick={()=>{
+                try{navigator.clipboard.writeText(addr);setCopied(true);
+                  setTimeout(()=>setCopied(false),2000);}catch{}
+              }}>{copied?"Copied":"Copy"}</button>
+          </div>
+          <p style={{fontSize:13,color:C.warm,lineHeight:1.6,margin:"10px 0 0"}}>
+            They add it under <b style={{color:C.black}}>Settings → Staff → Invite</b>.
+            Once they do, sign in again and everything will be here.
+          </p>
+        </div>
+
+        <p style={{fontSize:14,lineHeight:1.65,color:C.warm,margin:"0 0 26px"}}>
+          Nobody at your school using ALP yet? Then you&rsquo;re the one who sets it
+          up — email <a href="mailto:hello@growwithalp.com?subject=Setting%20up%20ALP%20for%20my%20school"
+          style={{color:C.purple,fontWeight:600}}>hello@growwithalp.com</a> and
+          we&rsquo;ll create your school and make you its director.
+        </p>
+
+        <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+          <button className="btn-purple" style={{fontSize:13,padding:"12px 22px"}}
+            onClick={()=>window.location.reload()}>Check again</button>
+          <button className="btn-ghost" style={{fontSize:13,padding:"12px 22px"}}
+            onClick={onSignOut}>Sign out</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Trajectory({baseline,current,target,unit}){
   const b=Number(baseline), c=Number(current), t=Number(target);
   if(![b,t].every(Number.isFinite)||t===b) return null;
@@ -10638,7 +10709,11 @@ function AppInner(){
       {screen==="login"&&<Login onLogin={handleLogin} onBack={()=>setScreen("landing")}/>}
       {screen==="signup"&&<SignUp onLogin={handleSignup} onBack={()=>setScreen("login")}/>}
       {screen==="404"&&<NotFound onHome={()=>setScreen("landing")}/>}
-      {screen==="app"&&
+      {screen==="app"&&Supabase.supabase&&authUser&&profile&&!profile.org_id&&
+        <PendingAccount profile={profile} email={authUser.email}
+          onSignOut={async()=>{try{await Supabase.signOut();}catch{}setScreen("landing");}}/>}
+
+      {screen==="app"&&!(Supabase.supabase&&authUser&&profile&&!profile.org_id)&&
         <div style={{display:"flex",minHeight:"100vh"}}>
           {showOnboarding&&<OnboardingModal onClose={()=>setShowOnboarding(false)} role={role}/>}
           <SidebarFull page={page} setPage={p=>{setPage(p);setSidebarOpen(false);}} open={sidebarOpen} setOpen={setSidebarOpen} onGoHome={()=>{setScreen("landing");setNavPage(null);}} onSearch={()=>setShowSearch(true)} onAddStudent={()=>setShowAddStudent(true)}/>
