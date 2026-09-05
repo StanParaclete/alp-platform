@@ -84,7 +84,7 @@ jobs:
       - name: No AI keys in the browser bundle
         run: |
           fail=0
-          if grep -rn "api.anthropic.com" 02-webapp/src --include=*.js --include=*.jsx | grep -v "^\s*//" | grep -vE "^[^:]+:[0-9]+:\s*//"; then
+          if grep -rnE "api\.(anthropic|deepseek|openai)\.com" 02-webapp/src --include=*.js --include=*.jsx | grep -vE "^[^:]+:[0-9]+:[[:space:]]*//" | grep -vE "^[^:]+:[0-9]+:\s*//"; then
             echo "::error::Direct browser call to the Anthropic API. Use the ai-assist Edge Function."
             fail=1
           fi
@@ -110,11 +110,15 @@ jobs:
       # An invalid role must fail the invite, never become a teacher.
       - name: Invalid roles are rejected, not downgraded
         run: |
-          if ! grep -q "Invalid role" supabase/migrations/*.sql; then
-            echo "::error::handle_new_user no longer rejects unknown roles."
-            echo "An invite carrying role=parent would silently create a teacher account."
-            exit 1
-          fi
+          fail=0
+          grep -q "VALID_ROLES" supabase/functions/invite-user/authorize.ts || {
+            echo "::error::authorize.ts no longer defines a role allow-list."; fail=1; }
+          grep -qE "VALID_ROLES\.includes\(" supabase/functions/invite-user/authorize.ts || {
+            echo "::error::VALID_ROLES is defined but never checked."; fail=1; }
+          grep -qE "values \(new\.id, null, new\.email, v_full_name, 'teacher', 'pending'" \
+            supabase/migrations/*.sql || {
+            echo "::error::handle_new_user no longer hardcodes an unprivileged profile."; fail=1; }
+          exit $fail
 
       # The primary-guardian switch must stay atomic and ownership-checked.
       - name: Primary guardian change is atomic
@@ -175,7 +179,7 @@ jobs:
 
       - name: One product name
         run: |
-          if grep -rnE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
+          if grep -rniE "Adaptive Learning (Program|Plan)|Accelerated Learning Program" 02-webapp/src 02-webapp/index.html; then
             echo "::error::Use 'Accelerated Learning Plan' — it is the name on the wordmark and the domain."
             exit 1
           fi
