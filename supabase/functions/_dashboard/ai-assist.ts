@@ -98,11 +98,11 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json(headers, { error: "Method not allowed" }, 405);
 
   try {
-    const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
+    const apiKey = Deno.env.get("DEEPSEEK_API_KEY");
     if (!apiKey) {
       // Explicit rather than a confusing upstream 401.
       return json(headers, {
-        error: "AI features are not configured. Ask your administrator to set ANTHROPIC_API_KEY.",
+        error: "AI features are not configured. Ask your administrator to set DEEPSEEK_API_KEY.",
       }, 503);
     }
 
@@ -168,24 +168,26 @@ Deno.serve(async (req) => {
       if (messages.length === 0) return json(headers, { error: "Nothing to send" }, 400);
     }
 
-    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
+    // DeepSeek speaks the OpenAI chat-completions shape: Bearer auth,
+    // the system prompt as the first MESSAGE, and the reply at
+    // choices[0].message.content rather than content[0].text.
+    const upstream = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey,              // never leaves this function
-        "anthropic-version": "2023-06-01", // required; the old client omitted it
+        "Authorization": `Bearer ${apiKey}`,   // never leaves this function
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: "deepseek-chat",
         max_tokens: MAX_TOKENS[mode],
-        system: SYSTEM[mode],
-        messages,
+        messages: [{ role: "system", content: SYSTEM[mode] }, ...messages],
+        stream: false,
       }),
     });
 
     if (!upstream.ok) {
       const detail = await upstream.text();
-      console.error("anthropic error", upstream.status, detail.slice(0, 400));
+      console.error("deepseek error", upstream.status, detail.slice(0, 400));
       // Don't forward upstream error bodies — they can contain account
       // and billing details the browser has no business seeing.
       return json(headers, {
@@ -196,7 +198,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await upstream.json();
-    const text = data?.content?.[0]?.text ?? "";
+    const text = data?.choices?.[0]?.message?.content ?? "";
     return json(headers, { text });
 
   } catch (err) {

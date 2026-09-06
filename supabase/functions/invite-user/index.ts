@@ -50,6 +50,22 @@ Deno.serve(async (req) => {
       return json(corsHeaders, { error: "Missing Authorization header" }, 401);
     }
 
+    // ── Parse the request body ──────────────────────────────────────
+    // These are UNTRUSTED. authorizeInvite() decides what the caller is
+    // actually allowed to assign; nothing here reaches the database
+    // before that decision. Missing in the previous version, which is
+    // why every call threw ReferenceError: role is not defined before
+    // reaching a single line of authorization logic.
+    let email, role, orgId;
+    try {
+      ({ email, role, orgId } = await req.json());
+    } catch {
+      return json(corsHeaders, { error: "Request body must be JSON" }, 400);
+    }
+    if (!email || typeof email !== "string") {
+      return json(corsHeaders, { error: "An email address is required" }, 400);
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
