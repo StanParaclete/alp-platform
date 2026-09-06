@@ -1,0 +1,127 @@
+# ═══════════════════════════════════════════════════════════════════
+# ALP — security gate against the STAGING Supabase project
+#
+# The mock-based jobs in ci.yml prove the probe works. This proves the
+# deployed database is correct, which is a different claim and the one
+# that matters. It replaces the manual cycle of waking production,
+# seeding fixtures beside real records, testing, and cleaning up.
+#
+# REQUIRED SECRETS (Settings → Secrets and variables → Actions):
+#   STAGING_SUPABASE_URL         https://<staging-ref>.supabase.co
+#   STAGING_PUBLISHABLE_KEY      sb_publishable_… from the staging project
+#   STAGING_SERVICE_ROLE_KEY     service_role from the staging project
+#
+# The service role key lives here and in Supabase. Never in Netlify.
+#
+# If the secrets are absent the job reports SKIPPED rather than passing
+# quietly — an unconfigured gate that reports green is exactly the
+# failure mode SECURITY_RULES.md rule 4 exists to prevent.
+# ═══════════════════════════════════════════════════════════════════
+name: Security gate (staging)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  staging-gate:
+    name: Privilege guard + tenant isolation vs staging
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check the gate is configured
+        id: cfg
+        env:
+          URL: ${{ secrets.STAGING_SUPABASE_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::warning::Staging secrets are not set — the security gate did NOT run."
+            echo "::warning::This job is not passing. It is unconfigured. See DEPLOYMENT.md §3."
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      # ── Wake staging ─────────────────────────────────────────────
+      # Free-tier projects pause on inactivity and their hostname stops
+      # resolving. A cold project produces DNS errors that look nothing
+      # like a security finding, so wait for it explicitly.
+      - name: Wait for staging to respond
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          KEY: ${{ secrets.STAGING_PUBLISHABLE_KEY }}
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -H "apikey: $KEY" "$URL/rest/v1/" || echo 000)
+            if [ "$code" != "000" ]; then echo "staging responded ($code) after ${i} attempt(s)"; exit 0; fi
+            echo "  waiting for staging… ($i/30)"; sleep 10
+          done
+          echo "::error::Staging never responded. It may be paused and failing to restore."
+          exit 1
+
+      - name: Seed the two-school fixture
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SERVICE_ROLE_KEY }}
+        run: node uat/seed-test-schools.mjs
+
+      - name: Privilege guard
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.STAGING_PUBLISHABLE_KEY }}
+          A_EMAIL: alp-uat-teacher-a@example.invalid
+          A_PASSWORD: AlpUat!2026-probe
+          B_EMAIL: alp-uat-teacher-b@example.invalid
+          B_PASSWORD: AlpUat!2026-probe
+        run: node uat/verify-privilege-guard.mjs
+
+      # Exit 1 = breach, 3 = incomplete. Both stop the pipeline: a
+      # skipped probe is untested, not clean.
+      - name: Tenant isolation (42 probes)
+        if: steps.cfg.outputs.configured == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.STAGING_PUBLISHABLE_KEY }}
+          A_EMAIL: alp-uat-teacher-a@example.invalid
+          A_PASSWORD: AlpUat!2026-probe
+          B_EMAIL: alp-uat-teacher-b@example.invalid
+          B_PASSWORD: AlpUat!2026-probe
+          P_EMAIL: alp-uat-pending@example.invalid
+          P_PASSWORD: AlpUat!2026-probe
+          P_EXPECT: pending
+        run: |
+          set +e
+          node uat/tenant-isolation-probe.mjs --allow-delete
+          code=$?
+          if [ $code -eq 1 ]; then
+            echo "::error::Cross-tenant BREACH on staging. Do not deploy."; exit 1
+          elif [ $code -eq 3 ]; then
+            echo "::error::Probes were SKIPPED. A skip is not a pass — the gate is incomplete."; exit 1
+          elif [ $code -ne 0 ]; then
+            echo "::error::Probe could not run (exit $code)."; exit 1
+          fi
+          echo "42/42 clean against staging."
+
+      # always() so a failed gate still leaves staging clean for the
+      # next run rather than half-seeded.
+      - name: Remove the fixture
+        if: always() && steps.cfg.outputs.configured == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.STAGING_SERVICE_ROLE_KEY }}
+        run: node uat/seed-test-schools.mjs --clean
+
+      - name: Fail if the gate never ran
+        if: steps.cfg.outputs.configured != 'true'
+        run: |
+          echo "::error::Security gate unconfigured — add the staging secrets in DEPLOYMENT.md §3."
+          exit 1

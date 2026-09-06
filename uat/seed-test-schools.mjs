@@ -44,6 +44,23 @@ if (!URL_BASE || !SERVICE) {
   console.error("Need SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. See the header of this file.");
   process.exit(2);
 }
+// ── Refuse to touch production ──────────────────────────────────────
+// This script writes fake schools and deletes rows. Production holds
+// real children's records. The refusal is deliberate friction: set
+// ALLOW_PRODUCTION_SEED=yes only if you genuinely mean it.
+const PRODUCTION_REFS = ["sjutbbpajmqchrccdmwb"];
+const ref = (URL_BASE.match(/https:\/\/([a-z0-9]+)\.supabase\.co/) || [])[1];
+if (PRODUCTION_REFS.includes(ref) && process.env.ALLOW_PRODUCTION_SEED !== "yes") {
+  console.error(`Refusing to run: ${ref} is the PRODUCTION project.\n` +
+    "Point SUPABASE_URL at staging. Fixtures do not belong beside real student records.\n" +
+    "If you are certain, set ALLOW_PRODUCTION_SEED=yes.");
+  process.exit(2);
+}
+
+if (SERVICE.startsWith("sb_publishable_")) {
+  console.error("That is the PUBLISHABLE key. Seeding needs the secret/service_role key.");
+  process.exit(2);
+}
 if (SERVICE.length < 100) {
   console.error("That does not look like a service_role key. The anon key will not work — " +
     "it cannot create users and every insert will be refused by RLS.");
