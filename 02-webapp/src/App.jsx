@@ -289,14 +289,14 @@ const CSS = `
 
 /* ── LANDING / MARKETING SURFACE ─────────────────────── */
 :root{
-  --lp-ink:#241B3D; --lp-ink-soft:#372A5A; --lp-paper:#FAF8FC;
-  --lp-rule:#E0D9EC; --lp-accent:#6D28D9; --lp-body:#453C57;
-  --lp-muted:#6B6280; --lp-panel:#FFFFFF;
+  --lp-ink:#102D2A; --lp-ink-soft:#183E38; --lp-paper:#F7F7F2;
+  --lp-deep:#102D2A; --lp-rule:#DBD7CC; --lp-accent:#7A2D4B; --lp-accent-2:#B8892E; --lp-body:#33413D;
+  --lp-muted:#66746C; --lp-panel:#FFFFFF;
 }
 [data-theme="dark"]{
-  --lp-ink:#0B0718; --lp-ink-soft:#160F2C; --lp-paper:#120C24;
-  --lp-rule:rgba(167,139,250,.20); --lp-accent:#A78BFA; --lp-body:#DAD5EE;
-  --lp-muted:#A79FC4; --lp-panel:#191233;
+  --lp-ink:#F4F0E8; --lp-ink-soft:#0D211D; --lp-paper:#101816;
+  --lp-deep:#071412; --lp-rule:rgba(213,166,78,.22); --lp-accent:#C47A96; --lp-accent-2:#D5A64E; --lp-body:#DDE7E1;
+  --lp-muted:#A8B5AE; --lp-panel:#16221F;
 }
 /* Emoji used as iconography read as stickers against editorial type.
    Desaturating them makes them behave like marks. A stopgap: real drawn
@@ -304,24 +304,14 @@ const CSS = `
 .glyph{filter:grayscale(1) contrast(.9);opacity:.55}
 [data-theme="dark"] .glyph{filter:grayscale(1) brightness(2.4) contrast(.8);opacity:.6}
 
-/* ── LANDING / MARKETING SURFACE ─────────────────────── */
-:root{
-  --lp-ink:#241B3D; --lp-ink-soft:#372A5A; --lp-paper:#FAF8FC;
-  --lp-rule:#E0D9EC; --lp-accent:#6D28D9; --lp-body:#453C57;
-  --lp-muted:#6B6280; --lp-panel:#FFFFFF;
-}
-[data-theme="dark"]{
-  --lp-ink:#0B0718; --lp-ink-soft:#160F2C; --lp-paper:#120C24;
-  --lp-rule:rgba(167,139,250,.20); --lp-accent:#A78BFA; --lp-body:#DAD5EE;
-  --lp-muted:#A79FC4; --lp-panel:#191233;
-}
 .lp{background:var(--lp-paper);color:var(--lp-body);font-size:17px;line-height:1.7;min-height:100vh;overflow-x:hidden;width:100%}
 .lp a{color:inherit;text-decoration:none}
 .lp img,.lp svg{display:block;max-width:100%}
 .lp-serif{font-family:'Playfair Display',Georgia,serif;font-weight:400;letter-spacing:-.012em}
 .lp-wrap{max-width:1240px;margin:0 auto;padding:0 36px}
-.lp-util{background:var(--lp-ink);color:rgba(255,255,255,.66);font-size:13px}
-.lp-util .lp-wrap{display:flex;align-items:center;justify-content:flex-end;gap:28px;height:42px}
+.lp-util{background:var(--lp-deep);color:rgba(255,255,255,.66);font-size:13px}
+.lp-util .lp-wrap{display:flex;align-items:center;justify-content:space-between;gap:28px;height:42px}
+.lp-util-note{margin-right:auto;letter-spacing:.04em}
 .lp-util button{background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0}
 .lp-util button:hover{color:#fff}
 .lp-head{background:var(--lp-paper);border-bottom:1px solid var(--lp-rule);position:sticky;top:0;z-index:100}
@@ -333,12 +323,12 @@ const CSS = `
 .lp-nav button{background:none;border:0;font:inherit;color:var(--lp-ink);padding:34px 0;border-bottom:2px solid transparent;cursor:pointer}
 .lp-nav button:hover{border-bottom-color:var(--lp-accent)}
 .lp-cta{border:1px solid var(--lp-ink);background:none;color:var(--lp-ink);padding:12px 26px;font:inherit;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:.15s}
-.lp-cta:hover{background:var(--lp-ink);color:var(--lp-paper)}
-.lp-hero{position:relative;min-height:600px;display:flex;align-items:flex-end;background:var(--lp-ink)}
-.lp-hero-img{position:absolute;inset:0;background:linear-gradient(180deg,rgba(36,27,61,.15) 0%,rgba(36,27,61,.82) 78%),repeating-linear-gradient(126deg,rgba(255,255,255,.02) 0 1px,transparent 1px 54px),radial-gradient(ellipse at 68% 18%,#4C3A82 0%,#241B3D 68%)}
+.lp-cta:hover{background:var(--lp-accent);border-color:var(--lp-accent);color:#fff}
+.lp-hero{position:relative;min-height:600px;display:flex;align-items:flex-end;background:var(--lp-deep)}
+.lp-hero-img{position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,45,42,.08) 0%,rgba(16,45,42,.78) 72%,rgba(16,45,42,.92) 100%),linear-gradient(90deg,rgba(16,45,42,.72) 0%,rgba(16,45,42,.22) 48%,rgba(16,45,42,.08) 100%),url('/assets/images/alp-hero-learning-support.webp');background-size:cover;background-position:center 44%}
 .lp-hero .lp-wrap{position:relative;padding:0 36px 84px;width:100%}
 .lp-hero h1{font-size:clamp(38px,5.6vw,66px);line-height:1.1;color:#fff;max-width:17ch;margin:0}
-.lp-hero p{color:rgba(255,255,255,.78);font-size:19px;max-width:50ch;margin:22px 0 0}
+.lp-hero p{color:rgba(255,255,255,.82);font-size:19px;max-width:50ch;margin:22px 0 0;text-shadow:0 1px 18px rgba(0,0,0,.28)}
 .lp-sec{padding:104px 0}
 .lp-lede{max-width:64ch;margin:0 auto 62px;text-align:center}
 .lp-lede h2{font-size:clamp(29px,3.7vw,42px);line-height:1.2;color:var(--lp-ink);margin:0 0 16px}
@@ -352,30 +342,31 @@ const CSS = `
 .lp-link{font-size:15px;letter-spacing:.05em;color:var(--lp-ink);border-bottom:1px solid var(--lp-accent);padding-bottom:4px;background:none;border-top:0;border-left:0;border-right:0;font-family:inherit;cursor:pointer}
 .lp-panel{background:var(--lp-panel);border-top:1px solid var(--lp-rule);border-bottom:1px solid var(--lp-rule)}
 .lp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:26px}
-.lp-card{position:relative;display:block;background:var(--lp-ink);min-height:300px;overflow:hidden;border:0;padding:0;cursor:pointer;text-align:left;width:100%}
-.lp-card-img{position:absolute;inset:0;opacity:.5;transition:.2s}
-.lp-card:nth-child(1) .lp-card-img{background:radial-gradient(ellipse at 40% 30%,#5B4A94,#241B3D)}
-.lp-card:nth-child(2) .lp-card-img{background:radial-gradient(ellipse at 60% 40%,#6E4E96,#241B3D)}
-.lp-card:nth-child(3) .lp-card-img{background:radial-gradient(ellipse at 35% 60%,#4A3E86,#241B3D)}
-.lp-card:nth-child(4) .lp-card-img{background:radial-gradient(ellipse at 55% 35%,#7A4E92,#241B3D)}
-.lp-card:hover .lp-card-img{opacity:.68}
+.lp-card{position:relative;display:block;background:var(--lp-deep);min-height:300px;overflow:hidden;border:0;padding:0;cursor:pointer;text-align:left;width:100%}
+.lp-card-img{position:absolute;inset:0;opacity:.72;transition:.2s;background-size:cover;background-position:center;filter:saturate(.92) contrast(.96)}
+.lp-card:nth-child(1) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.86)),url('/assets/images/alp-plan-review.webp')}
+.lp-card:nth-child(2) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.86)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 48%}
+.lp-card:nth-child(3) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.88)),url('/assets/images/alp-family-meeting.webp')}
+.lp-card:nth-child(4) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.88)),url('/assets/images/alp-family-meeting.webp');background-position:center 64%}
+.lp-card:hover .lp-card-img{opacity:.86;transform:scale(1.035)}
 .lp-mono{position:absolute;top:22px;left:24px;font-family:'Playfair Display',Georgia,serif;font-size:52px;color:rgba(255,255,255,.28);line-height:1}
 .lp-clabel{position:absolute;left:24px;right:24px;bottom:24px;color:#fff}
 .lp-clabel b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:400;margin-bottom:6px}
 .lp-clabel span{font-size:14px;color:rgba(255,255,255,.74);line-height:1.5}
 .lp-mosaic{display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:190px 190px;gap:16px}
-.lp-mosaic div{position:relative;background:var(--lp-ink-soft)}
-.lp-mosaic div:first-child{grid-row:span 2;background:linear-gradient(150deg,#4C3A82,#241B3D)}
-.lp-mosaic div:nth-child(2){background:linear-gradient(150deg,#6E4E96,#372A5A)}
-.lp-mosaic div:nth-child(3){background:linear-gradient(150deg,#4A3E86,#372A5A)}
-.lp-mosaic div:nth-child(4){background:linear-gradient(150deg,#7A4E92,#372A5A)}
-.lp-mosaic div:nth-child(5){background:linear-gradient(150deg,#5B4A94,#372A5A)}
-.lp-mosaic span{position:absolute;bottom:12px;left:14px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.lp-mosaic div{position:relative;background:var(--lp-ink-soft);background-size:cover;background-position:center;overflow:hidden}
+.lp-mosaic div::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.64))}
+.lp-mosaic div:first-child{grid-row:span 2;background-image:url('/assets/images/alp-hero-learning-support.webp');background-position:center 46%}
+.lp-mosaic div:nth-child(2){background-image:url('/assets/images/alp-plan-review.webp')}
+.lp-mosaic div:nth-child(3){background-image:url('/assets/images/alp-family-meeting.webp')}
+.lp-mosaic div:nth-child(4){background-image:url('/assets/images/alp-plan-review.webp');background-position:center 68%}
+.lp-mosaic div:nth-child(5){background-image:url('/assets/images/alp-family-meeting.webp');background-position:center 36%}
+.lp-mosaic span{position:absolute;bottom:12px;left:14px;z-index:1;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.78);background:rgba(16,45,42,.62);padding:5px 8px}
 .lp-trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:34px}
 .lp-tcard{background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
-.lp-timg{display:block;height:212px;margin-bottom:22px;background:linear-gradient(150deg,#4C3A82,#241B3D)}
-.lp-trio>button:nth-child(2) .lp-timg{background:linear-gradient(150deg,#6E4E96,#241B3D)}
-.lp-trio>button:nth-child(3) .lp-timg{background:linear-gradient(150deg,#4A3E86,#241B3D)}
+.lp-timg{display:block;height:212px;margin-bottom:22px;background:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.50)),url('/assets/images/alp-plan-review.webp');background-size:cover;background-position:center}
+.lp-trio>button:nth-child(2) .lp-timg{background-image:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.50)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 50%}
+.lp-trio>button:nth-child(3) .lp-timg{background-image:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.50)),url('/assets/images/alp-family-meeting.webp');background-position:center 58%}
 .lp-tcard h4{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:400;color:var(--lp-ink);margin:0 0 8px}
 .lp-tcard p{font-size:16px;color:var(--lp-muted);margin:0 0 14px}
 .lp-faq{background:var(--lp-panel);border-top:1px solid var(--lp-rule)}
@@ -386,7 +377,7 @@ const CSS = `
 .lp summary::after{content:"+";position:absolute;right:6px;top:24px;font-size:22px;color:var(--lp-accent)}
 .lp details[open] summary::after{content:"\\2013"}
 .lp details p{padding:0 40px 26px 0;color:var(--lp-muted);font-size:16px;margin:0}
-.lp-quick{background:var(--lp-ink);color:#fff;padding:66px 0}
+.lp-quick{background:var(--lp-deep);color:#fff;padding:66px 0}
 .lp-quick h5{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 26px;font-weight:400}
 .lp-qrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px}
 .lp-qrow button{border:1px solid rgba(255,255,255,.2);background:none;color:#fff;font:inherit;font-size:15px;padding:22px 20px;cursor:pointer;transition:.15s}
@@ -405,12 +396,19 @@ const CSS = `
   .lp-nav{display:none}
   .lp-head .lp-wrap{height:76px;gap:16px}
   .lp-hero{min-height:440px}
+  .lp-hero-img{background-position:58% center}
   .lp-mosaic{grid-template-columns:1fr 1fr;grid-template-rows:150px 150px 150px}
   .lp-mosaic div:first-child{grid-row:span 1;grid-column:span 2}
   .lp-fgrid{grid-template-columns:1fr 1fr;gap:34px}
   .lp-sec{padding:70px 0}
   .lp-wrap{padding:0 22px}
   .lp-hero .lp-wrap{padding:0 22px 56px}
+}
+@media(max-width:640px){
+  .lp-util .lp-wrap{justify-content:flex-end}
+  .lp-util-note{display:none}
+  .lp-fgrid{grid-template-columns:1fr}
+  .lp-card{min-height:248px}
 }
 @media(prefers-reduced-motion:reduce){.lp *{transition:none!important}}
 *,*::before,*::after{transition:background-color .25s ease,border-color .2s ease,box-shadow .2s ease;box-sizing:border-box;margin:0;padding:0}
@@ -1445,6 +1443,7 @@ function SubNav({active,setNavPage,onEnter,onSignup,onDemo}){
   return(
     <>
     <div className="lp-util"><div className="lp-wrap">
+      <span className="lp-util-note">Built for student support teams</span>
       <button onClick={()=>setNavPage("Resources")}>Help centre</button>
       <button onClick={onEnter}>Sign in</button>
     </div></div>
@@ -1514,10 +1513,10 @@ function PageFooter({setNavPage,onEnter,onDemo}={}){
         </ul></div>
       </div>
       <div className="lp-badges">
-        <span className="lp-badge">Row-level isolation</span>
+        <span className="lp-badge">School isolation</span>
         <span className="lp-badge">Audit logging</span>
-        <span className="lp-badge">EU-hosted data</span>
-        <span className="lp-badge">No guardian logins</span>
+        <span className="lp-badge">AI-assisted planning</span>
+        <span className="lp-badge">Exportable reports</span>
       </div>
       <div className="lp-colophon">
         <span>&copy; {new Date().getFullYear()} ALP. Built by Stan Paraclete.</span>
@@ -5819,6 +5818,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
   return(
     <div className="lp">
       <div className="lp-util"><div className="lp-wrap">
+        <span className="lp-util-note">Built for student support teams</span>
         <button onClick={()=>setNavPage("Resources")}>Help centre</button>
         <button onClick={onEnter}>Sign in</button>
       </div></div>
@@ -5834,8 +5834,27 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           <button onClick={()=>setNavPage("Pricing")}>Pricing</button>
           <button onClick={()=>setNavPage("Resources")}>Resources</button>
         </nav>
-        <button className="lp-cta" onClick={onSignup||onEnter}>Start free</button>
+        <div style={{display:"flex",gap:12,alignItems:"center",flexShrink:0}}>
+          <ThemeToggle/>
+          <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Start free</button>
+          <button className={`landing-nav-hamburger${mobileNavOpen?" open":""}`} onClick={()=>setMobileNavOpen(o=>!o)} aria-label="Menu">
+            <span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/>
+          </button>
+        </div>
       </div></header>
+      {mobileNavOpen&&(
+        <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:99,background:"var(--lp-paper)",padding:"96px 22px 22px",overflowY:"auto"}}>
+          {[["Features","Product"],["For Schools","For schools"],["Pricing","Pricing"],["Resources","Resources"]].map(([key,label])=>(
+            <div key={key} onClick={()=>{setNavPage(key);setMobileNavOpen(false);}}
+              style={{padding:"18px 0",fontSize:19,fontFamily:"'Playfair Display',Georgia,serif",
+                      color:"var(--lp-ink)",borderBottom:"1px solid var(--lp-rule)",cursor:"pointer"}}>{label}</div>
+          ))}
+          <div style={{display:"flex",gap:10,marginTop:26}}>
+            <button className="lp-cta" style={{flex:1}} onClick={()=>setMobileNavOpen(false)}>Home</button>
+            <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileNavOpen(false);}}>Start free</button>
+          </div>
+        </div>
+      )}
 
       <div className="lp-hero">
         <div className="lp-hero-img"/>
@@ -5875,8 +5894,8 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
 
       <section className="lp-sec lp-panel"><div className="lp-wrap">
         <div className="lp-lede">
-          <h2 className="lp-serif">This is where it starts</h2>
-          <p>Four ways into ALP, depending on what brought you here.</p>
+          <h2 className="lp-serif">Explore ALP</h2>
+          <p>Four useful routes into the platform, depending on what brought your school here.</p>
         </div>
         <div className="lp-cards">
           {[
@@ -5900,11 +5919,11 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           <p>Built alongside the staff who write these plans every term.</p>
         </div>
         <div className="lp-mosaic">
-          <div><span>Photograph</span></div>
-          <div><span>Photograph</span></div>
-          <div><span>Photograph</span></div>
-          <div><span>Photograph</span></div>
-          <div><span>Photograph</span></div>
+          <div><span>One-to-one support</span></div>
+          <div><span>Plan review</span></div>
+          <div><span>Family meeting</span></div>
+          <div><span>Progress evidence</span></div>
+          <div><span>Teacher workflow</span></div>
         </div>
       </div></section>
 
@@ -5980,10 +5999,10 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           </ul></div>
         </div>
         <div className="lp-badges">
-          <span className="lp-badge">Row-level isolation</span>
+          <span className="lp-badge">School isolation</span>
           <span className="lp-badge">Audit logging</span>
-          <span className="lp-badge">EU-hosted data</span>
-          <span className="lp-badge">No guardian logins</span>
+          <span className="lp-badge">AI-assisted planning</span>
+          <span className="lp-badge">Exportable reports</span>
         </div>
         <div className="lp-colophon">
           <span>&copy; {new Date().getFullYear()} ALP. Built by Stan Paraclete.</span>
@@ -10696,7 +10715,6 @@ function AppInner(){
       {showNotes&&<SessionNotesWidget onClose={()=>setShowNotes(false)}/>}
       {showOnboarding&&<OnboardingModal onClose={()=>setShowOnboarding(false)} setPage={setPage}/>}
       <Confetti active={celebrate}/>
-      <CookieBanner/>
       <TopProgressBar page={page}/>
       {showShortcuts&&<KeyboardShortcutsPanel onClose={()=>setShowShortcuts(false)}/>}
       {showExport&&<ExportAllDataModal onClose={()=>setShowExport(false)}/>}
