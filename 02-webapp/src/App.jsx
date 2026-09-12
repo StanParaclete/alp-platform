@@ -18,7 +18,7 @@ async function generateALPPdf({ student, goals = [], notes = "", reviewer = "", 
   const W = doc.internal.pageSize.getWidth();
   const margin = 56;
   let y = 64;
-  const purple = [124, 58, 237];
+  const purple = [143, 22, 184];
   const warm = [107, 114, 128];
   const black = [17, 17, 17];
 
@@ -242,61 +242,61 @@ function ThemeToggle({ style = {} }) {
 const CSS = `
 /* ── ALP AI THEME VARIABLES ──────────────────────────── */
 :root {
-  --bg-primary:#F5F5F7;
+  --bg-primary:#F8F6FA;
   --bg-secondary:#FFFFFF;
   --bg-card:#FFFFFF;
-  --bg-surface:#F5F5F7;
-  --bg-hover:#EBEBF0;
-  --text-primary:#1D1D1F;
-  --text-secondary:#6E6E73;
-  --text-muted:#8E8E93;
-  --border:#E3E3E8;
-  --border-purple:#D9CDF7;
+  --bg-surface:#F8F6FA;
+  --bg-hover:#F2EAF6;
+  --text-primary:#231C28;
+  --text-secondary:#685D70;
+  --text-muted:#75687D;
+  --border:#E6DFEA;
+  --border-purple:#E6CDED;
   /* Shadows are near-invisible by default and only appear on lift.
      A surface that is always floating reads as noise. */
   --shadow-card:0 1px 2px rgba(0,0,0,.04);
   --shadow-hover:0 12px 32px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.04);
-  --shadow-glow:0 0 0 4px rgba(109,40,217,.14);
-  --purple-main:#6D28D9;
-  --purple-soft:#8B5CF6;
-  --purple-accent:#A855F7;
-  --sidebar-bg:#111111;
+  --shadow-glow:0 0 0 4px rgba(143,22,184,.14);
+  --purple-main:#8F16B8;
+  --purple-soft:#A11DC8;
+  --purple-accent:#BC18D6;
+  --sidebar-bg:#100D13;
   --sidebar-border:rgba(255,255,255,.07);
-  --input-border:#C8B89A;
+  --input-border:#CAB7D2;
   --input-color:#1A1A1A;
-  --rule-color:#E8DDD0;
+  --rule-color:#EAE0EE;
 }
 [data-theme="dark"] {
-  --bg-primary:#0F0A1E;
-  --bg-secondary:#1B1333;
-  --bg-card:#1B1333;
-  --bg-surface:rgba(139,92,246,.08);
-  --bg-hover:rgba(139,92,246,.14);
-  --text-primary:#F0EEFF;
-  --text-secondary:rgba(240,238,255,.6);
-  --text-muted:rgba(240,238,255,.35);
-  --border:rgba(139,92,246,.2);
-  --border-purple:rgba(139,92,246,.25);
-  --shadow-card:0 4px 24px rgba(0,0,0,.4),0 0 0 1px rgba(139,92,246,.15);
-  --shadow-hover:0 8px 32px rgba(139,92,246,.3);
-  --shadow-glow:0 0 0 3px rgba(139,92,246,.2);
-  --sidebar-bg:#0B0718;
-  --sidebar-border:rgba(139,92,246,.15);
-  --input-border:rgba(139,92,246,.35);
-  --input-color:#F0EEFF;
-  --rule-color:rgba(139,92,246,.18);
+  --bg-primary:#100D13;
+  --bg-secondary:#1B171F;
+  --bg-card:#1B171F;
+  --bg-surface:rgba(198,106,223,.08);
+  --bg-hover:rgba(198,106,223,.14);
+  --text-primary:#F5EDF7;
+  --text-secondary:#C4B8CC;
+  --text-muted:#AFA0B8;
+  --border:rgba(198,106,223,.2);
+  --border-purple:rgba(198,106,223,.25);
+  --shadow-card:0 4px 24px rgba(0,0,0,.4),0 0 0 1px rgba(198,106,223,.15);
+  --shadow-hover:0 8px 32px rgba(198,106,223,.3);
+  --shadow-glow:0 0 0 3px rgba(198,106,223,.2);
+  --sidebar-bg:#100D13;
+  --sidebar-border:rgba(198,106,223,.15);
+  --input-border:rgba(198,106,223,.35);
+  --input-color:#F5EDF7;
+  --rule-color:rgba(198,106,223,.18);
 }
 
 /* ── LANDING / MARKETING SURFACE ─────────────────────── */
 :root{
-  --lp-ink:#102D2A; --lp-ink-soft:#183E38; --lp-paper:#F7F7F2;
-  --lp-deep:#102D2A; --lp-rule:#DBD7CC; --lp-accent:#7A2D4B; --lp-accent-2:#B8892E; --lp-body:#33413D;
-  --lp-muted:#66746C; --lp-panel:#FFFFFF;
+  --lp-ink:#231C28; --lp-ink-soft:#261B2D; --lp-paper:#FAF8FC;
+  --lp-deep:#100D13; --lp-rule:#E6DFEA; --lp-accent:#8F16B8; --lp-accent-2:#BC18D6; --lp-body:#493E51;
+  --lp-muted:#75687D; --lp-panel:#FFFFFF;
 }
 [data-theme="dark"]{
-  --lp-ink:#F4F0E8; --lp-ink-soft:#0D211D; --lp-paper:#101816;
-  --lp-deep:#071412; --lp-rule:rgba(213,166,78,.22); --lp-accent:#C47A96; --lp-accent-2:#D5A64E; --lp-body:#DDE7E1;
-  --lp-muted:#A8B5AE; --lp-panel:#16221F;
+  --lp-ink:#F5EDF7; --lp-ink-soft:#211827; --lp-paper:#100D13;
+  --lp-deep:#0B090E; --lp-rule:rgba(198,106,223,.22); --lp-accent:#D58BE8; --lp-accent-2:#E070E9; --lp-body:#E9DFEE;
+  --lp-muted:#BEB0C7; --lp-panel:#1B171F;
 }
 /* Emoji used as iconography read as stickers against editorial type.
    Desaturating them makes them behave like marks. A stopgap: real drawn
@@ -322,10 +322,10 @@ const CSS = `
 .lp-nav{display:flex;gap:34px;margin-left:auto;font-size:15px}
 .lp-nav button{background:none;border:0;font:inherit;color:var(--lp-ink);padding:34px 0;border-bottom:2px solid transparent;cursor:pointer}
 .lp-nav button:hover{border-bottom-color:var(--lp-accent)}
-.lp-cta{border:1px solid var(--lp-ink);background:none;color:var(--lp-ink);padding:12px 26px;font:inherit;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:.15s}
-.lp-cta:hover{background:var(--lp-accent);border-color:var(--lp-accent);color:#fff}
+.lp-cta{border:1px solid var(--purple-main);background:var(--purple-main);color:#fff;padding:12px 26px;font:inherit;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:.15s}
+.lp-cta:hover{background:var(--purple-soft);border-color:var(--purple-soft);color:#fff}
 .lp-hero{position:relative;min-height:600px;display:flex;align-items:flex-end;background:var(--lp-deep)}
-.lp-hero-img{position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,45,42,.08) 0%,rgba(16,45,42,.78) 72%,rgba(16,45,42,.92) 100%),linear-gradient(90deg,rgba(16,45,42,.72) 0%,rgba(16,45,42,.22) 48%,rgba(16,45,42,.08) 100%),url('/assets/images/alp-hero-learning-support.webp');background-size:cover;background-position:center 44%}
+.lp-hero-img{position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,14,29,.08) 0%,rgba(24,14,29,.78) 72%,rgba(24,14,29,.92) 100%),linear-gradient(90deg,rgba(24,14,29,.72) 0%,rgba(24,14,29,.22) 48%,rgba(24,14,29,.08) 100%),url('/assets/images/alp-hero-learning-support.webp');background-size:cover;background-position:center 44%}
 .lp-hero .lp-wrap{position:relative;padding:0 36px 84px;width:100%}
 .lp-hero h1{font-size:clamp(38px,5.6vw,66px);line-height:1.1;color:#fff;max-width:17ch;margin:0}
 .lp-hero p{color:rgba(255,255,255,.82);font-size:19px;max-width:50ch;margin:22px 0 0;text-shadow:0 1px 18px rgba(0,0,0,.28)}
@@ -344,10 +344,10 @@ const CSS = `
 .lp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:26px}
 .lp-card{position:relative;display:block;background:var(--lp-deep);min-height:300px;overflow:hidden;border:0;padding:0;cursor:pointer;text-align:left;width:100%}
 .lp-card-img{position:absolute;inset:0;opacity:.72;transition:.2s;background-size:cover;background-position:center;filter:saturate(.92) contrast(.96)}
-.lp-card:nth-child(1) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.86)),url('/assets/images/alp-plan-review.webp')}
-.lp-card:nth-child(2) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.86)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 48%}
-.lp-card:nth-child(3) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.88)),url('/assets/images/alp-family-meeting.webp')}
-.lp-card:nth-child(4) .lp-card-img{background-image:linear-gradient(180deg,rgba(16,45,42,.08),rgba(16,45,42,.88)),url('/assets/images/alp-family-meeting.webp');background-position:center 64%}
+.lp-card:nth-child(1) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.86)),url('/assets/images/alp-plan-review.webp')}
+.lp-card:nth-child(2) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.86)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 48%}
+.lp-card:nth-child(3) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.88)),url('/assets/images/alp-family-meeting.webp')}
+.lp-card:nth-child(4) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.88)),url('/assets/images/alp-family-meeting.webp');background-position:center 64%}
 .lp-card:hover .lp-card-img{opacity:.86;transform:scale(1.035)}
 .lp-mono{position:absolute;top:22px;left:24px;font-family:'Playfair Display',Georgia,serif;font-size:52px;color:rgba(255,255,255,.28);line-height:1}
 .lp-clabel{position:absolute;left:24px;right:24px;bottom:24px;color:#fff}
@@ -355,18 +355,18 @@ const CSS = `
 .lp-clabel span{font-size:14px;color:rgba(255,255,255,.74);line-height:1.5}
 .lp-mosaic{display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:190px 190px;gap:16px}
 .lp-mosaic div{position:relative;background:var(--lp-ink-soft);background-size:cover;background-position:center;overflow:hidden}
-.lp-mosaic div::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.64))}
+.lp-mosaic div::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.64))}
 .lp-mosaic div:first-child{grid-row:span 2;background-image:url('/assets/images/alp-hero-learning-support.webp');background-position:center 46%}
 .lp-mosaic div:nth-child(2){background-image:url('/assets/images/alp-plan-review.webp')}
 .lp-mosaic div:nth-child(3){background-image:url('/assets/images/alp-family-meeting.webp')}
 .lp-mosaic div:nth-child(4){background-image:url('/assets/images/alp-plan-review.webp');background-position:center 68%}
 .lp-mosaic div:nth-child(5){background-image:url('/assets/images/alp-family-meeting.webp');background-position:center 36%}
-.lp-mosaic span{position:absolute;bottom:12px;left:14px;z-index:1;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.78);background:rgba(16,45,42,.62);padding:5px 8px}
+.lp-mosaic span{position:absolute;bottom:12px;left:14px;z-index:1;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.78);background:rgba(24,14,29,.62);padding:5px 8px}
 .lp-trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:34px}
 .lp-tcard{background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
-.lp-timg{display:block;height:212px;margin-bottom:22px;background:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.50)),url('/assets/images/alp-plan-review.webp');background-size:cover;background-position:center}
-.lp-trio>button:nth-child(2) .lp-timg{background-image:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.50)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 50%}
-.lp-trio>button:nth-child(3) .lp-timg{background-image:linear-gradient(180deg,rgba(16,45,42,.05),rgba(16,45,42,.50)),url('/assets/images/alp-family-meeting.webp');background-position:center 58%}
+.lp-timg{display:block;height:212px;margin-bottom:22px;background:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.50)),url('/assets/images/alp-plan-review.webp');background-size:cover;background-position:center}
+.lp-trio>button:nth-child(2) .lp-timg{background-image:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.50)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 50%}
+.lp-trio>button:nth-child(3) .lp-timg{background-image:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.50)),url('/assets/images/alp-family-meeting.webp');background-position:center 58%}
 .lp-tcard h4{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:400;color:var(--lp-ink);margin:0 0 8px}
 .lp-tcard p{font-size:16px;color:var(--lp-muted);margin:0 0 14px}
 .lp-faq{background:var(--lp-panel);border-top:1px solid var(--lp-rule)}
@@ -448,7 +448,7 @@ button{cursor:pointer;border:none;background:none}
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700;1,800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg-secondary)}::-webkit-scrollbar-thumb{background:#7C3AED;border-radius:2px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg-secondary)}::-webkit-scrollbar-thumb{background:#8F16B8;border-radius:2px}
 @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ticker-wrap{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:13px 0;background:var(--bg-surface)}
 .ticker-inner{display:flex;animation:ticker 26s linear infinite;white-space:nowrap}
@@ -456,16 +456,16 @@ button{cursor:pointer;border:none;background:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-@keyframes glow{0%,100%{box-shadow:0 0 16px rgba(109,40,217,.3)}50%{box-shadow:0 0 32px rgba(109,40,217,.6)}}
+@keyframes glow{0%,100%{box-shadow:0 0 16px rgba(143,22,184,.3)}50%{box-shadow:0 0 32px rgba(143,22,184,.6)}}
 .fade-up{animation:fadeUp .38s ease both}
 .spin{animation:spin .8s linear infinite}
 .pulse{animation:pulse 2s ease infinite}
 .serif{font-family:'Playfair Display',Georgia,serif}
 .serif-italic{font-family:'Playfair Display',Georgia,serif;font-style:italic}
-.u-input{width:100%;background:transparent;border:none;border-bottom:1px solid #C8B89A;padding:11px 0;font-size:14px;color:#1A1A1A;outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif}
+.u-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--input-border);padding:11px 0;font-size:14px;color:var(--input-color);outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif}
 .u-input:focus{border-bottom-color:var(--purple-main)}
 .u-input::placeholder{color:var(--text-muted);font-size:13px}
-.u-select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--input-border);padding:11px 0;font-size:14px;color:var(--input-color);outline:none;cursor:pointer;font-family:'DM Sans',sans-serif;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237C3AED'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;padding-right:20px}
+.u-select{width:100%;background:transparent;border:none;border-bottom:1px solid var(--input-border);padding:11px 0;font-size:14px;color:var(--input-color);outline:none;cursor:pointer;font-family:'DM Sans',sans-serif;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238F16B8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;padding-right:20px}
 .u-select option{background:var(--bg-secondary);color:var(--text-primary)}
 .u-textarea{width:100%;background:transparent;border:none;border-bottom:1px solid var(--input-border);padding:10px 0;font-size:13.5px;color:var(--input-color);outline:none;resize:none;line-height:1.65;font-family:'DM Sans',sans-serif;transition:border-color .2s}
 .u-textarea:focus{border-bottom-color:var(--purple-main)}
@@ -475,7 +475,7 @@ button{cursor:pointer;border:none;background:none}
 .btn-black:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--text-primary);border:1.5px solid var(--text-primary);border-radius:99px;padding:12px 28px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;transition:all .18s}
 .btn-outline:hover{background:var(--text-primary);color:var(--bg-primary)}
-.btn-purple{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--purple-main);color:#fff;border:none;border-radius:99px;padding:12px 28px;font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .18s;box-shadow:0 4px 14px rgba(109,40,217,.3)}
+.btn-purple{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--purple-main);color:#fff;border:none;border-radius:99px;padding:12px 28px;font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:all .18s;box-shadow:0 4px 14px rgba(143,22,184,.3)}
 .btn-purple:hover{background:var(--purple-soft);transform:translateY(-1px);box-shadow:var(--shadow-hover)}
 .btn-purple:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
 .btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;color:var(--text-secondary);border:1px solid var(--border);border-radius:99px;padding:9px 20px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .18s}
@@ -494,19 +494,19 @@ button{cursor:pointer;border:none;background:none}
 .data-table tr:last-child td{border-bottom:none}
 .prog-track{height:4px;background:var(--border);border-radius:99px;overflow:hidden}
 .prog-fill{height:100%;border-radius:99px;transition:width 1s ease}
-.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;border-radius:8px;font-size:13px;color:#8A7A6A;transition:all .12s;cursor:pointer;border-left:3px solid transparent;text-align:left;border:none;background:none}
-.nav-item:hover{background:rgba(255,255,255,.06);color:#D0C4B0}
-.nav-item.active{background:rgba(124,58,237,.2);color:#fff;border-left:3px solid #7C3AED;font-weight:600}
-.step-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .12s;font-size:12.5px;color:#8A7A6A;border-left:3px solid transparent;border:none;background:none;width:100%;text-align:left}
-.step-item:hover{background:rgba(255,255,255,.06);color:#D0C4B0}
-.step-item.active{background:rgba(124,58,237,.18);color:#fff;border-left:3px solid #7C3AED;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 14px;border-radius:8px;font-size:13px;color:#AFA3B6;transition:all .12s;cursor:pointer;border-left:3px solid transparent;text-align:left;border:none;background:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#EDE3F0}
+.nav-item.active{background:rgba(143,22,184,.2);color:#fff;border-left:3px solid #8F16B8;font-weight:600}
+.step-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .12s;font-size:12.5px;color:#AFA3B6;border-left:3px solid transparent;border:none;background:none;width:100%;text-align:left}
+.step-item:hover{background:rgba(255,255,255,.06);color:#EDE3F0}
+.step-item.active{background:rgba(143,22,184,.18);color:#fff;border-left:3px solid #8F16B8;font-weight:600}
 .step-item.done{color:#6A9A6A}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px)}
 .tab-btn{padding:10px 0;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-family:'DM Sans',sans-serif}
 .tab-btn.active{color:var(--text-primary);border-bottom-color:var(--purple-main);font-weight:700}
 .metric-card{background:var(--bg-card);border-radius:12px;padding:22px 24px;box-shadow:var(--shadow-card);border:1px solid var(--border-purple)}
 .input-dark{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px 16px;font-size:14px;color:#fff;outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif}
-.input-dark:focus{border-color:rgba(124,58,237,.6);box-shadow:var(--shadow-glow)}
+.input-dark:focus{border-color:rgba(143,22,184,.6);box-shadow:var(--shadow-glow)}
 .input-dark::placeholder{color:rgba(255,255,255,.3)}
 
 /* ── GLOBAL MOBILE OVERFLOW FIX ───────────────────── */
@@ -580,7 +580,7 @@ section { max-width: 100vw; overflow-x: hidden; }
 /* ── SMOOTH INTERACTIONS ─────────────────────────────── */
 .card { transition: box-shadow .2s ease; }
 .card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.08); }
-button:focus-visible { outline: 2px solid #7C3AED; outline-offset: 2px; }
+button:focus-visible { outline: 2px solid #8F16B8; outline-offset: 2px; }
 input:focus-visible, textarea:focus-visible { outline: none; }
 
 /* ── TICKER ──────────────────────────────────────────── */
@@ -658,11 +658,11 @@ input:focus-visible, textarea:focus-visible { outline: none; }
 .mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;border:none;background:transparent;cursor:pointer;transition:all .15s;border-radius:8px;min-width:52px}
 .mobile-nav-btn span:first-child{font-size:20px;line-height:1}
 .mobile-nav-btn span:last-child{font-size:9px;font-weight:600;letter-spacing:.04em;color:rgba(255,255,255,.4);text-transform:uppercase}
-.mobile-nav-btn.active span:last-child{color:#A78BFA}
+.mobile-nav-btn.active span:last-child{color:#D58BE8}
 
 /* ── FLOATING ACTION BUTTON ──────────────────────── */
-.fab{position:fixed;bottom:28px;right:28px;z-index:199;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A855F7);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 6px 24px rgba(124,58,237,.45);transition:all .2s}
-.fab:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(124,58,237,.6)}
+.fab{position:fixed;bottom:28px;right:28px;z-index:199;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#8F16B8,#BC18D6);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 6px 24px rgba(143,22,184,.45);transition:all .2s}
+.fab:hover{transform:scale(1.08);box-shadow:0 10px 32px rgba(143,22,184,.6)}
 @media(max-width:768px){.fab{bottom:76px}}
 
 /* ── ANIMATED COUNTER ────────────────────────────── */
@@ -741,7 +741,7 @@ input:focus-visible, textarea:focus-visible { outline: none; }
 /* ── SMOOTH PAGE TRANSITIONS ────────────────────── */
 .fade-up{animation:heroFadeUp .4s ease both}
 /* ── SIDEBAR ITEM ACTIVE GLOW ────────────────────── */
-.sidebar-item-active{box-shadow:inset 3px 0 0 #7C3AED}
+.sidebar-item-active{box-shadow:inset 3px 0 0 #8F16B8}
 
 
 /* ── PRINT STYLES ────────────────────────────────── */
@@ -775,7 +775,7 @@ input:focus-visible, textarea:focus-visible { outline: none; }
 .btn-purple:hover{filter:brightness(1.08)}
 .btn-black:hover{filter:brightness(1.15)}
 /* ── FORM FOCUS GLOW ─────────────────────────────────── */
-input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(124,58,237,.15)!important}
+input:focus,textarea:focus,select:focus{box-shadow:0 0 0 3px rgba(143,22,184,.15)!important}
 /* ── TABLE ROW HOVER ─────────────────────────────────── */
 .data-table tbody tr{transition:background .12s}
 /* ── MODAL BACKDROP BLUR ─────────────────────────────── */
@@ -872,7 +872,7 @@ h3,.h3{font-size:var(--t-head);letter-spacing:-.018em;line-height:1.2;font-weigh
 .btn-purple:active:not(:disabled),
 .btn-black:active:not(:disabled),
 .btn-ghost:active:not(:disabled){transform:scale(.97)}
-.btn-purple:hover:not(:disabled){background:var(--purple-main);box-shadow:0 4px 14px rgba(109,40,217,.24)}
+.btn-purple:hover:not(:disabled){background:var(--purple-main);box-shadow:0 4px 14px rgba(143,22,184,.24)}
 .btn-ghost:hover:not(:disabled){background:var(--bg-hover)}
 .btn-purple:disabled,.btn-black:disabled,.btn-ghost:disabled{opacity:.42;cursor:not-allowed}
 
@@ -931,7 +931,7 @@ input,select,textarea{
   width:11px;height:11px;
   background:var(--purple-main);
   border-color:var(--bg-card);
-  box-shadow:0 0 0 3px rgba(109,40,217,.16);
+  box-shadow:0 0 0 3px rgba(143,22,184,.16);
   transition:left 1.1s var(--ease);
 }
 .trajectory-mark.target{right:0;left:auto;transform:translate(50%,-50%);border-color:var(--purple-main)}
@@ -951,7 +951,7 @@ input,select,textarea{
   transition:background var(--dur) var(--ease);
 }
 .step-tick.done{background:var(--purple-main)}
-.step-tick.current{background:var(--purple-soft);box-shadow:0 0 0 2px rgba(109,40,217,.14)}
+.step-tick.current{background:var(--purple-soft);box-shadow:0 0 0 2px rgba(143,22,184,.14)}
 
 /* ── Arrival ────────────────────────────────────────────────── */
 /* Content settles in rather than appearing. Used once per screen,
@@ -1031,10 +1031,10 @@ input,select,textarea{
 
 // ─── LIGHT COLORS ──────────────────────────────────────────
 const CL = {
-  cream:"#ffffff",white:"#FFFFFF",black:"#1D1D1F",
-  tan:"#D2D2D7",tanL:"#EBEBF0",warm:"#6E6E73",
-  bg:"#F5F5F7",border:"#E3E3E8",
-  purple:"#6D28D9",purpleL:"#F1ECFE",purpleD:"#5B21B6",
+  cream:"#ffffff",white:"#FFFFFF",black:"#231C28",
+  tan:"#CAB7D2",tanL:"#EAE0EE",warm:"#685D70",
+  bg:"#F8F6FA",border:"#E6DFEA",
+  purple:"#8F16B8",purpleL:"#F6E9FA",purpleD:"#71118F",
   green:"#16A34A",greenBg:"#F0FDF4",greenBd:"#BBF7D0",
   amber:"#D97706",amberBg:"#FFFBEB",amberBd:"#FDE68A",
   red:"#DC2626",redBg:"#FEF2F2",redBd:"#FECACA",
@@ -1042,10 +1042,10 @@ const CL = {
 };
 // ─── DARK COLORS ───────────────────────────────────────────
 const CD = {
-  cream:"#F5F5F7",white:"#1C1C1E",black:"#F5F5F7",
-  tan:"#3A3A3C",tanL:"#2C2C2E",warm:"#98989D",
-  bg:"#000000",border:"#2C2C2E",
-  purple:"#A78BFA",purpleL:"rgba(167,139,250,.14)",purpleD:"#8B5CF6",
+  cream:"#F5EDF7",white:"#1B171F",black:"#F5EDF7",
+  tan:"#514058",tanL:"#352A3B",warm:"#BEB0C7",
+  bg:"#100D13",border:"#352A3B",
+  purple:"#D58BE8",purpleL:"rgba(213,139,232,.14)",purpleD:"#C66ADF",
   green:"#34D399",greenBg:"rgba(52,211,153,.12)",greenBd:"rgba(52,211,153,.3)",
   amber:"#FBBF24",amberBg:"rgba(251,191,36,.12)",amberBd:"rgba(251,191,36,.3)",
   red:"#F87171",redBg:"rgba(248,113,113,.12)",redBd:"rgba(248,113,113,.3)",
@@ -1068,7 +1068,7 @@ function useResponsive(){
 }
 
 function Avatar({name="?",size=34}){
-  const p=["#7C3AED","#DC2626","#D97706","#16A34A","#2563EB","#8B2020","#0891B2","#9333EA"];
+  const p=["#8F16B8","#DC2626","#D97706","#16A34A","#2563EB","#8B2020","#0891B2","#9333EA"];
   const ini=name.split(" ").map(n=>n[0]).join("").slice(0,2).toUpperCase();
   return <div style={{width:size,height:size,borderRadius:"50%",background:p[name.charCodeAt(0)%p.length],display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:size*.36,fontWeight:700,flexShrink:0}}>{ini}</div>;
 }
@@ -1077,7 +1077,7 @@ function Dot({s}){
   return <span style={{width:8,height:8,borderRadius:"50%",background:map[s]||C.warm,display:"inline-block",flexShrink:0}}/>;
 }
 function Badge({children,color="purple"}){
-  const m={purple:{bg:"#EDE9FE",text:"#5B21B6"},green:{bg:"#DCFCE7",text:"#15803D"},amber:{bg:"#FEF9C3",text:"#A16207"},red:{bg:"#FEE2E2",text:"#B91C1C"},blue:{bg:"#DBEAFE",text:"#1D4ED8"},gray:{bg:"#F1F5F9",text:"#475569"},black:{bg:"#1A1A1A",text:"#fff"}};
+  const m={purple:{bg:"#EDE9FE",text:"#71118F"},green:{bg:"#DCFCE7",text:"#15803D"},amber:{bg:"#FEF9C3",text:"#A16207"},red:{bg:"#FEE2E2",text:"#B91C1C"},blue:{bg:"#DBEAFE",text:"#1D4ED8"},gray:{bg:"#F1F5F9",text:"#475569"},black:{bg:"#1A1A1A",text:"#fff"}};
   const s=m[color]||m.gray;
   return <span className="badge" style={{background:s.bg,color:s.text}}>{children}</span>;
 }
@@ -1091,7 +1091,7 @@ function DInput({label,value,onChange,placeholder,type="text"}){return(<div styl
 const ROLES = [
   {id:"admin",       label:"Administrator",         icon:"🏛",  color:"#DC2626", badge:"ADMIN",    desc:"Full district-level access · All schools · Billing"},
   {id:"director",    label:"Leadership / Director",icon:"👔",  color:"#2563EB", badge:"DIRECTOR", desc:"Review Queue · Compliance · Audit Log · Reports"},
-  {id:"teacher",     label:"Teacher",               icon:"👩‍🏫", color:"#7C3AED", badge:"TEACHER",  desc:"Caseload · ALP Builder · Progress monitoring"},
+  {id:"teacher",     label:"Teacher",               icon:"👩‍🏫", color:"#8F16B8", badge:"TEACHER",  desc:"Caseload · ALP Builder · Progress monitoring"},
   {id:"intervention",label:"Intervention Specialist",icon:"📊", color:"#D97706", badge:"RTI",      desc:"RTI tiers · Intervention plans · CBM data"},
   {id:"related", label:"Related Services",  icon:"🩺",  color:"#16A34A", badge:"SERVICES", desc:"SLP · OT · PT · Session notes · Goal progress"},
 ];
@@ -1296,15 +1296,15 @@ function AIModal({student,onAdd,onClose}){
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="card fade-up" style={{width:"100%",maxWidth:620,maxHeight:"92vh",overflowY:"auto",padding:0}}>
         {/* Header */}
-        <div style={{background:"linear-gradient(135deg,#0B0718,#1a0a3e)",padding:"28px 32px 22px",position:"sticky",top:0,zIndex:10}}>
+        <div style={{background:"linear-gradient(135deg,#100D13,#261B2D)",padding:"28px 32px 22px",position:"sticky",top:0,zIndex:10}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div>
               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,#7C3AED,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>✦</div>
-                <p style={{fontSize:11,fontWeight:700,letterSpacing:".1em",color:"#A78BFA"}}>ALP AI INTELLIGENCE SUITE</p>
+                <div style={{width:32,height:32,borderRadius:8,background:"linear-gradient(135deg,#8F16B8,#BC18D6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>✦</div>
+                <p style={{fontSize:11,fontWeight:700,letterSpacing:".1em",color:"#D58BE8"}}>ALP AI INTELLIGENCE SUITE</p>
               </div>
               <h2 className="serif" style={{fontSize:26,fontWeight:500,color:"#fff",lineHeight:1.1,letterSpacing:"-.016em"}}>
-                Goal Architect <span className="serif-italic" style={{color:"#A78BFA"}}>AI</span>
+                Goal Architect <span className="serif-italic" style={{color:"#D58BE8"}}>AI</span>
               </h2>
               <p style={{fontSize:12,color:"rgba(255,255,255,.45)",marginTop:5}}>{student.name} · Grade {student.grade} · {student.disability}</p>
             </div>
@@ -1336,8 +1336,8 @@ function AIModal({student,onAdd,onClose}){
           </div>
 
           <button className="btn-black" onClick={generate} disabled={loading||!baseline.trim()}
-            style={{width:"100%",padding:"15px",marginBottom:8,fontSize:13,borderRadius:10,background:loading?"#374151":"linear-gradient(135deg,#1a1a2e,#16213e)",border:"none",color:"#fff",cursor:loading||!baseline.trim()?"not-allowed":"pointer",transition:"all .2s"}}>
-            {loading?<><Spin color="#A78BFA"/> Generating with Claude AI…</>:"✦  Generate 3 SMART Goals →"}
+            style={{width:"100%",padding:"15px",marginBottom:8,fontSize:13,borderRadius:10,background:loading?"#374151":"linear-gradient(135deg,#1B171F,#261B2D)",border:"none",color:"#fff",cursor:loading||!baseline.trim()?"not-allowed":"pointer",transition:"all .2s"}}>
+            {loading?<><Spin color="#D58BE8"/> Generating with Claude AI…</>:"✦  Generate 3 SMART Goals →"}
           </button>
           {!baseline.trim()&&<p style={{fontSize:11,color:C.warm,textAlign:"center",marginBottom:16}}>Enter a baseline score above to generate goals</p>}
 
@@ -1357,7 +1357,7 @@ function AIModal({student,onAdd,onClose}){
                 return(
                   <div key={i} onClick={()=>setSelected(p=>sel?p.filter(x=>x!==i):[...p,i])}
                     style={{border:`2px solid ${sel?C.purple:C.tanL}`,background:sel?C.purpleL:C.white,borderRadius:12,padding:"18px 20px",marginBottom:12,cursor:"pointer",transition:"all .2s"}}
-                    onMouseEnter={e=>{if(!sel)e.currentTarget.style.borderColor="#C4B5FD";}}
+                    onMouseEnter={e=>{if(!sel)e.currentTarget.style.borderColor="#E3AFEf";}}
                     onMouseLeave={e=>{if(!sel)e.currentTarget.style.borderColor=C.tanL;}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:10,alignItems:"center"}}>
                       <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -1400,20 +1400,20 @@ function DownloadModal({onClose}){
   ];
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="fade-up" style={{background:"#0D0B1F",border:"1px solid rgba(124,58,237,.3)",borderRadius:20,padding:"40px 36px",width:"100%",maxWidth:560,textAlign:"center",boxShadow:"0 32px 80px rgba(0,0,0,.7)"}}>
-        <div style={{width:60,height:60,background:"linear-gradient(135deg,rgba(124,58,237,.4),rgba(124,58,237,.1))",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 18px",border:"1px solid rgba(124,58,237,.3)"}}>🖥</div>
+      <div className="fade-up" style={{background:"#17131B",border:"1px solid rgba(143,22,184,.3)",borderRadius:20,padding:"40px 36px",width:"100%",maxWidth:560,textAlign:"center",boxShadow:"0 32px 80px rgba(0,0,0,.7)"}}>
+        <div style={{width:60,height:60,background:"linear-gradient(135deg,rgba(143,22,184,.4),rgba(143,22,184,.1))",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 18px",border:"1px solid rgba(143,22,184,.3)"}}>🖥</div>
         <h2 style={{fontSize:26,fontWeight:800,color:"#fff",marginBottom:6,letterSpacing:"-.016em"}}>Download ALP Desktop</h2>
         <p style={{fontSize:13,color:"rgba(255,255,255,.5)",marginBottom:8,lineHeight:1.6}}>Full offline access · Enterprise security · v2.4.1</p>
         <p style={{fontSize:12,color:"rgba(255,255,255,.3)",marginBottom:28}}>Available for Windows, macOS, and Linux</p>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24}}>
           {platforms.map(p=>(
             <button key={p.label} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.1)",borderRadius:14,padding:"22px 12px",cursor:"pointer",transition:"all .2s",color:"#fff",textAlign:"center"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(124,58,237,.2)";e.currentTarget.style.borderColor="rgba(124,58,237,.5)";e.currentTarget.style.transform="translateY(-2px)";}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(143,22,184,.2)";e.currentTarget.style.borderColor="rgba(143,22,184,.5)";e.currentTarget.style.transform="translateY(-2px)";}}
               onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="rgba(255,255,255,.1)";e.currentTarget.style.transform="none";}}>
               <div style={{width:52,height:52,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center"}}>{p.svg}</div>
               <div style={{fontSize:14,fontWeight:700,marginBottom:4}}>{p.label}</div>
               <div style={{fontSize:10,color:"rgba(255,255,255,.4)",marginBottom:12,lineHeight:1.4}}>{p.sub}</div>
-              <div style={{fontSize:10,fontWeight:700,padding:"5px 10px",background:"rgba(124,58,237,.35)",border:"1px solid rgba(124,58,237,.4)",borderRadius:6,color:"#c4b5fd"}}>{p.btn}</div>
+              <div style={{fontSize:10,fontWeight:700,padding:"5px 10px",background:"rgba(143,22,184,.35)",border:"1px solid rgba(143,22,184,.4)",borderRadius:6,color:"#E3AFEf"}}>{p.btn}</div>
             </button>
           ))}
         </div>
@@ -1590,7 +1590,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
           <div className="r-feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
             {aiTools.map(t=>(
               <div key={t.name} style={{padding:24,border:`1px solid ${C.tanL}`,borderTop:`3px solid ${C.purple}`,borderRadius:12,background:"#FAF8FF",cursor:"pointer",transition:"all .2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 28px rgba(124,58,237,.15)";}}
+                onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-4px)";e.currentTarget.style.boxShadow="0 8px 28px rgba(143,22,184,.15)";}}
                 onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow="";}}>
                 <div className="glyph" style={{fontSize:28,marginBottom:12}}>{t.icon}</div>
                 <div className="serif" style={{fontSize:15,fontWeight:700,marginBottom:8,lineHeight:1.2,color:C.black}}>{t.name}</div>
@@ -1630,12 +1630,12 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
       <section style={{background:C.black,padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)"}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
           <p className="lbl" style={{color:"#9A8A78",marginBottom:14,textAlign:"center"}}>Global Progress Engine</p>
-          <h2 className="serif" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:700,color:C.cream,textAlign:"center",marginBottom:16,letterSpacing:"-.026em"}}>Built for every country,<br/><span className="serif-italic" style={{color:"#A78BFA"}}>every framework.</span></h2>
+          <h2 className="serif" style={{fontSize:"clamp(28px,4vw,52px)",fontWeight:700,color:C.cream,textAlign:"center",marginBottom:16,letterSpacing:"-.026em"}}>Built for every country,<br/><span className="serif-italic" style={{color:"#D58BE8"}}>every framework.</span></h2>
           <p style={{fontSize:15,color:"#9A8A78",textAlign:"center",maxWidth:560,margin:"0 auto 48px",lineHeight:1.7}}>ALP automatically checks programs against 10+ support frameworks — flagging anything missing before your audit arrives.</p>
           <div className="r-framework-grid" style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:40}}>
             {frameworks.map(c=>(
               <div key={c.n} style={{background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"16px 12px",textAlign:"center",transition:"all .2s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="rgba(124,58,237,.2)"}
+                onMouseEnter={e=>e.currentTarget.style.background="rgba(143,22,184,.2)"}
                 onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,.05)"}>
                 <div style={{fontSize:26,marginBottom:6}}>{c.f}</div>
                 <div style={{fontSize:12,fontWeight:700,color:C.cream,marginBottom:2}}>{c.n}</div>
@@ -1651,11 +1651,11 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
 
 
       {/* ── AI INTELLIGENCE SUITE ────────────────── */}
-      <section style={{background:"#0B0718",padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)"}}>
+      <section style={{background:"#100D13",padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)"}}>
         <div style={{maxWidth:1100,margin:"0 auto"}}>
-          <p className="lbl" style={{marginBottom:16,color:"#A78BFA",textAlign:"center"}}>AI Intelligence Suite</p>
+          <p className="lbl" style={{marginBottom:16,color:"#D58BE8",textAlign:"center"}}>AI Intelligence Suite</p>
           <h2 className="serif" style={{fontSize:"clamp(26px,4vw,46px)",fontWeight:500,color:"#fff",letterSpacing:"-.032em",marginBottom:12,textAlign:"center",lineHeight:1.08}}>
-            8 AI tools. All included. <span className="serif-italic" style={{color:"#A78BFA"}}>Free forever.</span>
+            8 AI tools. All included. <span className="serif-italic" style={{color:"#D58BE8"}}>Free forever.</span>
           </h2>
           <p style={{fontSize:15,color:"rgba(255,255,255,.5)",textAlign:"center",maxWidth:560,margin:"0 auto 40px",lineHeight:1.7}}>Every ALP AI tool is built specifically for special education — not generic AI bolted on.</p>
           <div className="r-feat-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
@@ -1669,9 +1669,9 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
               {icon:"✅",name:"Plan Validator",desc:"Reviews your ALP against your framework, flags missing elements, and suggests fixes before review."},
               {icon:"📊",name:"Progress Analyst",desc:"Analyses CBM data trends, flags students off track, and recommends intervention adjustments."},
             ].map(tool=>(
-              <div key={tool.name} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(124,58,237,.25)",borderRadius:14,padding:"22px 20px",transition:"all .2s"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="rgba(124,58,237,.12)";e.currentTarget.style.borderColor="rgba(124,58,237,.5)";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="rgba(124,58,237,.25)";}}>
+              <div key={tool.name} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(143,22,184,.25)",borderRadius:14,padding:"22px 20px",transition:"all .2s"}}
+                onMouseEnter={e=>{e.currentTarget.style.background="rgba(143,22,184,.12)";e.currentTarget.style.borderColor="rgba(143,22,184,.5)";}}
+                onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="rgba(143,22,184,.25)";}}>
                 <div style={{fontSize:28,marginBottom:12}}>{tool.icon}</div>
                 <h3 style={{fontSize:14,fontWeight:700,color:"#fff",marginBottom:8}}>{tool.name}</h3>
                 <p style={{fontSize:12,color:"rgba(255,255,255,.5)",lineHeight:1.6}}>{tool.desc}</p>
@@ -1733,16 +1733,16 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
       </section>
 
       {/* ── GLOBAL REACH ──────────────────────────── */}
-      <section style={{background:"#0B0718",padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)"}}>
+      <section style={{background:"#100D13",padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)"}}>
         <div style={{maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:16,color:"#A78BFA"}}>Global Reach</p>
+          <p className="lbl" style={{marginBottom:16,color:"#D58BE8"}}>Global Reach</p>
           <h2 className="serif" style={{fontSize:"clamp(26px,4vw,44px)",fontWeight:500,color:"#fff",letterSpacing:"-.032em",marginBottom:12,lineHeight:1.1}}>
-            Built for educators <span className="serif-italic" style={{color:"#A78BFA"}}>everywhere.</span>
+            Built for educators <span className="serif-italic" style={{color:"#D58BE8"}}>everywhere.</span>
           </h2>
           <p style={{fontSize:15,color:"rgba(255,255,255,.5)",maxWidth:560,margin:"0 auto 40px",lineHeight:1.7}}>Switch frameworks in one click. ALP adapts to your country's documentation requirements automatically.</p>
           <div style={{display:"flex",justifyContent:"center",flexWrap:"wrap",gap:12}}>
             {[["🇺🇸","USA","ALP standards · Support Plans"],["🇬🇭","Ghana","Inclusive Ed Policy"],["🇬🇧","UK","EHC Plan · Code of Practice"],["🇳🇬","Nigeria","National Special Needs Education Policy"],["🇰🇪","Kenya","SNE Policy Framework"],["🇨🇦","Canada","Provincial Learning Plan Standards"],["🇦🇺","Australia","Nationally Consistent Collection"],["🌍","Africa Regional","Multi-country NGO plans"]].map(([flag,country,framework])=>(
-              <div key={country} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(124,58,237,.25)",borderRadius:14,padding:"18px 20px",minWidth:140,textAlign:"center"}}>
+              <div key={country} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(143,22,184,.25)",borderRadius:14,padding:"18px 20px",minWidth:140,textAlign:"center"}}>
                 <div style={{fontSize:28,marginBottom:8}}>{flag}</div>
                 <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:3}}>{country}</div>
                 <div style={{fontSize:10,color:"rgba(255,255,255,.4)"}}>{framework}</div>
@@ -1753,7 +1753,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
       </section>
 
       {/* ── CTA BOTTOM ───────────────────────────── */}
-      <section style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)"}}>
+      <section style={{background:"linear-gradient(135deg,#8F16B8,#8F16B8)",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)"}}>
         <div style={{maxWidth:640,margin:"0 auto",textAlign:"center"}}>
           <h2 className="serif" style={{fontSize:"clamp(28px,5vw,52px)",fontWeight:500,color:"#fff",letterSpacing:"-.032em",lineHeight:1.08,marginBottom:16}}>
             Start building better<br/><span className="serif-italic" style={{color:"#DDD6FE"}}>plans today.</span>
@@ -1775,7 +1775,7 @@ function FeaturesPage({setNavPage,onEnter,onSignup,onDemo}){
 // ═══════════════════════════════════════════════════════════════════
 function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
   const roles=[
-    {icon:"👩‍🏫",title:"ALP Teacher",sub:"Reduce paperwork, increase student outcomes.",color:"#7C3AED",bg:"#EDE9FE",
+    {icon:"👩‍🏫",title:"ALP Teacher",sub:"Reduce paperwork, increase student outcomes.",color:"#8F16B8",bg:"#EDE9FE",
      desc:"You spend hours on documentation that could be spent with students. ALP cuts writing time from 2 hours to 20 minutes — with AI doing the heavy lifting on goals, BIPs, and present levels.",
      features:["Build complete ALPs in 20 min","AI ALP Goal Architect, ALP Behaviour Blueprint, ALP Present Levels Coach","Caseload dashboard — all students in one view","Progress monitoring with CBM auto-alerts","Professional PDF export for sharing with families"]},
     {icon:"🎓",title:"ALP Director",sub:"Increase quality, ensure consistency, support your team at scale.",color:"#2563EB",bg:"#DBEAFE",
@@ -1795,7 +1795,7 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
      features:["Country-specific framework config","Bulk student import (CSV/SIS)","Regional progress reporting","Multi-language support","Custom branding & white-labeling"]},
   ];
   const highlights=[
-    {q:"Built around a clear 10-step ALP workflow — from student information all the way to review and sign-off.",icon:"📋",c:"#7C3AED"},
+    {q:"Built around a clear 10-step ALP workflow — from student information all the way to review and sign-off.",icon:"📋",c:"#8F16B8"},
     {q:"AI-assisted goal writing helps you turn baseline data into SMART goals in seconds, not hours.",icon:"✨",c:"#2563EB"},
     {q:"Designed to work for any school, anywhere — not tied to one country's compliance framework.",icon:"🌍",c:"#16A34A"},
   ];
@@ -1856,7 +1856,7 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
               <div style={{fontSize:40,marginBottom:14}}>🏫</div>
               <h3 className="serif" style={{fontSize:22,fontWeight:700,color:C.cream,marginBottom:8}}>Schools & Districts</h3>
               <p style={{fontSize:14,color:"#9A8A78",lineHeight:1.7,marginBottom:20}}>Custom onboarding, staff training, district-wide deployment, and dedicated support — built around your school's specific needs and planning framework.</p>
-              <div style={{fontSize:30,fontWeight:800,color:"#A78BFA",marginBottom:4}}>Custom <span style={{fontSize:14,fontWeight:400,color:"#9A8A78"}}>pricing</span></div>
+              <div style={{fontSize:30,fontWeight:800,color:"#D58BE8",marginBottom:4}}>Custom <span style={{fontSize:14,fontWeight:400,color:"#9A8A78"}}>pricing</span></div>
               <p style={{fontSize:12,color:"#9A8A78",marginBottom:22}}>Tailored to your team size & district</p>
               <button className="btn-outline" onClick={()=>setNavPage("Pricing")} style={{width:"100%",fontSize:12,color:C.cream,borderColor:"#555"}}
                 onMouseEnter={e=>{e.currentTarget.style.background=C.cream;e.currentTarget.style.color=C.black;}}
@@ -1951,15 +1951,15 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
       </section>
 
       {/* ── FINAL CTA ────────────────────────────── */}
-      <section style={{background:"linear-gradient(135deg,#1a1a2e,#0B0718)",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)"}}>
+      <section style={{background:"linear-gradient(135deg,#1B171F,#100D13)",padding:"clamp(56px,8vw,96px) clamp(20px,4vw,48px)"}}>
         <div style={{maxWidth:640,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:16,color:"#A78BFA"}}>For Schools & Districts</p>
+          <p className="lbl" style={{marginBottom:16,color:"#D58BE8"}}>For Schools & Districts</p>
           <h2 className="serif" style={{fontSize:"clamp(26px,4vw,48px)",fontWeight:500,color:"#fff",letterSpacing:"-.032em",lineHeight:1.1,marginBottom:14}}>
-            Ready to bring ALP<br/><span className="serif-italic" style={{color:"#A78BFA"}}>to your whole school?</span>
+            Ready to bring ALP<br/><span className="serif-italic" style={{color:"#D58BE8"}}>to your whole school?</span>
           </h2>
           <p style={{fontSize:15,color:"rgba(255,255,255,.6)",marginBottom:32,lineHeight:1.7}}>Talk to our team about School and District plans. Volume pricing, SIS integration, and dedicated onboarding support.</p>
           <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
-            <button onClick={onDemo} style={{fontSize:14,padding:"14px 36px",borderRadius:99,background:C.purple,color:"#fff",fontWeight:700,border:"none",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background="#6D28D9"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>📅 Book a Demo →</button>
+            <button onClick={onDemo} style={{fontSize:14,padding:"14px 36px",borderRadius:99,background:C.purple,color:"#fff",fontWeight:700,border:"none",cursor:"pointer",transition:"all .2s"}} onMouseEnter={e=>e.currentTarget.style.background="#8F16B8"} onMouseLeave={e=>e.currentTarget.style.background=C.purple}>📅 Book a Demo →</button>
             <button onClick={onSignup} style={{fontSize:13,padding:"13px 28px",borderRadius:99,background:"rgba(255,255,255,.1)",color:"#fff",border:"1px solid rgba(255,255,255,.2)",cursor:"pointer",fontWeight:600}}>Try for Free</button>
           </div>
         </div>
@@ -2070,9 +2070,9 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
       <section style={{padding:"0 clamp(20px,4vw,48px) 64px",maxWidth:1100,margin:"0 auto"}}>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,alignItems:"start",paddingTop:24}}>
           {plans.map(p=>(
-            <div key={p.name} style={{background:p.bg,borderRadius:14,padding:26,position:"relative",border:`1.5px solid ${p.tag?p.color:C.tanL}`,boxShadow:p.tag?"0 8px 40px rgba(124,58,237,.2)":"0 1px 3px rgba(0,0,0,.04)",display:"flex",flexDirection:"column",gap:0,marginTop:p.tag?0:0}}>
+            <div key={p.name} style={{background:p.bg,borderRadius:14,padding:26,position:"relative",border:`1.5px solid ${p.tag?p.color:C.tanL}`,boxShadow:p.tag?"0 8px 40px rgba(143,22,184,.2)":"0 1px 3px rgba(0,0,0,.04)",display:"flex",flexDirection:"column",gap:0,marginTop:p.tag?0:0}}>
               {p.tag&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:p.color,color:"#fff",fontSize:10,fontWeight:800,padding:"5px 18px",borderRadius:99,letterSpacing:".08em",whiteSpace:"nowrap",boxShadow:`0 2px 8px ${p.color}66`}}>{p.tag}</div>}
-              <p style={{fontSize:10,fontWeight:700,color:p.bg===C.black?"#A78BFA":p.color,letterSpacing:".12em",textTransform:"uppercase",marginBottom:8}}>{p.name}</p>
+              <p style={{fontSize:10,fontWeight:700,color:p.bg===C.black?"#D58BE8":p.color,letterSpacing:".12em",textTransform:"uppercase",marginBottom:8}}>{p.name}</p>
               <div style={{display:"flex",alignItems:"flex-end",gap:3,marginBottom:4}}>
                 <span className="serif" style={{fontSize:p.price==="Custom"?30:42,fontWeight:500,color:p.bg===C.black?C.cream:C.black,lineHeight:1}}>{p.price}</span>
                 {p.price!=="Custom"&&<span style={{fontSize:12,color:p.bg===C.black?"#9A8A78":C.warm,marginBottom:5}}>{p.period}</span>}
@@ -2235,7 +2235,7 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
           <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-.026em",marginBottom:40}}>Register for upcoming<br/><span className="serif-italic">virtual AI workshops.</span></h2>
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
             {workshops.map(w=>(
-              <div key={w.title} style={{background:"#FAF8FF",border:`1.5px solid rgba(124,58,237,.2)`,borderRadius:14,padding:28}}>
+              <div key={w.title} style={{background:"#FAF8FF",border:`1.5px solid rgba(143,22,184,.2)`,borderRadius:14,padding:28}}>
                 <div className="glyph" style={{fontSize:32,marginBottom:12}}>{w.icon}</div>
                 <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:4}}>{w.title}</h3>
                 <p style={{fontSize:11,color:C.purple,fontWeight:700,letterSpacing:".04em",marginBottom:12}}>{w.date}</p>
@@ -2364,7 +2364,7 @@ After 6–8 data points, draw a line of best fit through your data. Compare it t
 The 3-point rule: if 3 data points in a row are below the goal line, change the intervention. If 3 points are above, consider raising the goal.
 
 ALP's Progress Monitoring dashboard does all of this automatically — trendlines, alerts, and decision rules are built in.`},
-  "Writing SMART Goals":{tag:"GUIDE",time:"8 min read",color:"#7C3AED",body:`SMART goals are the foundation of every effective Accelerated Learning Plan. SMART stands for Specific, Measurable, Achievable, Relevant, and Time-bound.
+  "Writing SMART Goals":{tag:"GUIDE",time:"8 min read",color:"#8F16B8",body:`SMART goals are the foundation of every effective Accelerated Learning Plan. SMART stands for Specific, Measurable, Achievable, Relevant, and Time-bound.
 
 **The anatomy of a SMART goal**
 Every ALP goal should follow this structure: "By [date], [student name] will [behaviour] with [criterion], as measured by [method], across [settings/trials]."
@@ -2409,7 +2409,7 @@ Any educator supporting a learner with structured needs — from a special educa
 // ARTICLE CONTENT DATABASE
 function ArticleModal({article,onClose}){
   if(!article)return null;
-  const data=ARTICLES[article.title]||{tag:article.tag||"ARTICLE",time:article.time||"5 min read",color:"#7C3AED",body:"ALP is designed to help special educators build better learning plans, faster. This guide covers key concepts, practical strategies, and how to use the platform effectively.\n\n**Getting Started**\nStart with the student's Present Level of Performance, then build annual goals and choose appropriate services. ALP guides you through all 13 required sections step by step.\n\n**AI Tools**\nThe AI Goal Architect generates 3 SMART goal options from your baseline data. The Present Levels Coach helps write functional academic and developmental narratives.\n\n**Progress Monitoring**\nLog CBM probes weekly. ALP tracks trends and flags students who are falling behind. Use the 3-point rule to adjust goals and interventions based on real data.\n\n**Family Communication**\nAfter a plan is approved, export a professional ALP PDF from the Create ALP Doc page. Print, email, or share with parents through your school's standard process. Research shows family engagement is one of the strongest predictors of student success in special education."};
+  const data=ARTICLES[article.title]||{tag:article.tag||"ARTICLE",time:article.time||"5 min read",color:"#8F16B8",body:"ALP is designed to help special educators build better learning plans, faster. This guide covers key concepts, practical strategies, and how to use the platform effectively.\n\n**Getting Started**\nStart with the student's Present Level of Performance, then build annual goals and choose appropriate services. ALP guides you through all 13 required sections step by step.\n\n**AI Tools**\nThe AI Goal Architect generates 3 SMART goal options from your baseline data. The Present Levels Coach helps write functional academic and developmental narratives.\n\n**Progress Monitoring**\nLog CBM probes weekly. ALP tracks trends and flags students who are falling behind. Use the 3-point rule to adjust goals and interventions based on real data.\n\n**Family Communication**\nAfter a plan is approved, export a professional ALP PDF from the Create ALP Doc page. Print, email, or share with parents through your school's standard process. Research shows family engagement is one of the strongest predictors of student success in special education."};
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="card fade-up" style={{width:"100%",maxWidth:640,maxHeight:"88vh",overflowY:"auto",padding:0}}>
@@ -2865,8 +2865,8 @@ function AIChatWidget({onClose}){
   return(
     <div style={{position:"fixed",bottom:28,right:28,zIndex:195,width:w,height:h,display:"flex",flexDirection:"column",background:"var(--bg-secondary)",border:`1px solid ${C.border}`,borderRadius:18,boxShadow:"0 20px 60px rgba(0,0,0,.25)",overflow:"hidden",transition:"all .25s"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",padding:"14px 18px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-        <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#7C3AED,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>✦</div>
+      <div style={{background:"linear-gradient(135deg,#1B171F,#261B2D)",padding:"14px 18px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+        <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#8F16B8,#BC18D6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>✦</div>
         <div style={{flex:1}}>
           <div style={{fontSize:13,fontWeight:700,color:"#fff"}}>ALP AI Assistant</div>
           <div style={{fontSize:10,color:"rgba(255,255,255,.4)"}}>Ask about goals, plans, strategies</div>
@@ -2879,7 +2879,7 @@ function AIChatWidget({onClose}){
       <div ref={scrollRef} style={{flex:1,overflowY:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:10}}>
         {msgs.map((m,i)=>(
           <div key={i} style={{display:"flex",gap:8,alignItems:"flex-start",flexDirection:m.role==="user"?"row-reverse":"row"}}>
-            {m.role==="assistant"&&<div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#7C3AED,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2}}>✦</div>}
+            {m.role==="assistant"&&<div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#8F16B8,#BC18D6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0,marginTop:2}}>✦</div>}
             <div style={{maxWidth:"85%",padding:"10px 13px",borderRadius:m.role==="user"?"14px 14px 3px 14px":"14px 14px 14px 3px",background:m.role==="user"?C.purple:"var(--bg-tertiary,#f4f4f5)",color:m.role==="user"?"#fff":C.black,fontSize:12.5,lineHeight:1.65,whiteSpace:"pre-wrap"}}>
               {m.text}
             </div>
@@ -2887,7 +2887,7 @@ function AIChatWidget({onClose}){
         ))}
         {loading&&(
           <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
-            <div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#7C3AED,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}}>✦</div>
+            <div style={{width:26,height:26,borderRadius:"50%",background:"linear-gradient(135deg,#8F16B8,#BC18D6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,flexShrink:0}}>✦</div>
             <div style={{padding:"10px 13px",borderRadius:"14px 14px 14px 3px",background:"var(--bg-tertiary,#f4f4f5)"}}>
               <div style={{display:"flex",gap:4}}>{[0,1,2].map(i=><div key={i} style={{width:6,height:6,borderRadius:"50%",background:C.purple,animation:`heroPulse 1.2s ${i*0.2}s ease-in-out infinite`}}/>)}</div>
             </div>
@@ -3295,13 +3295,13 @@ function ReportGenerationModal({report,onClose}){
         )}
         {step==="generating"&&(
           <div style={{padding:"36px 28px",textAlign:"center"}}>
-            <div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#7C3AED22,#A855F722)",border:`3px solid ${C.purple}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 20px",position:"relative"}}>
+            <div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#8F16B822,#BC18D622)",border:`3px solid ${C.purple}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 20px",position:"relative"}}>
               <Spin color={C.purple}/>
             </div>
             <h3 style={{fontSize:17,fontWeight:700,color:C.black,marginBottom:8}}>Generating report…</h3>
             <p style={{fontSize:12,color:C.warm,marginBottom:24,minHeight:18}}>{steps_gen[Math.min(stepIdx,steps_gen.length-1)]}</p>
             <div style={{background:C.tanL,borderRadius:99,height:6,overflow:"hidden",marginBottom:10}}>
-              <div style={{height:"100%",background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99,width:`${progress}%`,transition:"width .2s ease"}}/>
+              <div style={{height:"100%",background:`linear-gradient(90deg,${C.purple},#BC18D6)`,borderRadius:99,width:`${progress}%`,transition:"width .2s ease"}}/>
             </div>
             <p style={{fontSize:11,color:C.warm}}>{Math.round(progress)}% complete</p>
           </div>
@@ -3514,7 +3514,7 @@ function HelpCenter(){
         </div>
       ))}
       {/* Contact support */}
-      <div style={{marginTop:16,padding:"28px 32px",background:"linear-gradient(135deg,#7C3AED11,#A855F711)",border:`1px solid ${C.border}`,borderRadius:16,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16}}>
+      <div style={{marginTop:16,padding:"28px 32px",background:"linear-gradient(135deg,#8F16B811,#BC18D611)",border:`1px solid ${C.border}`,borderRadius:16,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16}}>
         <div>
           <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:4}}>Still need help?</h3>
           <p style={{fontSize:13,color:C.warm}}>Our team responds within 24 hours — Monday to Saturday.</p>
@@ -3545,18 +3545,18 @@ function CookieBanner(){
   if(!show)return null;
   return(
     <div style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:9998,width:"min(640px,calc(100vw-32px))"}}>
-      <div style={{background:"#1a1a2e",borderRadius:16,padding:"20px 24px",boxShadow:"0 8px 40px rgba(0,0,0,.4)",border:"1px solid rgba(255,255,255,.08)"}}>
+      <div style={{background:"#1B171F",borderRadius:16,padding:"20px 24px",boxShadow:"0 8px 40px rgba(0,0,0,.4)",border:"1px solid rgba(255,255,255,.08)"}}>
         {!showDetail&&(
           <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
             <div style={{flex:1,minWidth:200}}>
               <p style={{fontSize:13,fontWeight:600,color:"#fff",margin:"0 0 4px"}}>🍪 We use cookies</p>
               <p style={{fontSize:12,color:"rgba(255,255,255,.5)",margin:0}}>Essential cookies keep you logged in. That is all we need.{" "}
-                <button onClick={()=>setShowDetail(true)} style={{color:"#A78BFA",background:"none",border:"none",cursor:"pointer",fontSize:12,padding:0,textDecoration:"underline"}}>See details</button>
+                <button onClick={()=>setShowDetail(true)} style={{color:"#D58BE8",background:"none",border:"none",cursor:"pointer",fontSize:12,padding:0,textDecoration:"underline"}}>See details</button>
               </p>
             </div>
             <div style={{display:"flex",gap:8,flexShrink:0}}>
               <button onClick={()=>accept("essential")} style={{padding:"8px 16px",background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.15)",borderRadius:8,color:"rgba(255,255,255,.7)",fontSize:12,cursor:"pointer",whiteSpace:"nowrap"}}>Essential only</button>
-              <button onClick={()=>accept("all")} style={{padding:"8px 16px",background:"#7C3AED",border:"none",borderRadius:8,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Accept all</button>
+              <button onClick={()=>accept("all")} style={{padding:"8px 16px",background:"#8F16B8",border:"none",borderRadius:8,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer",whiteSpace:"nowrap"}}>Accept all</button>
             </div>
           </div>
         )}
@@ -3580,7 +3580,7 @@ function CookieBanner(){
             ))}
             <div style={{display:"flex",gap:8,marginTop:14}}>
               <button onClick={()=>accept("essential")} style={{flex:1,padding:"10px",background:"rgba(255,255,255,.08)",border:"none",borderRadius:8,color:"rgba(255,255,255,.7)",fontSize:12,cursor:"pointer"}}>Essential only</button>
-              <button onClick={()=>accept("all")} style={{flex:1,padding:"10px",background:"#7C3AED",border:"none",borderRadius:8,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>Accept all</button>
+              <button onClick={()=>accept("all")} style={{flex:1,padding:"10px",background:"#8F16B8",border:"none",borderRadius:8,color:"#fff",fontSize:12,fontWeight:700,cursor:"pointer"}}>Accept all</button>
             </div>
           </div>
         )}
@@ -3738,9 +3738,9 @@ function ContactModal({onClose,type="demo"}){
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="card fade-up" style={{width:"100%",maxWidth:520,padding:0}}>
         {/* Header */}
-        <div style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",padding:"28px 30px 24px",position:"relative"}}>
+        <div style={{background:"linear-gradient(135deg,#1B171F,#261B2D)",padding:"28px 30px 24px",position:"relative"}}>
           <button onClick={onClose} style={{position:"absolute",top:16,right:16,fontSize:22,color:"rgba(255,255,255,.5)",background:"none",border:"none",cursor:"pointer"}} aria-label="Close">×</button>
-          <p style={{fontSize:11,fontWeight:700,letterSpacing:".12em",color:"#A78BFA",marginBottom:8}}>
+          <p style={{fontSize:11,fontWeight:700,letterSpacing:".12em",color:"#D58BE8",marginBottom:8}}>
             {isDemo?"BOOK A DEMO":"GET IN TOUCH"}
           </p>
           <h3 className="serif" style={{fontSize:26,fontWeight:500,color:"#fff",letterSpacing:"-.016em",lineHeight:1.1,marginBottom:8}}>
@@ -3804,7 +3804,7 @@ function SignUp({onLogin,onBack}){
   const set=(k,v)=>setForm(f=>({...f,[k]:v}));
   const plans=[
     {id:"free",name:"Free",price:"$0",desc:"ALP AI tools forever. Up to 10 students.",color:"#6B7280",features:["AI Goal Architect","Present Levels Coach","Behaviour Blueprint","10 students max"]},
-    {id:"professional",name:"Professional",price:"$9/mo",desc:"Everything — unlimited students, director approvals, compliance dashboard, and professional PDF export.",color:"#7C3AED",features:["Unlimited students","All AI tools","Director approvals & audit log","Professional PDF export"],popular:true},
+    {id:"professional",name:"Professional",price:"$9/mo",desc:"Everything — unlimited students, director approvals, compliance dashboard, and professional PDF export.",color:"#8F16B8",features:["Unlimited students","All AI tools","Director approvals & audit log","Professional PDF export"],popular:true},
     {id:"school",name:"School",price:"$29/mo",desc:"Admin dashboard, district reporting, bulk import.",color:"#16A34A",features:["Everything in Pro","Admin dashboard","Staff management","Priority support"]},
   ];
   async function handleCreate(){
@@ -3830,26 +3830,26 @@ function SignUp({onLogin,onBack}){
   return(
     <div style={{display:"flex",minHeight:"100vh"}}>
       {/* Left panel */}
-      <div style={{flex:1,background:"linear-gradient(135deg,#18003d 0%,#0B0718 100%)",display:"flex",flexDirection:"column",justifyContent:"space-between",padding:"clamp(32px,5vw,56px)",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,rgba(124,58,237,.15) .8px,transparent .8px)",backgroundSize:"22px 22px"}}/>
+      <div style={{flex:1,background:"linear-gradient(135deg,#18003d 0%,#100D13 100%)",display:"flex",flexDirection:"column",justifyContent:"space-between",padding:"clamp(32px,5vw,56px)",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,rgba(143,22,184,.15) .8px,transparent .8px)",backgroundSize:"22px 22px"}}/>
         <div style={{position:"relative",zIndex:1}}>
           <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer",marginBottom:48}} onClick={onBack}>
             <img src="/assets/logos/alp-logo.png" alt="ALP" style={{width:40,height:40,borderRadius:10,objectFit:"cover"}}/>
             <div><div className="serif" style={{fontSize:16,fontWeight:700,color:"#fff"}}>ALP</div><div style={{fontSize:9,color:"rgba(255,255,255,.4)",textTransform:"uppercase",letterSpacing:".12em"}}>ACCELERATED LEARNING PLAN</div></div>
           </div>
           <h2 className="serif" style={{fontSize:"clamp(28px,4vw,46px)",fontWeight:500,color:"#fff",lineHeight:1.1,marginBottom:20,letterSpacing:"-.026em"}}>
-            Join educators<br/><span style={{color:"#A78BFA"}}>building better plans.</span>
+            Join educators<br/><span style={{color:"#D58BE8"}}>building better plans.</span>
           </h2>
           <p style={{fontSize:14,color:"rgba(255,255,255,.55)",lineHeight:1.75,maxWidth:360,marginBottom:40}}>Build effective Accelerated Learning Plans in minutes. Free plan for schools — access through your school — no credit card required.</p>
           <div style={{display:"flex",flexDirection:"column",gap:14}}>
             {[["✓ Free plan for schools — access through your school",""],["✓ AI tools included — no extra cost",""],["✓ various regions & more",""],["✓ Set up in under 5 minutes",""]].map(([t])=>(
-              <div key={t} style={{display:"flex",alignItems:"center",gap:10,fontSize:13,color:"rgba(255,255,255,.7)"}}><span style={{color:"#A78BFA",fontWeight:700}}>{t.slice(0,1)}</span>{t.slice(2)}</div>
+              <div key={t} style={{display:"flex",alignItems:"center",gap:10,fontSize:13,color:"rgba(255,255,255,.7)"}}><span style={{color:"#D58BE8",fontWeight:700}}>{t.slice(0,1)}</span>{t.slice(2)}</div>
             ))}
           </div>
         </div>
         <div style={{position:"relative",zIndex:1,display:"flex",gap:40,marginTop:40}}>
           {[["10+","Countries"],["Birth–22+","Age range"],["Free","For teachers"]].map(([v,l])=>(
-            <div key={l}><div style={{fontSize:22,fontWeight:800,color:"#A78BFA",letterSpacing:"-.026em"}}>{v}</div><div style={{fontSize:11,color:"rgba(255,255,255,.35)",marginTop:2}}>{l}</div></div>
+            <div key={l}><div style={{fontSize:22,fontWeight:800,color:"#D58BE8",letterSpacing:"-.026em"}}>{v}</div><div style={{fontSize:11,color:"rgba(255,255,255,.35)",marginTop:2}}>{l}</div></div>
           ))}
         </div>
       </div>
@@ -3858,7 +3858,7 @@ function SignUp({onLogin,onBack}){
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:28}}>
           <div style={{display:"flex",gap:8}}>
             {["plan","details","done"].map((s,i)=>(
-              <div key={s} style={{width:28,height:4,borderRadius:2,background:["plan","details","done"].indexOf(step)>=i?"#7C3AED":"#E5E7EB",transition:"background .3s"}}/>
+              <div key={s} style={{width:28,height:4,borderRadius:2,background:["plan","details","done"].indexOf(step)>=i?"#8F16B8":"#E5E7EB",transition:"background .3s"}}/>
             ))}
           </div>
           <button onClick={onBack} style={{fontSize:12,color:C.warm,background:"none",border:"none",cursor:"pointer"}}>← Back</button>
@@ -3941,7 +3941,7 @@ function SignUp({onLogin,onBack}){
 
         {step==="done"&&(
           <div style={{textAlign:"center"}}>
-            <div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#7C3AED,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,margin:"0 auto 24px",boxShadow:"0 8px 32px rgba(124,58,237,.4)"}}>🎉</div>
+            <div style={{width:72,height:72,borderRadius:"50%",background:"linear-gradient(135deg,#8F16B8,#BC18D6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,margin:"0 auto 24px",boxShadow:"0 8px 32px rgba(143,22,184,.4)"}}>🎉</div>
             <h3 style={{fontSize:24,fontWeight:800,color:C.black,marginBottom:8,letterSpacing:"-.016em"}}>Welcome to ALP!</h3>
             <p style={{fontSize:14,color:C.warm,lineHeight:1.7,marginBottom:8}}>Account created for <b style={{color:C.black}}>{form.email}</b>.</p>
             <p style={{fontSize:13,color:C.warm,marginBottom:32}}>Your <b style={{color:C.purple}}>{plans.find(p=>p.id===plan)?.name}</b> account is ready.</p>
@@ -5066,16 +5066,16 @@ function TimelinePage({setPage}){
 function ALPPrintPreview({onClose,student,goals}){
   const studentData=student||{name:"No student selected",grade:"–",dob:"–",disability:"–",teacher:"–",school:"–",year:`${new Date().getFullYear()}–${new Date().getFullYear()+1}`};
   const goalsData=goals||[];
-  const domainColors={READING:"#7C3AED",COMMUNICATION:"#2563EB","SELF-REGULATION":"#D97706",WRITING:"#059669"};
+  const domainColors={READING:"#8F16B8",COMMUNICATION:"#2563EB","SELF-REGULATION":"#D97706",WRITING:"#059669"};
 
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{width:"100%",maxWidth:700,maxHeight:"92vh",overflowY:"auto",background:"#fff",borderRadius:12,boxShadow:"0 25px 50px rgba(0,0,0,.3)"}}>
         {/* Toolbar */}
-        <div style={{padding:"12px 20px",background:"#1a1a2e",display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:"12px 12px 0 0",position:"sticky",top:0,zIndex:10}}>
+        <div style={{padding:"12px 20px",background:"#1B171F",display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:"12px 12px 0 0",position:"sticky",top:0,zIndex:10}}>
           <span style={{fontSize:13,fontWeight:600,color:"rgba(255,255,255,.8)"}}>📄 ALP Print Preview</span>
           <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>window.print()} style={{padding:"8px 16px",background:"#7C3AED",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:600,cursor:"pointer"}}>🖨 Print</button>
+            <button onClick={()=>window.print()} style={{padding:"8px 16px",background:"#8F16B8",color:"#fff",border:"none",borderRadius:6,fontSize:12,fontWeight:600,cursor:"pointer"}}>🖨 Print</button>
             <button onClick={onClose} style={{padding:"8px 12px",background:"rgba(255,255,255,.1)",color:"#fff",border:"none",borderRadius:6,fontSize:12,cursor:"pointer"}}>✕ Close</button>
           </div>
         </div>
@@ -5083,7 +5083,7 @@ function ALPPrintPreview({onClose,student,goals}){
         {/* Document */}
         <div style={{padding:"48px 56px",fontFamily:"'Georgia',serif",color:"#111"}}>
           {/* Header */}
-          <div style={{textAlign:"center",borderBottom:"3px solid #1a1a2e",paddingBottom:24,marginBottom:28}}>
+          <div style={{textAlign:"center",borderBottom:"3px solid #1B171F",paddingBottom:24,marginBottom:28}}>
             <div style={{fontSize:9,letterSpacing:".2em",color:"#666",marginBottom:8,textTransform:"uppercase"}}>{studentData.school} · Student Support Department</div>
             <h1 style={{fontSize:26,fontWeight:700,margin:"0 0 6px",letterSpacing:"-.016em"}}>Accelerated Learning Plan</h1>
             <div style={{fontSize:11,color:"#666"}}>Academic Year {studentData.year} · Annual Program Document</div>
@@ -5121,8 +5121,8 @@ function ALPPrintPreview({onClose,student,goals}){
           <h2 style={{fontSize:14,fontWeight:700,marginBottom:16,paddingBottom:6,borderBottom:"1px solid #ddd",textTransform:"uppercase",letterSpacing:".08em"}}>Annual Goals</h2>
           {goalsData.length===0&&<p style={{fontSize:12,color:"#888",fontStyle:"italic"}}>No goals recorded yet for this student.</p>}
           {goalsData.map((g,i)=>(
-            <div key={i} style={{marginBottom:20,padding:"14px 16px",border:"1px solid #ddd",borderLeft:`4px solid ${domainColors[g.domain]||"#7C3AED"}`,borderRadius:"0 4px 4px 0"}}>
-              <div style={{fontSize:9,fontWeight:700,color:domainColors[g.domain]||"#7C3AED",letterSpacing:".12em",marginBottom:6}}>{g.domain}</div>
+            <div key={i} style={{marginBottom:20,padding:"14px 16px",border:"1px solid #ddd",borderLeft:`4px solid ${domainColors[g.domain]||"#8F16B8"}`,borderRadius:"0 4px 4px 0"}}>
+              <div style={{fontSize:9,fontWeight:700,color:domainColors[g.domain]||"#8F16B8",letterSpacing:".12em",marginBottom:6}}>{g.domain}</div>
               <p style={{fontSize:13,lineHeight:1.75,margin:"0 0 10px"}}>{g.goal}</p>
               <div style={{display:"flex",gap:24,fontSize:10,color:"#888"}}>
                 <span>Review Date: ______________________</span>
@@ -5210,7 +5210,7 @@ function SessionNotesWidget({onClose}){
   return(
     <div style={{position:"fixed",bottom:96,right:28,zIndex:196,width:360,background:"var(--bg-secondary)",border:`1px solid ${C.border}`,borderRadius:16,boxShadow:"0 16px 48px rgba(0,0,0,.22)",overflow:"hidden"}}>
       {/* Header */}
-      <div style={{background:"linear-gradient(135deg,#1a1a2e,#16213e)",padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+      <div style={{background:"linear-gradient(135deg,#1B171F,#261B2D)",padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <span style={{fontSize:16}}>📝</span>
           <span style={{fontSize:13,fontWeight:700,color:"#fff"}}>Quick Session Note</span>
@@ -5318,7 +5318,7 @@ function BulkActionsBar({selected,onClear,onAction}){
   if(!selected||selected.length===0)return null;
   const {toast}=useToast();
   return(
-    <div style={{position:"sticky",top:62,zIndex:50,background:"linear-gradient(135deg,#7C3AED,#6D28D9)",padding:"12px 20px",display:"flex",alignItems:"center",gap:12,borderRadius:10,marginBottom:12,boxShadow:"0 4px 20px rgba(124,58,237,.3)",flexWrap:"wrap"}}>
+    <div style={{position:"sticky",top:62,zIndex:50,background:"linear-gradient(135deg,#8F16B8,#8F16B8)",padding:"12px 20px",display:"flex",alignItems:"center",gap:12,borderRadius:10,marginBottom:12,boxShadow:"0 4px 20px rgba(143,22,184,.3)",flexWrap:"wrap"}}>
       <span style={{fontSize:13,fontWeight:700,color:"#fff",flexShrink:0}}>{selected.length} student{selected.length!==1?"s":""} selected</span>
       <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
         {[["📤 Export","export"],["📧 Message All","message"],["📋 Generate Reports","report"],["🔄 Transfer","transfer"]].map(([label,action])=>(
@@ -5354,7 +5354,7 @@ function OfflineIndicator(){
   return(
     <div style={{position:"fixed",top:0,left:0,right:0,zIndex:9999,background:"#1a1a1a",color:"#fff",textAlign:"center",padding:"8px",fontSize:12,fontWeight:600,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
       <span style={{width:8,height:8,borderRadius:"50%",background:"#ef4444",display:"inline-block"}}/>
-      You're offline — changes will sync when you reconnect
+      You're offline — keep this page open and reconnect before saving
     </div>
   );
 }
@@ -5431,7 +5431,7 @@ function ExportAllDataModal({onClose}){
             <div style={{width:64,height:64,borderRadius:"50%",background:C.purpleL,border:`3px solid ${C.purple}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 20px"}}><Spin color={C.purple}/></div>
             <h3 style={{fontSize:17,fontWeight:700,marginBottom:8}}>Exporting your data…</h3>
             <div style={{background:C.tanL,borderRadius:99,height:6,overflow:"hidden",marginBottom:8,maxWidth:300,margin:"0 auto 8px"}}>
-              <div style={{height:"100%",background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99,width:`${progress}%`,transition:"width .2s"}}/>
+              <div style={{height:"100%",background:`linear-gradient(90deg,${C.purple},#BC18D6)`,borderRadius:99,width:`${progress}%`,transition:"width .2s"}}/>
             </div>
             <p style={{fontSize:12,color:C.warm}}>{Math.round(progress)}%</p>
           </div>
@@ -5652,7 +5652,7 @@ function Confetti({active}){
   const [items,setItems]=useState([]);
   useEffect(()=>{
     if(!active){setItems([]);return;}
-    const colors=["#7C3AED","#A855F7","#F59E0B","#10B981","#3B82F6","#EF4444","#F97316"];
+    const colors=["#8F16B8","#BC18D6","#F59E0B","#10B981","#3B82F6","#EF4444","#F97316"];
     setItems(Array.from({length:50},(_,i)=>({
       id:i,
       left:Math.random()*100,
@@ -5707,19 +5707,32 @@ function PWAInstallBanner(){
   const [dismissed,setDismissed]=useState(false);
   useEffect(()=>{
     const handler=e=>{e.preventDefault();setPrompt(e);};
-    try{window.addEventListener("beforeinstallprompt",handler);}catch{}
-    return()=>{try{window.removeEventListener("beforeinstallprompt",handler);}catch{}};
+    const installed=()=>{setPrompt(null);setDismissed(true);};
+    window.addEventListener("beforeinstallprompt",handler);
+    window.addEventListener("appinstalled",installed);
+    return()=>{
+      window.removeEventListener("beforeinstallprompt",handler);
+      window.removeEventListener("appinstalled",installed);
+    };
   },[]);
   if(!prompt||dismissed)return null;
   return(
-    <div style={{position:"fixed",bottom:90,left:20,right:20,zIndex:197,background:"linear-gradient(135deg,#1a1a2e,#16213e)",borderRadius:14,padding:"14px 18px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(0,0,0,.3)",border:"1px solid rgba(124,58,237,.3)"}}>
-      <div style={{fontSize:24,flexShrink:0}}>📱</div>
-      <div style={{flex:1}}>
+    <div style={{position:"fixed",bottom:90,left:20,right:20,zIndex:197,background:"#1B171F",borderRadius:8,padding:"14px 18px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(0,0,0,.3)",border:"1px solid rgba(143,22,184,.3)"}}>
+      <img src="/icons/icon-192x192.png" alt="" width={32} height={32} style={{flexShrink:0,borderRadius:6}}/>
+      <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:2}}>Install ALP App</div>
         <div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>Add to your home screen for quick access</div>
       </div>
-      <button onClick={async()=>{prompt.prompt();const{outcome}=await prompt.userChoice;if(outcome==="accepted")setDismissed(true);}} className="btn-purple" style={{fontSize:11,padding:"8px 14px",flexShrink:0}}>Install</button>
-      <button onClick={()=>setDismissed(true)} style={{fontSize:18,color:"rgba(255,255,255,.4)",background:"none",border:"none",cursor:"pointer",flexShrink:0}}>×</button>
+      <button onClick={async()=>{
+        const installPrompt=prompt;
+        setPrompt(null); // Browser install events can only be used once.
+        try{
+          await installPrompt.prompt();
+          const{outcome}=await installPrompt.userChoice;
+          if(outcome==="accepted")setDismissed(true);
+        }catch{ /* The browser can withdraw an install offer. */ }
+      }} className="btn-purple" style={{fontSize:11,padding:"8px 14px",flexShrink:0}}>Install</button>
+      <button aria-label="Dismiss install offer" onClick={()=>setDismissed(true)} style={{fontSize:18,color:"#AFA0B8",background:"none",border:"none",cursor:"pointer",flexShrink:0}}>×</button>
     </div>
   );
 }
@@ -5740,7 +5753,7 @@ function TopProgressBar({page}){
   if(!visible)return null;
   return(
     <div style={{position:"fixed",top:0,left:0,right:0,height:2,zIndex:9999,pointerEvents:"none"}}>
-      <div style={{height:"100%",width:`${width}%`,background:"linear-gradient(90deg,#7C3AED,#A855F7)",transition:"width .3s ease",borderRadius:"0 1px 1px 0",boxShadow:"0 0 8px rgba(124,58,237,.6)"}}/>
+      <div style={{height:"100%",width:`${width}%`,background:"linear-gradient(90deg,#8F16B8,#BC18D6)",transition:"width .3s ease",borderRadius:"0 1px 1px 0",boxShadow:"0 0 8px rgba(143,22,184,.6)"}}/>
     </div>
   );
 }
@@ -5783,10 +5796,10 @@ function NewsletterForm(){
         placeholder="your@school.edu" type="email"
         style={{flex:1,minWidth:220,padding:"14px 18px",borderRadius:99,border:"none",fontSize:14,outline:"none",fontFamily:"'DM Sans',sans-serif"}}/>
       <button onClick={submit} disabled={loading||!email}
-        style={{padding:"14px 28px",background:"#fff",color:"#7C3AED",border:"none",borderRadius:99,fontSize:13,fontWeight:800,cursor:"pointer",flexShrink:0,transition:"all .18s",opacity:loading||!email?.includes("@")?0.7:1}}
+        style={{padding:"14px 28px",background:"#fff",color:"#8F16B8",border:"none",borderRadius:99,fontSize:13,fontWeight:800,cursor:"pointer",flexShrink:0,transition:"all .18s",opacity:loading||!email?.includes("@")?0.7:1}}
         onMouseEnter={e=>e.currentTarget.style.background="#F5F3FF"}
         onMouseLeave={e=>e.currentTarget.style.background="#fff"}>
-        {loading?<Spin color="#7C3AED"/>:"Subscribe →"}
+        {loading?<Spin color="#8F16B8"/>:"Subscribe →"}
       </button>
     </div>
   );
@@ -6030,17 +6043,26 @@ function Login({onLogin, onBack}){
   const [loginError,setLoginError]=useState("");
 
   async function handleSignIn(){
-    setLoading(true);
-    const {data,error:e}=await Supabase.signIn(email,password);
-    setLoading(false);
-    if(e){
-      if(e.message?.includes("Demo")||e.message?.includes("not configured")){
-        setStep("role"); return; // Demo fallback
-      }
-      setLoginError(e.message||"Invalid email or password"); return;
+    setLoginError("");
+    if(!email.trim()||!pw){
+      setLoginError("Enter your email address and password.");
+      return;
     }
-    // Real auth success — set role from profile
-    onLogin(data.user?.user_metadata?.role||"teacher");
+    setLoading(true);
+    try{
+      const {data,error:e}=await Supabase.signIn(email.trim(),pw);
+      if(e){
+        if(e.message?.includes("Demo")||e.message?.includes("not configured")){
+          setStep("role"); return; // Demo fallback
+        }
+        setLoginError(e.message||"Invalid email or password"); return;
+      }
+      onLogin(data.user?.user_metadata?.role||"teacher");
+    }catch{
+      setLoginError("Unable to sign in. Check your connection and try again.");
+    }finally{
+      setLoading(false);
+    }
   }
 
   function handleRoleSelect(roleId){
@@ -6054,9 +6076,9 @@ function Login({onLogin, onBack}){
       {showForgot&&<ForgotPasswordModal onClose={()=>setShowForgot(false)}/>}
 
       {/* LEFT panel */}
-      <div className="login-left-panel" style={{flex:1,background:"#0B0718",display:step==="role"?"none":"flex",flexDirection:"column",justifyContent:"flex-end",padding:"clamp(32px,4vw,56px)",overflow:"hidden",position:"relative"}}>
-        <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,rgba(124,58,237,.18) .8px,transparent .8px)",backgroundSize:"22px 22px"}}/>
-        <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(124,58,237,.3) 0%,transparent 55%)"}}/>
+      <div className="login-left-panel" style={{flex:1,background:"#100D13",display:step==="role"?"none":"flex",flexDirection:"column",justifyContent:"flex-end",padding:"clamp(32px,4vw,56px)",overflow:"hidden",position:"relative"}}>
+        <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(circle,rgba(143,22,184,.18) .8px,transparent .8px)",backgroundSize:"22px 22px"}}/>
+        <div style={{position:"absolute",inset:0,background:"linear-gradient(135deg,rgba(143,22,184,.3) 0%,transparent 55%)"}}/>
         <div style={{position:"relative",zIndex:1}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:64}}>
             <div style={{display:"flex",alignItems:"center",gap:10,cursor:"pointer"}} onClick={onBack}>
@@ -6091,11 +6113,11 @@ function Login({onLogin, onBack}){
           <p style={{fontSize:14,color:C.warm,marginBottom:28}}>Access your school's ALP dashboard</p>
           <div style={{display:"flex",border:`1px solid ${C.tanL}`,borderRadius:10,marginBottom:28,overflow:"hidden"}}>
             {[["web","🌐 Web App"],["desktop","🖥 Desktop App"]].map(([id,label])=>(
-              <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"11px 0",fontSize:13,fontWeight:600,background:tab===id?C.purple:"transparent",color:tab===id?"#fff":C.warm,border:"none",cursor:"pointer",transition:"all .15s"}}>{label}</button>
+              <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"11px 0",fontSize:13,fontWeight:600,background:tab===id?"var(--purple-main)":"transparent",color:tab===id?"#fff":C.warm,border:"none",cursor:"pointer",transition:"all .15s"}}>{label}</button>
             ))}
           </div>
           {tab==="desktop"&&(
-            <div style={{background:"rgba(124,58,237,.08)",border:`1px solid ${C.tanL}`,borderRadius:12,padding:24,textAlign:"center",marginBottom:24}}>
+            <div style={{background:"rgba(143,22,184,.08)",border:`1px solid ${C.tanL}`,borderRadius:12,padding:24,textAlign:"center",marginBottom:24}}>
               <div style={{fontSize:32,marginBottom:10}}>🖥</div>
               <div style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:6}}>ALP Desktop App</div>
               <p style={{fontSize:12,color:C.warm,marginBottom:16,lineHeight:1.6}}>Download and install first, then sign in below.</p>
@@ -6115,6 +6137,7 @@ function Login({onLogin, onBack}){
             </div>
             <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13,color:C.warm,cursor:"pointer"}}><input type="checkbox" checked={rememberMe} onChange={e=>setRememberMe(e.target.checked)} style={{accentColor:C.purple}}/> Remember me for 30 days</label>
           </div>
+          {loginError&&<p role="alert" style={{color:C.red,background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:12,fontSize:13,lineHeight:1.5,marginBottom:16}}>{loginError}</p>}
           <button className="btn-purple" disabled={loading} onClick={handleSignIn} style={{width:"100%",padding:"15px",marginBottom:20,fontSize:13,borderRadius:10}}>
             {loading?<><Spin/>Signing in…</>:`Sign in to ${tab==="web"?"Web App →":"Desktop →"}`}
           </button>
@@ -6251,10 +6274,10 @@ function Sidebar({page,setPage}){
                 const active=page===item.id;
                 return(
                   <button key={item.id} onClick={()=>setPage(item.id)} title={collapsed?item.label:undefined}
-                    style={{width:"100%",display:"flex",alignItems:"center",gap:collapsed?0:10,padding:collapsed?"10px":"9px 10px",borderRadius:8,border:"none",background:active?"rgba(124,58,237,.25)":"transparent",cursor:"pointer",transition:"all .12s",marginBottom:1,justifyContent:collapsed?"center":"flex-start",position:"relative"}}
+                    style={{width:"100%",display:"flex",alignItems:"center",gap:collapsed?0:10,padding:collapsed?"10px":"9px 10px",borderRadius:8,border:"none",background:active?"rgba(143,22,184,.25)":"transparent",cursor:"pointer",transition:"all .12s",marginBottom:1,justifyContent:collapsed?"center":"flex-start",position:"relative"}}
                     onMouseEnter={e=>{if(!active)e.currentTarget.style.background="rgba(255,255,255,.06)";}}
                     onMouseLeave={e=>{if(!active)e.currentTarget.style.background="transparent";}}>
-                    {active&&<div style={{position:"absolute",left:0,top:"18%",bottom:"18%",width:3,borderRadius:"0 3px 3px 0",background:"#A78BFA"}}/>}
+                    {active&&<div style={{position:"absolute",left:0,top:"18%",bottom:"18%",width:3,borderRadius:"0 3px 3px 0",background:"#D58BE8"}}/>}
                     <span style={{fontSize:collapsed?18:14,flexShrink:0}}>{item.icon}</span>
                     {!collapsed&&<span style={{fontSize:12,fontWeight:active?600:400,color:active?"#fff":"rgba(255,255,255,.6)",flex:1,textAlign:"left",whiteSpace:"nowrap"}}>{item.label}</span>}
                     {!collapsed&&item.badge&&<span style={{fontSize:9,fontWeight:800,background:item.id==="notifications"?"#EF4444":"rgba(255,255,255,.12)",color:"#fff",padding:"2px 5px",borderRadius:99}}>{item.id==="notifications"&&unread>0?unread:item.badge}</span>}
@@ -6275,9 +6298,9 @@ function Sidebar({page,setPage}){
           <span>←</span> Back to Site
         </button>}
         <div style={{padding:collapsed?"10px 0":"10px 14px",display:"flex",gap:8,alignItems:"center",justifyContent:collapsed?"center":"flex-start"}}>
-          <div style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,#7C3AED,#A855F7)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0,position:"relative"}}>
+          <div style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,#8F16B8,#BC18D6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#fff",flexShrink:0,position:"relative"}}>
             {user.initials}
-            <div style={{position:"absolute",bottom:0,right:0,width:8,height:8,borderRadius:"50%",background:"#10B981",border:"1.5px solid #1a1a2e"}} title="Online"/>
+            <div style={{position:"absolute",bottom:0,right:0,width:8,height:8,borderRadius:"50%",background:"#10B981",border:"1.5px solid #1B171F"}} title="Online"/>
           </div>
           {!collapsed&&<div style={{flex:1,minWidth:0}}>
             <div style={{fontSize:11,fontWeight:600,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{user.name}</div>
@@ -6355,8 +6378,8 @@ function Dashboard({setPage,onAddStudent}){
   return(
     <Page>
       {/* Welcome banner — TrendiZip style */}
-      <div style={{background:"linear-gradient(135deg,#0B0718,#1a0a3e)",borderRadius:16,padding:"24px 28px",marginBottom:20,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:0,right:0,width:200,height:"100%",background:"linear-gradient(90deg,transparent,rgba(124,58,237,.15))",pointerEvents:"none"}}/>
+      <div style={{background:"linear-gradient(135deg,#100D13,#261B2D)",borderRadius:16,padding:"24px 28px",marginBottom:20,position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",top:0,right:0,width:200,height:"100%",background:"linear-gradient(90deg,transparent,rgba(143,22,184,.15))",pointerEvents:"none"}}/>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
           <div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
@@ -6369,7 +6392,7 @@ function Dashboard({setPage,onAddStudent}){
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
             <select value={period} onChange={e=>setPeriod(e.target.value)}
               style={{background:"rgba(255,255,255,.08)",border:"1px solid rgba(255,255,255,.15)",borderRadius:8,padding:"8px 12px",color:"#fff",fontSize:12,cursor:"pointer",outline:"none"}}>
-              {["This Week","This Month","This Term","This Year"].map(p=><option key={p} value={p} style={{background:"#1a1a2e"}}>{p}</option>)}
+              {["This Week","This Month","This Term","This Year"].map(p=><option key={p} value={p} style={{background:"#1B171F"}}>{p}</option>)}
             </select>
             <button className="btn-purple" onClick={()=>{onAddStudent&&onAddStudent();}} style={{fontSize:11,padding:"10px 18px",whiteSpace:"nowrap"}}>+ New Entry</button>
           </div>
@@ -6396,7 +6419,7 @@ function Dashboard({setPage,onAddStudent}){
 
       {/* Onboarding checklist — TrendiZip style */}
       {showChecklist&&pct<100&&(
-        <div className="card" style={{padding:"20px 24px",marginBottom:16,background:"linear-gradient(135deg,#7C3AED08,#A855F708)"}}>
+        <div className="card" style={{padding:"20px 24px",marginBottom:16,background:"linear-gradient(135deg,#8F16B808,#BC18D608)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{width:40,height:40,borderRadius:"50%",background:C.purpleL,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -6410,7 +6433,7 @@ function Dashboard({setPage,onAddStudent}){
             <button onClick={()=>setShowChecklist(false)} style={{fontSize:18,color:C.warm,background:"none",border:"none",cursor:"pointer",lineHeight:1}}>×</button>
           </div>
           <div style={{height:4,background:C.tanL,borderRadius:99,marginBottom:16,overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99,transition:"width .5s"}}/>
+            <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${C.purple},#BC18D6)`,borderRadius:99,transition:"width .5s"}}/>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:8}}>
             {checkItems.map(item=>(
@@ -8891,7 +8914,7 @@ function ALPNotice({setPage}){
             </div>
           </div>
 
-          <div className="card" style={{padding:"20px",background:"linear-gradient(135deg,#7C3AED11,#A855F711)"}}>
+          <div className="card" style={{padding:"20px",background:"linear-gradient(135deg,#8F16B811,#BC18D611)"}}>
             <p className="lbl" style={{marginBottom:8,color:C.purple}}>PLAN STATUS</p>
             {[["Student info complete","✓",C.green],["Reason documented","✓",C.green],["Rights included","✓",C.green],["Meeting date set","✓",C.green],["Delivery method","✓",C.green]].map(([item,status,c])=>(
               <div key={item} style={{display:"flex",justifyContent:"space-between",fontSize:12,padding:"5px 0",borderBottom:`1px solid ${C.tanL}`}}>
@@ -8987,7 +9010,7 @@ function CreateALPDoc({setPage}){
               </div>
             </div>
             <div style={{background:C.tanL,borderRadius:99,height:6,overflow:"hidden",marginBottom:14}}>
-              <div style={{height:"100%",width:"100%",background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99}}/>
+              <div style={{height:"100%",width:"100%",background:`linear-gradient(90deg,${C.purple},#BC18D6)`,borderRadius:99}}/>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
               {docMeta.map(({label,value})=>(
@@ -9061,7 +9084,7 @@ function CreateALPDoc({setPage}){
             <button className="btn-ghost" onClick={handlePrint} style={{width:"100%",fontSize:11}}>🖨 Print Document</button>
           </div>
 
-          <div className="card" style={{padding:"20px",background:"linear-gradient(135deg,#7C3AED11,#A855F711)"}}>
+          <div className="card" style={{padding:"20px",background:"linear-gradient(135deg,#8F16B811,#BC18D611)"}}>
             <p className="lbl" style={{marginBottom:12,color:C.purple}}>SHARE WITH FAMILY</p>
             <p style={{fontSize:12,color:C.warm,marginBottom:14,lineHeight:1.6}}>Generate and download the approved ALP as a PDF to email or print for the parent/guardian.</p>
             <button className="btn-purple" onClick={()=>setPage&&setPage("create")} style={{width:"100%",fontSize:11}}>
@@ -9419,7 +9442,7 @@ function FutureReadiness({setPage}){
       {/* Overall progress bar */}
       <div style={{marginBottom:20}}>
         <div style={{height:8,background:C.tanL,borderRadius:99,overflow:"hidden"}}>
-          <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${C.purple},#A855F7)`,borderRadius:99,transition:"width .5s"}}/>
+          <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${C.purple},#BC18D6)`,borderRadius:99,transition:"width .5s"}}/>
         </div>
       </div>
 
@@ -9449,11 +9472,11 @@ function FutureReadiness({setPage}){
       </div>
 
       {/* Next steps */}
-      <div className="card" style={{padding:"20px 24px",marginTop:16,background:"linear-gradient(135deg,#7C3AED11,#A855F711)"}}>
+      <div className="card" style={{padding:"20px 24px",marginTop:16,background:"linear-gradient(135deg,#8F16B811,#BC18D611)"}}>
         <p className="lbl" style={{marginBottom:12,color:C.purple}}>RECOMMENDED NEXT STEPS</p>
         <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr 1fr",gap:10}}>
           {[["📋","Complete transition assessment","Add to ALP goals this quarter"],["🤝","Schedule agency meeting","Connect with local job services"],["🎓","Campus visit","Book a tour of community college"]].map(([ic,title,desc])=>(
-            <div key={title} style={{padding:"12px 14px",background:"rgba(124,58,237,.06)",borderRadius:10,cursor:"pointer"}} onClick={()=>toast(`${title} — added to action list`,"info")}>
+            <div key={title} style={{padding:"12px 14px",background:"rgba(143,22,184,.06)",borderRadius:10,cursor:"pointer"}} onClick={()=>toast(`${title} — added to action list`,"info")}>
               <span style={{fontSize:20}}>{ic}</span>
               <div style={{fontSize:12,fontWeight:600,color:C.black,marginTop:6,marginBottom:3}}>{title}</div>
               <div style={{fontSize:11,color:C.warm}}>{desc}</div>
@@ -9637,11 +9660,11 @@ function Reports(){
         const jsPDF=await loadJsPDF();
         const doc=new jsPDF({unit:"pt",format:"letter"});
         const W=doc.internal.pageSize.getWidth();const margin=56;let y=64;
-        doc.setFont("times","bold");doc.setFontSize(20);doc.setTextColor(124,58,237);
+        doc.setFont("times","bold");doc.setFontSize(20);doc.setTextColor(143,22,184);
         doc.text("Class Caseload Report",margin,y);y+=24;
         doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(107,114,128);
         doc.text(`Generated ${new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})} by ${profile?.full_name||user?.email||"Staff"} · ${totalStudents} students`,margin,y);y+=24;
-        doc.setDrawColor(124,58,237);doc.line(margin,y,W-margin,y);y+=20;
+        doc.setDrawColor(143,22,184);doc.line(margin,y,W-margin,y);y+=20;
         (dbStudents||[]).forEach((st,i)=>{
           if(y>doc.internal.pageSize.getHeight()-80){doc.addPage();y=64;}
           doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(17,17,17);
@@ -10395,7 +10418,7 @@ function Settings(){
             {/* Current plan */}
             <div className="card" style={{padding:"28px"}}>
               <h3 className="serif" style={{fontSize:17,fontWeight:700,marginBottom:20}}>Current Plan</h3>
-              <div style={{background:"linear-gradient(135deg,#7C3AED,#6D28D9)",borderRadius:12,padding:"24px",color:"#fff",marginBottom:20}}>
+              <div style={{background:"linear-gradient(135deg,#8F16B8,#8F16B8)",borderRadius:12,padding:"24px",color:"#fff",marginBottom:20}}>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:".1em",opacity:.7,marginBottom:8}}>ACTIVE PLAN</div>
                 <div className="serif" style={{fontSize:28,fontWeight:500,marginBottom:4}}>Professional</div>
                 <div style={{fontSize:14,opacity:.8,marginBottom:16}}>$9/mo per teacher · Billed monthly</div>
@@ -10445,7 +10468,7 @@ function Settings(){
           </div>
 
           {/* Upgrade to School plan */}
-          <div className="card" style={{padding:"28px",background:"linear-gradient(135deg,#7C3AED11,#A855F711)",border:`1px solid ${C.border}`}}>
+          <div className="card" style={{padding:"28px",background:"linear-gradient(135deg,#8F16B811,#BC18D611)",border:`1px solid ${C.border}`}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16}}>
               <div>
                 <p className="lbl" style={{marginBottom:4,color:C.purple}}>UPGRADE YOUR PLAN</p>
@@ -10539,7 +10562,7 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
               <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:4,borderTop:"1px solid rgba(255,255,255,.1)",paddingTop:10}}>
                 {ROLES.map(r=>(
                   <button key={r.id} onClick={e=>{e.stopPropagation();setRole(r.id);setPage("dashboard");setShowRolePicker(false);}}
-                    style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",borderRadius:6,background:role===r.id?"rgba(124,58,237,.3)":"transparent",border:"none",cursor:"pointer",width:"100%",textAlign:"left",transition:"background .12s"}}
+                    style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",borderRadius:6,background:role===r.id?"rgba(143,22,184,.3)":"transparent",border:"none",cursor:"pointer",width:"100%",textAlign:"left",transition:"background .12s"}}
                     onMouseEnter={e=>{if(role!==r.id)e.currentTarget.style.background="rgba(255,255,255,.08)";}}
                     onMouseLeave={e=>{if(role!==r.id)e.currentTarget.style.background="transparent";}}>
                     <span className="glyph" style={{fontSize:12}}>{r.icon}</span>
@@ -10599,6 +10622,7 @@ function SidebarFull({page,setPage,open,setOpen,onGoHome,onSearch,onAddStudent})
 function AppInner(){
   const {isDark}=useTheme();
   const {role,setRole}=useRole();
+  const {user:authUser,profile}=useSupabaseAuth();
   Object.assign(C,isDark?CD:CL);
 
   const [screen,setScreen]=useState("landing");
@@ -10757,7 +10781,7 @@ function AppInner(){
             </div>
             {/* Floating buttons */}
             {!showAIChat&&!showNotes&&<>
-              <button className="fab" onClick={()=>setShowNotes(true)} title="Quick Session Note" style={{bottom:96,width:44,height:44,fontSize:18,background:"linear-gradient(135deg,#1a1a2e,#16213e)"}}>
+              <button className="fab" onClick={()=>setShowNotes(true)} title="Quick Session Note" style={{bottom:96,width:44,height:44,fontSize:18,background:"linear-gradient(135deg,#1B171F,#261B2D)"}}>
                 📝
               </button>
               <button className="fab" onClick={()=>setShowAIChat(true)} title="ALP AI Assistant" style={{bottom:28}}>
@@ -10765,7 +10789,7 @@ function AppInner(){
               </button>
             </>}
             {showAIChat&&<button className="fab" onClick={()=>setShowAIChat(false)} style={{bottom:28}}>×</button>}
-            {showNotes&&<button className="fab" onClick={()=>setShowNotes(false)} style={{bottom:96,width:44,height:44,fontSize:18,background:"linear-gradient(135deg,#1a1a2e,#16213e)"}}>×</button>}
+            {showNotes&&<button className="fab" onClick={()=>setShowNotes(false)} style={{bottom:96,width:44,height:44,fontSize:18,background:"linear-gradient(135deg,#1B171F,#261B2D)"}}>×</button>}
             <div style={{padding:"0 36px 80px",maxWidth:1100,margin:"0 auto"}}>
               <hr className="rule" style={{marginBottom:20}}/>
               <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.tan}}>
@@ -10791,15 +10815,15 @@ class ErrorBoundary extends React.Component{
   render(){
     if(this.state.hasError){
       return(
-        <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#f9f7f4",padding:32}}>
+        <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"#F8F6FA",padding:32}}>
           <div style={{textAlign:"center",maxWidth:480}}>
             <div style={{fontSize:56,marginBottom:16}}>⚠️</div>
-            <h2 style={{fontSize:24,fontWeight:700,color:"#1a1a2e",marginBottom:10}}>Something went wrong</h2>
+            <h2 style={{fontSize:24,fontWeight:700,color:"#1B171F",marginBottom:10}}>Something went wrong</h2>
             <p style={{fontSize:14,color:"#6b7280",lineHeight:1.7,marginBottom:24}}>
               An unexpected error occurred. Your data is safe.
             </p>
             <button onClick={()=>this.setState({hasError:false,error:null})}
-              style={{padding:"12px 32px",borderRadius:99,background:"#7C3AED",color:"#fff",border:"none",fontSize:13,fontWeight:700,cursor:"pointer"}}>
+              style={{padding:"12px 32px",borderRadius:99,background:"#8F16B8",color:"#fff",border:"none",fontSize:13,fontWeight:700,cursor:"pointer"}}>
               Try Again
             </button>
           </div>
@@ -10895,8 +10919,8 @@ We aim to respond to all privacy enquiries within 5 business days.`},
   return(
     <div className="lp" style={{minHeight:"100vh"}}>
       {/* Header */}
-      <div style={{background:"#0B0718",padding:"60px 24px 48px",textAlign:"center"}}>
-        <p style={{fontSize:11,fontWeight:700,letterSpacing:".14em",color:"#A78BFA",marginBottom:12}}>LEGAL</p>
+      <div style={{background:"#100D13",padding:"60px 24px 48px",textAlign:"center"}}>
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:".14em",color:"#D58BE8",marginBottom:12}}>LEGAL</p>
         <h1 className="serif" style={{fontSize:isMobile?32:44,fontWeight:500,color:"#fff",letterSpacing:"-.016em",marginBottom:14}}>Privacy Policy</h1>
         <p style={{fontSize:15,color:"rgba(255,255,255,.5)",maxWidth:520,margin:"0 auto 16px"}}>Plain English. No legal jargon. We believe you deserve to know exactly what we do with your data.</p>
         <p style={{fontSize:12,color:"rgba(255,255,255,.3)"}}>Last updated: May 2026 · Effective immediately</p>
@@ -10904,7 +10928,7 @@ We aim to respond to all privacy enquiries within 5 business days.`},
 
       <div style={{maxWidth:760,margin:"0 auto",padding:"48px 24px"}}>
         {/* Principles box */}
-        <div style={{background:"linear-gradient(135deg,#7C3AED12,#A855F712)",border:`1px solid ${C.purple}30`,borderRadius:16,padding:"24px 28px",marginBottom:40}}>
+        <div style={{background:"linear-gradient(135deg,#8F16B812,#BC18D612)",border:`1px solid ${C.purple}30`,borderRadius:16,padding:"24px 28px",marginBottom:40}}>
           <h2 style={{fontSize:18,fontWeight:700,color:C.black,marginBottom:12}}>Our commitment in plain terms</h2>
           <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",gap:10}}>
             {[["✅","Your data is yours — we are custodians, not owners"],["✅","We never sell student data. Ever."],["✅","You can export or delete everything, any time"],["✅","AI features never see student names or IDs"],["✅","We tell you if something goes wrong"],["✅","No compliance claims we cannot back up"]].map(([ic,text])=>(
@@ -11014,8 +11038,8 @@ We prefer to resolve any issue directly and fairly before any formal process.`},
 
   return(
     <div className="lp" style={{minHeight:"100vh"}}>
-      <div style={{background:"#0B0718",padding:"60px 24px 48px",textAlign:"center"}}>
-        <p style={{fontSize:11,fontWeight:700,letterSpacing:".14em",color:"#A78BFA",marginBottom:12}}>LEGAL</p>
+      <div style={{background:"#100D13",padding:"60px 24px 48px",textAlign:"center"}}>
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:".14em",color:"#D58BE8",marginBottom:12}}>LEGAL</p>
         <h1 className="serif" style={{fontSize:isMobile?32:44,fontWeight:500,color:"#fff",letterSpacing:"-.016em",marginBottom:14}}>Terms of Service</h1>
         <p style={{fontSize:15,color:"rgba(255,255,255,.5)",maxWidth:520,margin:"0 auto 16px"}}>Straightforward terms. We have tried to make these readable. If something is unclear, email us.</p>
         <p style={{fontSize:12,color:"rgba(255,255,255,.3)"}}>Last updated: May 2026</p>
@@ -11061,8 +11085,8 @@ function DataPage({setPage,setNavPage}){
 
   return(
     <div className="lp" style={{minHeight:"100vh"}}>
-      <div style={{background:"#0B0718",padding:"60px 24px 48px",textAlign:"center"}}>
-        <p style={{fontSize:11,fontWeight:700,letterSpacing:".14em",color:"#A78BFA",marginBottom:12}}>TRUST & SECURITY</p>
+      <div style={{background:"#100D13",padding:"60px 24px 48px",textAlign:"center"}}>
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:".14em",color:"#D58BE8",marginBottom:12}}>TRUST & SECURITY</p>
         <h1 className="serif" style={{fontSize:isMobile?32:44,fontWeight:500,color:"#fff",letterSpacing:"-.016em",marginBottom:14}}>Data & Security</h1>
         <p style={{fontSize:15,color:"rgba(255,255,255,.5)",maxWidth:540,margin:"0 auto 16px"}}>We handle some of the most sensitive data in education. Here is exactly how we protect it — no marketing, just specifics.</p>
       </div>

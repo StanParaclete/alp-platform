@@ -7,3 +7,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <App />
   </React.StrictMode>
 )
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  const register = () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
+      .catch(() => console.warn('ALP offline screen could not be registered.'))
+  }
+
+  if (document.readyState === 'complete') register()
+  else window.addEventListener('load', register, { once: true })
+}

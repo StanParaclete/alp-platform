@@ -156,6 +156,40 @@ probe is untested, not clean, and the exit code distinguishes them
 
 ## 7. Remaining manual acceptance
 
+### Installable web app
+
+The production build links `/manifest.json`, exports 192px and 512px ALP
+icons plus a 180px Apple touch icon, and registers `/sw.js`. The launch
+URL is `/`, matching the app's existing entry point. This is a browser-installed
+web app; it is not an App Store or Play Store release.
+
+The worker caches only `/offline.html` and its icon. It does not cache
+school records, API responses, credentials, PDFs, app HTML, or bundles.
+Navigation requests bypass the HTTP cache. Offline launches show a
+connection-required page; offline editing and automatic sync are not supported.
+
+New workers wait for existing tabs to close, without `skipWaiting`,
+`clients.claim`, or automatic page reloads. Netlify revalidates the worker
+and manifest. Increment the `alp-offline-v2` cache version in `public/sw.js`
+whenever the offline page or its cached icon changes. The development
+server does not register workers; test registration against a production build
+with `npm run build` and `npm run preview`.
+
+`npm run test:pwa` checks manifest assets, cache boundaries, offline
+fallbacks, and navigation freshness. Real-device acceptance still needs
+Android installation and iOS Share > Add to Home Screen, including reopening
+the installed app online and offline.
+
+### Staff workflows
+
+The logo palette is shared across the public pages, staff workspace, login,
+offline screen, manifest, and PDF accents. Semantic status colours and
+third-party sign-in logos retain their own colours.
+
+`npm run test:login` covers credential submission, clearing the loading
+state after failures, and pending-account versus school-workspace rendering.
+These isolated regression tests do not replace a real live-account walkthrough.
+
 Automation cannot cover these. They need a human in a browser.
 
 - Public signup on the live site, through to a working dashboard

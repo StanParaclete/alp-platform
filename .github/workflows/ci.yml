@@ -228,6 +228,14 @@ jobs:
       - run: npm ci
         working-directory: 02-webapp
 
+      - name: Installable app and cache safety
+        working-directory: 02-webapp
+        run: npm run test:pwa
+
+      - name: Sign-in regression tests
+        working-directory: 02-webapp
+        run: npm run test:login
+
       - name: Build
         working-directory: 02-webapp
         env:
