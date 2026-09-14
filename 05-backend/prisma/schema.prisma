@@ -1,0 +1,285 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "../node_modules/.prisma/client"
+}
+datasource db {
+  provider = "postgresql"
+}
+enum Role {
+  SUPER_ADMIN
+  SCHOOL_ADMIN
+  TEACHER
+  SPECIAL_EDUCATION_TEACHER
+  THERAPIST
+  PSYCHOLOGIST
+  PARENT
+  STUDENT
+  DISTRICT_MANAGER
+}
+enum PlanStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  ARCHIVED
+}
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  email String @unique
+  name String
+  passwordHash String
+  disabled Boolean @default(false)
+  createdAt DateTime @default(now())
+  memberships Membership[]
+  sessions RefreshToken[]
+  studentAccess StudentAccess[]
+}
+model District {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  country String
+  schools School[]
+}
+model School {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  country String
+  timezone String @default("UTC")
+  districtId String? @db.Uuid
+  district District? @relation(fields: [districtId], references: [id])
+  memberships Membership[]
+  students Student[]
+  frameworks Framework[]
+  createdAt DateTime @default(now())
+}
+model Membership {
+  userId String @db.Uuid
+  schoolId String @db.Uuid
+  role Role
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  @@id([userId, schoolId])
+  @@index([schoolId, role])
+}
+model RefreshToken {
+  id String @id @default(uuid()) @db.Uuid
+  hash String @unique
+  familyId String @db.Uuid
+  userId String @db.Uuid
+  expiresAt DateTime
+  usedAt DateTime?
+  revokedAt DateTime?
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([familyId])
+}
+model Student {
+  id String @id @default(uuid()) @db.Uuid
+  schoolId String @db.Uuid
+  school School @relation(fields: [schoolId], references: [id])
+  name String
+  grade String
+  dateOfBirth DateTime? @db.Date
+  supportLevel String @default("targeted")
+  categories String[]
+  strengths String @default("")
+  needs String @default("")
+  archived Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  access StudentAccess[]
+  plans ALPPlan[]
+  messages Message[]
+  meetings Meeting[]
+  @@index([schoolId, archived, name])
+}
+model StudentAccess {
+  studentId String @db.Uuid
+  userId String @db.Uuid
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@id([studentId, userId])
+}
+model ALPPlan {
+  id String @id @default(uuid()) @db.Uuid
+  studentId String @db.Uuid
+  student Student @relation(fields: [studentId], references: [id])
+  title String
+  status PlanStatus @default(DRAFT)
+  sections Json @default("{}")
+  revision Int @default(1)
+  reviewDate DateTime? @db.Date
+  createdBy String @db.Uuid
+  updatedBy String @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  versions PlanVersion[]
+  comments PlanComment[]
+  goals Goal[]
+  accommodations Accommodation[]
+  services Service[]
+  signatures Signature[]
+  documents Document[]
+  @@index([studentId, status])
+}
+model PlanVersion {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  revision Int
+  snapshot Json
+  authorId String @db.Uuid
+  createdAt DateTime @default(now())
+  @@unique([planId, revision])
+}
+model PlanComment {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  authorId String @db.Uuid
+  section String
+  body String
+  createdAt DateTime @default(now())
+  @@index([planId, createdAt])
+}
+model Goal {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  description String
+  baseline Float
+  target Float
+  unit String
+  direction String @default("increase")
+  dueDate DateTime @db.Date
+  progress Progress[]
+  @@index([planId])
+}
+model Progress {
+  id String @id @default(uuid()) @db.Uuid
+  goalId String @db.Uuid
+  goal Goal @relation(fields: [goalId], references: [id])
+  value Float
+  observedAt DateTime
+  note String @default("")
+  authorId String @db.Uuid
+  createdAt DateTime @default(now())
+  @@index([goalId, observedAt])
+}
+model Accommodation {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  description String
+  context String
+}
+model Service {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  name String
+  provider String
+  minutes Int
+  frequency String
+}
+model Document {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  storageKey String @unique
+  name String
+  mimeType String
+  size Int
+  sha256 String
+  createdBy String @db.Uuid
+  createdAt DateTime @default(now())
+}
+model Message {
+  id String @id @default(uuid()) @db.Uuid
+  studentId String @db.Uuid
+  student Student @relation(fields: [studentId], references: [id])
+  authorId String @db.Uuid
+  body String
+  createdAt DateTime @default(now())
+  @@index([studentId, createdAt])
+}
+model Meeting {
+  id String @id @default(uuid()) @db.Uuid
+  studentId String @db.Uuid
+  student Student @relation(fields: [studentId], references: [id])
+  title String
+  startsAt DateTime
+  endsAt DateTime
+  location String
+  createdBy String @db.Uuid
+  @@index([studentId, startsAt])
+}
+model Notification {
+  id String @id @default(uuid()) @db.Uuid
+  schoolId String @db.Uuid
+  userId String @db.Uuid
+  title String
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([schoolId, userId, createdAt])
+}
+model AuditLog {
+  id String @id @default(uuid()) @db.Uuid
+  schoolId String? @db.Uuid
+  actorId String? @db.Uuid
+  action String
+  resourceType String
+  resourceId String
+  createdAt DateTime @default(now())
+  @@index([schoolId, createdAt])
+}
+model Signature {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.Uuid
+  plan ALPPlan @relation(fields: [planId], references: [id])
+  revision Int
+  signerId String @db.Uuid
+  signedName String
+  consentText String
+  documentHash String
+  createdAt DateTime @default(now())
+  @@unique([planId, revision, signerId])
+}
+model Subscription {
+  id String @id @default(uuid()) @db.Uuid
+  schoolId String @unique @db.Uuid
+  providerReference String? @unique
+  status String
+  plan String
+  validUntil DateTime?
+}
+model Template {
+  id String @id @default(uuid()) @db.Uuid
+  schoolId String @db.Uuid
+  name String
+  sections Json
+  createdBy String @db.Uuid
+  @@index([schoolId])
+}
+model Framework {
+  id String @id @default(uuid()) @db.Uuid
+  schoolId String @db.Uuid
+  school School @relation(fields: [schoolId], references: [id])
+  name String
+  jurisdiction String
+  version String
+  requiredSections String[]
+  approvedBy String? @db.Uuid
+  sourceUrl String?
+  @@unique([schoolId, name, version])
+}
+model Enquiry {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  email String
+  organisation String
+  subject String
+  message String
+  consent Boolean
+  deliveredAt DateTime?
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,1 @@
+export default function robots() { const enabled = process.env.ALLOW_INDEXING === 'true'; return { rules: { userAgent: '*', ...(enabled ? { allow: '/' } : { disallow: '/' }) }, ...(enabled ? { sitemap: `${process.env.NEXT_PUBLIC_SITE_URL}/sitemap.xml` } : {}) }; }

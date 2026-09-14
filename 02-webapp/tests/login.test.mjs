@@ -95,7 +95,8 @@ function renderApp(profile, configured = true) {
     useTheme: () => ({ isDark: false }),
     useRole: () => ({ role: 'teacher', setRole: noop }),
     useSupabaseAuth: () => ({ user: { email: 'teacher@example.test' }, profile }),
-    useState: value => [value === 'landing' ? 'app' : value, noop],
+    entryScreen: () => 'landing', window: { location: { pathname: '/' } },
+    useState: value => { const initial = typeof value === 'function' ? value() : value; return [initial === 'landing' ? 'app' : initial, noop]; },
     useEffect: noop, usePageTitle: noop, useToast: () => ({ toast: noop }),
     C: {}, CL: {}, CD: {}, CSS: '', Supabase: { supabase: configured ? {} : null },
   };

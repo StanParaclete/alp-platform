@@ -1,0 +1,4 @@
+import React,{useState} from 'react';
+import {useSession} from '../../src/session';
+import {Page,Copy,Row,Button,ErrorText,Busy,useResource} from '../../src/ui';
+export default function Notifications(){const{api,school}=useSession();const{data,error,loading,reload}=useResource('/v1/notifications');const[failure,setFailure]=useState('');async function read(id){try{await api.request(`/v1/notifications/${id}`,{method:'PATCH',school:school.school.id});reload();}catch(error){setFailure(error.message);}}return <Page>{loading?<Busy/>:null}<ErrorText>{error||failure}</ErrorText><Button secondary onPress={reload}>Refresh</Button>{data?.map(item=><Row key={item.id} title={item.title} detail={`${item.readAt?'Read':'Unread'} | ${new Date(item.createdAt).toLocaleString()}`} onPress={()=>read(item.id)}/>)}{data?.length===0?<Copy>No notifications.</Copy>:null}</Page>;}

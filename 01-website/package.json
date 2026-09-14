@@ -1,0 +1,26 @@
+{
+  "name": "@alp/website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "media": "node scripts/sync-media.mjs",
+    "predev": "npm run media",
+    "dev": "next dev --hostname 127.0.0.1 --port 3100",
+    "prebuild": "npm run media",
+    "build": "next build",
+    "postbuild": "node scripts/prepare-standalone.mjs",
+    "start": "node scripts/start.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": { "node": ">=20.19.0" },
+  "dependencies": {
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "framer-motion": "13.2.0",
+    "lucide-react": "1.45.0",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/postcss": "4.3.3"
+  }
+}

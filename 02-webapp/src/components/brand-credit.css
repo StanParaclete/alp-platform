@@ -1,0 +1,13 @@
+.alp-credit-footer {
+  position: relative;
+  padding: 24px;
+  background: var(--lp-paper, #FAF8FC);
+  color: var(--lp-body, #231C28);
+  text-align: center;
+  font: 14px/1.7 system-ui, sans-serif;
+  letter-spacing: 0;
+  border-top: 1px solid var(--lp-rule, #E6DFEA);
+}
+.alp-credit-footer a { color: var(--purple-main, #8F16B8); font-weight: 600; text-underline-offset: 4px; }
+.alp-credit-footer a:focus-visible { outline: 2px solid currentColor; outline-offset: 5px; }
+@media (max-width: 900px) { .alp-credit-footer { padding-bottom: 88px; } }

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext, createContext, useRef, useCallback } from "react";
 import * as Supabase from "./supabase.js";
 import { suggestGoals, personaliseGoal, askAlpAi, AiUnavailable } from "./ai.js";
+import BrandCredit from "./components/BrandCredit.jsx";
+import { entryScreen } from "./entry-screen.js";
+import { SiteImage, media } from "./components/SiteMedia.jsx";
 
 // ═══════════════════════════════════════════════════════════
 // PDF GENERATION — real, professional ALP document export
@@ -324,10 +327,11 @@ const CSS = `
 .lp-nav button:hover{border-bottom-color:var(--lp-accent)}
 .lp-cta{border:1px solid var(--purple-main);background:var(--purple-main);color:#fff;padding:12px 26px;font:inherit;font-size:14px;letter-spacing:.04em;cursor:pointer;transition:.15s}
 .lp-cta:hover{background:var(--purple-soft);border-color:var(--purple-soft);color:#fff}
-.lp-hero{position:relative;min-height:600px;display:flex;align-items:flex-end;background:var(--lp-deep)}
-.lp-hero-img{position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,14,29,.08) 0%,rgba(24,14,29,.78) 72%,rgba(24,14,29,.92) 100%),linear-gradient(90deg,rgba(24,14,29,.72) 0%,rgba(24,14,29,.22) 48%,rgba(24,14,29,.08) 100%),url('/assets/images/alp-hero-learning-support.webp');background-size:cover;background-position:center 44%}
-.lp-hero .lp-wrap{position:relative;padding:0 36px 84px;width:100%}
-.lp-hero h1{font-size:clamp(38px,5.6vw,66px);line-height:1.1;color:#fff;max-width:17ch;margin:0}
+.lp-hero{position:relative;min-height:560px;height:min(680px,72svh);display:flex;align-items:flex-end;background:var(--lp-deep)}
+.lp-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lp-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(16,13,19,.78) 100%);pointer-events:none}
+.lp-hero .lp-wrap{position:relative;z-index:1;padding:0 36px 52px;width:100%}
+.lp-hero h1{font-size:58px;line-height:1.1;letter-spacing:0;color:#fff;max-width:19ch;margin:0}
 .lp-hero p{color:rgba(255,255,255,.82);font-size:19px;max-width:50ch;margin:22px 0 0;text-shadow:0 1px 18px rgba(0,0,0,.28)}
 .lp-sec{padding:104px 0}
 .lp-lede{max-width:64ch;margin:0 auto 62px;text-align:center}
@@ -343,12 +347,10 @@ const CSS = `
 .lp-panel{background:var(--lp-panel);border-top:1px solid var(--lp-rule);border-bottom:1px solid var(--lp-rule)}
 .lp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:26px}
 .lp-card{position:relative;display:block;background:var(--lp-deep);min-height:300px;overflow:hidden;border:0;padding:0;cursor:pointer;text-align:left;width:100%}
-.lp-card-img{position:absolute;inset:0;opacity:.72;transition:.2s;background-size:cover;background-position:center;filter:saturate(.92) contrast(.96)}
-.lp-card:nth-child(1) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.86)),url('/assets/images/alp-plan-review.webp')}
-.lp-card:nth-child(2) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.86)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 48%}
-.lp-card:nth-child(3) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.88)),url('/assets/images/alp-family-meeting.webp')}
-.lp-card:nth-child(4) .lp-card-img{background-image:linear-gradient(180deg,rgba(24,14,29,.08),rgba(24,14,29,.88)),url('/assets/images/alp-family-meeting.webp');background-position:center 64%}
-.lp-card:hover .lp-card-img{opacity:.86;transform:scale(1.035)}
+.lp-card-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .2s}
+.lp-card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(16,13,19,.9) 100%);pointer-events:none}
+.lp-card:hover .lp-card-img{transform:scale(1.035)}
+.lp-card .lp-mono,.lp-card .lp-clabel{z-index:1}
 .lp-mono{position:absolute;top:22px;left:24px;font-family:'Playfair Display',Georgia,serif;font-size:52px;color:rgba(255,255,255,.28);line-height:1}
 .lp-clabel{position:absolute;left:24px;right:24px;bottom:24px;color:#fff}
 .lp-clabel b{display:block;font-family:'Playfair Display',Georgia,serif;font-size:21px;font-weight:400;margin-bottom:6px}
@@ -356,17 +358,12 @@ const CSS = `
 .lp-mosaic{display:grid;grid-template-columns:1.5fr 1fr 1fr;grid-template-rows:190px 190px;gap:16px}
 .lp-mosaic div{position:relative;background:var(--lp-ink-soft);background-size:cover;background-position:center;overflow:hidden}
 .lp-mosaic div::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.64))}
-.lp-mosaic div:first-child{grid-row:span 2;background-image:url('/assets/images/alp-hero-learning-support.webp');background-position:center 46%}
-.lp-mosaic div:nth-child(2){background-image:url('/assets/images/alp-plan-review.webp')}
-.lp-mosaic div:nth-child(3){background-image:url('/assets/images/alp-family-meeting.webp')}
-.lp-mosaic div:nth-child(4){background-image:url('/assets/images/alp-plan-review.webp');background-position:center 68%}
-.lp-mosaic div:nth-child(5){background-image:url('/assets/images/alp-family-meeting.webp');background-position:center 36%}
+.lp-mosaic div:first-child{grid-row:span 2}
+.lp-mosaic img{width:100%;height:100%;object-fit:cover}
 .lp-mosaic span{position:absolute;bottom:12px;left:14px;z-index:1;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.78);background:rgba(24,14,29,.62);padding:5px 8px}
 .lp-trio{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:34px}
 .lp-tcard{background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;color:inherit;width:100%}
-.lp-timg{display:block;height:212px;margin-bottom:22px;background:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.50)),url('/assets/images/alp-plan-review.webp');background-size:cover;background-position:center}
-.lp-trio>button:nth-child(2) .lp-timg{background-image:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.50)),url('/assets/images/alp-hero-learning-support.webp');background-position:center 50%}
-.lp-trio>button:nth-child(3) .lp-timg{background-image:linear-gradient(180deg,rgba(24,14,29,.05),rgba(24,14,29,.50)),url('/assets/images/alp-family-meeting.webp');background-position:center 58%}
+.lp-timg{display:block;width:100%;height:212px;margin-bottom:22px;object-fit:cover}
 .lp-tcard h4{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:400;color:var(--lp-ink);margin:0 0 8px}
 .lp-tcard p{font-size:16px;color:var(--lp-muted);margin:0 0 14px}
 .lp-faq{background:var(--lp-panel);border-top:1px solid var(--lp-rule)}
@@ -395,7 +392,8 @@ const CSS = `
 @media(max-width:900px){
   .lp-nav{display:none}
   .lp-head .lp-wrap{height:76px;gap:16px}
-  .lp-hero{min-height:440px}
+  .lp-hero{min-height:440px;height:64svh}
+  .lp-hero h1{font-size:40px}
   .lp-hero-img{background-position:58% center}
   .lp-mosaic{grid-template-columns:1fr 1fr;grid-template-rows:150px 150px 150px}
   .lp-mosaic div:first-child{grid-row:span 1;grid-column:span 2}
@@ -1519,7 +1517,7 @@ function PageFooter({setNavPage,onEnter,onDemo}={}){
         <span className="lp-badge">Exportable reports</span>
       </div>
       <div className="lp-colophon">
-        <span>&copy; {new Date().getFullYear()} ALP. Built by Stan Paraclete.</span>
+        <span>&copy; {new Date().getFullYear()} ALP.</span>
         <span>Accra, Ghana &middot; Columbus, Georgia</span>
       </div>
     </div></footer>
@@ -5870,10 +5868,10 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       )}
 
       <div className="lp-hero">
-        <div className="lp-hero-img"/>
+        <SiteImage className="lp-hero-img" slot="hero" priority/>
         <div className="lp-wrap">
-          <h1 className="lp-serif">Every learner gets a plan worth following.</h1>
-          <p>Planning software for the staff who support learners with additional needs.</p>
+          <h1 className="lp-serif">Accelerated Learning Plan</h1>
+          <p>Accelerating growth for every learner. Planning, progress and collaboration for the teams who support them.</p>
         </div>
       </div>
 
@@ -5912,13 +5910,13 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         </div>
         <div className="lp-cards">
           {[
-            {k:"G",t:"Goal writing",d:"Draft measurable goals from a baseline."},
-            {k:"P",t:"Progress",d:"Record evidence week by week."},
-            {k:"R",t:"Review queue",d:"Directors approve without chasing paper."},
-            {k:"F",t:"Family updates",d:"Share progress in plain language."},
+            {k:"G",slot:"goalWriting",t:"Goal writing",d:"Draft measurable goals from a baseline."},
+            {k:"P",slot:"progress",t:"Progress",d:"Record evidence week by week."},
+            {k:"R",slot:"review",t:"Review queue",d:"Directors approve without chasing paper."},
+            {k:"F",slot:"familyUpdates",t:"Family updates",d:"Share progress in plain language."},
           ].map(c=>(
             <button key={c.k} className="lp-card" onClick={()=>setNavPage("Features")}>
-              <span className="lp-card-img"/>
+              <SiteImage className="lp-card-img" slot={c.slot} decorative/>
               <span className="lp-mono">{c.k}</span>
               <span className="lp-clabel"><b>{c.t}</b><span>{c.d}</span></span>
             </button>
@@ -5929,14 +5927,10 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       <section className="lp-sec"><div className="lp-wrap">
         <div className="lp-lede">
           <h2 className="lp-serif">Grounded in the classroom</h2>
-          <p>Built alongside the staff who write these plans every term.</p>
+          <p>Different classrooms. Different strengths. A shared commitment to helping learners grow.</p>
         </div>
         <div className="lp-mosaic">
-          <div><span>One-to-one support</span></div>
-          <div><span>Plan review</span></div>
-          <div><span>Family meeting</span></div>
-          <div><span>Progress evidence</span></div>
-          <div><span>Teacher workflow</span></div>
+          {media.gallery.map(item=><div key={item.image}><SiteImage image={item.image}/><span>{item.caption}</span></div>)}
         </div>
       </div></section>
 
@@ -5947,17 +5941,17 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         </div>
         <div className="lp-trio">
           <button className="lp-tcard" onClick={()=>setNavPage("For Schools")}>
-            <span className="lp-timg"/><h4>Security</h4>
+            <SiteImage className="lp-timg" slot="security" decorative/><h4>Security</h4>
             <p>How each school&rsquo;s records stay separate, and how we prove it on every release.</p>
             <span className="lp-link">Learn more</span>
           </button>
           <button className="lp-tcard" onClick={()=>setNavPage("Pricing")}>
-            <span className="lp-timg"/><h4>Pricing</h4>
+            <SiteImage className="lp-timg" slot="pricing" decorative/><h4>Pricing</h4>
             <p>Free for individual teachers. Clear per-school pricing, published.</p>
             <span className="lp-link">Learn more</span>
           </button>
           <button className="lp-tcard" onClick={onDemo||onSignup||onEnter}>
-            <span className="lp-timg"/><h4>Getting started</h4>
+            <SiteImage className="lp-timg" slot="gettingStarted" decorative/><h4>Getting started</h4>
             <p>What adopting ALP looks like, from one teacher to a whole department.</p>
             <span className="lp-link">Learn more</span>
           </button>
@@ -5971,7 +5965,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           <details><summary>Can guardians log in and see their child&rsquo;s plan?</summary><p>No. Guardians are contact records held by staff. There are no guardian accounts, which removes a whole category of access risk around children&rsquo;s records.</p></details>
           <details><summary>How is one school&rsquo;s data kept separate from another&rsquo;s?</summary><p>Isolation is enforced in the database itself, not in application code. A staff member&rsquo;s role and school are set server-side and cannot be changed from their browser.</p></details>
           <details><summary>What happens to our data if we stop using ALP?</summary><p>You can export every plan as a document, and request deletion of your school&rsquo;s records.</p></details>
-          <details><summary>Does ALP work on a phone?</summary><p>Yes. It runs in any modern browser on a laptop, tablet or phone. There is nothing to install.</p></details>
+          <details><summary>Does ALP work on a phone?</summary><p>Yes. Use ALP in a modern browser on your laptop, tablet or phone, or add the web app to your home screen. An internet connection is needed to work with school records.</p></details>
         </div>
       </div></section>
 
@@ -6018,7 +6012,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           <span className="lp-badge">Exportable reports</span>
         </div>
         <div className="lp-colophon">
-          <span>&copy; {new Date().getFullYear()} ALP. Built by Stan Paraclete.</span>
+          <span>&copy; {new Date().getFullYear()} ALP.</span>
           <span>Accra, Ghana &middot; Columbus, Georgia</span>
         </div>
       </div></footer>
@@ -10625,7 +10619,7 @@ function AppInner(){
   const {user:authUser,profile}=useSupabaseAuth();
   Object.assign(C,isDark?CD:CL);
 
-  const [screen,setScreen]=useState("landing");
+  const [screen,setScreen]=useState(()=>entryScreen(window.location.pathname));
   const [page,setPage]=useState("dashboard");
   const [sidebarOpen,setSidebarOpen]=useState(false);
   const [navPage,setNavPage]=useState(null);
@@ -10794,7 +10788,7 @@ function AppInner(){
               <hr className="rule" style={{marginBottom:20}}/>
               <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.tan}}>
                 <span>© 2026 ALP Platform Inc. All rights reserved.</span>
-                <span>Built by <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer" style={{color:C.purple,fontWeight:700,textDecoration:"none"}}>Stan Paraclete</a> · <a href="https://www.stanparaclete.com" target="_blank" rel="noopener noreferrer" style={{color:C.warm,textDecoration:"none"}}>stanparaclete.com</a> · <a href="https://www.growwithalp.com" target="_blank" rel="noopener noreferrer" style={{color:C.warm,textDecoration:"none"}}>growwithalp.com</a> · v2.4.1</span>
+                <a href="https://growwithalp.com/" style={{color:C.purple}}>growwithalp.com</a>
               </div>
             </div>
           </div>
@@ -11152,6 +11146,7 @@ export default function App(){
             <ErrorBoundary>
               <AppInner/>
             </ErrorBoundary>
+            <BrandCredit/>
           </ToastProvider>
         </SupabaseAuthProvider>
       </RoleProvider>

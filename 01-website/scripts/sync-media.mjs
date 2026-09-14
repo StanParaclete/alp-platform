@@ -1,0 +1,10 @@
+import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+const root = new URL('../', import.meta.url);
+const source = new URL('../../02-webapp/', import.meta.url);
+const media = JSON.parse(await readFile(new URL('src/content/media.json', source), 'utf8'));
+await mkdir(new URL('public/assets', root), { recursive: true });
+await cp(new URL('public' + media.basePath, source), new URL('public' + media.basePath, root), { recursive: true });
+await cp(new URL('public/icons/icon-512x512.png', source), new URL('public/alp-logo.png', root));
+await mkdir(new URL('content', root), { recursive: true });
+await writeFile(new URL('content/media.json', root), JSON.stringify(media, null, 2) + '\n');
+console.log('Synced supplied ALP media and logo.');

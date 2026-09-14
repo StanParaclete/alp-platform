@@ -1,3 +1,5 @@
+# Historical proposed API, not the implemented API contract.
+# See ../../05-backend/src/app.mjs and ../ECOSYSTEM_STATUS.md.
 openapi: 3.0.3
 info:
   title: ALP Platform API

@@ -170,7 +170,7 @@ connection-required page; offline editing and automatic sync are not supported.
 
 New workers wait for existing tabs to close, without `skipWaiting`,
 `clients.claim`, or automatic page reloads. Netlify revalidates the worker
-and manifest. Increment the `alp-offline-v2` cache version in `public/sw.js`
+and manifest. Increment the `alp-offline-v3` cache version in `public/sw.js`
 whenever the offline page or its cached icon changes. The development
 server does not register workers; test registration against a production build
 with `npm run build` and `npm run preview`.

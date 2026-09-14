@@ -1,0 +1,80 @@
+name: Parallel ecosystem checks
+on:
+  pull_request:
+  push:
+    branches: [codex/alp-ecosystem]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  applications:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        folder: [01-website, 03-app, 04-software]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: '${{ matrix.folder }}/package-lock.json'
+      - run: npm ci
+        working-directory: '${{ matrix.folder }}'
+      - run: npm test
+        working-directory: '${{ matrix.folder }}'
+      - run: npm audit --audit-level=high
+        working-directory: '${{ matrix.folder }}'
+      - if: matrix.folder == '01-website'
+        run: npm run build
+        working-directory: 01-website
+      - if: matrix.folder == '03-app'
+        run: npm run export
+        working-directory: 03-app
+      - if: matrix.folder == '04-software'
+        run: npm run pack
+        working-directory: 04-software
+  database:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_DB: alp_test
+          POSTGRES_USER: alp_test
+          POSTGRES_PASSWORD: ephemeral-ci-only-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U alp_test -d alp_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-bookworm
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://alp_test:ephemeral-ci-only-password@127.0.0.1:5432/alp_test
+      ALP_INTEGRATION_DATABASE_URL: postgresql://alp_test:ephemeral-ci-only-password@127.0.0.1:5432/alp_test
+      ALP_INTEGRATION_REDIS_URL: redis://127.0.0.1:6379/15
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: 05-backend/package-lock.json
+      - run: npm ci
+        working-directory: 05-backend
+      - run: npm run generate
+        working-directory: 05-backend
+      - run: npm run validate
+        working-directory: 05-backend
+      - run: npm run migrate:deploy
+        working-directory: 05-backend
+      - run: npm run test:integration
+        working-directory: 05-backend
+      - run: npm audit --audit-level=high
+        working-directory: 05-backend

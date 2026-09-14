@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "basePath": "/assets/community-2026-09/",
+  "images": {
+    "community": { "file": "geralt-children-10186220_1920.jpg", "alt": "A teacher and children bringing their hands together in a classroom", "position": "center 48%" },
+    "reading": { "file": "swastikarora-indian-school-children-8196294_1920.jpg", "alt": "Two schoolchildren reading and writing at their desks", "position": "center" },
+    "class": { "file": "andros1234-class-302116_1920.jpg", "alt": "Students working together on classroom activities", "position": "center" },
+    "library": { "file": "wal_172619-library-7408106_1920.jpg", "alt": "A learner studying between library bookshelves", "position": "center" },
+    "learningAtHome": { "file": "abouyassin-child-5976952_1920.jpg", "alt": "A child following a lesson on a computer", "position": "center" },
+    "children": { "file": "akshayapatra-children-876543_1920.jpg", "alt": "A group of schoolchildren participating in a classroom activity", "position": "center" },
+    "teacherIllustration": { "file": "kidaha-teacher-2841679_1920.jpg", "alt": "Illustration of a teacher beside a writing board", "position": "center" },
+    "classIllustration": { "file": "chaimana-classroom-10458346_1920.jpg", "alt": "Illustration of children learning in a classroom", "position": "center" },
+    "healthIllustration": { "file": "htchnm-classroom-5592865_1920.png", "alt": "Illustration of a teacher and children wearing face masks", "position": "center" },
+    "readingIllustration": { "file": "roszie-read-out-7371166_1920.jpg", "alt": "Illustration of a teacher reading to children", "position": "center" },
+    "study": { "file": "arturo_anez-candle-6942931_1920.jpg", "alt": "An open book beside a candle", "position": "center" },
+    "classroom": { "file": "tylijura-classroom-10271298_1920.jpg", "alt": "Coloured pencils on a desk in a classroom", "position": "center" }
+  },
+  "slots": {
+    "hero": "community",
+    "goalWriting": "reading",
+    "progress": "children",
+    "review": "class",
+    "familyUpdates": "learningAtHome",
+    "security": "library",
+    "pricing": "reading",
+    "gettingStarted": "community"
+  },
+  "gallery": [
+    { "image": "community", "caption": "Learning together" },
+    { "image": "reading", "caption": "Everyday progress" },
+    { "image": "class", "caption": "Shared discovery" },
+    { "image": "children", "caption": "Every learner" },
+    { "image": "learningAtHome", "caption": "Beyond the classroom" }
+  ],
+  "video": { "file": "215470_medium.mp4", "title": "Learning in focus", "poster": "classroom", "enabled": false }
+}

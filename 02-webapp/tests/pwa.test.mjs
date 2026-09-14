@@ -99,9 +99,9 @@ test('install caches only the offline page and its icon, bypassing old HTTP copi
 });
 
 test('activation removes old ALP caches and preserves unrelated caches', async () => {
-  const sw = worker({ keys: ['alp-v2.4.1', 'alp-api-v2.4.1', 'alp-offline-v1', 'alp-offline-v2', 'other-app-v1'] });
+  const sw = worker({ keys: ['alp-v2.4.1', 'alp-api-v2.4.1', 'alp-offline-v1', 'alp-offline-v2', 'alp-offline-v3', 'other-app-v1'] });
   await sw.lifecycle('activate');
-  assert.deepEqual(sw.deleted, ['alp-v2.4.1', 'alp-api-v2.4.1', 'alp-offline-v1']);
+  assert.deepEqual(sw.deleted, ['alp-v2.4.1', 'alp-api-v2.4.1', 'alp-offline-v1', 'alp-offline-v2']);
 });
 
 test('online navigations always request the current deployment', async () => {

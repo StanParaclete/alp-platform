@@ -1,13 +1,9 @@
+# Separate website project only. The repository root still deploys the live web app.
 [build]
-  publish = "."
-  command = "echo 'Static site — no build needed'"
+  base = "01-website"
+  command = "npm ci && npm run build"
+  publish = ".next"
 
-[[redirects]]
-  from   = "/app"
-  to     = "https://app.growwithalp.com"
-  status = 301
-
-[[redirects]]
-  from   = "/download"
-  to     = "https://github.com/stanparaclete/alp-platform/releases/latest"
-  status = 301
+[build.environment]
+  NODE_VERSION = "22"
+  ALLOW_INDEXING = "false"

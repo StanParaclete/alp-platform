@@ -1,3 +1,4 @@
+// Historical commented design sketch. The active Next.js app is in 01-website/app.
 /**
  * ALP Platform — Next.js 14 Marketing Website
  * growwithalp.com

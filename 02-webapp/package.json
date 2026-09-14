@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:pwa": "node --test tests/pwa.test.mjs",
+    "test:media": "node --test tests/media.test.mjs",
     "test:login": "node --test tests/login.test.mjs",
     "test:invite": "esbuild tests/invite-authorization.test.mjs --bundle --platform=node --format=esm --outfile=node_modules/.tmp-invite.mjs && node node_modules/.tmp-invite.mjs"
   },

@@ -1,0 +1,13 @@
+{
+  "name": "ALP",
+  "fullName": "Accelerated Learning Plan",
+  "tagline": "Accelerating growth for every learner",
+  "description": "Intervention planning, progress monitoring and educational support for teachers and school teams.",
+  "credit": { "name": "Stan Paraclete", "url": "https://www.stanparaclete.com/" },
+  "navigation": [
+    { "label": "Platform", "href": "/features" },
+    { "label": "Who we serve", "href": "/who-we-serve" },
+    { "label": "Solutions", "href": "/solutions" },
+    { "label": "Resources", "href": "/resources" }
+  ]
+}

@@ -1,5 +1,5 @@
 // Bump this version when changing the offline page or its icon.
-const CACHE_NAME = 'alp-offline-v2';
+const CACHE_NAME = 'alp-offline-v3';
 const OFFLINE_PAGE = '/offline.html';
 const OFFLINE_ICON = '/icons/icon-192x192.png';
 

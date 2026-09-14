@@ -1,0 +1,7 @@
+public/assets/
+public/alp-logo.png
+content/media.json
+.next/
+node_modules/
+.env*
+!.env.example
