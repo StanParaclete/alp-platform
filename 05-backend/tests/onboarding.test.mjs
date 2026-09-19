@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { bootstrapInput, invitationInput, invitationRegistration, invitationAcceptance, canInvite } from '../src/onboarding.mjs';
 
 test('only school administrators can invite, never provision global roles',()=>{
@@ -28,4 +29,12 @@ test('bootstrap validates time zones, names, country and account credentials',()
   const input={email:'admin@example.test',name:'School Admin',password:'a-long-test-password',schoolName:'Test School',country:'GH',timezone:'Africa/Accra'};
   assert.equal(bootstrapInput.safeParse(input).success,true);
   for(const patch of [{timezone:'made-up'},{country:'Ghana'},{schoolName:' '},{password:'short'},{role:'SUPER_ADMIN'}]) assert.equal(bootstrapInput.safeParse({...input,...patch}).success,false);
+});
+test('operator bootstrap dry run makes no database connection and never prints credentials',()=>{
+  const secret='never-print-this-password',connection='postgresql://operator:database-secret@127.0.0.1:1/new_alp';
+  const env={...process.env,ALP_BOOTSTRAP_DATABASE_URL:connection,ALP_BOOTSTRAP_EMAIL:'admin@example.test',ALP_BOOTSTRAP_NAME:'Admin',ALP_BOOTSTRAP_PASSWORD:secret,ALP_BOOTSTRAP_SCHOOL:'Test School',ALP_BOOTSTRAP_COUNTRY:'GH',ALP_BOOTSTRAP_TIMEZONE:'Africa/Accra',ALP_BOOTSTRAP_CONFIRM:''};
+  const run=args=>spawnSync(process.execPath,[new URL('../scripts/bootstrap.mjs',import.meta.url).pathname,...args],{env,encoding:'utf8',timeout:10000});
+  const dry=run([]);assert.equal(dry.status,0);assert.match(dry.stdout,/No connection or changes made/);
+  const unconfirmed=run(['--apply']);assert.equal(unconfirmed.status,1);assert.match(unconfirmed.stderr,/ALP_BOOTSTRAP_CONFIRM/);
+  for(const output of [dry.stdout,dry.stderr,unconfirmed.stdout,unconfirmed.stderr]){assert.equal(output.includes(secret),false);assert.equal(output.includes(connection),false);assert.equal(output.includes('database-secret'),false);}
 });

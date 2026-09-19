@@ -18,6 +18,6 @@ try {
     console.log(JSON.stringify({created:true,...result}));
   }
 } catch (error) {
-  console.error(error.name === 'ZodError' ? 'Bootstrap fields are missing or invalid. Check the onboarding guide.' : error.code ? `Bootstrap failed (${error.code}); no credentials printed.` : error.message);
+  console.error(db ? 'Bootstrap failed. No credentials printed; inspect the empty-database requirement and database health before retrying.' : error.name === 'ZodError' ? 'Bootstrap fields are missing or invalid. Check the onboarding guide.' : error.message);
   process.exitCode = 1;
 } finally { if (db) await db.$disconnect(); }

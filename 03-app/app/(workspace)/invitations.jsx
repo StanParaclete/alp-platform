@@ -1,6 +1,6 @@
 import React,{useEffect,useState} from 'react';
 import {Alert,Modal,Pressable,Share,Text,View} from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {useSession} from '../../src/session';
 import {invitationRoles,canInvite,needsLearners,toggleLearner,invitationStatus,invitationMessage} from '../../src/invitations.mjs';
 import {Page,Label,Copy,Field,Button,ErrorText,Busy,Credit,usePalette,useResource} from '../../src/ui';

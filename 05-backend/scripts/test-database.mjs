@@ -1,5 +1,5 @@
 import EmbeddedPostgres from 'embedded-postgres';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
@@ -13,8 +13,9 @@ let started=false;
 try {
   await pg.initialise();await pg.start();started=true;await pg.createDatabase('alp_test');
   const url=`postgresql://alp_test:${password}@127.0.0.1:${port}/alp_test`;
-  const { Client }=await import('pg');const client=new Client({connectionString:url});await client.connect();
-  try { await client.query(await readFile(new URL('../../06-database/migrations/202609120001_initial/migration.sql',import.meta.url),'utf8')); } finally { await client.end(); }
+  const migrate=spawn('npm',['run','migrate:deploy'],{cwd:new URL('../',import.meta.url),stdio:'inherit',env:{...process.env,DATABASE_URL:url}});
+  const migrationCode=await new Promise((resolve,reject)=>{migrate.once('exit',code=>resolve(code??1));migrate.once('error',reject);});
+  if(migrationCode!==0)throw new Error('Test database migration failed.');
   const child=spawn(process.execPath,['--test','tests/integration.test.mjs'],{cwd:new URL('../',import.meta.url),stdio:'inherit',env:{...process.env,NODE_ENV:'test',ALP_INTEGRATION_DATABASE_URL:url}});
   process.exitCode=await new Promise((resolve,reject)=>{child.once('exit',code=>resolve(code??1));child.once('error',reject);});
 } finally { if(started) await pg.stop(); }
