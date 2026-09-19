@@ -7,6 +7,27 @@ on:
 permissions:
   contents: read
 jobs:
+  existing-webapp:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: 02-webapp/package-lock.json
+      - run: npm ci
+        working-directory: 02-webapp
+      - run: npm run test:login
+        working-directory: 02-webapp
+      - run: npm run test:pwa
+        working-directory: 02-webapp
+      - run: npm run test:media
+        working-directory: 02-webapp
+      - run: npm run test:invite
+        working-directory: 02-webapp
+      - run: npm run build
+        working-directory: 02-webapp
   applications:
     runs-on: ubuntu-24.04
     strategy:
@@ -28,6 +49,9 @@ jobs:
         working-directory: '${{ matrix.folder }}'
       - if: matrix.folder == '01-website'
         run: npm run build
+        working-directory: 01-website
+      - if: matrix.folder == '01-website'
+        run: npm run test:smoke
         working-directory: 01-website
       - if: matrix.folder == '03-app'
         run: npm run export
@@ -71,6 +95,8 @@ jobs:
       - run: npm run generate
         working-directory: 05-backend
       - run: npm run validate
+        working-directory: 05-backend
+      - run: node --test tests/domain.test.mjs
         working-directory: 05-backend
       - run: npm run migrate:deploy
         working-directory: 05-backend
