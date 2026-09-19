@@ -3,6 +3,7 @@
 Built by [Stan Paraclete](https://www.stanparaclete.com).
 
 - [Verified implementation and release gaps](ECOSYSTEM_STATUS.md)
+- [CI and browser verification evidence](VERIFICATION.md)
 - [Architecture and migration boundary](ARCHITECTURE.md)
 - [Parallel deployment instructions](../09-deployment/README.md)
 - [Existing live deployment](../DEPLOYMENT.md)

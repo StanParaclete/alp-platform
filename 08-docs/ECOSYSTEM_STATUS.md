@@ -1,15 +1,19 @@
 # Ecosystem Status
 
-Updated 2026-09-14. This is an implementation inventory, not production approval.
+Updated 2026-09-19. This is an implementation inventory, not production approval.
 The expanded ecosystem is incomplete. Live ALP has not been migrated.
+
+All five jobs passed for code commit `f6842b85eafa247e0f26970629688df449be6307`
+in [CI run 35455307223](https://github.com/StanParaclete/alp-platform/actions/runs/35455307223).
+See [verification evidence](VERIFICATION.md) for scope and remaining gaps.
 
 | Area | Implemented | Verification and remaining gate |
 | --- | --- | --- |
-| 01-website | Next.js pages, configurable supplied media, logo palette, theme, platform gateway, linked credit, server-side enquiry forwarding | Production build and contact tests pass locally. Browser/accessibility review, configured delivery, legal review and separate staging deployment remain. |
+| 01-website | Next.js pages, configurable supplied media, logo palette, theme, platform gateway, linked credit, server-side enquiry forwarding | CI build, contact tests and all-page smoke checks pass. Desktop/mobile browser checks completed. Full accessibility review, configured delivery, legal review and separate staging deployment remain. |
 | 02-webapp | Existing Supabase app preserved; supplied imagery, shared credit, login/signup entry paths, privacy-conscious PWA fallback | Build and focused tests run locally. Changes are unpublished. Real signup and five-role acceptance checks remain. |
-| 03-app | Expo native screens for authentication, school selection, students, 13-section plan editing, autosave, revisions, goals, observations, messages and notifications | iOS/Android JavaScript exports and unit tests pass. These are not signed native binaries. Physical device tests and store distribution remain. |
-| 04-software | Sandboxed Electron client for existing ALP, menus, tray, print/downloads, explicit update controls, linked footer | Policy tests and unsigned macOS arm64 package passed. Windows/Linux runtime tests, signing, notarization, installer and updater acceptance remain. |
-| 05-backend | Separate Express/Prisma API, tenant membership checks, linked learner access, JWT rotation/revocation, revision checks, audit records, enquiry outbox and Redis limits | Domain tests pass locally. Real PostgreSQL/Redis checks run in the ecosystem workflow; inspect the actual run before claiming a pass. SMTP/queue delivery requires separate acceptance. |
+| 03-app | Expo native screens for authentication, school selection, students, 13-section plan editing, autosave, revisions, goals, observations, messages and notifications | Clean CI install, eight tests and iOS/Android JavaScript exports pass. These are not signed native binaries. Physical device tests and store distribution remain. |
+| 04-software | Sandboxed Electron client for existing ALP, menus, tray, print/downloads, explicit update controls, linked footer | Policy tests, unsigned macOS arm64 packaging and CI Linux packaging passed. Platform runtime tests, Windows packaging, signing, notarization, installer and updater acceptance remain. |
+| 05-backend | Separate Express/Prisma API, tenant membership checks, linked learner access, JWT rotation/revocation, revision checks, audit records, enquiry outbox and Redis limits | Domain tests, real PostgreSQL/Redis checks and high-severity dependency gate pass in CI. SMTP/queue delivery requires separate acceptance. |
 | 06-database | Initial PostgreSQL migration and strict synthetic test seed | No production migration has been run. Restore, migration rehearsal and rollback proof required. |
 | 07-assets | Supplied photos/video, existing logo and editable media catalog | Photos are illustrative, not customers or testimonials. Video is disabled pending review. Owner must confirm publication rights. |
 | 08-docs / 09-deployment | Current status, migration boundaries and deployment configuration | Container/provider deployments need execution in staging; configuration alone is not release evidence. |
