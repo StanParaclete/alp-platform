@@ -7,6 +7,11 @@ All five jobs passed for code commit `f6842b85eafa247e0f26970629688df449be6307`
 in [CI run 35455307223](https://github.com/StanParaclete/alp-platform/actions/runs/35455307223).
 See [verification evidence](VERIFICATION.md) for scope and remaining gaps.
 
+The current onboarding increment adds operator-controlled first-school setup and
+single-use school invitations, with mobile creation, revocation and acceptance.
+Its unit tests pass locally; a fresh CI run is required for its PostgreSQL checks.
+See [onboarding scope and release gates](ONBOARDING.md).
+
 | Area | Implemented | Verification and remaining gate |
 | --- | --- | --- |
 | 01-website | Next.js pages, configurable supplied media, logo palette, theme, platform gateway, linked credit, server-side enquiry forwarding | CI build, contact tests and all-page smoke checks pass. Desktop/mobile browser checks completed. Full accessibility review, configured delivery, legal review and separate staging deployment remain. |
@@ -33,7 +38,7 @@ They do not certify compliance with any country's laws or regulations.
 ## Not Yet Implemented in the New Ecosystem
 
 - A new React/Vite client integrated with the new API; `02-webapp` still uses Supabase.
-- Production account provisioning, invitations, password recovery, MFA and social identity integration.
+- Password recovery, MFA, social identity integration, automated invitation email, additional-school administration and membership removal/role changes. First-school bootstrap and manually shared account invitations are implemented; staging and device acceptance remain.
 - Complete service/accommodation workflows, document storage, camera uploads, signatures and meeting scheduling. Several corresponding database models exist without finished endpoints or interfaces.
 - AI assistance, validated risk prediction, generated PDF/Word reports and school/district analytics in the new API.
 - Encrypted offline learner storage, persistent offline edits, conflict synchronization and remote push delivery. Mobile currently requires connectivity and keeps unsaved drafts in memory.

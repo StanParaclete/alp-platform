@@ -15,6 +15,7 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "seed": "node scripts/seed.mjs",
+    "bootstrap": "node scripts/bootstrap.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:database": "node scripts/test-database.mjs",
     "test:integration": "node scripts/check-integration.mjs"

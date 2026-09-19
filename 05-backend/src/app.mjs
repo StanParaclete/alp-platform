@@ -2,6 +2,7 @@ import express from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { authTokens, digest, hashPassword, verifyPassword, sameSecret } from './security.mjs';
+import { acceptInvitation, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
 import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, planInput, planUpdate, goalInput, progressInput, messageInput, completion, mayChangeStatus, sectionIds, evaluateFramework } from './domain.mjs';
 
 class HttpError extends Error { constructor(status,message) { super(message); this.status=status; } }
@@ -45,6 +46,11 @@ export async function createApp({ db, rateLimit, env=process.env }) {
     res.json(result);
   });
   const refreshInput=z.object({refreshToken:z.string().min(32).max(256)}).strict();
+  app.post('/auth/invitations/register',async (req,res)=>{
+    if (!await rateLimit.allow(`invitation-register:${digest(req.ip||'unknown')}`,8,900)) fail(429,'Too many attempts. Try again later.');
+    await acceptInvitation(db,req.body);
+    res.sendStatus(204);
+  });
   app.post('/auth/refresh',async (req,res)=>{
     const {refreshToken}=refreshInput.parse(req.body);
     const result=await db.$transaction(async tx=>{
@@ -93,6 +99,10 @@ export async function createApp({ db, rateLimit, env=process.env }) {
     const memberships=await db.membership.findMany({where:{userId:req.user.id},select:{role:true,school:{select:{id:true,name:true,country:true,timezone:true}}}});
     res.json({id:req.user.id,name:req.user.name,email:req.user.email,memberships});
   });
+  app.post('/auth/invitations/accept',async (req,res)=>{
+    if (!await rateLimit.allow(`invitation-accept:${req.user.id}`,8,900)) fail(429,'Too many attempts. Try again later.');
+    res.json(await acceptInvitation(db,req.body,req.user));
+  });
   app.use('/v1',async (req,res,next)=>{
     const schoolId=uuid.safeParse(req.get('x-school-id'));
     if (!schoolId.success) return res.status(400).json({error:'Choose a school.'});
@@ -102,6 +112,15 @@ export async function createApp({ db, rateLimit, env=process.env }) {
   });
   const staff=req=>{ if (!staffRoles.includes(req.actor.role)) fail(403,'Staff access required.'); };
   const admin=req=>{ if (!adminRoles.includes(req.actor.role)) fail(403,'School administrator access required.'); };
+  app.get('/v1/invitations',async (req,res)=>{
+    const {offset=0}=z.object({offset:z.coerce.number().int().min(0).max(100000).optional()}).strict().parse(req.query);
+    res.json(await listInvitations(db,req.actor,offset));
+  });
+  app.post('/v1/invitations',async (req,res)=>{
+    if (!await rateLimit.allow(`invitation-create:${req.actor.schoolId}:${req.actor.id}`,20,3600)) fail(429,'Invitation limit reached. Try again later.');
+    res.status(201).json(await createInvitation(db,req.actor,req.body));
+  });
+  app.patch('/v1/invitations/:id/revoke',async (req,res)=>{ await revokeInvitation(db,req.actor,req.params.id); res.sendStatus(204); });
   async function student(req,id) { const item=await db.student.findFirst({where:{id:uuid.parse(id),...studentScope(req.actor)}}); if (!item) fail(404,'Student not found.'); return item; }
   async function plan(req,id) { const item=await db.aLPPlan.findFirst({where:{id:uuid.parse(id),...planScope(req.actor)}}); if (!item) fail(404,'Plan not found.'); return item; }
   app.get('/v1/students',async (req,res)=>{

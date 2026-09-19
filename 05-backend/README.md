@@ -16,6 +16,10 @@ URLs are absent. `npm run test:integration` requires both
 The CI workflow provisions these ephemeral services. Seeds are test-only and
 must never be used as production account provisioning.
 
+First-school setup and single-use school invitations are documented in
+[School onboarding](../08-docs/ONBOARDING.md). `npm run bootstrap` is a validation-only
+dry run; applying requires an explicit separate database and confirmation.
+
 The implemented contract is in `src/app.mjs`, validated by `src/domain.mjs`.
 Review [status and unfinished modules](../08-docs/ECOSYSTEM_STATUS.md) before
 deploying. Configure a trusted reverse proxy policy and rate-limit topology

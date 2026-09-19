@@ -44,8 +44,10 @@ only behind the intended private ingress/TLS proxy.
 Check `/health/live` and `/health/ready`. Before external use, configure a trusted
 proxy/rate-limit topology, managed backups, secret rotation, alerting, request
 body limits and log redaction. Test failure/retry behavior for SMTP and Redis.
-The new API does not yet have production user provisioning or password recovery;
-do not substitute test seeds for those workflows.
+For the first school and subsequent account invitations, follow
+`08-docs/ONBOARDING.md`; never substitute test seeds for account provisioning.
+Password recovery, additional-school administration and identity-provider
+integration remain unfinished.
 
 ## Native Releases
 
