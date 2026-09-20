@@ -3,6 +3,10 @@ import { promisify } from 'node:util';
 import { SignJWT, jwtVerify } from 'jose';
 const scrypt = promisify(scryptCallback);
 export const digest = value => createHash('sha256').update(value).digest('hex');
+export async function lockCredentials(tx,user) {
+  const result=await tx.user.updateMany({where:{id:user.id,disabled:false,credentialVersion:user.credentialVersion},data:{credentialVersion:{increment:0}}});
+  return result.count===1;
+}
 export async function hashPassword(password) {
   if (typeof password !== 'string' || password.length < 12 || password.length > 256) throw new Error('Password must contain 12 to 256 characters.');
   const salt = randomBytes(16).toString('hex');

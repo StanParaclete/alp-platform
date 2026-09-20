@@ -6,6 +6,7 @@ import { database } from '../src/db.mjs';
 import { digest, hashPassword, verifyPassword } from '../src/security.mjs';
 import { bootstrapSchool } from '../src/onboarding.mjs';
 import { sectionIds } from '../src/domain.mjs';
+import { checkRecovery } from './recovery.integration.mjs';
 
 test('real PostgreSQL: isolation, role restrictions, revisions, sessions and durable enquiries', { skip:!process.env.ALP_INTEGRATION_DATABASE_URL }, async t=>{
   assert.equal(process.env.NODE_ENV,'test');
@@ -141,6 +142,7 @@ test('real PostgreSQL: isolation, role restrictions, revisions, sessions and dur
       assert.equal((await request('/public/enquiries',{method:'POST',body})).status,401);
       const response=await request('/public/enquiries',{method:'POST',headers:{Authorization:'Bearer test-webhook-secret'},body});assert.equal(response.status,201);const saved=await response.json();assert.ok(await db.enquiry.findUnique({where:{id:saved.id}}));
     });
+    await t.test('password recovery and delivery outbox',async t=>checkRecovery(t,db));
     await t.test('rate limiting is enforced before private reads',async()=>{rateAllowed=false;assert.equal((await request('/v1/students',{token:adminSession.accessToken})).status,429);});
   } finally { await new Promise(resolve=>server.close(resolve));await db.$disconnect(); }
 });

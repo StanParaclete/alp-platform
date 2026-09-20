@@ -6,6 +6,7 @@ Built by [Stan Paraclete](https://www.stanparaclete.com).
 - [CI and browser verification evidence](VERIFICATION.md)
 - [Architecture and migration boundary](ARCHITECTURE.md)
 - [First school setup and invitations](ONBOARDING.md)
+- [Password recovery and mail operations](PASSWORD_RECOVERY.md)
 - [Parallel deployment instructions](../09-deployment/README.md)
 - [Existing live deployment](../DEPLOYMENT.md)
 

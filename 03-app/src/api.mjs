@@ -35,6 +35,12 @@ export function createApi({ base, send = fetch, onSession = async () => {} }) {
     return refreshing;
   }
   return {
+    requestPasswordRecovery(email) { return raw('/auth/password/request', { method: 'POST', body: { email } }); },
+    async resetPassword(body) {
+      const current = generation;
+      await raw('/auth/password/reset', { method: 'POST', body });
+      if (current === generation) { generation++; refreshing = null; session = null; await onSession(null); }
+    },
     registerInvitation(body) { return raw('/auth/invitations/register', { method: 'POST', body }); },
     async login(email, password) { const current = ++generation; refreshing = null; session = null; const value = await raw('/auth/login', { method: 'POST', body: { email, password } }); return remember(value, current); },
     async restore(refreshToken) { generation++; refreshing = null; session = { refreshToken }; return refresh(); },

@@ -6,7 +6,7 @@ random bytes encoded as hex. Never point this package at live Supabase.
 
 Run `npm ci`, `npm run generate`, `npm run validate`, then `npm run migrate:deploy`
 against the new database. Start with `npm start`; run `npm run worker` separately
-with SMTP configuration for enquiries. Scripts do not automatically load `.env`;
+with SMTP configuration for enquiries and opt-in password recovery. Scripts do not automatically load `.env`;
 use your process manager, container environment or Node's `--env-file` option.
 
 `npm test` includes unit checks and explicitly skipped service tests when their
@@ -19,6 +19,10 @@ must never be used as production account provisioning.
 First-school setup and single-use school invitations are documented in
 [School onboarding](../08-docs/ONBOARDING.md). `npm run bootstrap` is a validation-only
 dry run; applying requires an explicit separate database and confirmation.
+
+[Password recovery](../08-docs/PASSWORD_RECOVERY.md) requires a separate encryption
+key and the mail worker. It is disabled by default; verify real SMTP delivery in
+staging before enabling it for users.
 
 The implemented contract is in `src/app.mjs`, validated by `src/domain.mjs`.
 Review [status and unfinished modules](../08-docs/ECOSYSTEM_STATUS.md) before

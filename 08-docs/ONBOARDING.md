@@ -85,8 +85,9 @@ apply to creation and redemption in addition to the global IP limiter.
 
 ## Remaining Gates
 
-This is not complete identity administration. Password recovery, MFA, social
-identity, email verification/delivery, additional-school provisioning, membership
+This is not complete identity administration. Password recovery is implemented
+separately; its [SMTP and device acceptance gates](PASSWORD_RECOVERY.md) remain.
+MFA, social identity, invitation email delivery, additional-school provisioning, membership
 removal/role changes and parent consent management remain separate work. The new
 React/Vite browser interface is not yet connected. Native acceptance on real
 devices, staging onboarding with institution-approved identities and migration

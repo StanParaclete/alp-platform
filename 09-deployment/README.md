@@ -46,8 +46,10 @@ proxy/rate-limit topology, managed backups, secret rotation, alerting, request
 body limits and log redaction. Test failure/retry behavior for SMTP and Redis.
 For the first school and subsequent account invitations, follow
 `08-docs/ONBOARDING.md`; never substitute test seeds for account provisioning.
-Password recovery, additional-school administration and identity-provider
-integration remain unfinished.
+For opt-in password recovery, configure the separate encryption key and mail
+worker using `08-docs/PASSWORD_RECOVERY.md`. Verify actual inbox delivery and
+session revocation in staging before public enablement. Additional-school
+administration and identity-provider integration remain unfinished.
 
 ## Native Releases
 

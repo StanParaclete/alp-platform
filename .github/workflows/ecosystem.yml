@@ -96,7 +96,7 @@ jobs:
         working-directory: 05-backend
       - run: npm run validate
         working-directory: 05-backend
-      - run: node --test tests/domain.test.mjs tests/onboarding.test.mjs
+      - run: node --test tests/domain.test.mjs tests/onboarding.test.mjs tests/recovery.test.mjs
         working-directory: 05-backend
       - run: npm run migrate:deploy
         working-directory: 05-backend

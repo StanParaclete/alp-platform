@@ -1,4 +1,10 @@
-# Verification Record - 2026-09-19
+# Verification Record - 2026-09-20
+
+Password-recovery work has passed 15 backend unit tests, 15 mobile unit tests,
+Prisma validation and iOS/Android JavaScript exports locally. Its database
+migration and concurrency tests still await CI. The record below describes the
+previous verified baseline, not yet the recovery increment. Real SMTP and native
+device acceptance have not been performed.
 
 Code commit: `514d34d9f313f66a020e6a9792c8bceb284114eb`
 

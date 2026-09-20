@@ -1,9 +1,9 @@
 # Ecosystem Status
 
-Updated 2026-09-19. This is an implementation inventory, not production approval.
+Updated 2026-09-20. This is an implementation inventory, not production approval.
 The expanded ecosystem is incomplete. Live ALP has not been migrated.
 
-All five jobs passed for code commit `514d34d9f313f66a020e6a9792c8bceb284114eb`
+The previous baseline passed all five jobs for code commit `514d34d9f313f66a020e6a9792c8bceb284114eb`
 in [CI run 35476842540](https://github.com/StanParaclete/alp-platform/actions/runs/35476842540).
 See [verification evidence](VERIFICATION.md) for scope and remaining gaps.
 
@@ -11,6 +11,12 @@ The current onboarding increment adds operator-controlled first-school setup and
 single-use school invitations, with mobile creation, revocation and acceptance.
 Its unit tests and real PostgreSQL acceptance/security checks pass in CI.
 See [onboarding scope and release gates](ONBOARDING.md).
+
+The password-recovery increment adds encrypted mail delivery, a mobile reset
+flow and atomic session revocation. Local backend/mobile tests (15 each), Prisma
+validation and native JavaScript exports pass. Its new PostgreSQL race tests and
+migration still await CI; no real SMTP or native-device check has run.
+See [recovery operations and acceptance](PASSWORD_RECOVERY.md).
 
 | Area | Implemented | Verification and remaining gate |
 | --- | --- | --- |
@@ -38,7 +44,7 @@ They do not certify compliance with any country's laws or regulations.
 ## Not Yet Implemented in the New Ecosystem
 
 - A new React/Vite client integrated with the new API; `02-webapp` still uses Supabase.
-- Password recovery, MFA, social identity integration, automated invitation email, additional-school administration and membership removal/role changes. First-school bootstrap and manually shared account invitations are implemented; staging and device acceptance remain.
+- MFA, social identity integration, automated invitation email, additional-school administration and membership removal/role changes. First-school bootstrap, manually shared account invitations and opt-in password recovery are implemented; staging and device acceptance remain.
 - Complete service/accommodation workflows, document storage, camera uploads, signatures and meeting scheduling. Several corresponding database models exist without finished endpoints or interfaces.
 - AI assistance, validated risk prediction, generated PDF/Word reports and school/district analytics in the new API.
 - Encrypted offline learner storage, persistent offline edits, conflict synchronization and remote push delivery. Mobile currently requires connectivity and keeps unsaved drafts in memory.

@@ -1,7 +1,8 @@
 import express from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { authTokens, digest, hashPassword, verifyPassword, sameSecret } from './security.mjs';
+import { authTokens, digest, hashPassword, verifyPassword, sameSecret, lockCredentials } from './security.mjs';
+import { recoveryCipher, recoveryRequest, recoveryAcknowledgement, requestPasswordRecovery, completePasswordRecovery } from './recovery.mjs';
 import { acceptInvitation, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
 import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, planInput, planUpdate, goalInput, progressInput, messageInput, completion, mayChangeStatus, sectionIds, evaluateFramework } from './domain.mjs';
 
@@ -13,6 +14,7 @@ const audit = (tx,actor,action,type,id) => tx.auditLog.create({data:{schoolId:ac
 export async function createApp({ db, rateLimit, env=process.env }) {
   const app = express();
   const tokens = authTokens(env);
+  const recovery = recoveryCipher(env);
   const dummy = await hashPassword(randomBytes(32).toString('hex'));
   const origins = new Set((env.CORS_ORIGINS||'').split(',').filter(Boolean));
   app.disable('x-powered-by');
@@ -42,10 +44,27 @@ export async function createApp({ db, rateLimit, env=process.env }) {
     const user=await db.user.findUnique({where:{email}});
     const valid=await verifyPassword(password,user?.passwordHash||dummy);
     if (!valid||!user||user.disabled) fail(401,'Email or password is incorrect.');
-    const result=await db.$transaction(async tx=>{ const result=await session(tx,user.id); await audit(tx,{id:user.id},'login','user',user.id); return result; });
+    const result=await db.$transaction(async tx=>{ if(!await lockCredentials(tx,user))fail(401,'Email or password is incorrect.'); const result=await session(tx,user.id); await audit(tx,{id:user.id},'login','user',user.id); return result; });
     res.json(result);
   });
   const refreshInput=z.object({refreshToken:z.string().min(32).max(256)}).strict();
+  async function recoveryLimit(key,max,seconds) {
+    try { return await rateLimit.allow(key,max,seconds); }
+    catch { fail(503,'Password recovery is temporarily unavailable.'); }
+  }
+  app.post('/auth/password/request',async (req,res)=>{
+    if(!recovery)fail(503,'Password recovery is not available. Contact your school administrator.');
+    const input=recoveryRequest.parse(req.body);
+    if(!await recoveryLimit(`recovery-ip:${digest(req.ip||'unknown')}`,8,900))fail(429,'Too many recovery requests. Try again later.');
+    if(await recoveryLimit(`recovery-email:${digest(input.email)}`,3,3600))await requestPasswordRecovery(db,recovery,input);
+    res.status(202).json(recoveryAcknowledgement);
+  });
+  app.post('/auth/password/reset',async (req,res)=>{
+    if(!recovery)fail(503,'Password recovery is not available. Contact your school administrator.');
+    if(!await recoveryLimit(`recovery-complete:${digest(req.ip||'unknown')}`,8,900))fail(429,'Too many recovery attempts. Try again later.');
+    await completePasswordRecovery(db,req.body);
+    res.sendStatus(204);
+  });
   app.post('/auth/invitations/register',async (req,res)=>{
     if (!await rateLimit.allow(`invitation-register:${digest(req.ip||'unknown')}`,8,900)) fail(429,'Too many attempts. Try again later.');
     await acceptInvitation(db,req.body);
@@ -59,6 +78,7 @@ export async function createApp({ db, rateLimit, env=process.env }) {
       if (current.usedAt||current.revokedAt||current.expiresAt<new Date()||current.user.disabled) {
         await tx.refreshToken.updateMany({where:{familyId:current.familyId,revokedAt:null},data:{revokedAt:new Date()}}); return null;
       }
+      if (!await lockCredentials(tx,current.user)) return null;
       const changed=await tx.refreshToken.updateMany({where:{id:current.id,usedAt:null,revokedAt:null},data:{usedAt:new Date()}});
       if (!changed.count) { await tx.refreshToken.updateMany({where:{familyId:current.familyId},data:{revokedAt:new Date()}}); return null; }
       return session(tx,current.userId,current.familyId);
