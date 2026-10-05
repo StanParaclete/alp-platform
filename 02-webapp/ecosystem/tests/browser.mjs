@@ -244,6 +244,19 @@ try {
   await fits();
   await screenshot("plan-desktop");
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByLabel("Plan section", { exact: true })).toHaveValue(
+    "strengths",
+  );
+  await page.getByLabel("Plan section", { exact: true }).selectOption("needs");
+  await expect(
+    page.getByRole("heading", { name: "Needs", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Plan section", { exact: true })
+    .selectOption("strengths");
+  await expect(page.getByLabel("Section content", { exact: true })).toHaveValue(
+    "Synthetic learner enjoys collaborative reading.",
+  );
   await accessible();
   await fits();
   await screenshot("plan-mobile");

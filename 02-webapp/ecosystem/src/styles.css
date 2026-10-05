@@ -632,6 +632,10 @@ tbody tr:hover {
   padding-block: 24px;
   gap: 30px;
 }
+.section-picker {
+  display: none;
+  min-width: 0;
+}
 .section-nav {
   display: flex;
   flex-direction: column;
@@ -935,13 +939,10 @@ details h3 {
     gap: 20px;
   }
   .section-nav {
-    flex-direction: row;
-    overflow: auto;
-    padding-bottom: 10px;
+    display: none;
   }
-  .section-nav button {
-    min-width: 154px;
-    flex-shrink: 0;
+  .section-picker {
+    display: block;
   }
   .section-editor textarea {
     min-height: 300px;

@@ -148,6 +148,19 @@ export function Plan() {
             </div>
           ) : null}
           <div className="builder">
+            <div className="section-picker">
+              <Field
+                label="Plan section"
+                value={selected}
+                onChange={(event) => setSelected(event.target.value)}
+              >
+                {sections.map(([key, label], index) => (
+                  <option key={key} value={key}>
+                    {index + 1}. {label}
+                  </option>
+                ))}
+              </Field>
+            </div>
             <nav className="section-nav" aria-label="Plan sections">
               {sections.map(([key, label], index) => (
                 <button
