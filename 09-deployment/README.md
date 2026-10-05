@@ -51,6 +51,16 @@ worker using `08-docs/PASSWORD_RECOVERY.md`. Verify actual inbox delivery and
 session revocation in staging before public enablement. Additional-school
 administration and identity-provider integration remain unfinished.
 
+## Browser Workspace Staging
+
+`02-webapp/ecosystem` is the new Vite client for the separate API. Use its own
+Netlify project/configuration and HTTPS origin, never the existing live project.
+Set `VITE_API_URL` at build time and allow only this frontend's exact origin in
+the API's `CORS_ORIGINS`. The production build rejects missing or insecure API
+origins and generates Netlify security headers. Do not add this preview as the
+public website's gateway until its acceptance and migration gates are complete.
+See `02-webapp/ecosystem/README.md` for implemented workflows and test boundaries.
+
 ## Native Releases
 
 Expo requires the owner's project, build credentials and device testing. A

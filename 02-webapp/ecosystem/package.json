@@ -1,0 +1,29 @@
+{
+  "name": "@alp/ecosystem-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3200",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 3200",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node tests/browser.mjs"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-router-dom": "7.18.4",
+    "zustand": "5.0.15",
+    "lucide-react": "1.47.0"
+  },
+  "devDependencies": {
+    "vite": "8.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "@playwright/test": "1.63.0",
+    "@axe-core/playwright": "4.13.0"
+  }
+}

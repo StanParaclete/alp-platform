@@ -102,5 +102,25 @@ jobs:
         working-directory: 05-backend
       - run: npm run test:integration
         working-directory: 05-backend
+      - run: npm ci
+        working-directory: 02-webapp/ecosystem
+      - run: npm test
+        working-directory: 02-webapp/ecosystem
+      - run: npm run build
+        working-directory: 02-webapp/ecosystem
+        env:
+          VITE_API_URL: https://api.example.invalid
+      - run: npm audit --audit-level=high
+        working-directory: 02-webapp/ecosystem
+      - run: npx playwright install --with-deps chromium
+        working-directory: 02-webapp/ecosystem
+      - run: npm run test:browser -- --integration
+        working-directory: 02-webapp/ecosystem
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ecosystem-browser-checks
+          path: 02-webapp/ecosystem/test-results
+          retention-days: 7
       - run: npm audit --audit-level=high
         working-directory: 05-backend

@@ -1,9 +1,9 @@
 # Ecosystem Status
 
-Updated 2026-09-21. This is an implementation inventory, not production approval.
+Updated 2026-10-05. This is an implementation inventory, not production approval.
 The expanded ecosystem is incomplete. Live ALP has not been migrated.
 
-All five jobs passed for code commit `36efe31aacd41eff02fe55e9db873f7897bdc5a6`
+The previous recovery baseline passed all five jobs for code commit `36efe31aacd41eff02fe55e9db873f7897bdc5a6`
 in [CI run 35541663342](https://github.com/StanParaclete/alp-platform/actions/runs/35541663342).
 See [verification evidence](VERIFICATION.md) for scope and remaining gaps.
 
@@ -17,6 +17,12 @@ flow and atomic session revocation. Backend/mobile tests (15 each), Prisma
 validation, native JavaScript exports, all three migrations and PostgreSQL race
 tests pass in CI. No real SMTP or native-device check has run.
 See [recovery operations and acceptance](PASSWORD_RECOVERY.md).
+
+The new browser workspace at `02-webapp/ecosystem` adds real API-backed roster,
+plan, goal, progress, comment and messaging interfaces without changing the live
+Supabase client. Seven local unit tests, its Vite build and dependency audit pass.
+Its new real-database browser tests await CI. See the
+[browser implementation and remaining gates](../02-webapp/ecosystem/README.md).
 
 | Area | Implemented | Verification and remaining gate |
 | --- | --- | --- |
@@ -43,7 +49,7 @@ They do not certify compliance with any country's laws or regulations.
 
 ## Not Yet Implemented in the New Ecosystem
 
-- A new React/Vite client integrated with the new API; `02-webapp` still uses Supabase.
+- Full feature parity in the new Vite browser client. Its initial teaching workflow is integrated with the new API; the parent `02-webapp` still uses Supabase.
 - MFA, social identity integration, automated invitation email, additional-school administration and membership removal/role changes. First-school bootstrap, manually shared account invitations and opt-in password recovery are implemented; staging and device acceptance remain.
 - Complete service/accommodation workflows, document storage, camera uploads, signatures and meeting scheduling. Several corresponding database models exist without finished endpoints or interfaces.
 - AI assistance, validated risk prediction, generated PDF/Word reports and school/district analytics in the new API.

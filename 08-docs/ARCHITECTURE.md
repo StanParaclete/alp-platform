@@ -7,10 +7,10 @@ flowchart LR
   Desktop[04 Electron isolated workspace] --> Live
   Website -->|Authenticated enquiry webhook| API[05 Express API]
   Mobile[03 Expo native app] -->|JWT and explicit school membership| API
-  Future[Future migrated web client] -.-> API
+  Web[02 ecosystem Vite browser workspace] -->|Separate staging only| API
   API --> PG[(New PostgreSQL)]
   API --> Redis[(Redis rate limits)]
-  PG --> Outbox[Enquiry outbox dispatcher]
+  PG --> Outbox[Enquiry and recovery outbox dispatcher]
   Outbox --> Queue[Redis BullMQ]
   Queue --> Worker[SMTP worker]
   Live --> Supabase[(Existing Supabase, unchanged)]
@@ -21,8 +21,9 @@ website never holds learner tokens. The enquiry webhook uses a server-only
 shared secret. The API validates JWTs, active refresh families and current
 membership before queries; never trust a client-supplied school ID alone.
 
-The new API is not an adapter for the current Supabase frontend. Both remain
-separate until a compatible client and rehearsed migration exist. Password
+The new API is not an adapter for the current Supabase frontend. Its separate
+browser client is in `02-webapp/ecosystem`; both products remain isolated until
+client acceptance and a rehearsed migration are complete. Password
 hashes and role identifiers are not assumed compatible between the systems.
 
 ## Migration Gates
