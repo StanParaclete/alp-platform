@@ -21,14 +21,18 @@ See [recovery operations and acceptance](PASSWORD_RECOVERY.md).
 The new browser workspace at `02-webapp/ecosystem` adds real API-backed roster,
 plan, goal, progress, comment and messaging interfaces without changing the live
 Supabase client. Seven local unit tests, its Vite build and dependency audit pass.
-Its new real-database browser tests await CI. See the
+Its real-database browser workflow passed in
+[CI run 37317582263](https://github.com/StanParaclete/alp-platform/actions/runs/37317582263).
+Four jobs passed; the mobile dependency audit failed and remains a release blocker.
+See [current dependency findings](DEPENDENCY_SECURITY.md) and the
 [browser implementation and remaining gates](../02-webapp/ecosystem/README.md).
 
 | Area | Implemented | Verification and remaining gate |
 | --- | --- | --- |
 | 01-website | Next.js pages, configurable supplied media, logo palette, theme, platform gateway, linked credit, server-side enquiry forwarding | CI build, contact tests and all-page smoke checks pass. Desktop/mobile browser checks completed. Full accessibility review, configured delivery, legal review and separate staging deployment remain. |
 | 02-webapp | Existing Supabase app preserved; supplied imagery, shared credit, login/signup entry paths, privacy-conscious PWA fallback | Build and focused tests run locally. Changes are unpublished. Real signup and five-role acceptance checks remain. |
-| 03-app | Expo native screens for authentication, password recovery, school selection, students, 13-section plan editing, autosave, revisions, goals, observations, messages, notifications and account invitations | Clean CI install, 15 tests and iOS/Android JavaScript exports pass. These are not signed native binaries. Physical device tests and store distribution remain. |
+| 02-webapp/ecosystem | Separate Vite browser client for the new API; school-scoped roster, student profiles, 13-section builder, goals/progress, messages, notifications, recovery and invitation acceptance | Seven unit checks, production build, zero audit findings and PostgreSQL-backed browser workflow pass. Separate staging deployment, broader role/assistive-technology acceptance and full product parity remain. |
+| 03-app | Expo native screens for authentication, password recovery, school selection, students, 13-section plan editing, autosave, revisions, goals, observations, messages, notifications and account invitations | 15 tests and local iOS/Android JavaScript exports pass. Current CI fails the high-severity audit and skips export. Unpatched upstream findings, signed native builds and physical-device acceptance block distribution. |
 | 04-software | Sandboxed Electron client for existing ALP, menus, tray, print/downloads, explicit update controls, linked footer | Policy tests, unsigned macOS arm64 packaging and CI Linux packaging passed. Platform runtime tests, Windows packaging, signing, notarization, installer and updater acceptance remain. |
 | 05-backend | Separate Express/Prisma API, first-school bootstrap, scoped invitations, tenant membership checks, linked learner access, JWT rotation/revocation, password recovery with encrypted mail outbox, revision checks, audit records, enquiry outbox and Redis limits | 15 unit tests, real PostgreSQL/Redis checks and high-severity dependency gate pass in CI. SMTP/queue delivery and staging onboarding require separate acceptance. |
 | 06-database | Initial PostgreSQL, invitation and password-recovery migrations, plus strict synthetic test seed | All three migrations pass in disposable CI PostgreSQL. No production migration has been run. Restore, migration rehearsal and rollback proof required. |
@@ -59,8 +63,10 @@ They do not certify compliance with any country's laws or regulations.
 The desktop currently opens the existing live email-login flow; it does not
 expose arbitrary external identity-provider navigation. Its session is memory
 only. Updates remain disabled until signed release artifacts are available.
-The mobile dependency audit has moderate transitive Expo findings to review;
-do not force incompatible dependency overrides just to silence the report.
+The mobile dependency audit has high and moderate transitive Expo findings.
+The current braces and node-forge advisories have no published patched version
+as of 2026-10-05. Keep the release gate closed; do not force incompatible
+dependency overrides or reduce the audit threshold to silence the report.
 
 ## Release Evidence
 

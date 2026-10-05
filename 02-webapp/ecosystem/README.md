@@ -59,7 +59,7 @@ PostgreSQL. This mode refuses anything except `NODE_ENV=test` and a localhost
 API, a synthetic institution, random test passwords and example.test addresses.
 The injected limiter is permissive; Redis enforcement has a separate CI test.
 
-Browser checks exercise login, family restrictions, plan persistence, history,
+Browser checks exercise login, student creation/editing, family restrictions, plan persistence, history,
 goals, progress, comments, save-failure navigation, recovery-unavailable handling,
 no persistent session data, responsive screenshots and automated WCAG checks.
 Screenshots contain synthetic data only and CI retains them for seven days.

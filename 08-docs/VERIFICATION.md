@@ -1,4 +1,57 @@
-# Verification Record - 2026-09-21
+# Verification Record
+
+## Current Increment - 2026-10-05
+
+Code commit: `6a0e6867c72ab1dea60026ac114542634e94ebe3`
+
+[GitHub Actions run 37317582263](https://github.com/StanParaclete/alp-platform/actions/runs/37317582263)
+completed with **four jobs passing and the mobile audit failing**. This is not
+an approved release. The high-severity security gate was not weakened.
+
+| Job | Result and evidence |
+| --- | --- |
+| existing-webapp | PASS: focused login/PWA/media/invitation checks and production build. |
+| applications (01-website) | PASS: clean install, six tests, zero audit findings, Next.js 16.3.8 production build and HTTP smoke test. |
+| applications (03-app) | FAIL at dependency audit: 19 high and 10 moderate package findings; 15 unit tests passed. CI native export was skipped after the failed gate. |
+| applications (04-software) | PASS: four policy tests, zero audit findings and unpacked Linux Electron build. |
+| database | PASS: all three migrations, 15 backend unit tests, real PostgreSQL/Redis security checks, seven browser unit tests, Vite build, browser workflow against the real API, and zero backend/browser audit findings. |
+
+The new browser checks use a disposable PostgreSQL institution and synthetic
+accounts, not production or a mocked data API. They exercise teacher sign-in,
+student creation/editing (including a database assertion), plan creation and
+autosave, version history, goals, observations and staff comments. They also
+check linked-parent restrictions, preservation of unsaved edits during a
+simulated save outage, navigation blocking, retry, sign-out and an unavailable
+recovery service. No bearer tokens or learner records persist in browser storage.
+
+Automated axe checks ran on login, roster and plan views in light/dark themes and
+at desktop/phone widths. Screenshot checks used 1440x960 and 390x844, required no
+document overflow and checked the supplied image and linked Stan Paraclete
+credit. These are representative accessibility checks, not WCAG certification.
+The screenshots were downloaded and inspected. Phone section selection now uses
+a native picker that keeps the current section visible; switching sections and
+preserving saved content is covered in the browser workflow.
+
+Local checks: seven browser, six website, 15 mobile, 15 backend and four desktop
+unit tests passed. Website and browser production builds passed; the website
+smoke check covered 18 pages, 13 images, 404 and unavailable-contact handling.
+Both native JavaScript exports passed locally, but the unresolved mobile audit
+still blocks distribution. Unpacked macOS arm64 packaging passed after granting
+the standard Electron build-cache directory access. It is unsigned and has not
+passed runtime/installer acceptance.
+
+The first browser run, 37280538374, exposed an exact-label failure caused by a
+textarea nested in its label; labels and controls are now separate elements.
+Compatible dependency patches removed the website, desktop and backend findings.
+See [dependency evidence and unresolved upstream advisories](DEPENDENCY_SECURITY.md).
+The prior September audit results below are historical, not current clearance.
+
+The local preview at `http://127.0.0.1:3200/` has no staging API configured and
+intentionally disables sign-in. It is not a demo backend. No new API deployment,
+production data migration, DNS cutover, merge to `main` or live publication was
+performed. Main remains `3b5155579c126d4da1df0ccd496fd61bce8db5d0`.
+
+## Previous Recovery Baseline - 2026-09-21
 
 Code commit: `36efe31aacd41eff02fe55e9db873f7897bdc5a6`
 
