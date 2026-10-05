@@ -55,8 +55,8 @@ export function IconButton({ label, icon: Icon, ...props }) {
 export function Field({ label, multiline = false, children, ...props }) {
   const id = useId();
   return (
-    <label className="field" htmlFor={id}>
-      <span>{label}</span>
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
       {children ? (
         <select id={id} {...props}>
           {children}
@@ -66,7 +66,7 @@ export function Field({ label, multiline = false, children, ...props }) {
       ) : (
         <input id={id} {...props} />
       )}
-    </label>
+    </div>
   );
 }
 export function ErrorText({ children }) {

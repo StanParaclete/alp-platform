@@ -175,7 +175,7 @@ img {
   font-size: 14px;
   font-weight: 550;
 }
-.field > span {
+.field > label {
   overflow-wrap: anywhere;
 }
 .field input,
@@ -441,7 +441,7 @@ img {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
 }
-.school-picker .field > span {
+.school-picker .field > label {
   color: var(--muted);
   font-size: 13px;
 }
@@ -893,7 +893,7 @@ details h3 {
   .school-picker .field {
     display: block;
   }
-  .school-picker .field > span {
+  .school-picker .field > label {
     position: absolute;
     width: 1px;
     height: 1px;

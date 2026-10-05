@@ -131,6 +131,52 @@ try {
   await screenshot("login-mobile");
   await page.setViewportSize({ width: 1440, height: 960 });
   await login(data.teacher);
+  if (integration) {
+    await page
+      .getByRole("button", { name: "Add student", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByLabel("Student name", { exact: true })
+      .fill("Additional Browser Learner");
+    await page
+      .getByRole("dialog")
+      .getByLabel("Grade / year", { exact: true })
+      .fill("5");
+    await page
+      .getByRole("button", { name: "Save student", exact: true })
+      .click();
+    await expect(
+      page.getByRole("heading", {
+        name: "Additional Browser Learner",
+        exact: true,
+      }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Edit student", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByLabel("Strengths", { exact: true })
+      .fill("Synthetic edited strengths.");
+    await page
+      .getByRole("button", { name: "Save student", exact: true })
+      .click();
+    await expect(
+      page.getByText("Synthetic edited strengths.", { exact: true }),
+    ).toBeVisible();
+    const saved = await db.student.findFirst({
+      where: { name: "Additional Browser Learner" },
+    });
+    assert.equal(saved.strengths, "Synthetic edited strengths.");
+    await page
+      .getByRole("link", { name: "Students", exact: true })
+      .first()
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "Students", exact: true }),
+    ).toBeVisible();
+  }
   await accessible();
   await screenshot("students-desktop");
   await page.getByRole("link", { name: "Synthetic Learner" }).click();

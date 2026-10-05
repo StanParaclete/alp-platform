@@ -40,7 +40,10 @@ export function Layout() {
   const [open, setOpen] = useState(false),
     [dark, setDark] = useState(false),
     [error, setError] = useState("");
-  const blocker = useBlocker(state.dirty || state.saving);
+  const blocker = useBlocker(() => {
+    const current = session.store.getState();
+    return current.dirty || current.saving;
+  });
   useBeforeUnload(
     useCallback((event) => {
       if (session.store.getState().dirty || session.store.getState().saving) {
