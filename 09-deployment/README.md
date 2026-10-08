@@ -17,6 +17,10 @@ starts the API image against CI-only PostgreSQL and Redis, and runs the anonymou
 API readiness checker. See `09-deployment/LAUNCH_STATUS.md` for what this proves
 and what still needs manual production acceptance.
 
+For the current Netlify project split and DNS cutover checklist, use
+`09-deployment/NETLIFY_CUTOVER.md`. It records the live dashboard state and the
+exact project settings to create before public DNS changes.
+
 ## Website Staging
 
 Create a separate Netlify project connected to this repository and branch, using
