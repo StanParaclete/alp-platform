@@ -1,7 +1,7 @@
 # Separate website project only. The repository root still deploys the live web app.
 [build]
   base = "01-website"
-  command = "npm ci && npm run build"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]

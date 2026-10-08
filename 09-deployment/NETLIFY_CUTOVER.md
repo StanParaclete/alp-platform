@@ -20,27 +20,28 @@ email and onboarding checks pass.
   - `growwithalp.com` -> Netlify project `myalpeducation.netlify.app`
   - `www.growwithalp.com` -> Netlify project `myalpeducation.netlify.app`
   - `api.growwithalp.com` -> stale CNAME `ptsndeotblrgmxcfffrt.supabase.co`
-  - `app.growwithalp.com` -> no record
+  - `app.growwithalp.com` -> Netlify project `alp-app-745.netlify.app`
 
-## Create These Projects
+## Staged Projects
 
-Create separate projects from the existing GitHub repository
-`StanParaclete/alp-platform`. Use the `codex/alp-ecosystem` branch for staging.
-Use `main` only after the migration branch is merged and accepted.
+Two separate Netlify projects now exist for the parallel ALP ecosystem. They were deployed manually from local production builds, not connected to GitHub CI yet. Connect GitHub CI after approving Netlify/GitHub deploy-key and webhook access.
 
 ### 1. Marketing Website
 
-Suggested Netlify project name:
+Actual Netlify project:
 
 ```text
-alp-website
+alp-website-745
+Project ID: 8c885a93-4089-4a19-981e-3643b074feb7
+Live URL: https://alp-website-745.netlify.app
+Latest deploy: 6ac7f578b8ef5822ea9e40a0
 ```
 
 Build settings:
 
 ```text
 Base directory: 01-website
-Build command: npm ci && npm run build
+Build command: npm run build
 Publish directory: 01-website/.next
 Node version: 22
 ```
@@ -60,10 +61,14 @@ Keep `ALLOW_INDEXING=false` until the public launch is approved.
 
 ### 2. Browser Application
 
-Suggested Netlify project name:
+Actual Netlify project:
 
 ```text
-alp-app
+alp-app-745
+Project ID: 1fa5a5af-0f8a-4dc3-b5d4-70fb2fa28e18
+Live URL: https://app.growwithalp.com
+Fallback URL: https://alp-app-745.netlify.app
+Latest deploy: 6ac7787247e4332fed6d36d8
 ```
 
 Build settings:
@@ -89,14 +94,13 @@ https://app.growwithalp.com
 
 ## DNS Changes
 
-Do not make these changes until the staged projects have working Netlify
-subdomains and the API readiness check passes.
+The app subdomain has been created. Do not move the root website or API DNS until the API readiness check passes.
 
 | Hostname | Type | Target |
 | --- | --- | --- |
 | `growwithalp.com` | Netlify domain | `alp-website` |
 | `www.growwithalp.com` | Netlify domain | `alp-website` |
-| `app.growwithalp.com` | Netlify domain or CNAME | `alp-app` |
+| `app.growwithalp.com` | Netlify domain | `alp-app-745` |
 | `api.growwithalp.com` | CNAME or ALIAS | approved backend API host |
 
 Delete the old `api.growwithalp.com` Supabase CNAME only when the replacement

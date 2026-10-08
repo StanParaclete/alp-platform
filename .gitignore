@@ -39,3 +39,6 @@ client_secret*.json
 *credentials*.json
 *.pem
 *.p12
+
+# Local Netlify folder
+.netlify
