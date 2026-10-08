@@ -23,5 +23,9 @@
     "lucide-react": "1.45.0",
     "tailwindcss": "4.3.3",
     "@tailwindcss/postcss": "4.3.3"
+  },
+  "overrides": {
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2"
   }
 }
