@@ -1,0 +1,22 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "09-deployment/backend.Dockerfile",
+    "watchPatterns": [
+      "05-backend/**",
+      "06-database/migrations/**",
+      "09-deployment/backend.Dockerfile",
+      "09-deployment/backend.Dockerfile.dockerignore",
+      "railway.json"
+    ]
+  },
+  "deploy": {
+    "healthcheckPath": "/health/ready",
+    "healthcheckTimeout": 120,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 5,
+    "overlapSeconds": 30,
+    "drainingSeconds": 15
+  }
+}

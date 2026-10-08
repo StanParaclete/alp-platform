@@ -110,3 +110,6 @@ On 2026-10-08:
 - `npm test` in `05-backend` passed 15 local tests. The two service-backed
   PostgreSQL and Redis tests were skipped because staging service URLs were not
   configured locally.
+- Railway CLI is installed but logged out on this machine, and no Railway
+  project is linked. `railway.json` now defines the backend API service build and
+  readiness policy for the approved project once login/linking is completed.

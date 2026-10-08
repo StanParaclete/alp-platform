@@ -99,6 +99,29 @@ target as a separate private process. Keep these runtime values in the provider'
 secret manager, not in Git or chat: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`,
 `CONTACT_WEBHOOK_TOKEN`, SMTP credentials and password-recovery keys.
 
+## Railway Backend Service
+
+The repository includes `railway.json` for the API service. It tells Railway to
+build `09-deployment/backend.Dockerfile`, use the API image's Docker `CMD`, and
+health-check `/health/ready`. The CLI on this machine is currently logged out;
+log in and link to the approved project before deploying.
+
+Railway still needs these project/service settings before a successful API
+release:
+
+- PostgreSQL and Redis services provisioned in the same project.
+- API service variables: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`,
+  `CORS_ORIGINS=https://app.growwithalp.com`, `CONTACT_WEBHOOK_TOKEN` and any
+  optional SMTP/password-recovery values.
+- A one-time migration run from the `migrate` image target before exposing the
+  API service.
+- A public Railway domain or custom domain for the API, then a DNS update so
+  `api.growwithalp.com` points to that approved host.
+
+Do not run `railway up` against a project that has not been explicitly selected
+for the parallel ALP backend, because the config is intentionally for the API
+service only.
+
 ## Browser Workspace Staging
 
 `02-webapp/ecosystem` is the new Vite client for the separate API. Use its own
