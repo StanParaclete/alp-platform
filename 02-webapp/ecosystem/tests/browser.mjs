@@ -152,6 +152,9 @@ try {
         exact: true,
       }),
     ).toBeVisible();
+    const additionalStudentId = await page.evaluate(() =>
+      location.pathname.split("/").pop(),
+    );
     await page
       .getByRole("button", { name: "Edit student", exact: true })
       .click();
@@ -162,11 +165,14 @@ try {
     await page
       .getByRole("button", { name: "Save student", exact: true })
       .click();
+    await expect(page.getByRole("dialog")).toBeHidden({ timeout: 10000 });
     await expect(
-      page.getByText("Synthetic edited strengths.", { exact: true }),
+      page
+        .locator(".profile-columns")
+        .getByText("Synthetic edited strengths.", { exact: true }),
     ).toBeVisible();
-    const saved = await db.student.findFirst({
-      where: { name: "Additional Browser Learner" },
+    const saved = await db.student.findUnique({
+      where: { id: additionalStudentId },
     });
     assert.equal(saved.strengths, "Synthetic edited strengths.");
     await page
