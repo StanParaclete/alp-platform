@@ -80,6 +80,25 @@ After staging deploy, verify the public API without sending credentials:
 node 09-deployment/check-api.mjs --api https://api.example.com --origin https://app.example.com
 ```
 
+For the current staged website, browser gateway and production API hostname, run
+the no-secrets public status check:
+
+```sh
+node 09-deployment/check-public-status.mjs
+```
+
+It must pass the marketing website, browser app, API liveness, API readiness,
+CORS and anonymous-authentication checks before any school is invited. A failure
+at `ALP API identity` means DNS, TLS or backend hosting is still incomplete.
+
+The production API host must expose the Express backend from
+`09-deployment/backend.Dockerfile`, with managed PostgreSQL and Redis. Build
+from the repository root, run the `migrate` target once with a migration database
+identity, then run the `api` target as the public HTTPS service and the `worker`
+target as a separate private process. Keep these runtime values in the provider's
+secret manager, not in Git or chat: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`,
+`CONTACT_WEBHOOK_TOKEN`, SMTP credentials and password-recovery keys.
+
 ## Browser Workspace Staging
 
 `02-webapp/ecosystem` is the new Vite client for the separate API. Use its own

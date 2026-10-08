@@ -104,6 +104,9 @@ On 2026-10-08:
 - `https://alp-website-745.netlify.app/` returned HTTP 200.
 - `node 09-deployment/check-api.mjs --api https://api.growwithalp.com --origin https://app.growwithalp.com`
   failed at API identity because the API hostname could not be resolved.
+- `node 09-deployment/check-public-status.mjs` is the current no-secrets public
+  release check. It is expected to fail until `api.growwithalp.com` resolves to
+  the approved backend host and passes readiness.
 - `npm test` in `05-backend` passed 15 local tests. The two service-backed
   PostgreSQL and Redis tests were skipped because staging service URLs were not
   configured locally.
