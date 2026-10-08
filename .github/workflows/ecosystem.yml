@@ -124,3 +124,80 @@ jobs:
           retention-days: 7
       - run: npm audit --audit-level=high
         working-directory: 05-backend
+  backend-container-smoke:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_DB: alp_test
+          POSTGRES_USER: alp_test
+          POSTGRES_PASSWORD: ephemeral-ci-only-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U alp_test -d alp_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-bookworm
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://alp_test:ephemeral-ci-only-password@127.0.0.1:5432/alp_test
+      REDIS_URL: redis://127.0.0.1:6379/14
+      CORS_ORIGINS: https://app.example.test
+      JWT_SECRET: ci-only-deployment-smoke-not-a-production-secret-please-never-reuse
+      NODE_ENV: production
+      NPM_CONFIG_CACHE: /tmp/.npm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test 09-deployment/check-api.test.mjs
+      - name: Build backend deployment images
+        run: |
+          docker build -f 09-deployment/backend.Dockerfile --target migrate -t alp-backend-migrate:ci .
+          docker build -f 09-deployment/backend.Dockerfile --target api -t alp-backend-api:ci .
+          docker build -f 09-deployment/backend.Dockerfile --target worker -t alp-backend-worker:ci .
+      - name: Run database migrations from deployment image
+        run: |
+          docker run --rm \
+            --network host \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --cap-drop=ALL \
+            --security-opt=no-new-privileges \
+            -e DATABASE_URL \
+            -e NPM_CONFIG_CACHE \
+            alp-backend-migrate:ci
+      - name: Smoke test deployment API image
+        run: |
+          docker run -d --name alp-api-smoke \
+            --network host \
+            --read-only \
+            --tmpfs /tmp:rw,noexec,nosuid,size=64m \
+            --cap-drop=ALL \
+            --security-opt=no-new-privileges \
+            -e NODE_ENV \
+            -e HOST=127.0.0.1 \
+            -e PORT=4100 \
+            -e DATABASE_URL \
+            -e REDIS_URL \
+            -e JWT_SECRET \
+            -e CORS_ORIGINS \
+            alp-backend-api:ci
+          trap 'docker logs --tail 100 alp-api-smoke || true; docker rm -f alp-api-smoke || true' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4100/health/ready > /tmp/alp-ready.json; then
+              break
+            fi
+            sleep 2
+          done
+          test "$(docker exec alp-api-smoke id -u)" != "0"
+          curl -fsS http://127.0.0.1:4100/health/ready
+          node 09-deployment/check-api.mjs --api http://127.0.0.1:4100 --origin "$CORS_ORIGINS" --allow-loopback
+          docker stop --time 15 alp-api-smoke
+          docker rm alp-api-smoke
+          trap - EXIT

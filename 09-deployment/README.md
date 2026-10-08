@@ -11,6 +11,12 @@ and runs real PostgreSQL/Redis isolation tests. It requires no production secret
 Select the test branch when manually dispatching the workflow. Never insert live
 database credentials into its integration-test environment.
 
+The same workflow also builds the backend deployment images from
+`09-deployment/backend.Dockerfile`, applies migrations from the migration image,
+starts the API image against CI-only PostgreSQL and Redis, and runs the anonymous
+API readiness checker. See `09-deployment/LAUNCH_STATUS.md` for what this proves
+and what still needs manual production acceptance.
+
 ## Website Staging
 
 Create a separate Netlify project connected to this repository and branch, using
@@ -51,6 +57,25 @@ worker using `08-docs/PASSWORD_RECOVERY.md`. Verify actual inbox delivery and
 session revocation in staging before public enablement. Additional-school
 administration and identity-provider integration remain unfinished.
 
+Container deployments should build from the repository root:
+
+```sh
+docker build -f 09-deployment/backend.Dockerfile --target migrate -t alp-backend-migrate:release .
+docker build -f 09-deployment/backend.Dockerfile --target api -t alp-backend-api:release .
+docker build -f 09-deployment/backend.Dockerfile --target worker -t alp-backend-worker:release .
+```
+
+Run the `migrate` image once per release with the migration database identity,
+then run the `api` and `worker` images as separate non-root services. The worker
+still needs real SMTP verification before public password recovery or contact
+delivery is advertised.
+
+After staging deploy, verify the public API without sending credentials:
+
+```sh
+node 09-deployment/check-api.mjs --api https://api.example.com --origin https://app.example.com
+```
+
 ## Browser Workspace Staging
 
 `02-webapp/ecosystem` is the new Vite client for the separate API. Use its own
@@ -72,7 +97,7 @@ artifacts exist. Do not add dummy URLs or advertise store availability.
 
 ## Not Yet Verified
 
-Docker, Vercel and Railway deployment configurations and execution, production
-domain routing, migration/import tooling, native store publication, and full
+Production domain routing, migration/import tooling, native store publication,
+email inbox delivery, backup restore drills, external monitoring, and full
 security/accessibility/restore acceptance remain work. Follow the gates in
 `08-docs/ARCHITECTURE.md`; deployment settings alone do not make a release ready.

@@ -1,0 +1,17 @@
+**
+!05-backend/
+!05-backend/package.json
+!05-backend/package-lock.json
+!05-backend/prisma.config.ts
+!05-backend/prisma/
+!05-backend/prisma/schema.prisma
+!05-backend/src/
+!05-backend/src/*.mjs
+!05-backend/scripts/
+!05-backend/scripts/bootstrap.mjs
+!06-database/
+!06-database/migrations/
+!06-database/migrations/**
+!09-deployment/
+!09-deployment/backend.Dockerfile
+!09-deployment/backend.Dockerfile.dockerignore
