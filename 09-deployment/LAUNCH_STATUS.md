@@ -23,10 +23,11 @@ passing deployment checks on their own staging hosts:
 
 ## Hosting Gates
 
-The parallel branch now includes a backend deployment Dockerfile and an anonymous
-API readiness checker. The GitHub workflow builds the migration, API and worker
-images; runs migrations against CI-only PostgreSQL; starts the API image with
-CI-only Redis; and verifies:
+The parallel branch includes a backend deployment Dockerfile and an anonymous
+API readiness checker. GitHub Actions run
+37720258789 for commit `d89baf87374995549fb01893194610351bf922ed` built the
+migration, API and worker images; ran migrations against CI-only PostgreSQL;
+started the API image with CI-only Redis; and verified:
 
 - ALP API identity on `/health/live`
 - PostgreSQL and Redis readiness on `/health/ready`

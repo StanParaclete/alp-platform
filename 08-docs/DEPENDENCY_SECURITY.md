@@ -1,4 +1,4 @@
-# Dependency Security - 2026-10-05
+# Dependency Security - 2026-10-08
 
 Scope: the separate `codex/alp-ecosystem` branch. This is not a security
 assessment of the deployed Supabase application. No live release was changed.
@@ -9,9 +9,14 @@ assessment of the deployed Supabase application. No live release was changed.
   [GHSA-vcvr-r3jv-pc5j](https://github.com/advisories/GHSA-vcvr-r3jv-pc5j).
 - Desktop: compatible lockfile updates for brace-expansion (1.1.21, 2.1.7,
   5.0.12), http-cache-semantics 4.3.0 and fast-uri 3.1.8.
-- Backend: fast-uri 3.1.8.
+- Backend: fast-uri 3.1.8 and proxy-addr 2.0.8.
+- Website and browser workspace: compatible overrides for patched `sharp`
+  0.35.5 and `source-map-js` 1.2.2 where required by Next, Tailwind/PostCSS and
+  Vite dependency trees.
 - Mobile: brace-expansion 5.0.12. Expo, React Native and their supported React
-  and animation peers were not downgraded or overridden.
+  and animation peers were not downgraded or overridden. A safe lockfile-only
+  audit cleanup removed the transient `source-map-js` and `shell-quote` reports
+  without using `--force`.
 
 The website, new browser client, desktop and backend local audits report zero
 known vulnerabilities after these updates. That result is time-dependent and
@@ -19,14 +24,14 @@ does not replace code review, threat modelling or operational security testing.
 
 ## Mobile Release Blockers
 
-The mobile audit still fails `npm audit --audit-level=high`: 19 high and 10
+The mobile audit still fails `npm audit --audit-level=high`: 18 high and 10
 moderate package findings, including propagation through parent dependencies.
-These are not 29 independent vulnerabilities.
+These are not 28 independent vulnerabilities.
 
 | Leaf package | Dependency path | Advisory | Published patched version |
 | --- | --- | --- | --- |
-| braces 3.0.3 | Expo CLI -> Metro file map -> micromatch | [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), stack exhaustion on deeply nested patterns | None as of 2026-10-05 |
-| node-forge 1.4.0 | Expo CLI and Expo code-signing-certificates | [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv), RSA signature verification | None as of 2026-10-05 |
+| braces 3.0.3 | Expo CLI -> Metro file map -> micromatch | [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm), stack exhaustion on deeply nested patterns | None as of 2026-10-08 |
+| node-forge 1.4.0 | Expo CLI and Expo code-signing-certificates | [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv), RSA signature verification | None as of 2026-10-08 |
 
 Both the registry's latest versions and the advisory's patched-version fields
 were checked. The known dependency paths are in native development/build
@@ -35,10 +40,10 @@ or that a signed artifact would be safe. Do not distribute native releases while
 the high-severity gate is red. Do not expose Metro/Expo development services to
 untrusted networks or run untrusted projects in the release/signing environment.
 
-Moderate transitive findings also remain in decode-uri-component via
+Moderate transitive findings remain in decode-uri-component via
 expo-router/query-string and uuid via Expo config-plugins/xcode. Track those
 alongside the high findings. `npm audit fix --force` proposes incompatible major
-changes/downgrades and is not an accepted fix.
+changes/downgrades, including older Expo packages, and is not an accepted fix.
 
 ## Closure Evidence Required
 

@@ -1,6 +1,36 @@
 # Verification Record
 
-## Current Increment - 2026-10-05
+## Current Increment - 2026-10-08
+
+Code commit: `d89baf87374995549fb01893194610351bf922ed`
+
+[GitHub Actions run 37720258789](https://github.com/StanParaclete/alp-platform/actions/runs/37720258789)
+completed with **five jobs passing and the mobile audit failing**. This is not
+an approved release or DNS cutover.
+
+| Job | Result and evidence |
+| --- | --- |
+| existing-webapp | PASS: focused login/PWA/media/invitation checks and production build. |
+| applications (01-website) | PASS: clean install, six tests, zero audit findings, Next.js production build and HTTP smoke test. |
+| applications (03-app) | FAIL at dependency audit: 18 high and 10 moderate package findings remain in Expo/React Native tooling; 15 unit tests and iOS/Android JavaScript exports passed locally after compatible lockfile cleanup. |
+| applications (04-software) | PASS: four policy tests, zero audit findings and unpacked Linux Electron build. |
+| backend-container-smoke | PASS: migration, API and worker images built from `09-deployment/backend.Dockerfile`; migrations ran from the migration image; the API image started as non-root with read-only filesystem settings against CI-only PostgreSQL/Redis and passed anonymous HTTPS/CORS/readiness checks. |
+| database | PASS: all three migrations, 15 backend unit tests, real PostgreSQL/Redis security checks, seven browser unit tests, Vite build, browser workflow against the real API, and zero backend/browser audit findings. |
+
+This run proves the separate ecosystem branch can build the website, browser
+workspace, backend runtime image and database-backed browser workflow in CI.
+It does not prove production DNS, Netlify project access, real staging API
+hosting, inbox email delivery, first-school onboarding, backups, restore drills,
+native signed builds or school acceptance. `09-deployment/LAUNCH_STATUS.md`
+tracks those public-launch gates.
+
+Local checks after the dependency updates: website tests, website production
+build and smoke test passed; browser workspace tests, production build and audit
+passed; backend Prisma generation/validation, 15 unit checks and audit passed;
+mobile unit tests and iOS/Android JavaScript export passed. Local Docker is not
+installed, so container execution was verified in CI only.
+
+## Previous Increment - 2026-10-05
 
 Code commit: `6a0e6867c72ab1dea60026ac114542634e94ebe3`
 
