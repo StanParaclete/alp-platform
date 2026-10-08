@@ -9,13 +9,16 @@ not yet safe to cut over for schools.
 ## Public DNS
 
 - `growwithalp.com` resolves and serves the current Netlify production site.
-- `app.growwithalp.com` has no DNS record yet.
-- `api.growwithalp.com` points at an old Supabase hostname that no longer
-  resolves. Do not send production traffic or credentials there.
+- `alp-website-745.netlify.app` serves the staged marketing website for the
+  parallel ecosystem, but the root domain has not been moved to it.
+- `app.growwithalp.com` resolves to the staged browser workspace and returns
+  HTTP 200 at `/login`.
+- `api.growwithalp.com` does not resolve in public DNS. Do not send production
+  traffic or credentials there.
 
 ## Netlify Project State
 
-Verified in the Netlify dashboard on 2026-10-08:
+Verified in Netlify and public endpoint checks on 2026-10-08:
 
 - The `myalpeducation` team currently has one project for this repository:
   `growwithalp.com`.
@@ -27,7 +30,17 @@ Verified in the Netlify dashboard on 2026-10-08:
 - The only visible project environment variables are Supabase client variables:
   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - The DNS zone contains Netlify records for `growwithalp.com` and
-  `www.growwithalp.com`, plus the stale `api.growwithalp.com` Supabase CNAME.
+  `www.growwithalp.com`. Public DNS for `api.growwithalp.com` currently fails.
+
+Separate staging projects now exist for the parallel ecosystem:
+
+- `alp-website-745`, project ID `8c885a93-4089-4a19-981e-3643b074feb7`, serves
+  `https://alp-website-745.netlify.app`.
+- `alp-app-745`, project ID `1fa5a5af-0f8a-4dc3-b5d4-70fb2fa28e18`, serves
+  `https://app.growwithalp.com` and `https://alp-app-745.netlify.app`.
+- These projects were deployed from local production builds. GitHub-triggered
+  deploys for the new projects still need Netlify/GitHub deploy-key and webhook
+  authorization.
 
 Do not repurpose this live project during the parallel migration. Create
 separate Netlify projects for the new marketing website and browser workspace,
@@ -65,16 +78,28 @@ payment, support operations or production monitoring.
 
 ## Required Before Public Use
 
-1. Sign in to Netlify and confirm the live project, DNS zone and deploy settings.
-2. Provide the staging API HTTPS origin without secrets.
-3. Deploy the backend to the approved host with managed PostgreSQL and Redis.
-4. Configure the browser workspace with `VITE_API_URL` pointing at that staging
+1. Provide the staging API HTTPS origin without secrets.
+2. Deploy the backend to the approved host with managed PostgreSQL and Redis.
+3. Configure the browser workspace with `VITE_API_URL` pointing at that staging
    API and set the API `CORS_ORIGINS` to the exact browser origin.
-5. Run `node 09-deployment/check-api.mjs --api <api-origin> --origin <app-origin>`
+4. Run `node 09-deployment/check-api.mjs --api <api-origin> --origin <app-origin>`
    against the real staging hosts.
-6. Verify account onboarding with a real school administrator and at least one
+5. Verify account onboarding with a real school administrator and at least one
    teacher account.
-7. Verify contact and password-recovery email delivery in a real inbox.
-8. Add backups, restore testing, alerting, log retention, secret rotation and an
+6. Verify contact and password-recovery email delivery in a real inbox.
+7. Add backups, restore testing, alerting, log retention, secret rotation and an
    explicit proxy/rate-limit topology.
-9. Only then change public DNS and publish release notes/download links.
+8. Only then change public DNS and publish release notes/download links.
+
+## Latest Local Checks
+
+On 2026-10-08:
+
+- `https://app.growwithalp.com/login` returned HTTP 200 with the expected API
+  content security policy.
+- `https://alp-website-745.netlify.app/` returned HTTP 200.
+- `node 09-deployment/check-api.mjs --api https://api.growwithalp.com --origin https://app.growwithalp.com`
+  failed at API identity because the API hostname could not be resolved.
+- `npm test` in `05-backend` passed 15 local tests. The two service-backed
+  PostgreSQL and Redis tests were skipped because staging service URLs were not
+  configured locally.

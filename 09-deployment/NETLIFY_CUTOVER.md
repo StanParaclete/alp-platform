@@ -131,8 +131,9 @@ Then verify manually:
 Stop the launch if any of these are true:
 
 - The API host is unknown.
-- `api.growwithalp.com` still points to Supabase.
-- `app.growwithalp.com` has no DNS record.
+- `api.growwithalp.com` does not resolve to the approved API host and pass
+  `/health/live` and `/health/ready`.
+- `app.growwithalp.com` does not return the browser workspace over HTTPS.
 - Netlify deploys are built from the legacy root project instead of the new
   `01-website` or `02-webapp/ecosystem` projects.
 - Email delivery has not been verified.
