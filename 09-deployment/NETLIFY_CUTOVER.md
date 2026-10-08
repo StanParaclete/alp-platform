@@ -34,7 +34,7 @@ Actual Netlify project:
 alp-website-745
 Project ID: 8c885a93-4089-4a19-981e-3643b074feb7
 Live URL: https://alp-website-745.netlify.app
-Latest deploy: 6ac7f578b8ef5822ea9e40a0
+Latest deploy: 6ac7fc2c135ba28e7864dbb6
 ```
 
 Build settings:
@@ -68,7 +68,7 @@ alp-app-745
 Project ID: 1fa5a5af-0f8a-4dc3-b5d4-70fb2fa28e18
 Live URL: https://app.growwithalp.com
 Fallback URL: https://alp-app-745.netlify.app
-Latest deploy: 6ac7787247e4332fed6d36d8
+Latest deploy: 6ac7fc19135ba28c5864dbf3
 ```
 
 Build settings:
