@@ -27,7 +27,20 @@ export async function createApp({ db, rateLimit, env=process.env }) {
     next();
   });
   app.get('/health/live',(_,res)=>res.json({status:'ok',service:'alp-api'}));
-  app.get('/health/ready',async (_,res)=>{ try { await db.$queryRaw`SELECT 1`; await rateLimit.health(); res.json({status:'ready'}); } catch { res.status(503).json({status:'unavailable'}); } });
+  app.get('/health/ready',async (_,res)=>{
+    try {
+      await db.$queryRaw`SELECT 1`;
+      await rateLimit.health();
+      res.json({status:'ready'});
+    } catch (error) {
+      console.error('alp_ready_unavailable',{
+        name:error?.name,
+        code:error?.code,
+        message:error?.message
+      });
+      res.status(503).json({status:'unavailable'});
+    }
+  });
   app.use(express.json({limit:'450kb'}));
   app.use(async (req,res,next) => {
     try { if (!await rateLimit.allow(`ip:${digest(req.ip||'unknown')}`,120,60)) return res.status(429).json({error:'Too many requests. Try again shortly.'}); next(); }
