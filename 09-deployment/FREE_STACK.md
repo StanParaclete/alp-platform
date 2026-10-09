@@ -50,6 +50,9 @@ The build command generates Prisma Client and runs Prisma migrations before the
 service starts. Only expose or point DNS to the service after both health checks
 and the API checker pass.
 
+Runtime database connections automatically enable TLS for Render Postgres hosts.
+This is required when the app uses the Render external database URL.
+
 ## Verification
 
 Use the Render service URL first:
