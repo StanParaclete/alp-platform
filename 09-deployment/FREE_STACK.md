@@ -8,6 +8,7 @@ limits.
 ## Target Stack
 
 - API runtime: Render Free Web Service, service name `alp-api`
+- Public API gateway: Netlify static proxy, site name `alp-api-proxy-745`
 - PostgreSQL: Render Free Postgres, service name `alp-postgres`
 - Redis-compatible cache: Render Free Key Value, service name `alp-redis`
 - Website and browser app: existing Netlify staging projects
@@ -53,6 +54,22 @@ and the API checker pass.
 Runtime database connections automatically enable TLS for Render Postgres hosts.
 This is required when the app uses the Render external database URL.
 
+## Public API Gateway
+
+The Render free service remains the actual API runtime, but
+`api.growwithalp.com` is served through a tiny Netlify proxy in
+`09-deployment/netlify-api-proxy`. This keeps the public API on the same DNS
+provider as the website and app, and avoids needing a paid backend workspace
+only to issue a custom-domain certificate.
+
+The proxy should stay intentionally small:
+
+- `index.html` identifies the gateway for accidental browser visits.
+- `_redirects` forwards every path to the Render API service.
+
+Do not put secrets in this folder. It contains only static Netlify routing
+rules.
+
 ## Verification
 
 Use the Render service URL first:
@@ -69,7 +86,7 @@ node 09-deployment/check-api.mjs \
 ```
 
 Only after the checker passes should `api.growwithalp.com` point to the approved
-API host.
+API host or gateway.
 
 ## Secrets
 
@@ -92,4 +109,7 @@ secret manager or local shell variables while deploying:
 6. Deploy the API and confirm migrations complete.
 7. Wait for `/health/live` and `/health/ready` to pass.
 8. Run `09-deployment/check-api.mjs` against the Render service URL.
-9. Set Netlify DNS for `api.growwithalp.com` only after the API checker passes.
+9. Deploy `09-deployment/netlify-api-proxy` to the Netlify proxy site.
+10. Point `api.growwithalp.com` at the proxy site only after the API checker
+    passes against the Render service URL.
+11. Run `09-deployment/check-api.mjs` again against `https://api.growwithalp.com`.
