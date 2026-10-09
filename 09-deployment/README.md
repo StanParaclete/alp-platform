@@ -103,13 +103,23 @@ secret manager, not in Git or chat: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`,
 
 The repository includes `railway.json` for the API service. It tells Railway to
 build `09-deployment/backend.Dockerfile`, use the API image's Docker `CMD`, and
-health-check `/health/ready`. The CLI on this machine is currently logged out;
-log in and link to the approved project before deploying.
+health-check `/health/ready`.
 
-The local Railway config already points `05-backend` at project `alp-backend`,
-production environment `production`, service `08f541b3-68bd-414d-a4b7-9aa3d5180b10`.
-The saved token is expired, so refresh login first; do not paste Railway tokens
-into chat or commit them to the repository.
+The local Railway CLI is authenticated. The local `05-backend` link points at
+project `alp-backend`, production environment `production`, service
+`alp-backend` (`398c79ff-1282-4110-9a46-fb7e8b72ddfa`). The repository root is
+not linked, so deploy from the root with explicit project/service selectors:
+
+```bash
+railway up \
+  --service alp-backend \
+  --environment production \
+  --project 7c85796d-3139-4ef0-9196-81b20ed32691
+```
+
+As of 2026-10-09, Railway blocks that deploy before upload because the
+workspace trial has expired. Select an active Railway plan or move the backend
+to another approved host before trying to publish the API.
 
 Railway still needs these project/service settings before a successful API
 release:

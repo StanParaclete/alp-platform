@@ -1,6 +1,6 @@
 # ALP Launch Status
 
-Last updated: 2026-10-08
+Last updated: 2026-10-09
 
 This file separates completed build work from the remaining public launch gates.
 The live `growwithalp.com` site is online, but the parallel ecosystem branch is
@@ -78,22 +78,25 @@ payment, support operations or production monitoring.
 
 ## Required Before Public Use
 
-1. Provide the staging API HTTPS origin without secrets.
-2. Deploy the backend to the approved host with managed PostgreSQL and Redis.
-3. Configure the browser workspace with `VITE_API_URL` pointing at that staging
+1. Select an active Railway plan or another approved paid backend host. Railway
+   currently blocks deploys before upload because the workspace trial has
+   expired.
+2. Provide the staging API HTTPS origin without secrets.
+3. Deploy the backend to the approved host with managed PostgreSQL and Redis.
+4. Configure the browser workspace with `VITE_API_URL` pointing at that staging
    API and set the API `CORS_ORIGINS` to the exact browser origin.
-4. Run `node 09-deployment/check-api.mjs --api <api-origin> --origin <app-origin>`
+5. Run `node 09-deployment/check-api.mjs --api <api-origin> --origin <app-origin>`
    against the real staging hosts.
-5. Verify account onboarding with a real school administrator and at least one
+6. Verify account onboarding with a real school administrator and at least one
    teacher account.
-6. Verify contact and password-recovery email delivery in a real inbox.
-7. Add backups, restore testing, alerting, log retention, secret rotation and an
+7. Verify contact and password-recovery email delivery in a real inbox.
+8. Add backups, restore testing, alerting, log retention, secret rotation and an
    explicit proxy/rate-limit topology.
-8. Only then change public DNS and publish release notes/download links.
+9. Only then change public DNS and publish release notes/download links.
 
 ## Latest Local Checks
 
-On 2026-10-08:
+On 2026-10-09:
 
 - `alp-app-745` redeployed successfully as deploy
   `6ac7fc19135ba28c5864dbf3`.
@@ -105,18 +108,25 @@ On 2026-10-08:
 - `node 09-deployment/check-api.mjs --api https://api.growwithalp.com --origin https://app.growwithalp.com`
   failed at API identity because the API hostname could not be resolved.
 - `node 09-deployment/check-public-status.mjs` is the current no-secrets public
-  release check. It is expected to fail until `api.growwithalp.com` resolves to
-  the approved backend host and passes readiness.
+  release check. It currently passes the marketing website and browser app, and
+  fails only at ALP API identity until `api.growwithalp.com` resolves to the
+  approved backend host and passes readiness.
 - `npm test` in `05-backend` passed 15 local tests. The two service-backed
   PostgreSQL and Redis tests were skipped because staging service URLs were not
   configured locally.
-- Railway CLI is installed but logged out on this machine, and no Railway
-  project is linked. `railway.json` now defines the backend API service build and
-  readiness policy for the approved project once login/linking is completed.
-- The local Railway config still records an existing backend project link from
-  `05-backend`: project `alp-backend`
-  (`7c85796d-3139-4ef0-9196-81b20ed32691`), production environment
-  `95ea7b77-5a8d-44b0-9c5c-dd4994089bbf`, service
-  `08f541b3-68bd-414d-a4b7-9aa3d5180b10`. The saved Railway token is expired.
-- `railway login` opened an activation flow but requires account authorization
-  before the CLI can deploy or inspect the backend service.
+- Railway CLI is authenticated and the local `05-backend` link now points at the
+  actual API service `alp-backend`
+  (`398c79ff-1282-4110-9a46-fb7e8b72ddfa`) in project
+  `7c85796d-3139-4ef0-9196-81b20ed32691`, production environment
+  `95ea7b77-5a8d-44b0-9c5c-dd4994089bbf`.
+- The Railway project currently shows `alp-backend` as failed and Postgres as
+  offline. The latest Railway deployment is from 2026-07-09 and still references
+  the old `/05-backend/railway.json` flow rather than the current root
+  `railway.json` Docker build.
+- `railway up --service alp-backend --environment production --project 7c85796d-3139-4ef0-9196-81b20ed32691`
+  was attempted from the repository root and stopped before upload with:
+  `Your trial has expired. Please select a plan to continue using Railway.`
+- The existing Railway API service is still associated with
+  `https://www.growwithalp.com`; do not move public DNS or invite schools until
+  the backend is redeployed on an approved API host and `api.growwithalp.com`
+  passes the public checker.
