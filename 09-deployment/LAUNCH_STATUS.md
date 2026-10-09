@@ -82,7 +82,9 @@ backups, restore drills, payment, support operations or production monitoring.
 ## Required Before Public Use
 
 1. Verify account onboarding with a real school administrator and at least one
-   teacher account.
+   teacher account. The browser setup route is implemented, but the API keeps
+   it disabled until `ALP_SETUP_TOKEN` is temporarily configured for the first
+   owner setup.
 2. Verify contact and password-recovery email delivery in a real inbox.
 3. Add backups, restore testing, alerting, log retention, secret rotation and an
    explicit proxy/rate-limit topology.
@@ -98,6 +100,15 @@ backups, restore drills, payment, support operations or production monitoring.
 
 On 2026-10-09:
 
+- The guarded first-school browser setup flow was added to the ecosystem app
+  and API. It is reachable at `/setup` after deployment, but the backend returns
+  404 until `ALP_SETUP_TOKEN` is set on the API service.
+- `npm test` in `05-backend` passed 16 local tests. The two service-backed
+  PostgreSQL and Redis tests were skipped because staging service URLs were not
+  configured locally.
+- `npm test` in `02-webapp/ecosystem` passed 8 local tests.
+- `VITE_API_URL=https://api.growwithalp.com npm run build` in
+  `02-webapp/ecosystem` produced a production app bundle.
 - `alp-app-745` redeployed successfully as deploy
   `6ac7fc19135ba28c5864dbf3`.
 - `alp-website-745` redeployed successfully as deploy
@@ -116,9 +127,6 @@ On 2026-10-09:
   passed ALP API identity, PostgreSQL and Redis readiness, browser-origin CORS,
   browser preflight, blocked unrecognised origins and blocked anonymous `/me`
   access.
-- `npm test` in `05-backend` passed 15 local tests. The two service-backed
-  PostgreSQL and Redis tests were skipped because staging service URLs were not
-  configured locally.
 - Railway CLI is authenticated and the local `05-backend` link now points at the
   actual API service `alp-backend`
   (`398c79ff-1282-4110-9a46-fb7e8b72ddfa`) in project

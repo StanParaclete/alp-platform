@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { bootstrapInput, invitationInput, invitationRegistration, invitationAcceptance, canInvite } from '../src/onboarding.mjs';
+import { bootstrapInput, browserBootstrapInput, invitationInput, invitationRegistration, invitationAcceptance, canInvite } from '../src/onboarding.mjs';
 
 test('only school administrators can invite, never provision global roles',()=>{
   assert.equal(canInvite('SCHOOL_ADMIN'),true);
@@ -29,6 +29,11 @@ test('bootstrap validates time zones, names, country and account credentials',()
   const input={email:'admin@example.test',name:'School Admin',password:'a-long-test-password',schoolName:'Test School',country:'GH',timezone:'Africa/Accra'};
   assert.equal(bootstrapInput.safeParse(input).success,true);
   for(const patch of [{timezone:'made-up'},{country:'Ghana'},{schoolName:' '},{password:'short'},{role:'SUPER_ADMIN'}]) assert.equal(bootstrapInput.safeParse({...input,...patch}).success,false);
+});
+test('browser bootstrap requires a setup code but cannot carry roles or extra fields',()=>{
+  const input={setupCode:'setup-code-with-entropy',email:'admin@example.test',name:'School Admin',password:'a-long-test-password',schoolName:'Test School',country:'GH',timezone:'Africa/Accra'};
+  assert.equal(browserBootstrapInput.safeParse(input).success,true);
+  for(const patch of [{setupCode:'short'},{role:'SUPER_ADMIN'},{districtId:randomUUID()}]) assert.equal(browserBootstrapInput.safeParse({...input,...patch}).success,false);
 });
 test('operator bootstrap dry run makes no database connection and never prints credentials',()=>{
   const secret='never-print-this-password',connection='postgresql://operator:database-secret@127.0.0.1:1/new_alp';

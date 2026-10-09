@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { LogIn, ArrowRight } from "lucide-react";
+import { LogIn, ArrowRight, KeyRound } from "lucide-react";
 import { session, useSession, useAction } from "./runtime";
 import { resetInput } from "../../../03-app/src/recovery.mjs";
 import { Brand, Button, Field, ErrorText, Credit } from "./ui";
@@ -78,8 +78,119 @@ export function Login() {
         <Link to="/join">
           Join a school <ArrowRight size={16} />
         </Link>
+        <Link to="/setup">
+          Set up first school <ArrowRight size={16} />
+        </Link>
         <a href="https://growwithalp.com/">Back to website</a>
       </div>
+    </AuthFrame>
+  );
+}
+export function Setup() {
+  const state = useSession(),
+    action = useAction(),
+    navigate = useNavigate();
+  const [values, setValues] = useState({
+    setupCode: "",
+    schoolName: "",
+    country: "GH",
+    timezone: "Africa/Accra",
+    name: "",
+    email: "",
+    password: "",
+  });
+  if (state.user) return <Navigate to="/" replace />;
+  const field = (key) => ({
+    value: values[key],
+    onChange: (event) => setValues({ ...values, [key]: event.target.value }),
+    disabled: action.busy,
+  });
+  return (
+    <AuthFrame title="Set up ALP">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          action.run(async () => {
+            await session.setupSchool({
+              ...values,
+              setupCode: values.setupCode.trim(),
+              schoolName: values.schoolName.trim(),
+              country: values.country.trim().toUpperCase(),
+              timezone: values.timezone.trim(),
+              name: values.name.trim(),
+              email: values.email.trim().toLowerCase(),
+            });
+            navigate("/");
+          });
+        }}
+      >
+        <ErrorText>{state.configurationError || action.error}</ErrorText>
+        <Field
+          label="Setup code"
+          type="password"
+          autoComplete="off"
+          required
+          minLength={16}
+          maxLength={256}
+          {...field("setupCode")}
+        />
+        <Field
+          label="School / institution"
+          required
+          maxLength={200}
+          autoComplete="organization"
+          {...field("schoolName")}
+        />
+        <div className="form-grid">
+          <Field
+            label="Country code"
+            required
+            maxLength={2}
+            pattern="[A-Za-z]{2}"
+            autoCapitalize="characters"
+            {...field("country")}
+          />
+          <Field
+            label="Time zone"
+            required
+            maxLength={100}
+            autoComplete="off"
+            {...field("timezone")}
+          />
+        </div>
+        <Field
+          label="Administrator name"
+          required
+          maxLength={160}
+          autoComplete="name"
+          {...field("name")}
+        />
+        <Field
+          label="Administrator email"
+          type="email"
+          required
+          maxLength={254}
+          autoComplete="username"
+          {...field("email")}
+        />
+        <Field
+          label="Administrator password"
+          type="password"
+          required
+          minLength={12}
+          maxLength={256}
+          autoComplete="new-password"
+          {...field("password")}
+        />
+        <Button
+          type="submit"
+          icon={KeyRound}
+          disabled={action.busy || !!state.configurationError}
+        >
+          {action.busy ? "Creating workspace..." : "Create school workspace"}
+        </Button>
+        <Link to="/login">Back to sign in</Link>
+      </form>
     </AuthFrame>
   );
 }

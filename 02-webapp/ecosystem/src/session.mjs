@@ -58,6 +58,25 @@ export function createSession({ url, development = false, send = fetch }) {
         if (current === operation) store.setState({ busy: false });
       }
     },
+    async setupSchool(body) {
+      if (!api) throw new Error(store.getState().configurationError);
+      const current = ++operation;
+      store.setState({ busy: true, error: "", user: null, school: null });
+      try {
+        await api.bootstrapSchool(body);
+        const user = await api.request("/me");
+        if (current === operation)
+          store.setState({ user, school: user.memberships[0] || null });
+      } catch (error) {
+        if (current === operation) {
+          await api.logout().catch(() => {});
+          store.setState({ error: error.message });
+        }
+        throw error;
+      } finally {
+        if (current === operation) store.setState({ busy: false });
+      }
+    },
     async reloadProfile() {
       const current = operation,
         user = await api.request("/me");

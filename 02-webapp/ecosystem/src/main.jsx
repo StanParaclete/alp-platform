@@ -8,7 +8,7 @@ import {
   useRouteError,
 } from "react-router-dom";
 import { Layout, Notifications, Settings } from "./workspace";
-import { Login, Recovery, Join, AuthFrame } from "./auth";
+import { Login, Recovery, Join, Setup, AuthFrame } from "./auth";
 import { Students, Student } from "./students";
 import { Plan } from "./plans";
 import "./styles.css";
@@ -25,6 +25,7 @@ function RouteError() {
 }
 const router = createBrowserRouter([
   { path: "/login", element: <Login />, errorElement: <RouteError /> },
+  { path: "/setup", element: <Setup />, errorElement: <RouteError /> },
   { path: "/recover", element: <Recovery />, errorElement: <RouteError /> },
   { path: "/join", element: <Join />, errorElement: <RouteError /> },
   {

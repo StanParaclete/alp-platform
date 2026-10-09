@@ -3,7 +3,7 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { authTokens, digest, hashPassword, verifyPassword, sameSecret, lockCredentials } from './security.mjs';
 import { recoveryCipher, recoveryRequest, recoveryAcknowledgement, requestPasswordRecovery, completePasswordRecovery } from './recovery.mjs';
-import { acceptInvitation, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
+import { acceptInvitation, bootstrapSchool, browserBootstrapInput, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
 import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, planInput, planUpdate, goalInput, progressInput, messageInput, completion, mayChangeStatus, sectionIds, evaluateFramework } from './domain.mjs';
 
 class HttpError extends Error { constructor(status,message) { super(message); this.status=status; } }
@@ -15,6 +15,7 @@ export async function createApp({ db, rateLimit, env=process.env }) {
   const app = express();
   const tokens = authTokens(env);
   const recovery = recoveryCipher(env);
+  if (env.ALP_SETUP_TOKEN && env.ALP_SETUP_TOKEN.length < 16) throw new Error('ALP_SETUP_TOKEN must contain at least 16 characters.');
   const dummy = await hashPassword(randomBytes(32).toString('hex'));
   const origins = new Set((env.CORS_ORIGINS||'').split(',').filter(Boolean));
   app.disable('x-powered-by');
@@ -82,6 +83,15 @@ export async function createApp({ db, rateLimit, env=process.env }) {
     if (!await rateLimit.allow(`invitation-register:${digest(req.ip||'unknown')}`,8,900)) fail(429,'Too many attempts. Try again later.');
     await acceptInvitation(db,req.body);
     res.sendStatus(204);
+  });
+  app.post('/auth/bootstrap',async (req,res)=>{
+    if (!env.ALP_SETUP_TOKEN) fail(404,'First-school setup is not available.');
+    if (!await rateLimit.allow(`bootstrap:${digest(req.ip||'unknown')}`,5,900)) fail(429,'Too many setup attempts. Try again later.');
+    const input=browserBootstrapInput.parse(req.body);
+    if (!sameSecret(input.setupCode,env.ALP_SETUP_TOKEN)) fail(401,'Setup code is invalid.');
+    const {setupCode,...body}=input;
+    const created=await bootstrapSchool(db,body);
+    res.status(201).json(await db.$transaction(tx=>session(tx,created.userId)));
   });
   app.post('/auth/refresh',async (req,res)=>{
     const {refreshToken}=refreshInput.parse(req.body);

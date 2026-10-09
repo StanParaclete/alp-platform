@@ -11,6 +11,13 @@ otherwise empty ecosystem database. It refuses databases with existing users or
 schools, runs atomically at serializable isolation, and records an audit event.
 It does not create a global administrator or demo accounts.
 
+For hosted review, the browser workspace also includes `/setup`. This screen
+submits the same school and administrator fields to `POST /auth/bootstrap` and
+then signs the new administrator in. The endpoint is disabled unless
+`ALP_SETUP_TOKEN` is configured on the API service, and it still refuses any
+database that already has users or schools. Remove `ALP_SETUP_TOKEN` after the
+first administrator has signed in.
+
 Inject these variables using the approved secret manager or a protected process
 environment. Do not put passwords in shell history, command-line arguments, Git,
 chat, screenshots or CI logs:
@@ -24,6 +31,7 @@ chat, screenshots or CI logs:
 | `ALP_BOOTSTRAP_SCHOOL` | Institution name |
 | `ALP_BOOTSTRAP_COUNTRY` | Two-letter uppercase country code |
 | `ALP_BOOTSTRAP_TIMEZONE` | IANA time zone, for example `Africa/Accra` |
+| `ALP_SETUP_TOKEN` | Optional hosted setup code for `/setup`; keep out of Git and chat |
 
 From `05-backend`, run `npm run bootstrap`. This validates configuration without
 connecting or writing. Set `ALP_BOOTSTRAP_CONFIRM` to the exact host, port and

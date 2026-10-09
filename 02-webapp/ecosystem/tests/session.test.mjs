@@ -39,6 +39,34 @@ test("sign-in loads memberships and stores no bearer or refresh token in the UI 
   assert.equal(session.store.getState().school.school.id, "two");
   assert.throws(() => session.chooseSchool("foreign"));
 });
+test("first-school setup signs in and keeps session tokens outside the UI store", async () => {
+  const seen = [];
+  const session = createSession({
+    url: "https://api.example.test",
+    send: async (url, options = {}) => {
+      seen.push([new URL(url).pathname, JSON.parse(options.body || "{}")]);
+      return response(
+        url.endsWith("/me")
+          ? profile
+          : { accessToken: "secret-access", refreshToken: "secret-refresh" },
+      );
+    },
+  });
+  await session.setupSchool({
+    setupCode: "setup-code-with-entropy",
+    schoolName: "School One",
+    country: "GH",
+    timezone: "Africa/Accra",
+    name: "Teacher",
+    email: "teacher@example.test",
+    password: "a-long-test-password",
+  });
+  assert.equal(seen[0][0], "/auth/bootstrap");
+  assert.equal(session.store.getState().school.school.id, "one");
+  const state = JSON.stringify(session.store.getState());
+  assert.equal(state.includes("secret-"), false);
+  assert.equal(session.store.getState().busy, false);
+});
 test("profile lookup failure removes the partial login and stops the loading state", async () => {
   const session = createSession({
     url: "https://api.example.test",

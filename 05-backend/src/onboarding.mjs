@@ -82,6 +82,7 @@ export async function revokeInvitation(db,actor,id) {
 }
 
 export const bootstrapInput = z.object({email,name:z.string().trim().min(1).max(160),password,schoolName:z.string().trim().min(1).max(200),country:z.string().regex(/^[A-Z]{2}$/),timezone:z.string().refine(value=>{try{new Intl.DateTimeFormat('en',{timeZone:value});return true;}catch{return false;}},'Use an IANA time zone.')}).strict();
+export const browserBootstrapInput = bootstrapInput.extend({setupCode:z.string().trim().min(16).max(256)}).strict();
 export async function bootstrapSchool(db,body) {
   const input = bootstrapInput.parse(body), passwordHash = await hashPassword(input.password);
   // Serializable isolation ensures two concurrent operators cannot both bootstrap an empty database.

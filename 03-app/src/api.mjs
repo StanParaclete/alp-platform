@@ -42,6 +42,7 @@ export function createApi({ base, send = fetch, onSession = async () => {} }) {
       if (current === generation) { generation++; refreshing = null; session = null; await onSession(null); }
     },
     registerInvitation(body) { return raw('/auth/invitations/register', { method: 'POST', body }); },
+    async bootstrapSchool(body) { const current = ++generation; refreshing = null; session = null; const value = await raw('/auth/bootstrap', { method: 'POST', body }); return remember(value, current); },
     async login(email, password) { const current = ++generation; refreshing = null; session = null; const value = await raw('/auth/login', { method: 'POST', body: { email, password } }); return remember(value, current); },
     async restore(refreshToken) { generation++; refreshing = null; session = { refreshToken }; return refresh(); },
     async logout() { const token = session?.refreshToken; generation++; refreshing = null; session = null; await onSession(null); if (token) await raw('/auth/logout', { method: 'POST', body: { refreshToken: token } }); },

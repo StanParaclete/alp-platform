@@ -25,7 +25,8 @@ must retain the sibling mobile modules and existing image assets during builds.
 
 ## Implemented
 
-- Email sign-in, account recovery and invitation acceptance (new or existing account).
+- Email sign-in, first-school setup, account recovery and invitation acceptance
+  (new or existing account).
 - Explicit school selection, pending-membership screen and role-aware navigation.
 - Searchable, paginated roster; student creation/editing; profiles and messages.
 - Thirteen-section plan editor, delayed autosave, revision-conflict handling,
@@ -59,7 +60,7 @@ PostgreSQL. This mode refuses anything except `NODE_ENV=test` and a localhost
 API, a synthetic institution, random test passwords and example.test addresses.
 The injected limiter is permissive; Redis enforcement has a separate CI test.
 
-Browser checks exercise login, student creation/editing, family restrictions, plan persistence, history,
+Browser checks exercise login, first-school setup state, student creation/editing, family restrictions, plan persistence, history,
 goals, progress, comments, save-failure navigation, recovery-unavailable handling,
 no persistent session data, responsive screenshots and automated WCAG checks.
 Screenshots contain synthetic data only and CI retains them for seven days.
@@ -70,7 +71,7 @@ No test sends real email, touches a live database or certifies accessibility.
 This is not parity with every requested product module. Browser invitation
 administration, framework administration, charts, exports, document storage,
 AI, signatures, MFA/social login and encrypted offline work remain incomplete.
-Recovery mail delivery, staging onboarding, broader role acceptance, manual
+Recovery mail delivery, staged first-school setup, broader role acceptance, manual
 assistive-technology review and migration rehearsal remain release gates.
 
 Built by [Stan Paraclete](https://www.stanparaclete.com/).
