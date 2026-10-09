@@ -3,8 +3,9 @@
 Last updated: 2026-10-09
 
 This file separates completed build work from the remaining public launch gates.
-The live `growwithalp.com` site is online, but the parallel ecosystem branch is
-not yet safe to cut over for schools.
+The live `growwithalp.com` site is online. The parallel ecosystem now has a
+working browser workspace and API gateway, but it is not yet safe to invite
+schools until onboarding, email, backups and acceptance testing are complete.
 
 ## Public DNS
 
@@ -13,31 +14,32 @@ not yet safe to cut over for schools.
   parallel ecosystem, but the root domain has not been moved to it.
 - `app.growwithalp.com` resolves to the staged browser workspace and returns
   HTTP 200 at `/login`.
-- `api.growwithalp.com` does not resolve in public DNS. Do not send production
-  traffic or credentials there.
+- `api.growwithalp.com` is managed by Netlify DNS and points to the
+  `alp-api-proxy-745` gateway, which proxies to the Render `alp-api` service.
 
 ## Netlify Project State
 
-Verified in Netlify and public endpoint checks on 2026-10-08:
+Verified in Netlify and public endpoint checks on 2026-10-09:
 
-- The `myalpeducation` team currently has one project for this repository:
-  `growwithalp.com`.
-- That project is linked to `github.com/StanParaclete/alp-platform`.
-- Production deploys come from `main`.
-- The current build settings are the legacy browser app:
+- The `myalpeducation` team still has the original `growwithalp.com` project
+  linked to `github.com/StanParaclete/alp-platform`.
+- That original production project deploys from `main`.
+- Its current build settings are the legacy browser app:
   base directory `02-webapp`, build command `npm run build`, publish directory
   `02-webapp/dist`, and functions directory `02-webapp/netlify/functions`.
 - The only visible project environment variables are Supabase client variables:
   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
 - The DNS zone contains Netlify records for `growwithalp.com` and
-  `www.growwithalp.com`. Public DNS for `api.growwithalp.com` currently fails.
+  `www.growwithalp.com`, `app.growwithalp.com` and `api.growwithalp.com`.
 
-Separate staging projects now exist for the parallel ecosystem:
+Separate projects now exist for the parallel ecosystem:
 
 - `alp-website-745`, project ID `8c885a93-4089-4a19-981e-3643b074feb7`, serves
   `https://alp-website-745.netlify.app`.
 - `alp-app-745`, project ID `1fa5a5af-0f8a-4dc3-b5d4-70fb2fa28e18`, serves
   `https://app.growwithalp.com` and `https://alp-app-745.netlify.app`.
+- `alp-api-proxy-745`, project ID `9b2794d5-0452-4627-ad9c-439186050c31`,
+  serves `https://api.growwithalp.com` and forwards to the Render API service.
 - These projects were deployed from local production builds. GitHub-triggered
   deploys for the new projects still need Netlify/GitHub deploy-key and webhook
   authorization.
@@ -47,13 +49,12 @@ separate Netlify projects for the new marketing website and browser workspace,
 verify them on staging URLs, then move production domains only after the API and
 onboarding gates pass.
 
-Create or update these records only after the new browser workspace and API have
-passing deployment checks on their own staging hosts:
+Current DNS responsibilities:
 
 - `growwithalp.com` and `www.growwithalp.com` should point to the approved
   marketing website project.
-- `app.growwithalp.com` should point to the approved browser workspace host.
-- `api.growwithalp.com` should point to the approved ALP API host.
+- `app.growwithalp.com` points to the approved browser workspace host.
+- `api.growwithalp.com` points to the approved ALP API gateway.
 - Both hosts must pass HTTPS, CORS and readiness checks before a school is
   invited.
 
@@ -72,27 +73,26 @@ started the API image with CI-only Redis; and verified:
 - blocked anonymous `/me` access
 - non-root API container execution
 
-This proves the deployment path can start cleanly. It does not prove real school
-onboarding, email inbox delivery, native store builds, backups, restore drills,
-payment, support operations or production monitoring.
+The API also deploys on Render Free with Render Postgres and Render Key Value,
+behind the Netlify `api.growwithalp.com` gateway. This proves the deployment
+path can start cleanly and the public API can answer readiness checks. It does
+not prove real school onboarding, email inbox delivery, native store builds,
+backups, restore drills, payment, support operations or production monitoring.
 
 ## Required Before Public Use
 
-1. Select an active Railway plan or another approved paid backend host. Railway
-   currently blocks deploys before upload because the workspace trial has
-   expired.
-2. Provide the staging API HTTPS origin without secrets.
-3. Deploy the backend to the approved host with managed PostgreSQL and Redis.
-4. Configure the browser workspace with `VITE_API_URL` pointing at that staging
-   API and set the API `CORS_ORIGINS` to the exact browser origin.
-5. Run `node 09-deployment/check-api.mjs --api <api-origin> --origin <app-origin>`
-   against the real staging hosts.
-6. Verify account onboarding with a real school administrator and at least one
+1. Verify account onboarding with a real school administrator and at least one
    teacher account.
-7. Verify contact and password-recovery email delivery in a real inbox.
-8. Add backups, restore testing, alerting, log retention, secret rotation and an
+2. Verify contact and password-recovery email delivery in a real inbox.
+3. Add backups, restore testing, alerting, log retention, secret rotation and an
    explicit proxy/rate-limit topology.
-9. Only then change public DNS and publish release notes/download links.
+4. Decide whether the free Render stack is acceptable for a limited pilot. The
+   current free Postgres database expires on November 8, 2026 unless upgraded or
+   migrated, the web service can sleep after inactivity, and the Key Value
+   service is not persistent.
+5. Run the five-role walkthrough: school admin, teacher, specialist,
+   family-facing records and student-facing flows.
+6. Only then publish release notes/download links and invite schools.
 
 ## Latest Local Checks
 
@@ -106,11 +106,16 @@ On 2026-10-09:
   content security policy.
 - `https://alp-website-745.netlify.app/` returned HTTP 200.
 - `node 09-deployment/check-api.mjs --api https://api.growwithalp.com --origin https://app.growwithalp.com`
-  failed at API identity because the API hostname could not be resolved.
+  is blocked on this Mac by a stale local resolver cache, but authoritative DNS
+  and public resolvers return the Netlify gateway records.
 - `node 09-deployment/check-public-status.mjs` is the current no-secrets public
-  release check. It currently passes the marketing website and browser app, and
-  fails only at ALP API identity until `api.growwithalp.com` resolves to the
-  approved backend host and passes readiness.
+  release check. It currently passes the marketing website and browser app on
+  this Mac, and its API step should pass once the local resolver cache catches
+  up.
+- Manual HTTPS checks against `api.growwithalp.com` with the Netlify gateway IP
+  passed ALP API identity, PostgreSQL and Redis readiness, browser-origin CORS,
+  browser preflight, blocked unrecognised origins and blocked anonymous `/me`
+  access.
 - `npm test` in `05-backend` passed 15 local tests. The two service-backed
   PostgreSQL and Redis tests were skipped because staging service URLs were not
   configured locally.
@@ -126,7 +131,5 @@ On 2026-10-09:
 - `railway up --service alp-backend --environment production --project 7c85796d-3139-4ef0-9196-81b20ed32691`
   was attempted from the repository root and stopped before upload with:
   `Your trial has expired. Please select a plan to continue using Railway.`
-- The existing Railway API service is still associated with
-  `https://www.growwithalp.com`; do not move public DNS or invite schools until
-  the backend is redeployed on an approved API host and `api.growwithalp.com`
-  passes the public checker.
+- Railway remains blocked by the expired trial and is not part of the active
+  no-monthly-fee staging stack.
