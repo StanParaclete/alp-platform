@@ -46,8 +46,9 @@ cd 05-backend && npm ci --include=dev && npm run migrate:deploy
 cd 05-backend && npm start
 ```
 
-The build command runs Prisma migrations before the service starts. Only expose
-or point DNS to the service after both health checks and the API checker pass.
+The build command generates Prisma Client and runs Prisma migrations before the
+service starts. Only expose or point DNS to the service after both health checks
+and the API checker pass.
 
 ## Verification
 
