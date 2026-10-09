@@ -117,10 +117,11 @@ On 2026-10-09:
   account-access checks.
 - `node 09-deployment/check-public-status.mjs` passed the marketing website,
   browser app and public API checks.
-- `POST /auth/bootstrap` on the hosted API is still returning the previous
-  authenticated-route response. Render dashboard login is required to manually
-  deploy the latest `codex/alp-ecosystem` commit if auto-deploy does not pick it
-  up.
+- Render `alp-api` manually deployed commit `c2ca225` as deploy
+  `dep-db4lbl6i0phs73d4fk50`; it is marked Live in the Render dashboard.
+- `POST /auth/bootstrap` on the hosted API now reaches the guarded setup
+  endpoint and returns `First-school setup is not available.` until
+  `ALP_SETUP_TOKEN` is intentionally configured for first-school setup.
 - `alp-app-745` redeployed successfully as deploy
   `6ac7fc19135ba28c5864dbf3`.
 - `alp-website-745` redeployed successfully as deploy
