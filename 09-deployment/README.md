@@ -106,6 +106,11 @@ build `09-deployment/backend.Dockerfile`, use the API image's Docker `CMD`, and
 health-check `/health/ready`. The CLI on this machine is currently logged out;
 log in and link to the approved project before deploying.
 
+The local Railway config already points `05-backend` at project `alp-backend`,
+production environment `production`, service `08f541b3-68bd-414d-a4b7-9aa3d5180b10`.
+The saved token is expired, so refresh login first; do not paste Railway tokens
+into chat or commit them to the repository.
+
 Railway still needs these project/service settings before a successful API
 release:
 

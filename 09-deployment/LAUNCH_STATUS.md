@@ -113,3 +113,10 @@ On 2026-10-08:
 - Railway CLI is installed but logged out on this machine, and no Railway
   project is linked. `railway.json` now defines the backend API service build and
   readiness policy for the approved project once login/linking is completed.
+- The local Railway config still records an existing backend project link from
+  `05-backend`: project `alp-backend`
+  (`7c85796d-3139-4ef0-9196-81b20ed32691`), production environment
+  `95ea7b77-5a8d-44b0-9c5c-dd4994089bbf`, service
+  `08f541b3-68bd-414d-a4b7-9aa3d5180b10`. The saved Railway token is expired.
+- `railway login` opened an activation flow but requires account authorization
+  before the CLI can deploy or inspect the backend service.
