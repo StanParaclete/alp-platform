@@ -4,8 +4,9 @@ Last updated: 2026-10-09
 
 This file separates completed build work from the remaining public launch gates.
 The live `growwithalp.com` site is online. The parallel ecosystem now has a
-working browser workspace and API gateway, but it is not yet safe to invite
-schools until onboarding, email, backups and acceptance testing are complete.
+working browser workspace and API gateway, and the first school workspace has
+been created. It is not yet ready for broad school rollout until email,
+backups, monitoring and acceptance testing are complete.
 
 ## Public DNS
 
@@ -81,10 +82,9 @@ backups, restore drills, payment, support operations or production monitoring.
 
 ## Required Before Public Use
 
-1. Verify account onboarding with a real school administrator and at least one
-   teacher account. The browser setup route is implemented, but the API keeps
-   it disabled until `ALP_SETUP_TOKEN` is temporarily configured for the first
-   owner setup.
+1. Verify day-one onboarding beyond the owner account: invite at least one
+   teacher, create one student, create one ALP plan and confirm role-scoped
+   access from separate browser sessions.
 2. Verify contact and password-recovery email delivery in a real inbox.
 3. Add backups, restore testing, alerting, log retention, secret rotation and an
    explicit proxy/rate-limit topology.
@@ -101,8 +101,8 @@ backups, restore drills, payment, support operations or production monitoring.
 On 2026-10-09:
 
 - The guarded first-school browser setup flow was added to the ecosystem app
-  and API. It is reachable at `/setup` after deployment, but the backend returns
-  404 until `ALP_SETUP_TOKEN` is set on the API service.
+  and API. It is reachable at `/setup`, and the backend keeps it unavailable
+  unless `ALP_SETUP_TOKEN` is intentionally set on the API service.
 - `npm test` in `05-backend` passed 16 local tests. The two service-backed
   PostgreSQL and Redis tests were skipped because staging service URLs were not
   configured locally.
@@ -119,9 +119,14 @@ On 2026-10-09:
   browser app and public API checks.
 - Render `alp-api` manually deployed commit `c2ca225` as deploy
   `dep-db4lbl6i0phs73d4fk50`; it is marked Live in the Render dashboard.
-- `POST /auth/bootstrap` on the hosted API now reaches the guarded setup
-  endpoint and returns `First-school setup is not available.` until
+- `POST /auth/bootstrap` on the hosted API reaches the guarded setup endpoint
+  and is designed to return `First-school setup is not available.` unless
   `ALP_SETUP_TOKEN` is intentionally configured for first-school setup.
+- The first school workspace was created on `https://app.growwithalp.com`.
+  After setup, the temporary `ALP_SETUP_TOKEN` environment variable was removed
+  from Render and the API was rebuilt successfully as deploy
+  `dep-db4m40aj9qps73d2s0gg`. The Render environment page no longer lists
+  `ALP_SETUP_TOKEN`.
 - `alp-app-745` redeployed successfully as deploy
   `6ac7fc19135ba28c5864dbf3`.
 - `alp-website-745` redeployed successfully as deploy
