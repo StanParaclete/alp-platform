@@ -110,19 +110,26 @@ On 2026-10-09:
 - `VITE_API_URL=https://api.growwithalp.com npm run build` in
   `02-webapp/ecosystem` produced a production app bundle.
 - `alp-app-745` redeployed successfully as deploy
+  `6ac951c0ce03370bfd8c1eef`; `https://app.growwithalp.com/setup` returns the
+  new first-school setup screen with the Stan Paraclete footer link.
+- `node 09-deployment/check-api.mjs --api https://api.growwithalp.com --origin https://app.growwithalp.com`
+  passed the public API identity, readiness, CORS, origin-blocking and anonymous
+  account-access checks.
+- `node 09-deployment/check-public-status.mjs` passed the marketing website,
+  browser app and public API checks.
+- `POST /auth/bootstrap` on the hosted API is still returning the previous
+  authenticated-route response. Render dashboard login is required to manually
+  deploy the latest `codex/alp-ecosystem` commit if auto-deploy does not pick it
+  up.
+- `alp-app-745` redeployed successfully as deploy
   `6ac7fc19135ba28c5864dbf3`.
 - `alp-website-745` redeployed successfully as deploy
   `6ac7fc2c135ba28e7864dbb6`.
 - `https://app.growwithalp.com/login` returned HTTP 200 with the expected API
   content security policy.
 - `https://alp-website-745.netlify.app/` returned HTTP 200.
-- `node 09-deployment/check-api.mjs --api https://api.growwithalp.com --origin https://app.growwithalp.com`
-  is blocked on this Mac by a stale local resolver cache, but authoritative DNS
-  and public resolvers return the Netlify gateway records.
 - `node 09-deployment/check-public-status.mjs` is the current no-secrets public
-  release check. It currently passes the marketing website and browser app on
-  this Mac, and its API step should pass once the local resolver cache catches
-  up.
+  release check.
 - Manual HTTPS checks against `api.growwithalp.com` with the Netlify gateway IP
   passed ALP API identity, PostgreSQL and Redis readiness, browser-origin CORS,
   browser preflight, blocked unrecognised origins and blocked anonymous `/me`
