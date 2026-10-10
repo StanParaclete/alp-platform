@@ -18,7 +18,9 @@ import {
   Sun,
   Moon,
   Check,
+  UserPlus,
 } from "lucide-react";
+import { canInvite } from "../../../03-app/src/invitations.mjs";
 import { session, useSession, useResource, useAction } from "./runtime";
 import {
   Brand,
@@ -83,6 +85,9 @@ export function Layout() {
         <nav aria-label="Workspace">
           {[
             ["/students", "Students", Users],
+            ...(canInvite(state.school?.role)
+              ? [["/invitations", "Invitations", UserPlus]]
+              : []),
             ["/notifications", "Notifications", Bell],
             ["/settings", "Settings", SettingsIcon],
           ].map(([to, label, Icon]) => (
@@ -268,6 +273,11 @@ export function Settings() {
         <Link className="button secondary" to="/join">
           Join another school
         </Link>
+        {canInvite(school?.role) ? (
+          <Link className="button secondary" to="/invitations">
+            School invitations
+          </Link>
+        ) : null}
       </section>
       <section>
         <h2>Schools</h2>

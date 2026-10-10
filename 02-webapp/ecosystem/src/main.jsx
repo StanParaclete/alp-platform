@@ -11,6 +11,7 @@ import { Layout, Notifications, Settings } from "./workspace";
 import { Login, Recovery, Join, Setup, AuthFrame } from "./auth";
 import { Students, Student } from "./students";
 import { Plan } from "./plans";
+import { Invitations } from "./invitations";
 import "./styles.css";
 function RouteError() {
   useRouteError();
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
       { path: "students", element: <Students /> },
       { path: "students/:id", element: <Student /> },
       { path: "plans/:id", element: <Plan /> },
+      { path: "invitations", element: <Invitations /> },
       { path: "notifications", element: <Notifications /> },
       { path: "settings", element: <Settings /> },
       {

@@ -726,6 +726,62 @@ tbody tr:hover {
 .notification small {
   color: var(--muted);
 }
+.invite-code {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--primary);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.invite-code textarea {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.7;
+}
+.learner-picker {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.selection-list {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.check-row input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.check-row span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.check-row small {
+  color: var(--muted);
+}
+.invitation-row {
+  align-items: center;
+}
 dl {
   margin-bottom: 28px;
 }
