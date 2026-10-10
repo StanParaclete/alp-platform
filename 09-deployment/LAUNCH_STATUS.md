@@ -82,9 +82,9 @@ backups, restore drills, payment, support operations or production monitoring.
 
 ## Required Before Public Use
 
-1. Verify day-one onboarding beyond the owner account: invite at least one
-   teacher, create one student, create one ALP plan and confirm role-scoped
-   access from separate browser sessions.
+1. Verify day-one onboarding beyond the owner account: create at least one
+   teacher invitation from the browser app, accept it in a separate browser
+   session, and confirm role-scoped access.
 2. Verify contact and password-recovery email delivery in a real inbox.
 3. Add backups, restore testing, alerting, log retention, secret rotation and an
    explicit proxy/rate-limit topology.
@@ -127,6 +127,12 @@ On 2026-10-09:
   from Render and the API was rebuilt successfully as deploy
   `dep-db4m40aj9qps73d2s0gg`. The Render environment page no longer lists
   `ALP_SETUP_TOKEN`.
+- Browser invitation management was added for school administrators and deployed
+  to `alp-app-745` as Netlify deploy `6ac9dc850dec4cd30e69384d`. The live
+  bundle contains the `/invitations` route, invitation creation, learner linking
+  for parent/student invites, invitation history and revoke actions.
+- `node 09-deployment/check-public-status.mjs` passed again after the browser
+  invitation deploy.
 - `alp-app-745` redeployed successfully as deploy
   `6ac7fc19135ba28c5864dbf3`.
 - `alp-website-745` redeployed successfully as deploy
