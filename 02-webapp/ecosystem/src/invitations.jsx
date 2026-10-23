@@ -22,6 +22,12 @@ import {
 
 const defaultRole = "TEACHER";
 
+function deliveryText(delivery) {
+  if (delivery?.status === "sent") return "Email accepted for delivery. Check the inbox and spam folder. The invitation code is also shown below as a backup.";
+  if (delivery?.status === "failed") return "Email could not be sent. Copy this invitation and share it privately.";
+  return "Email delivery is not configured yet. Copy this invitation and share it privately.";
+}
+
 export function Invitations() {
   const { school } = useSession(),
     allowed = canInvite(school?.role);
@@ -101,6 +107,9 @@ export function Invitations() {
             <p>
               Share this code privately. It expires{" "}
               {new Date(created.expiresAt).toLocaleString()}.
+            </p>
+            <p className={`delivery-note ${created.emailDelivery?.status || "not_configured"}`} role="status">
+              {deliveryText(created.emailDelivery)}
             </p>
           </div>
           <textarea readOnly value={message} aria-label="Invitation message" />

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { authTokens, digest, hashPassword, verifyPassword, sameSecret, lockCredentials } from './security.mjs';
 import { recoveryCipher, recoveryRequest, recoveryAcknowledgement, requestPasswordRecovery, completePasswordRecovery } from './recovery.mjs';
 import { acceptInvitation, bootstrapSchool, browserBootstrapInput, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
+import { sendInvitationEmail } from './mail.mjs';
 import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, planInput, planUpdate, goalInput, progressInput, messageInput, completion, mayChangeStatus, sectionIds, evaluateFramework } from './domain.mjs';
 
 class HttpError extends Error { constructor(status,message) { super(message); this.status=status; } }
@@ -11,7 +12,7 @@ const fail = (status,message) => { throw new HttpError(status,message); };
 const date = value => value ? new Date(value) : null;
 const audit = (tx,actor,action,type,id) => tx.auditLog.create({data:{schoolId:actor?.schoolId,actorId:actor?.id,action,resourceType:type,resourceId:id}});
 
-export async function createApp({ db, rateLimit, env=process.env }) {
+export async function createApp({ db, rateLimit, env=process.env, mailer=null }) {
   const app = express();
   const tokens = authTokens(env);
   const recovery = recoveryCipher(env);
@@ -161,7 +162,9 @@ export async function createApp({ db, rateLimit, env=process.env }) {
   });
   app.post('/v1/invitations',async (req,res)=>{
     if (!await rateLimit.allow(`invitation-create:${req.actor.schoolId}:${req.actor.id}`,20,3600)) fail(429,'Invitation limit reached. Try again later.');
-    res.status(201).json(await createInvitation(db,req.actor,req.body));
+    const invitation = await createInvitation(db,req.actor,req.body);
+    const emailDelivery = await sendInvitationEmail({ env, mailer, invitation });
+    res.status(201).json({...invitation,emailDelivery});
   });
   app.patch('/v1/invitations/:id/revoke',async (req,res)=>{ await revokeInvitation(db,req.actor,req.params.id); res.sendStatus(204); });
   async function student(req,id) { const item=await db.student.findFirst({where:{id:uuid.parse(id),...studentScope(req.actor)}}); if (!item) fail(404,'Student not found.'); return item; }

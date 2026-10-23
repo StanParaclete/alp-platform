@@ -747,6 +747,17 @@ tbody tr:hover {
   font: inherit;
   line-height: 1.7;
 }
+.delivery-note {
+  margin-top: 10px;
+  color: var(--muted);
+}
+.delivery-note.sent {
+  color: var(--primary);
+}
+.delivery-note.failed,
+.delivery-note.not_configured {
+  color: var(--ink);
+}
 .learner-picker {
   display: grid;
   gap: 16px;

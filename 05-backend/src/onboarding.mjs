@@ -30,11 +30,13 @@ export async function createInvitation(db,actor,body) {
   if (!canInvite(actor.role)) reject(403,'School administrator access required.');
   const input = invitationInput.parse(body), token = randomBytes(48).toString('base64url');
   const saved = await db.$transaction(async tx=>{
+    const school = await tx.school.findUnique({where:{id:actor.schoolId},select:{name:true}});
+    if (!school) reject(403,'School access is not authorised.');
     await validateLinks(tx,actor.schoolId,input.role,input.studentIds);
     if (await tx.membership.findFirst({where:{schoolId:actor.schoolId,user:{email:input.email}}})) reject(409,'This account already belongs to the school.');
     const item = await tx.invitation.create({data:{...input,schoolId:actor.schoolId,createdBy:actor.id,tokenHash:digest(token),expiresAt:new Date(Date.now()+72*3600000)},select:publicFields});
     await audit(tx,actor.schoolId,actor.id,'invitation_created',item.id);
-    return item;
+    return {...item,schoolName:school.name};
   });
   return {...saved,token};
 }

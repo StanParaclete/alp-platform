@@ -54,6 +54,10 @@ only behind the intended private ingress/TLS proxy.
 Check `/health/live` and `/health/ready`. Before external use, configure a trusted
 proxy/rate-limit topology, managed backups, secret rotation, alerting, request
 body limits and log redaction. Test failure/retry behavior for SMTP and Redis.
+Browser invitations send immediately from the API when `SMTP_HOST`,
+`SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` and `ALP_APP_URL` are
+configured. If SMTP is missing or rejected, the browser app keeps the invitation
+valid and displays the copyable code for private manual sharing.
 For the first school and subsequent account invitations, follow
 `08-docs/ONBOARDING.md`; never substitute test seeds for account provisioning.
 For hosted first-school setup, set `ALP_SETUP_TOKEN` only long enough for the
