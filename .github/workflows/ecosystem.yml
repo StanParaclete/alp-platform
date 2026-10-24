@@ -102,9 +102,10 @@ jobs:
         working-directory: 05-backend
       - run: npm run migrate:deploy
         working-directory: 05-backend
-      - run: npm test
-        working-directory: 05-backend
-      - run: npm run test:integration
+      - name: Run full backend suite with required service connections
+        run: |
+          node --input-type=module -e "for (const key of ['ALP_INTEGRATION_DATABASE_URL', 'ALP_INTEGRATION_REDIS_URL']) if (!process.env[key]) throw new Error(key + ' is required')"
+          npm test
         working-directory: 05-backend
       - run: npm ci
         working-directory: 02-webapp/ecosystem

@@ -30,6 +30,20 @@ devices; prove recovery/monitoring; run measured concurrency tests before scalin
 Do not use real learner data in disposable tests or describe 5,000-user capacity
 as verified. Each gate needs dated evidence and an owner before it is closed.
 
+### Readiness CI Findings (24 October)
+
+Isolated readiness branch run `40135423025` passed the legacy webapp checks.
+The full backend suite step passed against both PostgreSQL 16 and 18; a redundant
+second integration invocation failed and has been removed, while explicit checks
+for both service URLs remain. The container migration failed; the migration image
+now invokes deploy directly instead of regenerating an already-built client on a
+read-only filesystem. These CI corrections require a fresh successful run.
+
+Website, mobile and desktop dependency audits failed at the high-severity gate.
+Do not lower or disable this gate. Review current advisories, apply compatible
+dependency patches and rerun builds/device checks before release. None of these
+findings approves a live deployment or broad school rollout.
+
 This file separates completed build work from the remaining public launch gates.
 The live `growwithalp.com` site is online. The parallel ecosystem now has a
 working browser workspace and API gateway, and the first school workspace has

@@ -14,7 +14,7 @@ RUN npm run generate && npm run validate
 FROM dependencies AS migrate
 COPY 06-database/migrations /app/06-database/migrations
 USER node
-CMD ["npm", "run", "migrate:deploy"]
+CMD ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
 
 FROM dependencies AS production-dependencies
 RUN npm prune --omit=dev --ignore-scripts && npm cache clean --force
