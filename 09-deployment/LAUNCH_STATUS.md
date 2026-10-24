@@ -32,6 +32,18 @@ as verified. Each gate needs dated evidence and an owner before it is closed.
 
 ### Readiness CI Findings (24 October)
 
+Patched-tree run `40135906045` passed PostgreSQL 16 and 18 jobs (including browser
+integration and dependency gates), website, desktop packaging, legacy webapp and
+backend container checks. Only the mobile dependency audit failed. This is CI
+evidence for synthetic workflows, not live school acceptance or load capacity.
+
+Follow-up proxy configuration now accepts only explicit trusted IPs/CIDRs and
+defaults to no forwarded-header trust. Local backend result: 26 passed, two
+service tests skipped. No production proxy setting was changed. Follow
+`09-deployment/PROXY_RATE_LIMITS.md` to verify hosted client-IP attribution and
+anti-spoofing before configuring an allowlist. Shared-proxy rate-limit behavior
+remains a live acceptance gate.
+
 Follow-up run `40135631116` passed container build/migration/API smoke checks.
 Both database jobs passed their backend and browser integration steps and failed
 later at dependency audits. Compatible patches have now cleared local audits for

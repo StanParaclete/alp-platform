@@ -5,6 +5,7 @@ import { authTokens, digest, hashPassword, verifyPassword, sameSecret, lockCrede
 import { recoveryCipher, recoveryRequest, recoveryAcknowledgement, requestPasswordRecovery, completePasswordRecovery } from './recovery.mjs';
 import { acceptInvitation, bootstrapSchool, browserBootstrapInput, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
 import { sendInvitationEmail } from './mail.mjs';
+import { trustedProxyAddresses } from './proxy.mjs';
 import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, planInput, planUpdate, goalInput, progressInput, messageInput, completion, mayChangeStatus, sectionIds, evaluateFramework } from './domain.mjs';
 
 class HttpError extends Error { constructor(status,message) { super(message); this.status=status; } }
@@ -14,6 +15,7 @@ const audit = (tx,actor,action,type,id) => tx.auditLog.create({data:{schoolId:ac
 
 export async function createApp({ db, rateLimit, env=process.env, mailer=null }) {
   const app = express();
+  app.set('trust proxy', trustedProxyAddresses(env));
   const tokens = authTokens(env);
   const recovery = recoveryCipher(env);
   if (env.ALP_SETUP_TOKEN && env.ALP_SETUP_TOKEN.length < 16) throw new Error('ALP_SETUP_TOKEN must contain at least 16 characters.');
