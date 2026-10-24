@@ -27,6 +27,14 @@ function smtpTransport(env) {
   });
 }
 
+export function mailDelivery(env, { smtp = smtpTransport, zoho = zohoTransport } = {}) {
+  const provider = env.MAIL_PROVIDER || 'smtp';
+  if (!['smtp', 'zoho'].includes(provider)) throw new Error('Unsupported ALP mail provider.');
+  const from = provider === 'zoho' ? env.ZOHO_FROM : env.SMTP_FROM;
+  const mail = provider === 'zoho' ? zoho(env) : smtp(env);
+  return from && mail ? { from, mail } : null;
+}
+
 function joinUrl(env) {
   const base = env.ALP_APP_URL || env.APP_URL || 'https://app.growwithalp.com';
   try {
@@ -37,8 +45,8 @@ function joinUrl(env) {
 }
 
 export async function sendInvitationEmail({ env, mailer, invitation }) {
-  const from = env.MAIL_PROVIDER === 'zoho' ? env.ZOHO_FROM : env.SMTP_FROM;
-  const mail = mailer || (env.MAIL_PROVIDER === 'zoho' ? zohoTransport(env) : smtpTransport(env));
+  const delivery = mailer ? { from: env.MAIL_PROVIDER === 'zoho' ? env.ZOHO_FROM : env.SMTP_FROM, mail: mailer } : mailDelivery(env);
+  const { from, mail } = delivery || {};
   if (!from || !mail) return { status: 'not_configured' };
   try {
     const role = roleLabels[invitation.role] || invitation.role;

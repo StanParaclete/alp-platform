@@ -1,6 +1,34 @@
 # ALP Launch Status
 
-Last updated: 2026-10-09
+Last updated: 2026-10-24
+
+## Current Readiness Update
+
+General availability is not approved. The following supersedes older notes below
+where they differ:
+
+- Invitation delivery through Zoho HTTPS has been deployed and a real recipient
+  inbox was checked. Teacher acceptance and role-scoped use still need recorded
+  acceptance evidence.
+- A separate Neon Free PostgreSQL 18 project (`shy-glade-95234557`, Oregon) exists.
+  Production data has not been migrated; Render remains the active database.
+- PostgreSQL 18.6 client tools are installed locally. Certificate post-install
+  setup still requires completion outside the restricted agent terminal.
+- Local worker code now supports Zoho HTTPS for password recovery, account-change
+  notices and enquiries, using the same provider selection as invitations.
+  This change has not been deployed. Recovery requires the separate supervised
+  worker, encryption key configuration and real inbox/reset acceptance testing.
+- Backend test run on 2026-10-24: 23 passed, zero failed, two PostgreSQL/Redis
+  service tests skipped. No new load-test or live migration evidence was produced.
+- Signed desktop/mobile releases, independent encrypted backups with a successful
+  restore, monitoring and capacity testing remain launch gates.
+
+Next acceptance order: complete backup tooling and migrate with reconciliation;
+deploy and verify recovery delivery; test admin/teacher/family access and denial
+across schools; exercise learner creation, plan saving/review and progress on real
+devices; prove recovery/monitoring; run measured concurrency tests before scaling.
+Do not use real learner data in disposable tests or describe 5,000-user capacity
+as verified. Each gate needs dated evidence and an owner before it is closed.
 
 This file separates completed build work from the remaining public launch gates.
 The live `growwithalp.com` site is online. The parallel ecosystem now has a

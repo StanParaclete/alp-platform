@@ -18,9 +18,9 @@ export function zohoTransport(env, request=fetch) {
     })().finally(()=>{pending=null;});
     return pending;
   }
-  return {async sendMail(message){
+  return {async verify(){await accessToken();return true;},async sendMail(message){
     const access=await accessToken();
-    const response=await request(`https://${mail}/api/accounts/${env.ZOHO_ACCOUNT_ID}/messages`,{method:'POST',redirect:'error',signal:AbortSignal.timeout(15000),headers:{Authorization:`Zoho-oauthtoken ${access}`,'Content-Type':'application/json'},body:JSON.stringify({fromAddress:env.ZOHO_FROM,toAddress:message.to,subject:message.subject,content:message.text,mailFormat:'plaintext'})});
+    const response=await request(`https://${mail}/api/accounts/${env.ZOHO_ACCOUNT_ID}/messages`,{method:'POST',redirect:'error',signal:AbortSignal.timeout(15000),headers:{Authorization:`Zoho-oauthtoken ${access}`,'Content-Type':'application/json'},body:JSON.stringify({fromAddress:env.ZOHO_FROM,toAddress:message.to,subject:message.subject,content:message.text,mailFormat:'plaintext',...(message.replyTo?{replyTo:message.replyTo}:{})})});
     const data=await response.json();
     if(response.status===401){token=null;expires=0;}
     if(!response.ok||data.status?.code!==200||!data.data?.messageId)throw new Error('Zoho delivery was not accepted.');

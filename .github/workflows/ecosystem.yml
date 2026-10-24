@@ -2,7 +2,7 @@ name: Parallel ecosystem checks
 on:
   pull_request:
   push:
-    branches: [codex/alp-ecosystem]
+    branches: [codex/alp-ecosystem, codex/alp-readiness-checks]
   workflow_dispatch:
 permissions:
   contents: read
@@ -61,9 +61,13 @@ jobs:
         working-directory: 04-software
   database:
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: ['16', '18']
     services:
       postgres:
-        image: postgres:16-bookworm
+        image: postgres:${{ matrix.postgres }}-bookworm
         env:
           POSTGRES_DB: alp_test
           POSTGRES_USER: alp_test
@@ -96,7 +100,7 @@ jobs:
         working-directory: 05-backend
       - run: npm run validate
         working-directory: 05-backend
-      - run: node --test tests/domain.test.mjs tests/onboarding.test.mjs tests/recovery.test.mjs
+      - run: npm test
         working-directory: 05-backend
       - run: npm run migrate:deploy
         working-directory: 05-backend
@@ -119,7 +123,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ecosystem-browser-checks
+          name: ecosystem-browser-checks-pg${{ matrix.postgres }}
           path: 02-webapp/ecosystem/test-results
           retention-days: 7
       - run: npm audit --audit-level=high
@@ -155,7 +159,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test 09-deployment/check-api.test.mjs
+      - run: node --test 09-deployment/check-api.test.mjs 09-deployment/migration-preflight.test.mjs
       - name: Build backend deployment images
         run: |
           docker build -f 09-deployment/backend.Dockerfile --target migrate -t alp-backend-migrate:ci .

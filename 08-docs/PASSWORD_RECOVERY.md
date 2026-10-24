@@ -12,9 +12,13 @@ delivery or native-device acceptance; those staging gates are listed below.
 2. Generate a separate cryptographically random 32-byte key, encoded as 64 hex
    characters. Inject it as `PASSWORD_RECOVERY_KEY` into both API and worker
    through a secret manager. Never reuse `JWT_SECRET` or expose this key to Expo.
-3. Configure `REDIS_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`
-   and `SMTP_FROM` on the worker. The transport uses TLS and certificate
-   verification. Port 465 uses implicit TLS; other ports require STARTTLS.
+3. Configure `DATABASE_URL` and `REDIS_URL` on the worker. Choose the same mail
+   provider used by invitations. For `MAIL_PROVIDER=zoho`, set `ZOHO_CLIENT_ID`,
+   `ZOHO_CLIENT_SECRET`, `ZOHO_REFRESH_TOKEN`, `ZOHO_ACCOUNT_ID`, `ZOHO_FROM` and
+   the account's `ZOHO_REGION`. This uses HTTPS and needs no SMTP credentials.
+   Otherwise set `MAIL_PROVIDER=smtp`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+   `SMTP_PASSWORD` and `SMTP_FROM`. SMTP uses verified TLS: port 465 is implicit
+   TLS; other ports require STARTTLS. Do not use SMTP on a host that blocks it.
 4. Set `PASSWORD_RECOVERY_ENABLED=true` on API and worker and start the supervised
    worker with `npm run worker`. `CONTACT_RECIPIENT` is only required when also
    sending website enquiries. Check worker health and queue failures before
@@ -22,8 +26,11 @@ delivery or native-device acceptance; those staging gates are listed below.
 5. Point a configured native staging build at this API and complete the email
    and device checks below. Disabled recovery returns 503, not a success claim.
 
-The worker verifies SMTP connectivity and authentication at startup. This does
-not prove that a particular email will reach an inbox; see
+The worker verifies SMTP connectivity/authentication or obtains a Zoho OAuth
+access token at startup. OAuth success does not prove message scope, sender
+authorization or inbox delivery; an actual recovery and change-notice test is
+still required. A separately supervised worker must be deployed; invitation
+delivery by the API does not mean the worker is running. See
 [Nodemailer's SMTP documentation](https://nodemailer.com/smtp).
 
 ## User and API Contract
@@ -68,7 +75,7 @@ guidance in the [OWASP password recovery cheat sheet](https://cheatsheetseries.o
 ## Delivery and Operations
 
 The worker scans the durable outbox every ten seconds using keyset pagination.
-It clears encrypted codes after SMTP acceptance, revocation, use or expiry.
+It clears encrypted codes after provider acceptance, revocation, use or expiry.
 Expired reset rows are deleted after another 24 hours while the recovery worker
 is enabled. Password-change notices and audit records do not yet have automated
 retention; agree a policy before production. Database backups need their own
@@ -82,7 +89,7 @@ an expired code requires a new request. Clear invalid/obsolete failed jobs under
 the operator's retention policy. Do not enable provider or request-body debug
 logging: it can expose codes and addresses.
 
-SMTP acceptance is not inbox delivery. A crash after acceptance but before the
+Provider acceptance is not inbox delivery. A crash after acceptance but before the
 database acknowledgement can cause duplicate email on retry. The stable message
 ID assists diagnosis but does not guarantee exactly-once delivery. Worker errors
 stored in Redis and application logs are sanitized and identify only queue/job ID.

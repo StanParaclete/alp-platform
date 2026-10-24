@@ -1,15 +1,17 @@
 import { Queue, Worker } from 'bullmq';
-import nodemailer from 'nodemailer';
+import { mailDelivery } from './mail.mjs';
 import Redis from 'ioredis';
 import { database } from './db.mjs';
 import { recoveryCipher, deliverPasswordRecovery, deliverAccountNotice, dispatchRecovery, dispatchAccountNotices } from './recovery.mjs';
-for(const key of ['REDIS_URL','SMTP_HOST','SMTP_USER','SMTP_PASSWORD','SMTP_FROM'])if(!process.env[key])throw new Error(`${key} is required.`);
+if(!process.env.REDIS_URL)throw new Error('REDIS_URL is required.');
+const delivery=mailDelivery(process.env);
+if(!delivery)throw new Error('Configure the selected ALP mail provider before starting the worker.');
+const {mail,from}=delivery;
 const recovery=recoveryCipher(process.env);
 if(!recovery&&!process.env.CONTACT_RECIPIENT)throw new Error('Configure CONTACT_RECIPIENT or enable password recovery before starting the mail worker.');
 const db=database();
 const connection=new Redis(process.env.REDIS_URL,{maxRetriesPerRequest:null});
 connection.on('error',()=>console.error('alp_mail_redis_unavailable'));
-const mail=nodemailer.createTransport({host:process.env.SMTP_HOST,port:Number(process.env.SMTP_PORT||465),secure:Number(process.env.SMTP_PORT||465)===465,requireTLS:true,connectionTimeout:10000,greetingTimeout:10000,socketTimeout:30000,auth:{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}});
 try { await mail.verify(); }
 catch { connection.disconnect();await db.$disconnect();throw new Error('ALP mail server verification failed. Check the configured transport.'); }
 
@@ -25,7 +27,7 @@ function consume(name,handler,dispatch) {
 if(process.env.CONTACT_RECIPIENT)consume('alp-enquiries',async job=>{
   const item=await db.enquiry.findUnique({where:{id:job.data.id}});
   if(!item||item.deliveredAt)return;
-  const result=await mail.sendMail({from:process.env.SMTP_FROM,to:process.env.CONTACT_RECIPIENT,replyTo:item.email,subject:`ALP enquiry: ${item.subject}`,text:`Name: ${item.name}\nOrganisation: ${item.organisation}\nEmail: ${item.email}\n\n${item.message}`,messageId:`<alp-enquiry-${item.id}@growwithalp.com>`});
+  const result=await mail.sendMail({from,to:process.env.CONTACT_RECIPIENT,replyTo:item.email,subject:`ALP enquiry: ${item.subject}`,text:`Name: ${item.name}\nOrganisation: ${item.organisation}\nEmail: ${item.email}\n\n${item.message}`,messageId:`<alp-enquiry-${item.id}@growwithalp.com>`});
   if(!result.accepted?.length)throw new Error('Enquiry email was not accepted by the mail server.');
   await db.enquiry.update({where:{id:item.id},data:{deliveredAt:new Date()}});
 },async queue=>{
@@ -33,8 +35,8 @@ if(process.env.CONTACT_RECIPIENT)consume('alp-enquiries',async job=>{
   for(const item of items)await queue.add('deliver',{id:item.id},{jobId:item.id,attempts:5,backoff:{type:'exponential',delay:30000},removeOnComplete:true,removeOnFail:1000});
 });
 if(recovery){
-  consume('alp-password-recovery',job=>deliverPasswordRecovery(db,mail,recovery,job.data.id,process.env.SMTP_FROM),queue=>dispatchRecovery(db,queue));
-  consume('alp-account-notices',job=>deliverAccountNotice(db,mail,job.data.id,process.env.SMTP_FROM),queue=>dispatchAccountNotices(db,queue));
+  consume('alp-password-recovery',job=>deliverPasswordRecovery(db,mail,recovery,job.data.id,from),queue=>dispatchRecovery(db,queue));
+  consume('alp-account-notices',job=>deliverAccountNotice(db,mail,job.data.id,from),queue=>dispatchAccountNotices(db,queue));
 }
 
 // PostgreSQL owns the durable outbox. Redis jobs contain identifiers, never codes or email bodies.
