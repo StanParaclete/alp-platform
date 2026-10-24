@@ -32,6 +32,13 @@ as verified. Each gate needs dated evidence and an owner before it is closed.
 
 ### Readiness CI Findings (24 October)
 
+Follow-up run `40135631116` passed container build/migration/API smoke checks.
+Both database jobs passed their backend and browser integration steps and failed
+later at dependency audits. Compatible patches have now cleared local audits for
+the website, browser workspace, desktop and backend; see
+`08-docs/DEPENDENCY_SECURITY.md` for versions and local verification. Mobile's
+high-severity gate remains blocked. A new remote run must verify the patched tree.
+
 Isolated readiness branch run `40135423025` passed the legacy webapp checks.
 The full backend suite step passed against both PostgreSQL 16 and 18; a redundant
 second integration invocation failed and has been removed, while explicit checks

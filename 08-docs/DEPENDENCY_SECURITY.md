@@ -1,4 +1,30 @@
-# Dependency Security - 2026-10-08
+# Dependency Security
+
+## Update: 2026-10-24
+
+Separate readiness-branch changes only; no live deployment was updated.
+
+- Website Next.js: 16.4.3. Audit: zero findings. Six tests, production build and
+  smoke verification of 18 pages/13 images passed.
+- Browser workspace Vite: 8.3.5. Audit: zero findings. Eight tests and production
+  build passed.
+- Desktop Electron: 44.9.3; compatible transitive patches include undici 7.30.1
+  and 6.29.1, fast-uri 3.1.9. Audit: zero findings. Four policy tests passed.
+  No new signed installer or physical-device acceptance is claimed.
+- Backend Zod: 4.6.7; Nodemailer: 10.2.1; compatible transitive patches include
+  body-parser 2.4.0 and fast-uri 3.1.9. Audit: zero findings. Local suite: 23
+  passed, two service tests skipped. Fresh service-backed CI remains required.
+- Mobile audit: five high and six moderate package findings. Registry latest
+  node-forge is still 1.4.0, which the audit flags. Expo also depends on Zod 3;
+  forcing Zod 4 into that dependency is not a reviewed compatibility fix.
+  No forced Expo downgrade, audit exclusion or reduced threshold was used.
+
+The older dated inventory below is historical; its counts and versions are not
+the current assessment. Audit success is time-dependent and is not a complete
+security certification. Native distribution remains blocked by the mobile gate
+and unsigned/unverified release artifacts.
+
+## Historical Inventory: 2026-10-08
 
 Scope: the separate `codex/alp-ecosystem` branch. This is not a security
 assessment of the deployed Supabase application. No live release was changed.
