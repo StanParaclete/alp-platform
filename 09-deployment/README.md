@@ -58,6 +58,16 @@ Browser invitations send immediately from the API when `SMTP_HOST`,
 `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` and `ALP_APP_URL` are
 configured. If SMTP is missing or rejected, the browser app keeps the invitation
 valid and displays the copyable code for private manual sharing.
+
+Render Free blocks SMTP ports. For invitations on that host, set
+`MAIL_PROVIDER=zoho`, `ZOHO_REGION=com` (or the mailbox's actual data center),
+`ZOHO_FROM=notification@growwithalp.com`, `ZOHO_ACCOUNT_ID`, `ZOHO_CLIENT_ID`,
+`ZOHO_CLIENT_SECRET` and `ZOHO_REFRESH_TOKEN`. Authorize only the sender mailbox
+with `ZohoMail.messages.CREATE`; account-ID discovery additionally needs
+`ZohoMail.accounts.READ`. Store secrets in Render, never in Git or chat.
+The HTTPS transport refreshes access tokens automatically. It currently serves
+invitation delivery only; the existing recovery/contact worker still uses SMTP.
+Verify an actual inbox before describing email delivery as operational.
 For the first school and subsequent account invitations, follow
 `08-docs/ONBOARDING.md`; never substitute test seeds for account provisioning.
 For hosted first-school setup, set `ALP_SETUP_TOKEN` only long enough for the

@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { zohoTransport } from './zoho-mail.mjs';
 
 const roleLabels = {
   SCHOOL_ADMIN: 'School administrator',
@@ -36,8 +37,8 @@ function joinUrl(env) {
 }
 
 export async function sendInvitationEmail({ env, mailer, invitation }) {
-  const from = env.SMTP_FROM;
-  const mail = mailer || smtpTransport(env);
+  const from = env.MAIL_PROVIDER === 'zoho' ? env.ZOHO_FROM : env.SMTP_FROM;
+  const mail = mailer || (env.MAIL_PROVIDER === 'zoho' ? zohoTransport(env) : smtpTransport(env));
   if (!from || !mail) return { status: 'not_configured' };
   try {
     const role = roleLabels[invitation.role] || invitation.role;
