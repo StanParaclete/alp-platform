@@ -93,7 +93,7 @@ export async function dispatchAccountNotices(db,queue) {
   await queueRecords(db.accountNotice,{deliveredAt:null},queue,'notice');
 }
 
-async function queueRecords(model,where,queue,name) {
+export async function queueRecords(model,where,queue,name) {
   let after=null;
   do {
     const rows=await model.findMany({where:{AND:[where,...(after?[{OR:[{createdAt:{gt:after.createdAt}},{createdAt:after.createdAt,id:{gt:after.id}}]}]:[])]},select:{id:true,createdAt:true},orderBy:[{createdAt:'asc'},{id:'asc'}],take:100});

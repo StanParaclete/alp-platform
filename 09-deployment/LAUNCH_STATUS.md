@@ -4,6 +4,13 @@ Last updated: 2026-10-25
 
 ## Latest Acceptance Evidence: 25 October
 
+Follow-up worker review corrected enquiry starvation: dispatch previously read
+only the oldest 100 pending enquiries, which could hide newer rows behind failed
+jobs. Enquiries now use the existing keyset-paginated outbox dispatcher. Local
+backend checks passed 34 tests, zero failures, with two service tests skipped.
+Regression tests cover more than two pages with tied timestamps and queue errors.
+This readiness-only change has not been deployed or verified through a real inbox.
+
 The isolated real-Neon API suite passed 23 tests, zero failures and zero skips
 in `alp_acceptance_69b80bce9b82189bc3a5b2a9`. A preceding run exposed a
 credential transaction timeout during concurrent reset/login/refresh; explicit

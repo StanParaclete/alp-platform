@@ -2,7 +2,7 @@ import { Queue, Worker } from 'bullmq';
 import { mailDelivery } from './mail.mjs';
 import Redis from 'ioredis';
 import { database } from './db.mjs';
-import { recoveryCipher, deliverPasswordRecovery, deliverAccountNotice, dispatchRecovery, dispatchAccountNotices } from './recovery.mjs';
+import { recoveryCipher, deliverPasswordRecovery, deliverAccountNotice, dispatchRecovery, dispatchAccountNotices, queueRecords } from './recovery.mjs';
 if(!process.env.REDIS_URL)throw new Error('REDIS_URL is required.');
 const delivery=mailDelivery(process.env);
 if(!delivery)throw new Error('Configure the selected ALP mail provider before starting the worker.');
@@ -30,10 +30,7 @@ if(process.env.CONTACT_RECIPIENT)consume('alp-enquiries',async job=>{
   const result=await mail.sendMail({from,to:process.env.CONTACT_RECIPIENT,replyTo:item.email,subject:`ALP enquiry: ${item.subject}`,text:`Name: ${item.name}\nOrganisation: ${item.organisation}\nEmail: ${item.email}\n\n${item.message}`,messageId:`<alp-enquiry-${item.id}@growwithalp.com>`});
   if(!result.accepted?.length)throw new Error('Enquiry email was not accepted by the mail server.');
   await db.enquiry.update({where:{id:item.id},data:{deliveredAt:new Date()}});
-},async queue=>{
-  const items=await db.enquiry.findMany({where:{deliveredAt:null},orderBy:{createdAt:'asc'},take:100});
-  for(const item of items)await queue.add('deliver',{id:item.id},{jobId:item.id,attempts:5,backoff:{type:'exponential',delay:30000},removeOnComplete:true,removeOnFail:1000});
-});
+},queue=>queueRecords(db.enquiry,{deliveredAt:null},queue,'deliver'));
 if(recovery){
   consume('alp-password-recovery',job=>deliverPasswordRecovery(db,mail,recovery,job.data.id,from),queue=>dispatchRecovery(db,queue));
   consume('alp-account-notices',job=>deliverAccountNotice(db,mail,job.data.id,from),queue=>dispatchAccountNotices(db,queue));

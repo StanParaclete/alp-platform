@@ -80,6 +80,10 @@ guidance in the [OWASP password recovery cheat sheet](https://cheatsheetseries.o
 ## Delivery and Operations
 
 The worker scans the durable outbox every ten seconds using keyset pagination.
+Enquiries use the same timestamp-and-ID pagination as recovery and account
+notices, so a retained full page of failed deliveries cannot hide newer rows.
+Queue failures propagate to the dispatcher and are retried on the next scan;
+existing job IDs retain their configured retry state.
 It clears encrypted codes after provider acceptance, revocation, use or expiry.
 Expired reset rows are deleted after another 24 hours while the recovery worker
 is enabled. Password-change notices and audit records do not yet have automated
