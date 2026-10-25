@@ -69,7 +69,7 @@ stale verified credentials from creating an active session after the reset.
 Credential-changing, login and refresh transactions use a bounded five-second
 pool-acquisition wait and fifteen-second transaction budget, allowing row-lock
 contention across a remote database without removing atomic session revocation.
-They remain below the API's thirty-second request timeout. A timeout still
+These database budgets are not a guaranteed HTTP response deadline. A timeout still
 rolls back; no partial reset or automatic unsafe retry is permitted.
 Other accounts are unaffected. Existing requests already authorized before a
 reset are not canceled, but subsequent requests using old sessions are rejected.

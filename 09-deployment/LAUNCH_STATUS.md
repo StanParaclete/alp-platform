@@ -2,6 +2,29 @@
 
 Last updated: 2026-10-25
 
+## Latest Acceptance Evidence: 25 October
+
+The isolated real-Neon API suite passed 23 tests, zero failures and zero skips
+in `alp_acceptance_69b80bce9b82189bc3a5b2a9`. A preceding run exposed a
+credential transaction timeout during concurrent reset/login/refresh; explicit
+bounded transaction budgets corrected it. Local backend checks passed 32 tests
+with two service tests skipped. See `NEON_ACCEPTANCE.md` for scope and history.
+
+Readiness CI run `40163719746` passed PostgreSQL 16/18, website, desktop
+packaging, backend container smoke and existing-webapp jobs. Mobile remains
+blocked by its dependency security audit; the overall CI run is not green.
+
+Tests used synthetic records, controlled rate limiting and captured mail.
+The three isolated test databases are retained pending approved cleanup.
+Neither the copied school database nor the live app was changed. These results
+do not verify live Redis enforcement, inbox delivery, devices or user capacity.
+
+Remaining gates include supervised recovery-worker deployment and real inbox
+acceptance, least-privilege Neon runtime access, hosted proxy/rate-limit checks,
+device walkthroughs, independent off-device backups, measured capacity and a
+final write-frozen migration with explicit cutover approval. No broad school
+launch or 5,000-user capacity is approved by this test result.
+
 ## Verified Migration Rehearsal: 25 October
 
 Additional evidence: the real Prisma adapter passed read-only ORM and relationship

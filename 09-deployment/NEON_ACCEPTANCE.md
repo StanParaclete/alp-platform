@@ -54,8 +54,10 @@ restore. Never copy real learner records into it.
   three failed (one recovery concurrency check plus its two containing groups).
   Prisma reported `P2028`. This was not a school-data or live-app test.
 - Credential transactions now have explicit bounded wait/transaction budgets.
-  A fresh run in `alp_acceptance_69b80bce9b82189bc3a5b2a9` is verifying the change;
-  do not mark it passed until its report confirms zero failures and skips.
+  The fresh run in `alp_acceptance_69b80bce9b82189bc3a5b2a9` passed all 23
+  tests with zero failures, zero skips and no reported error codes, including
+  the previously failing reset/login/refresh concurrency check.
+  The aggregate report is `ALP-Neon-Acceptance.json` in the local task workspace.
 
 All these databases contain synthetic test data only and are retained pending
 approved cleanup. The school-data copy remains in `alp_svpq` and is unchanged.
