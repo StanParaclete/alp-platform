@@ -90,6 +90,22 @@ API host or gateway.
 
 ## Secrets
 
+### Optional Mail Processor Without Another Service
+
+The readiness branch supports `ALP_MAIL_IN_API=true`: the existing API start
+command supervises its mail child process and stops if the child fails. It
+requires the protected provider/recovery configuration documented in
+`08-docs/PASSWORD_RECOVERY.md`. Do not create a paid Render Background Worker
+or run a second worker for this mode. The setting is off by default and has
+not been enabled on the live service.
+
+This avoids an additional worker service, not the free host's sleep or resource
+limits. Verify host restarts, cold starts, actual recovery-code receipt and
+password-change notices using an owner-controlled test account before pilot use.
+Do not replace production database credentials as part of enabling this setting.
+
+### Protected Configuration
+
 Do not paste secrets into chat or commit them. Put these only into the provider
 secret manager or local shell variables while deploying:
 

@@ -33,6 +33,31 @@ still required. A separately supervised worker must be deployed; invitation
 delivery by the API does not mean the worker is running. See
 [Nodemailer's SMTP documentation](https://nodemailer.com/smtp).
 
+### Optional Single-Service Pilot
+
+Set `ALP_MAIL_IN_API=true` to have `npm start` supervise a separate mail child
+process within the existing API instance. Do not also start a standalone worker
+for this pilot. Both processes inherit the service's protected configuration;
+configure the same provider, recovery key, database and Redis settings above.
+The default remains disabled. This mode avoids provisioning a separate paid
+worker service; it does not create more free-tier capacity.
+
+API startup waits up to 45 seconds for the mail process to verify its provider,
+database and queues. Startup failure stops the API. An unexpected child exit
+requests API shutdown so the host can restart the whole service, rather than
+continuing to advertise a healthy API with a dead enabled processor. Shutdown
+sends SIGTERM, then SIGKILL after five seconds if necessary. Child stdout/stderr
+are suppressed in this mode to prevent unreviewed provider errors exposing
+secrets; the parent logs a generic startup failure. Monitor process exits and
+outbox age through restricted operations tooling.
+
+This mode shares API memory/CPU and follows the host's sleep/restart lifecycle.
+Pending outbox rows survive in PostgreSQL, but a sleeping host does not dispatch
+mail. A successful recovery request is not a promise of immediate delivery.
+It is a limited-pilot option, not evidence of an always-on service or capacity
+for 5,000 users. Hosted restart, email receipt and cold-start checks remain
+required before enabling it for schools. No keep-alive workaround is included.
+
 ## User and API Contract
 
 Open Forgot password on the mobile sign-in screen. Request a code for the account

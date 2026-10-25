@@ -4,6 +4,13 @@ Last updated: 2026-10-25
 
 ## Latest Acceptance Evidence: 25 October
 
+Single-service mail supervision is now available as an opt-in readiness change
+(`ALP_MAIL_IN_API=true`, disabled by default). API startup waits for worker
+readiness; worker failure shuts down the API for host restart. Local tests passed
+39 checks, with two service tests skipped. This is lifecycle unit-test evidence,
+not hosted mail/queue acceptance. No paid service was created, live setting
+changed or recovery email sent. See `PASSWORD_RECOVERY.md` for pilot limitations.
+
 Follow-up worker review corrected enquiry starvation: dispatch previously read
 only the oldest 100 pending enquiries, which could hide newer rows behind failed
 jobs. Enquiries now use the existing keyset-paginated outbox dispatcher. Local

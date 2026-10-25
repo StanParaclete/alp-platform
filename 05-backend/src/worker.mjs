@@ -52,4 +52,8 @@ async function stop(){
   await connection.quit();await db.$disconnect();
 }
 process.once('SIGTERM',()=>void stop());process.once('SIGINT',()=>void stop());
+await db.$connect();
+await connection.ping();
+await Promise.all(tasks.map(async task=>{await task.queue.waitUntilReady();await task.worker.waitUntilReady();}));
+process.send?.({type:'alp-mail-ready'});
 await running;
