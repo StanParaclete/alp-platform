@@ -7,12 +7,17 @@ import { digest, hashPassword, verifyPassword } from '../src/security.mjs';
 import { bootstrapSchool } from '../src/onboarding.mjs';
 import { sectionIds } from '../src/domain.mjs';
 import { checkRecovery } from './recovery.integration.mjs';
+import { validateTestTarget, verifyEmptyAcceptanceDatabase } from './test-target.mjs';
 
 test('real PostgreSQL: isolation, role restrictions, revisions, sessions and durable enquiries', { skip:!process.env.ALP_INTEGRATION_DATABASE_URL }, async t=>{
-  assert.equal(process.env.NODE_ENV,'test');
-  const url=new URL(process.env.ALP_INTEGRATION_DATABASE_URL);
-  assert.equal(url.hostname,'127.0.0.1');assert.equal(url.pathname,'/alp_test');
-  const db=database({DATABASE_URL:url.href});
+  const {url,remote}=validateTestTarget(process.env);
+  const db=database({DATABASE_URL:url.href,PGSSLROOTCERT:process.env.PGSSLROOTCERT});
+  if(remote) {
+    try { await verifyEmptyAcceptanceDatabase(db,process.env.ALP_ACCEPTANCE_MARKER); }
+    catch(error) { await db.$disconnect(); throw error; }
+  }
+  let server;
+  try {
   const password=randomBytes(20).toString('hex');
   const passwordHash=await hashPassword(password);
   const bootstrap={email:'bootstrap@example.test',name:'Initial administrator',password,schoolName:'Initial school',country:'GH',timezone:'Africa/Accra'};
@@ -32,11 +37,10 @@ test('real PostgreSQL: isolation, role restrictions, revisions, sessions and dur
   await db.studentAccess.create({data:{userId:parent.id,studentId:pupil.id}});
   let rateAllowed=true;
   const app=await createApp({db,rateLimit:{health:async()=>true,allow:async()=>rateAllowed},env:{JWT_SECRET:randomBytes(48).toString('hex'),CONTACT_WEBHOOK_TOKEN:'test-webhook-secret',CORS_ORIGINS:'https://allowed.example.test'}});
-  const server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
+  server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
   const base=`http://127.0.0.1:${server.address().port}`;
   const request=async(path,{token,school=schoolA.id,body,method='GET',headers={}}={})=>fetch(base+path,{method,headers:{...(token?{Authorization:`Bearer ${token}`} :{}),'X-School-Id':school,...(body?{'Content-Type':'application/json'}:{}),...headers},body:body?JSON.stringify(body):undefined});
   const login=async user=>{const response=await request('/auth/login',{method:'POST',body:{email:user.email,password}});assert.equal(response.status,200);return response.json();};
-  try {
     const teacherSession=await login(teacher),adminSession=await login(admin),parentSession=await login(parent),outsideSession=await login(outsider),otherAdminSession=await login(otherAdmin);
     const initialSession=await login({email:bootstrap.email});
     const initialProfile=await (await request('/me',{token:initialSession.accessToken})).json();assert.equal(initialProfile.memberships[0].school.id,initial.schoolId);
@@ -144,5 +148,5 @@ test('real PostgreSQL: isolation, role restrictions, revisions, sessions and dur
     });
     await t.test('password recovery and delivery outbox',async t=>checkRecovery(t,db));
     await t.test('rate limiting is enforced before private reads',async()=>{rateAllowed=false;assert.equal((await request('/v1/students',{token:adminSession.accessToken})).status,429);});
-  } finally { await new Promise(resolve=>server.close(resolve));await db.$disconnect(); }
+  } finally { if(server)await new Promise(resolve=>server.close(resolve));await db.$disconnect(); }
 });

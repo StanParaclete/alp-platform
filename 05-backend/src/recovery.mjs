@@ -1,6 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { digest, hashPassword } from './security.mjs';
+import { digest, hashPassword, credentialTransactionOptions } from './security.mjs';
 
 const email = z.string().trim().toLowerCase().pipe(z.email().max(254));
 export const recoveryRequest = z.object({email}).strict();
@@ -53,7 +53,7 @@ export async function completePasswordRecovery(db,body) {
     await tx.refreshToken.updateMany({where:{userId:item.userId,revokedAt:null},data:{revokedAt:new Date()}});
     await tx.accountNotice.create({data:{userId:item.userId,email:item.email}});
     await tx.auditLog.create({data:{actorId:item.userId,action:'password_reset',resourceType:'user',resourceId:item.userId}});
-  });
+  },credentialTransactionOptions);
 }
 
 export async function deliverPasswordRecovery(db,mail,cipher,id,from) {

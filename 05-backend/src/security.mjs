@@ -2,6 +2,8 @@ import { scrypt as scryptCallback, randomBytes, timingSafeEqual, createHash } fr
 import { promisify } from 'node:util';
 import { SignJWT, jwtVerify } from 'jose';
 const scrypt = promisify(scryptCallback);
+// Credential row locks can wait behind a competing reset across a remote database.
+export const credentialTransactionOptions = Object.freeze({ maxWait: 5000, timeout: 15000 });
 export const digest = value => createHash('sha256').update(value).digest('hex');
 export async function lockCredentials(tx,user) {
   const result=await tx.user.updateMany({where:{id:user.id,disabled:false,credentialVersion:user.credentialVersion},data:{credentialVersion:{increment:0}}});

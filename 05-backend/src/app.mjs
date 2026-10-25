@@ -1,7 +1,7 @@
 import express from 'express';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { authTokens, digest, hashPassword, verifyPassword, sameSecret, lockCredentials } from './security.mjs';
+import { authTokens, digest, hashPassword, verifyPassword, sameSecret, lockCredentials, credentialTransactionOptions } from './security.mjs';
 import { recoveryCipher, recoveryRequest, recoveryAcknowledgement, requestPasswordRecovery, completePasswordRecovery } from './recovery.mjs';
 import { acceptInvitation, bootstrapSchool, browserBootstrapInput, createInvitation, listInvitations, revokeInvitation } from './onboarding.mjs';
 import { sendInvitationEmail } from './mail.mjs';
@@ -61,7 +61,7 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     const user=await db.user.findUnique({where:{email}});
     const valid=await verifyPassword(password,user?.passwordHash||dummy);
     if (!valid||!user||user.disabled) fail(401,'Email or password is incorrect.');
-    const result=await db.$transaction(async tx=>{ if(!await lockCredentials(tx,user))fail(401,'Email or password is incorrect.'); const result=await session(tx,user.id); await audit(tx,{id:user.id},'login','user',user.id); return result; });
+    const result=await db.$transaction(async tx=>{ if(!await lockCredentials(tx,user))fail(401,'Email or password is incorrect.'); const result=await session(tx,user.id); await audit(tx,{id:user.id},'login','user',user.id); return result; },credentialTransactionOptions);
     res.json(result);
   });
   const refreshInput=z.object({refreshToken:z.string().min(32).max(256)}).strict();
@@ -108,7 +108,7 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
       const changed=await tx.refreshToken.updateMany({where:{id:current.id,usedAt:null,revokedAt:null},data:{usedAt:new Date()}});
       if (!changed.count) { await tx.refreshToken.updateMany({where:{familyId:current.familyId},data:{revokedAt:new Date()}}); return null; }
       return session(tx,current.userId,current.familyId);
-    });
+    },credentialTransactionOptions);
     if (!result) fail(401,'Session expired. Sign in again.');
     res.json(result);
   });
