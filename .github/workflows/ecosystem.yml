@@ -160,7 +160,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test 09-deployment/check-api.test.mjs 09-deployment/migration-preflight.test.mjs
+      - run: node --test 09-deployment/check-api.test.mjs 09-deployment/migration-preflight.test.mjs 09-deployment/verify-backup.test.mjs
       - name: Build backend deployment images
         run: |
           docker build -f 09-deployment/backend.Dockerfile --target migrate -t alp-backend-migrate:ci .

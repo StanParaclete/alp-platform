@@ -1,6 +1,29 @@
 # ALP Launch Status
 
-Last updated: 2026-10-24
+Last updated: 2026-10-25
+
+## Verified Migration Rehearsal: 25 October
+
+Additional evidence: the real Prisma adapter passed read-only ORM and relationship
+queries on Neon, with all three migration records completed. No copied or source
+records changed. New TLS regression coverage brings local backend checks to 29
+passed and two service tests skipped. Remote connections now explicitly require
+certificate/hostname verification; production has not received this code change.
+Full sign-in/save/review and authorization acceptance still needs controlled
+testing; read-only adapter success alone does not close that gate.
+
+The owner-approved Render snapshot was backed up with AES-256-GCM and restored
+transactionally into Neon PostgreSQL 18 in Oregon. All 28 tables and 36 rows,
+record fingerprints, constraints and sequence state matched. The saved archive
+passed independent authentication verification. See `NEON_MIGRATION.md` for the
+local archive/report locations and key-custody limitations.
+
+Production is still on Render. No source deletion, production secret change or
+live cutover occurred. Subsequent source writes are not replicated. A final
+write-frozen copy, least-privilege runtime access, application acceptance against
+Neon, off-device backup custody and an approved cutover remain required. The
+local credential helper was stopped and temporary credential values cleared.
+The following older notes remain historical where superseded by this evidence.
 
 ## Current Readiness Update
 

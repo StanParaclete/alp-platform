@@ -32,9 +32,10 @@ export async function main(env = process.env) {
   }
   const require = createRequire(new URL('../05-backend/package.json', import.meta.url));
   const { Client } = require('pg');
+  const { postgresOptions } = await import('../05-backend/src/db.mjs');
   const results = {};
   for (const [label, url] of [['source', source], ['target', target]]) {
-    const client = new Client({ connectionString: url.href, connectionTimeoutMillis: 10000,
+    const client = new Client({ ...postgresOptions({ DATABASE_URL: url.href, PGSSLROOTCERT: env.PGSSLROOTCERT }), connectionTimeoutMillis: 10000,
       statement_timeout: 15000, application_name: 'alp-migration-preflight' });
     try {
       await client.connect();
@@ -45,7 +46,10 @@ export async function main(env = process.env) {
         (SELECT ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()) AS tls,
         (SELECT count(*)::int FROM information_schema.tables
           WHERE table_schema = 'public' AND table_type = 'BASE TABLE') AS tables`);
-      if (!row.tls) throw new Error('TLS is not active');
+      // Managed endpoints can terminate TLS before their internal PostgreSQL hop.
+      if (client.connection.stream.encrypted !== true || client.connection.stream.authorized !== true) {
+        throw new Error('Client TLS certificate verification is not active');
+      }
       results[label] = { major: Math.floor(row.version / 10000), bytes: row.bytes, tables: row.tables };
       await client.query('ROLLBACK');
     } finally {
