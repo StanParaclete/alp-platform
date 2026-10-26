@@ -1,6 +1,27 @@
 # ALP Launch Status
 
-Last updated: 2026-10-25
+Last updated: 2026-10-26
+
+## Hosted Backend Verification: 26 October
+
+Render confirms deploy `dep-dbep8cks728c73cvlu10` succeeded and is Live at
+commit `02c40db286e8f0dfbe06d67214d17f86d388d233` (deployed 25 October).
+The build found three existing migrations and no pending migrations. Its logs
+confirm the database remains Render's `alp_svpq`; no Neon cutover occurred.
+Specific-commit deployment disabled auto-deploy, preventing accidental updates.
+
+On 26 October, `check-api.mjs` passed all six public gateway checks: API identity,
+PostgreSQL/Redis readiness, exact browser origin, preflight, unrecognised-origin
+rejection and anonymous account-access rejection. The initial gateway request
+returned HTTP 502 during service wake-up; direct Render liveness subsequently
+returned HTTP 200 with `no-store` and `nosniff`, and the full public suite passed.
+Runtime logs showed a fresh API startup. Cold-start availability is still a
+pilot limitation, not a resolved production-capacity gate.
+
+No recovery settings or database connection values were changed during this
+deployment/verification. Mail cohosting remains opt-in and recovery delivery is
+not verified. The older readiness-only notes below describe historical state;
+their code is now deployed, but the worker has not been enabled by this action.
 
 ## Latest Acceptance Evidence: 25 October
 
