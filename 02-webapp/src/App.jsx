@@ -1460,7 +1460,7 @@ function SubNav({active,setNavPage,onEnter,onSignup,onDemo}){
       </nav>
       <div style={{display:"flex",gap:12,alignItems:"center",flexShrink:0}}>
         <ThemeToggle/>
-        <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Start free</button>
+        <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Join a school</button>
         <button className={`landing-nav-hamburger${mobileOpen?" open":""}`} onClick={()=>setMobileOpen(o=>!o)} aria-label="Menu">
           <span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/>
         </button>
@@ -1476,7 +1476,7 @@ function SubNav({active,setNavPage,onEnter,onSignup,onDemo}){
         ))}
         <div style={{display:"flex",gap:10,marginTop:26}}>
           <button className="lp-cta" style={{flex:1}} onClick={()=>{setNavPage(null);setMobileOpen(false);}}>Home</button>
-          <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileOpen(false);}}>Start free</button>
+          <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileOpen(false);}}>Join a school</button>
         </div>
       </div>
     )}
@@ -5849,7 +5849,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         </nav>
         <div style={{display:"flex",gap:12,alignItems:"center",flexShrink:0}}>
           <ThemeToggle/>
-          <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Start free</button>
+          <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Join a school</button>
           <button className={`landing-nav-hamburger${mobileNavOpen?" open":""}`} onClick={()=>setMobileNavOpen(o=>!o)} aria-label="Menu">
             <span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/>
           </button>
@@ -5864,7 +5864,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           ))}
           <div style={{display:"flex",gap:10,marginTop:26}}>
             <button className="lp-cta" style={{flex:1}} onClick={()=>setMobileNavOpen(false)}>Home</button>
-            <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileNavOpen(false);}}>Start free</button>
+            <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileNavOpen(false);}}>Join a school</button>
           </div>
         </div>
       )}
@@ -5978,7 +5978,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       <div className="lp-quick"><div className="lp-wrap">
         <h5>Quick links</h5>
         <div className="lp-qrow">
-          <button onClick={onSignup||onEnter}>Start free</button>
+          <button onClick={onSignup||onEnter}>Join a school</button>
           <button onClick={onDemo||onEnter}>Book a demo</button>
           <button onClick={()=>setNavPage("For Schools")}>Security</button>
           <button onClick={()=>setNavPage("Pricing")}>Pricing</button>
@@ -10744,7 +10744,7 @@ function AppInner(){
       {showExport&&<ExportAllDataModal onClose={()=>setShowExport(false)}/>}
       <OfflineIndicator/>
       <PWAInstallBanner/>
-      {screen==="landing"&&<Landing onEnter={()=>setScreen("login")} onSignup={()=>setScreen("signup")} onDemo={()=>setContactType("demo")} navPage={navPage} setNavPage={setNavPage}/>}
+      {screen==="landing"&&<Landing onEnter={()=>window.location.assign("https://app.growwithalp.com/login")} onSignup={()=>window.location.assign("https://app.growwithalp.com/join")} onDemo={()=>setContactType("demo")} navPage={navPage} setNavPage={setNavPage}/>}
       {screen==="login"&&<Login onLogin={handleLogin} onBack={()=>setScreen("landing")}/>}
       {screen==="signup"&&<SignUp onLogin={handleSignup} onBack={()=>setScreen("login")}/>}
       {screen==="404"&&<NotFound onHome={()=>setScreen("landing")}/>}
