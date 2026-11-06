@@ -10,6 +10,10 @@ import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, pl
 
 class HttpError extends Error { constructor(status,message) { super(message); this.status=status; } }
 const fail = (status,message) => { throw new HttpError(status,message); };
+const sessionLifetimeMs = 8 * 60 * 60 * 1000;
+const legacyLifetimeMs = 30 * 24 * 60 * 60 * 1000;
+const sessionDeadline = expiry => expiry.getTime() > Date.now() + sessionLifetimeMs
+  ? new Date(expiry.getTime() - legacyLifetimeMs + sessionLifetimeMs) : expiry;
 const date = value => value ? new Date(value) : null;
 const audit = (tx,actor,action,type,id) => tx.auditLog.create({data:{schoolId:actor?.schoolId,actorId:actor?.id,action,resourceType:type,resourceId:id}});
 
@@ -40,7 +44,6 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
       console.error('alp_ready_unavailable',{
         name:error?.name,
         code:error?.code,
-        message:error?.message
       });
       res.status(503).json({status:'unavailable'});
     }
@@ -50,11 +53,17 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     try { if (!await rateLimit.allow(`ip:${digest(req.ip||'unknown')}`,120,60)) return res.status(429).json({error:'Too many requests. Try again shortly.'}); next(); }
     catch { res.status(503).json({error:'Service temporarily unavailable.'}); }
   });
-  async function session(tx,userId,familyId=randomUUID()) {
+  async function session(tx,userId,familyId=randomUUID(),expiresAt=new Date(Date.now()+sessionLifetimeMs)) {
     const refreshToken = randomBytes(48).toString('base64url');
-    await tx.refreshToken.create({data:{userId,familyId,hash:digest(refreshToken),expiresAt:new Date(Date.now()+30*86400000)}});
+    await tx.refreshToken.create({data:{userId,familyId,hash:digest(refreshToken),expiresAt}});
     return {accessToken:await tokens.issue(userId,familyId),refreshToken,expiresIn:600};
   }
+  app.post('/public/workspace-errors',async (req,res)=>{
+    if (!await rateLimit.allow(`workspace-error:${digest(req.ip||'unknown')}`,12,60)) return res.sendStatus(429);
+    const {kind}=z.object({kind:z.enum(['route','runtime','promise'])}).strict().parse(req.body);
+    console.error('alp_workspace_error',{kind});
+    res.sendStatus(204);
+  });
   app.post('/auth/login',async (req,res)=>{
     const {email,password}=z.object({email:z.string().trim().toLowerCase().pipe(z.email().max(254)),password:z.string().min(1).max(256)}).strict().parse(req.body);
     if (!await rateLimit.allow(`login:${digest(email)}`,8,900)) fail(429,'Too many sign-in attempts. Try again later.');
@@ -101,13 +110,13 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     const result=await db.$transaction(async tx=>{
       const current=await tx.refreshToken.findUnique({where:{hash:digest(refreshToken)},include:{user:true}});
       if (!current) return null;
-      if (current.usedAt||current.revokedAt||current.expiresAt<new Date()||current.user.disabled) {
+      if (current.usedAt||current.revokedAt||sessionDeadline(current.expiresAt)<=new Date()||current.user.disabled) {
         await tx.refreshToken.updateMany({where:{familyId:current.familyId,revokedAt:null},data:{revokedAt:new Date()}}); return null;
       }
       if (!await lockCredentials(tx,current.user)) return null;
       const changed=await tx.refreshToken.updateMany({where:{id:current.id,usedAt:null,revokedAt:null},data:{usedAt:new Date()}});
       if (!changed.count) { await tx.refreshToken.updateMany({where:{familyId:current.familyId},data:{revokedAt:new Date()}}); return null; }
-      return session(tx,current.userId,current.familyId);
+      return session(tx,current.userId,current.familyId,sessionDeadline(current.expiresAt));
     },credentialTransactionOptions);
     if (!result) fail(401,'Session expired. Sign in again.');
     res.json(result);
@@ -134,8 +143,8 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
       id=uuid.parse(payload.sub);
       familyId=uuid.parse(payload.sid);
     } catch { return res.status(401).json({error:'Session expired. Sign in again.'}); }
-    const session=await db.refreshToken.findFirst({where:{userId:id,familyId,revokedAt:null,usedAt:null,expiresAt:{gt:new Date()}},select:{id:true}});
-    if (!session) fail(401,'Session expired.');
+    const session=await db.refreshToken.findFirst({where:{userId:id,familyId,revokedAt:null,usedAt:null,expiresAt:{gt:new Date()}},select:{expiresAt:true}});
+    if (!session||sessionDeadline(session.expiresAt)<=new Date()) fail(401,'Session expired.');
     const user=await db.user.findUnique({where:{id},select:{id:true,name:true,email:true,disabled:true}});
     if (!user||user.disabled) fail(401,'Session expired.');
     req.user=user;
@@ -175,12 +184,13 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     const {q='',offset=0}=z.object({q:z.string().max(160).optional(),offset:z.coerce.number().int().min(0).max(100000).optional()}).parse(req.query);
     const where={...studentScope(req.actor),archived:false,...(q?{name:{contains:q,mode:'insensitive'}}:{})};
     const [items,total]=await db.$transaction([db.student.findMany({where,orderBy:[{name:'asc'},{id:'asc'}],skip:offset,take:50,select:{id:true,name:true,grade:true,supportLevel:true,categories:true,updatedAt:true}}),db.student.count({where})]);
+    if(items.length) await db.auditLog.createMany({data:items.map(({id})=>({schoolId:req.actor.schoolId,actorId:req.actor.id,action:'list_read',resourceType:'student',resourceId:id}))});
     res.json({items,total,offset,limit:50});
   });
   app.post('/v1/students',async (req,res)=>{ staff(req); const input=studentInput.parse(req.body); const item=await db.$transaction(async tx=>{ const saved=await tx.student.create({data:{...input,dateOfBirth:date(input.dateOfBirth),schoolId:req.actor.schoolId}}); await audit(tx,req.actor,'create','student',saved.id); return saved; }); res.status(201).json(item); });
   app.get('/v1/students/:id',async (req,res)=>{ const item=await student(req,req.params.id); await audit(db,req.actor,'read','student',item.id); res.json(item); });
   app.patch('/v1/students/:id',async (req,res)=>{ staff(req); const item=await student(req,req.params.id); const input=studentInput.partial().extend({archived:z.boolean().optional()}).strict().parse(req.body); res.json(await db.$transaction(async tx=>{ const saved=await tx.student.update({where:{id:item.id},data:{...input,...('dateOfBirth'in input?{dateOfBirth:date(input.dateOfBirth)}:{})}}); await audit(tx,req.actor,'update','student',item.id); return saved; })); });
-  app.get('/v1/students/:id/plans',async (req,res)=>{ const item=await student(req,req.params.id); res.json(await db.aLPPlan.findMany({where:{studentId:item.id,...planScope(req.actor)},orderBy:{updatedAt:'desc'}})); });
+  app.get('/v1/students/:id/plans',async (req,res)=>{ const item=await student(req,req.params.id); await audit(db,req.actor,'plans_read','student',item.id); res.json(await db.aLPPlan.findMany({where:{studentId:item.id,...planScope(req.actor)},orderBy:{updatedAt:'desc'}})); });
   app.post('/v1/students/:id/plans',async (req,res)=>{ staff(req); const item=await student(req,req.params.id); const input=planInput.parse(req.body); const saved=await db.$transaction(async tx=>{ const saved=await tx.aLPPlan.create({data:{...input,reviewDate:date(input.reviewDate),studentId:item.id,createdBy:req.actor.id,updatedBy:req.actor.id}}); await tx.planVersion.create({data:{planId:saved.id,revision:1,authorId:req.actor.id,snapshot:JSON.parse(JSON.stringify(saved))}}); await audit(tx,req.actor,'create','plan',saved.id); return saved; }); res.status(201).json(saved); });
   app.get('/v1/plans/:id',async (req,res)=>{ const item=await plan(req,req.params.id); await audit(db,req.actor,'read','plan',item.id); res.json({...item,completion:completion(item.sections),goals:await db.goal.findMany({where:{planId:item.id},include:{progress:{orderBy:{observedAt:'asc'},take:1000}}})}); });
   app.patch('/v1/plans/:id',async (req,res)=>{
@@ -211,7 +221,7 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     }));
   });
   app.post('/v1/goals/:id/progress',async (req,res)=>{ staff(req); const goal=await db.goal.findFirst({where:{id:uuid.parse(req.params.id),plan:planScope(req.actor)}}); if(!goal) fail(404,'Goal not found.'); const input=progressInput.parse(req.body); res.status(201).json(await db.$transaction(async tx=>{ const saved=await tx.progress.create({data:{...input,observedAt:new Date(input.observedAt),goalId:goal.id,authorId:req.actor.id}}); await audit(tx,req.actor,'create','progress',saved.id); return saved; })); });
-  app.get('/v1/students/:id/messages',async (req,res)=>{ const item=await student(req,req.params.id); res.json(await db.message.findMany({where:{studentId:item.id},orderBy:{createdAt:'desc'},take:100})); });
+  app.get('/v1/students/:id/messages',async (req,res)=>{ const item=await student(req,req.params.id); await audit(db,req.actor,'messages_read','student',item.id); res.json(await db.message.findMany({where:{studentId:item.id},orderBy:{createdAt:'desc'},take:100})); });
   app.post('/v1/students/:id/messages',async (req,res)=>{ const item=await student(req,req.params.id); const input=messageInput.parse(req.body); res.status(201).json(await db.$transaction(async tx=>{ const saved=await tx.message.create({data:{...input,studentId:item.id,authorId:req.actor.id}}); await audit(tx,req.actor,'create','message',saved.id); return saved; })); });
   app.get('/v1/notifications',async (req,res)=>res.json(await db.notification.findMany({where:{schoolId:req.actor.schoolId,userId:req.actor.id},orderBy:{createdAt:'desc'},take:100})));
   app.patch('/v1/notifications/:id',async (req,res)=>{ const result=await db.notification.updateMany({where:{id:uuid.parse(req.params.id),schoolId:req.actor.schoolId,userId:req.actor.id},data:{readAt:new Date()}}); if (!result.count) fail(404,'Notification not found.'); res.sendStatus(204); });
@@ -225,7 +235,7 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     if (error instanceof z.ZodError) return res.status(400).json({error:'Please check the submitted fields.',fields:error.issues.map(item=>({path:item.path.join('.'),message:item.message}))});
     if (error.status) return res.status(error.status).json({error:error.status===413?'Request too large.':error.message});
     if (error.code==='P2002') return res.status(409).json({error:'This record already exists.'});
-    console.error('alp_request_failed',{code:error.code||error.name});
+    console.error('alp_request_failed',{method:req.method,route:req.route?.path||'unmatched',code:error.code||error.name});
     res.status(500).json({error:'Unable to complete the request.'});
   });
   return app;

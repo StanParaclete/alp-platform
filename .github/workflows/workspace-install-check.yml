@@ -1,7 +1,7 @@
 name: Workspace install and two-school browser check
 on:
   push:
-    branches: [codex/workspace-install]
+    branches: [codex/workspace-install, codex/production-readiness]
 permissions:
   contents: read
 jobs:

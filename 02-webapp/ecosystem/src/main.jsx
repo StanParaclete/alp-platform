@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import {
   createBrowserRouter,
@@ -13,8 +13,25 @@ import { Students, Student } from "./students";
 import { Plan } from "./plans";
 import { Invitations } from "./invitations";
 import "./styles.css";
+function reportWorkspaceError(kind) {
+  const endpoint = import.meta.env.VITE_API_URL;
+  if (import.meta.env.PROD && endpoint)
+    fetch(new URL("/public/workspace-errors", endpoint), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind }),
+      credentials: "omit",
+      keepalive: true,
+    }).catch(() => {});
+}
+if (import.meta.env.PROD) {
+  window.addEventListener("error", () => reportWorkspaceError("runtime"));
+  window.addEventListener("unhandledrejection", () => reportWorkspaceError("promise"));
+}
+
 function RouteError() {
-  useRouteError();
+  const error = useRouteError();
+  useEffect(() => { reportWorkspaceError("route"); }, [error]);
   return (
     <AuthFrame title="This page could not load">
       <p>Your saved work is unchanged. Try opening your workspace again.</p>

@@ -129,8 +129,23 @@ test('real PostgreSQL: isolation, role restrictions, revisions, sessions and dur
       assert.equal((await request(`/v1/plans/${plan.id}`,{token:parentSession.accessToken})).status,200);
       assert.ok(await db.auditLog.count({where:{schoolId:schoolA.id,resourceId:plan.id}})>0);
     });
+    await t.test('roster views audit each returned student against the actor',async()=>{
+      const response=await request('/v1/students',{token:adminSession.accessToken,school:schoolA.id});
+      assert.equal(response.status,200);
+      for (const item of (await response.json()).items)
+        assert.ok(await db.auditLog.findFirst({where:{schoolId:schoolA.id,actorId:admin.id,action:'list_read',resourceType:'student',resourceId:item.id}}));
+    });
+    await t.test('workspace error reports reject unexpected fields',async()=>{
+      const report=body=>request('/public/workspace-errors',{method:'POST',body});
+      assert.equal((await report({kind:'runtime'})).status,204);
+      assert.equal((await report({kind:'runtime',message:'synthetic sensitive payload'})).status,400);
+    });
     await t.test('refresh rotates tokens and detects replay',async()=>{
       const renewed=await request('/auth/refresh',{method:'POST',body:{refreshToken:teacherSession.refreshToken}});assert.equal(renewed.status,200);const next=await renewed.json();
+      const before=await db.refreshToken.findUnique({where:{hash:digest(teacherSession.refreshToken)}});
+      const after=await db.refreshToken.findUnique({where:{hash:digest(next.refreshToken)}});
+      assert.equal(after.expiresAt.getTime(),before.expiresAt.getTime());
+      assert.ok(after.expiresAt.getTime()<=Date.now()+8*3600000);
       assert.equal((await request('/auth/refresh',{method:'POST',body:{refreshToken:teacherSession.refreshToken}})).status,401);
       assert.equal((await request('/auth/refresh',{method:'POST',body:{refreshToken:next.refreshToken}})).status,401);
       assert.equal((await request('/me',{token:next.accessToken})).status,401);
