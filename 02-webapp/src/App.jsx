@@ -1390,42 +1390,6 @@ function AIModal({student,onAdd,onClose}){
   );
 }
 
-function DownloadModal({onClose}){
-  const platforms=[
-    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11 · 64-bit",btn:"Download .exe"},
-    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="white"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.46 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>,label:"macOS",sub:"macOS 12+ · Universal",btn:"Download .dmg"},
-    {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50"><ellipse cx="21" cy="31" rx="14" ry="15" fill="#1a1a1a"/><ellipse cx="21" cy="33" rx="7.5" ry="9.5" fill="#f0ece0"/><ellipse cx="21" cy="11" rx="9.5" ry="10.5" fill="#1a1a1a"/><ellipse cx="21" cy="12.5" rx="5.5" ry="6.5" fill="#f0ece0"/><circle cx="18" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="24" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="18.6" cy="8.9" r="0.65" fill="#fff"/><circle cx="24.6" cy="8.9" r="0.65" fill="#fff"/><ellipse cx="21" cy="14.5" rx="2.8" ry="1.7" fill="#f5a623"/><ellipse cx="8" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(-8 8 30)"/><ellipse cx="34" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(8 34 30)"/><ellipse cx="16" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/><ellipse cx="26" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/></svg>,label:"Linux",sub:"Ubuntu / Debian · .deb",btn:"Download .deb"},
-  ];
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="fade-up" style={{background:"#17131B",border:"1px solid rgba(143,22,184,.3)",borderRadius:20,padding:"40px 36px",width:"100%",maxWidth:560,textAlign:"center",boxShadow:"0 32px 80px rgba(0,0,0,.7)"}}>
-        <div style={{width:60,height:60,background:"linear-gradient(135deg,rgba(143,22,184,.4),rgba(143,22,184,.1))",borderRadius:16,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,margin:"0 auto 18px",border:"1px solid rgba(143,22,184,.3)"}}>🖥</div>
-        <h2 style={{fontSize:26,fontWeight:800,color:"#fff",marginBottom:6,letterSpacing:"-.016em"}}>Download ALP Desktop</h2>
-        <p style={{fontSize:13,color:"rgba(255,255,255,.5)",marginBottom:8,lineHeight:1.6}}>Full offline access · Enterprise security · v2.4.1</p>
-        <p style={{fontSize:12,color:"rgba(255,255,255,.3)",marginBottom:28}}>Available for Windows, macOS, and Linux</p>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24}}>
-          {platforms.map(p=>(
-            <button key={p.label} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.1)",borderRadius:14,padding:"22px 12px",cursor:"pointer",transition:"all .2s",color:"#fff",textAlign:"center"}}
-              onMouseEnter={e=>{e.currentTarget.style.background="rgba(143,22,184,.2)";e.currentTarget.style.borderColor="rgba(143,22,184,.5)";e.currentTarget.style.transform="translateY(-2px)";}}
-              onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.04)";e.currentTarget.style.borderColor="rgba(255,255,255,.1)";e.currentTarget.style.transform="none";}}>
-              <div style={{width:52,height:52,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center"}}>{p.svg}</div>
-              <div style={{fontSize:14,fontWeight:700,marginBottom:4}}>{p.label}</div>
-              <div style={{fontSize:10,color:"rgba(255,255,255,.4)",marginBottom:12,lineHeight:1.4}}>{p.sub}</div>
-              <div style={{fontSize:10,fontWeight:700,padding:"5px 10px",background:"rgba(143,22,184,.35)",border:"1px solid rgba(143,22,184,.4)",borderRadius:6,color:"#E3AFEf"}}>{p.btn}</div>
-            </button>
-          ))}
-        </div>
-        <div style={{padding:"14px 16px",background:"rgba(255,255,255,.03)",border:"1px solid rgba(255,255,255,.07)",borderRadius:10,marginBottom:20}}>
-          <p style={{fontSize:12,color:"rgba(255,255,255,.4)",lineHeight:1.6}}>✓ Free plan for schools — access through your school  ·  ✓ Offline access  ·  ✓ Auto-updates  ·  ✓ Sync across devices</p>
-        </div>
-        <button onClick={onClose} style={{background:"rgba(255,255,255,.06)",border:"1px solid rgba(255,255,255,.1)",borderRadius:99,padding:"9px 28px",fontSize:12,color:"rgba(255,255,255,.5)",cursor:"pointer",transition:"all .15s"}}
-          onMouseEnter={e=>{e.currentTarget.style.background="rgba(255,255,255,.12)";e.currentTarget.style.color="#fff";}}
-          onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.06)";e.currentTarget.style.color="rgba(255,255,255,.5)";}}>← Back</button>
-      </div>
-    </div>
-  );
-}
-
 // ═══════════════════════════════════════════════════════════
 // LANDING
 // ═══════════════════════════════════════════════════════════
@@ -1458,7 +1422,7 @@ function SubNav({active,setNavPage,onEnter,onSignup,onDemo}){
       </nav>
       <div style={{display:"flex",gap:12,alignItems:"center",flexShrink:0}}>
         <ThemeToggle/>
-        <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Start free</button>
+        <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Join a school</button>
         <button className={`landing-nav-hamburger${mobileOpen?" open":""}`} onClick={()=>setMobileOpen(o=>!o)} aria-label="Menu">
           <span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/>
         </button>
@@ -1474,7 +1438,7 @@ function SubNav({active,setNavPage,onEnter,onSignup,onDemo}){
         ))}
         <div style={{display:"flex",gap:10,marginTop:26}}>
           <button className="lp-cta" style={{flex:1}} onClick={()=>{setNavPage(null);setMobileOpen(false);}}>Home</button>
-          <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileOpen(false);}}>Start free</button>
+          <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileOpen(false);}}>Join a school</button>
         </div>
       </div>
     )}
@@ -2019,7 +1983,6 @@ function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
     {f:"PDF Export",a:"✓ All plans",p:"✗ Not included"},
     {f:"E-Signature",a:"✓ Pro & above",p:"✗ Not included"},
     {f:"Global Support (Ghana, Nigeria, UK…)",a:"✓ 10+ frameworks",p:"✗ USA only"},
-    {f:"Desktop App (offline access)",a:"✓ Windows/Mac/Linux",p:"✗ Web only"},
     {f:"ALP Student Snapshot",a:"✓ Pro & above",p:"✓ Pro & above"},
     {f:"ALP Accommodations Hub",a:"✓ School & above",p:"✓ School & above"},
     {f:"Age Range",a:"Birth–22+",p:"Ages 5–21 only"},
@@ -2271,26 +2234,13 @@ function ResourcesPage({setNavPage,onEnter,onSignup,onDemo}){
       {/* OS Download cards with real logos */}
       <section style={{background:C.purpleL,padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
-          <p className="lbl" style={{marginBottom:16}}>Desktop App</p>
-          <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-.026em",marginBottom:14}}>Access ALP <span className="serif-italic">your way.</span></h2>
-          <p style={{fontSize:14,color:C.warm,marginBottom:44}}>Full offline access, faster performance, and enterprise security on all major platforms.</p>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16}}>
-            {[
-              {icon:"🌐",label:"Web App",sub:"No download needed",cta:true},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 88 88"><path d="M0 12.402l35.687-4.86.016 34.423-35.67.203z" fill="#F35325"/><path d="M39.996 6.86L87.314 0v41.745l-47.318.376z" fill="#81BC06"/><path d="M35.67 45.471l.028 34.453L0 75.48V45.268z" fill="#05A6F0"/><path d="M39.996 46.06l47.318-.376V88l-47.318-7.62z" fill="#FFBA08"/></svg>,label:"Windows",sub:"Windows 10 / 11"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="var(--text-primary,#1a0a2e)"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.46 2.208 3.09 3.792 3.029 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>,label:"macOS",sub:"macOS 12+"},
-              {svg:<svg xmlns="http://www.w3.org/2000/svg" width="42" height="50" viewBox="0 0 42 50"><ellipse cx="21" cy="31" rx="14" ry="15" fill="#1a1a1a"/><ellipse cx="21" cy="33" rx="7.5" ry="9.5" fill="#f0ece0"/><ellipse cx="21" cy="11" rx="9.5" ry="10.5" fill="#1a1a1a"/><ellipse cx="21" cy="12.5" rx="5.5" ry="6.5" fill="#f0ece0"/><circle cx="18" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="24" cy="9.5" r="1.7" fill="#1a1a1a"/><circle cx="18.6" cy="8.9" r="0.65" fill="#fff"/><circle cx="24.6" cy="8.9" r="0.65" fill="#fff"/><ellipse cx="21" cy="14.5" rx="2.8" ry="1.7" fill="#f5a623"/><ellipse cx="8" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(-8 8 30)"/><ellipse cx="34" cy="30" rx="4.5" ry="9" fill="#1a1a1a" transform="rotate(8 34 30)"/><ellipse cx="16" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/><ellipse cx="26" cy="47" rx="5.5" ry="2.8" fill="#f5a623"/></svg>,label:"Linux",sub:"Ubuntu / Debian"}
-            ].map(p=>(
-              <div key={p.label} className="card" style={{padding:"28px 20px",textAlign:"center"}}>
-                {p.svg
-                  ?<div style={{width:52,height:52,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center"}}>{p.svg}</div>
-                  :<div className="glyph" style={{fontSize:42,marginBottom:12}}>{p.icon}</div>
-                }
-                <div className="serif" style={{fontSize:17,fontWeight:700,marginBottom:4}}>{p.label}</div>
-                <div style={{fontSize:12,color:C.warm,marginBottom:18}}>{p.sub}</div>
-                {p.cta?<button className="btn-black" onClick={onSignup||onEnter} style={{width:"100%",fontSize:11}}>Open in Browser</button>:<button className="btn-outline" onClick={()=>setShowDownload(true)} style={{width:"100%",fontSize:11}}>⬇ Download {p.label}</button>}
-              </div>
-            ))}
+          <h2 className="serif" style={{fontSize:32}}>Install ALP</h2>
+          <p>Open the school workspace on the device where you want to install it. An internet connection is required.</p>
+          <a className="btn-black" href="https://app.growwithalp.com/login">Open ALP workspace</a>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16,marginTop:24,textAlign:"left"}}>
+            <div className="card" style={{padding:24}}><h3>iPhone</h3><p>Open the workspace in Safari. Tap Share, then Add to Home Screen. If shown, turn on Open as Web App, then tap Add.</p></div>
+            <div className="card" style={{padding:24}}><h3>Android</h3><p>Open the workspace in Chrome. Open the ⋮ menu, tap Add to Home screen, then choose Install if offered.</p></div>
+            <div className="card" style={{padding:24}}><h3>Computer</h3><p>Open the workspace in Chrome or Edge. Choose Install in the address bar or browser menu. On a supported Mac, Safari also offers File → Add to Dock.</p></div>
           </div>
         </div>
       </section>
@@ -5700,40 +5650,7 @@ function useCopy(){
 // ═══════════════════════════════════════════════════════════
 // PWA INSTALL PROMPT
 // ═══════════════════════════════════════════════════════════
-function PWAInstallBanner(){
-  const [prompt,setPrompt]=useState(null);
-  const [dismissed,setDismissed]=useState(false);
-  useEffect(()=>{
-    const handler=e=>{e.preventDefault();setPrompt(e);};
-    const installed=()=>{setPrompt(null);setDismissed(true);};
-    window.addEventListener("beforeinstallprompt",handler);
-    window.addEventListener("appinstalled",installed);
-    return()=>{
-      window.removeEventListener("beforeinstallprompt",handler);
-      window.removeEventListener("appinstalled",installed);
-    };
-  },[]);
-  if(!prompt||dismissed)return null;
-  return(
-    <div style={{position:"fixed",bottom:90,left:20,right:20,zIndex:197,background:"#1B171F",borderRadius:8,padding:"14px 18px",display:"flex",alignItems:"center",gap:12,boxShadow:"0 8px 32px rgba(0,0,0,.3)",border:"1px solid rgba(143,22,184,.3)"}}>
-      <img src="/icons/icon-192x192.png" alt="" width={32} height={32} style={{flexShrink:0,borderRadius:6}}/>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:13,fontWeight:700,color:"#fff",marginBottom:2}}>Install ALP App</div>
-        <div style={{fontSize:11,color:"rgba(255,255,255,.5)"}}>Add to your home screen for quick access</div>
-      </div>
-      <button onClick={async()=>{
-        const installPrompt=prompt;
-        setPrompt(null); // Browser install events can only be used once.
-        try{
-          await installPrompt.prompt();
-          const{outcome}=await installPrompt.userChoice;
-          if(outcome==="accepted")setDismissed(true);
-        }catch{ /* The browser can withdraw an install offer. */ }
-      }} className="btn-purple" style={{fontSize:11,padding:"8px 14px",flexShrink:0}}>Install</button>
-      <button aria-label="Dismiss install offer" onClick={()=>setDismissed(true)} style={{fontSize:18,color:"#AFA0B8",background:"none",border:"none",cursor:"pointer",flexShrink:0}}>×</button>
-    </div>
-  );
-}
+
 
 // ═══════════════════════════════════════════════════════════
 // PAGE LOAD PROGRESS BAR
@@ -5803,7 +5720,6 @@ function NewsletterForm(){
   );
 }
 function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
-  const [showDownload,setShowDownload]=useState(false);
   const [mobileNavOpen,setMobileNavOpen]=useState(false);
   // Prevent horizontal overflow on mobile
   if(typeof document!=="undefined")document.body.style.overflowX="hidden";
@@ -5847,7 +5763,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         </nav>
         <div style={{display:"flex",gap:12,alignItems:"center",flexShrink:0}}>
           <ThemeToggle/>
-          <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Start free</button>
+          <button className="lp-cta landing-nav-desktop" onClick={onSignup||onEnter}>Join a school</button>
           <button className={`landing-nav-hamburger${mobileNavOpen?" open":""}`} onClick={()=>setMobileNavOpen(o=>!o)} aria-label="Menu">
             <span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/><span style={{background:"var(--lp-ink)"}}/>
           </button>
@@ -5862,7 +5778,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
           ))}
           <div style={{display:"flex",gap:10,marginTop:26}}>
             <button className="lp-cta" style={{flex:1}} onClick={()=>setMobileNavOpen(false)}>Home</button>
-            <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileNavOpen(false);}}>Start free</button>
+            <button className="lp-cta" style={{flex:1}} onClick={()=>{(onSignup||onEnter)();setMobileNavOpen(false);}}>Join a school</button>
           </div>
         </div>
       )}
@@ -5972,7 +5888,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
       <div className="lp-quick"><div className="lp-wrap">
         <h5>Quick links</h5>
         <div className="lp-qrow">
-          <button onClick={onSignup||onEnter}>Start free</button>
+          <button onClick={onSignup||onEnter}>Join a school</button>
           <button onClick={onDemo||onEnter}>Book a demo</button>
           <button onClick={()=>setNavPage("For Schools")}>Security</button>
           <button onClick={()=>setNavPage("Pricing")}>Pricing</button>
@@ -6024,13 +5940,10 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
 // LOGIN — matches pages 4 & 5 of prototype exactly
 // ═══════════════════════════════════════════════════════════
 function Login({onLogin, onBack}){
-  const [tab,setTab]=useState("web");
   const [rememberMe,setRememberMe]=useState(false);
   const [email,setEmail]=useState("");
   const [pw,setPw]=useState("");
-  const [license,setLicense]=useState("");
   const [loading,setLoading]=useState(false);
-  const [showDownload,setShowDownload]=useState(false);
   const [showForgot,setShowForgot]=useState(false);
   const [step,setStep]=useState("credentials"); // "credentials" | "role"
   const [selectedRole,setSelectedRole]=useState(null);
@@ -6066,7 +5979,6 @@ function Login({onLogin, onBack}){
 
   return(
     <div style={{display:"flex",minHeight:"100vh"}}>
-      {showDownload&&<DownloadModal onClose={()=>setShowDownload(false)}/>}
       {showForgot&&<ForgotPasswordModal onClose={()=>setShowForgot(false)}/>}
 
       {/* LEFT panel */}
@@ -6105,26 +6017,12 @@ function Login({onLogin, onBack}){
         {step==="credentials"&&(<>
           <h3 style={{fontSize:28,fontWeight:800,color:C.black,marginBottom:6,letterSpacing:"-.016em"}}>Sign in</h3>
           <p style={{fontSize:14,color:C.warm,marginBottom:28}}>Access your school's ALP dashboard</p>
-          <div style={{display:"flex",border:`1px solid ${C.tanL}`,borderRadius:10,marginBottom:28,overflow:"hidden"}}>
-            {[["web","🌐 Web App"],["desktop","🖥 Desktop App"]].map(([id,label])=>(
-              <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"11px 0",fontSize:13,fontWeight:600,background:tab===id?"var(--purple-main)":"transparent",color:tab===id?"#fff":C.warm,border:"none",cursor:"pointer",transition:"all .15s"}}>{label}</button>
-            ))}
-          </div>
-          {tab==="desktop"&&(
-            <div style={{background:"rgba(143,22,184,.08)",border:`1px solid ${C.tanL}`,borderRadius:12,padding:24,textAlign:"center",marginBottom:24}}>
-              <div style={{fontSize:32,marginBottom:10}}>🖥</div>
-              <div style={{fontSize:14,fontWeight:700,color:C.black,marginBottom:6}}>ALP Desktop App</div>
-              <p style={{fontSize:12,color:C.warm,marginBottom:16,lineHeight:1.6}}>Download and install first, then sign in below.</p>
-              <button className="btn-purple" onClick={()=>setShowDownload(true)} style={{fontSize:11,padding:"10px 22px"}}>⬇ Download for your OS</button>
-            </div>
-          )}
           <div style={{display:"flex",flexDirection:"column",gap:22,marginBottom:24}}>
             <div style={{display:"flex",flexDirection:"column",gap:6}}>
               <span className="lbl" style={{fontSize:9}}>School / Institution</span>
               <select className="u-select"><option>Westwood Elementary</option><option>Riverside High School</option><option>Other Institution</option></select>
             </div>
             <UInput label="Email Address" value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="you@school.edu"/>
-            {tab==="desktop"&&<UInput label="License Key" value={license} onChange={e=>setLicense(e.target.value)} placeholder="XXXX - XXXX - XXXX - XXXX"/>}
             <div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><span className="lbl" style={{fontSize:9}}>Password</span><span style={{fontSize:12,color:C.purple,cursor:"pointer"}} onClick={()=>setShowForgot(true)}>Forgot password?</span></div>
               <input className="u-input" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="••••••••"/>
@@ -6133,7 +6031,7 @@ function Login({onLogin, onBack}){
           </div>
           {loginError&&<p role="alert" style={{color:C.red,background:C.redBg,border:`1px solid ${C.redBd}`,borderRadius:6,padding:12,fontSize:13,lineHeight:1.5,marginBottom:16}}>{loginError}</p>}
           <button className="btn-purple" disabled={loading} onClick={handleSignIn} style={{width:"100%",padding:"15px",marginBottom:20,fontSize:13,borderRadius:10}}>
-            {loading?<><Spin/>Signing in…</>:`Sign in to ${tab==="web"?"Web App →":"Desktop →"}`}
+            {loading?<><Spin/>Signing in…</>:"Sign in →"}
           </button>
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}><div style={{flex:1,height:1,background:C.tanL}}/><span style={{fontSize:12,color:C.warm}}>or continue with</span><div style={{flex:1,height:1,background:C.tanL}}/></div>
           <button onClick={async()=>{setLoading(true);const{error:e}=await Supabase.signInWithGoogle();if(e){setLoginError(e.message);setLoading(false);}}}
@@ -10737,8 +10635,7 @@ function AppInner(){
       {showShortcuts&&<KeyboardShortcutsPanel onClose={()=>setShowShortcuts(false)}/>}
       {showExport&&<ExportAllDataModal onClose={()=>setShowExport(false)}/>}
       <OfflineIndicator/>
-      <PWAInstallBanner/>
-      {screen==="landing"&&<Landing onEnter={()=>setScreen("login")} onSignup={()=>setScreen("signup")} onDemo={()=>setContactType("demo")} navPage={navPage} setNavPage={setNavPage}/>}
+      {screen==="landing"&&<Landing onEnter={()=>window.location.assign("https://app.growwithalp.com/login")} onSignup={()=>window.location.assign("https://app.growwithalp.com/join")} onDemo={()=>setContactType("demo")} navPage={navPage} setNavPage={setNavPage}/>}
       {screen==="login"&&<Login onLogin={handleLogin} onBack={()=>setScreen("landing")}/>}
       {screen==="signup"&&<SignUp onLogin={handleSignup} onBack={()=>setScreen("login")}/>}
       {screen==="404"&&<NotFound onHome={()=>setScreen("landing")}/>}
