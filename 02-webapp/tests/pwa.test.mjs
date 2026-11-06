@@ -64,26 +64,9 @@ function worker({ offline = false, keys = [], missingFallback = false } = {}) {
   };
 }
 
-test('linked manifest has a real launch URL and correctly encoded icons', () => {
+test('marketing entry does not advertise itself as the installable workspace', () => {
   const document = new JSDOM(read('index.html')).window.document;
-  const manifestPath = document.querySelector('link[rel="manifest"]').getAttribute('href');
-  const manifest = JSON.parse(read('public' + manifestPath));
-  assert.equal(manifest.id, '/');
-  assert.equal(manifest.start_url, '/');
-  assert.equal(manifest.scope, '/');
-  assert.equal(manifest.display, 'standalone');
-  assert.equal(manifest.theme_color, document.querySelector('meta[name="theme-color"]').content);
-  assert.deepEqual(manifest.icons.map(icon => icon.sizes), ['192x192', '512x512']);
-  const apple = document.querySelector('link[rel="apple-touch-icon"]');
-  const icons = [...manifest.icons, { src: apple.getAttribute('href'), sizes: apple.getAttribute('sizes') }];
-  for (const icon of icons) {
-    const png = readFileSync(new URL('public' + icon.src, root));
-    assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
-    assert.equal(`${png.readUInt32BE(16)}x${png.readUInt32BE(20)}`, icon.sizes);
-  }
-  for (const removed of ['screenshots', 'shortcuts', 'share_target', 'protocol_handlers', 'related_applications']) {
-    assert.equal(manifest[removed], undefined);
-  }
+  assert.equal(document.querySelector('link[rel="manifest"]'), null);
 });
 
 test('install caches only the offline page and its icon, bypassing old HTTP copies', async () => {
