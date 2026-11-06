@@ -156,6 +156,10 @@ jobs:
       # only route into staff access — the authentication boundary for
       # the whole product. Its rules live in authorize.ts precisely so
       # they can be tested; this job is that test.
+      - name: Install invitation test dependencies
+        working-directory: 02-webapp
+        run: npm ci
+
       - name: Invitation authorization tests
         working-directory: 02-webapp
         run: npm run test:invite
