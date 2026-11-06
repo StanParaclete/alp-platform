@@ -1,0 +1,69 @@
+name: Workspace install and two-school browser check
+on:
+  push:
+    branches: [codex/workspace-install]
+permissions:
+  contents: read
+jobs:
+  database:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        postgres: ['18']
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}-bookworm
+        env:
+          POSTGRES_DB: alp_test
+          POSTGRES_USER: alp_test
+          POSTGRES_PASSWORD: ephemeral-ci-only-password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U alp_test -d alp_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7.4-bookworm
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://alp_test:ephemeral-ci-only-password@127.0.0.1:5432/alp_test
+      ALP_INTEGRATION_DATABASE_URL: postgresql://alp_test:ephemeral-ci-only-password@127.0.0.1:5432/alp_test
+      ALP_INTEGRATION_REDIS_URL: redis://127.0.0.1:6379/15
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: 05-backend/package-lock.json
+      - run: npm ci
+        working-directory: 05-backend
+      - run: npm run generate
+        working-directory: 05-backend
+      - run: npm run validate
+        working-directory: 05-backend
+      - run: npm run migrate:deploy
+        working-directory: 05-backend
+      - name: Run full backend suite with required service connections
+        run: |
+          node --input-type=module -e "for (const key of ['ALP_INTEGRATION_DATABASE_URL', 'ALP_INTEGRATION_REDIS_URL']) if (!process.env[key]) throw new Error(key + ' is required')"
+          npm test
+        working-directory: 05-backend
+      - run: npm ci
+        working-directory: 02-webapp/ecosystem
+      - run: npm test
+        working-directory: 02-webapp/ecosystem
+      - run: npm run build
+        working-directory: 02-webapp/ecosystem
+        env:
+          VITE_API_URL: https://api.example.invalid
+      - run: npm audit --audit-level=high
+        working-directory: 02-webapp/ecosystem
+      - run: npx playwright install --with-deps chromium
+        working-directory: 02-webapp/ecosystem
+      - run: npm run test:browser -- --integration
+        working-directory: 02-webapp/ecosystem

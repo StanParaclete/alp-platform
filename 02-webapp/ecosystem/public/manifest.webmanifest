@@ -1,0 +1,14 @@
+{
+  "id": "/",
+  "name": "ALP School Workspace",
+  "short_name": "ALP",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#100D13",
+  "theme_color": "#8F16B8",
+  "icons": [
+    { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

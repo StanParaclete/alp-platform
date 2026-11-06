@@ -11,7 +11,7 @@ const integration = process.argv.includes("--integration"),
   base = "http://127.0.0.1:3309",
   apiBase = "http://127.0.0.1:3310";
 process.env.VITE_API_URL = apiBase;
-let db, apiServer, browser, vite, context;
+let db, apiServer, browser, vite, context, invitations;
 const data = fixture(),
   password = randomBytes(24).toString("hex");
 try {
@@ -29,7 +29,6 @@ try {
       data: { name: "ALP Synthetic Browser School", country: "GH" },
     });
     for (const [user, role] of [
-      [data.teacher, "TEACHER"],
       [data.parent, "PARENT"],
     ])
       await db.user.create({
@@ -53,6 +52,21 @@ try {
     await db.studentAccess.create({
       data: { userId: data.parent.id, studentId: data.student.id },
     });
+    const otherSchool = await db.school.create({
+      data: { name: "ALP Synthetic Browser School B", country: "GH" },
+    });
+    await db.student.create({
+      data: { schoolId: otherSchool.id, name: "School B Learner", grade: "4", categories: [] },
+    });
+    const teachers = [data.teacher, { email: "teacher-b@example.test", name: "School B Teacher" }];
+    const schools = [school, otherSchool];
+    for (const [index, tenant] of schools.entries())
+      await db.user.create({
+        data: {
+          email: `admin-${index}@example.test`, name: "Synthetic Admin", passwordHash,
+          memberships: { create: { schoolId: tenant.id, role: "SCHOOL_ADMIN" } },
+        },
+      });
     const app = await createApp({
       db,
       env: { JWT_SECRET: randomBytes(48).toString("hex"), CORS_ORIGINS: base },
@@ -63,6 +77,22 @@ try {
       apiServer.once("listening", resolve);
       apiServer.once("error", reject);
     });
+    invitations = [];
+    for (const [index, tenant] of schools.entries()) {
+      const auth = await fetch(`${apiBase}/auth/login`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: `admin-${index}@example.test`, password }),
+      });
+      assert.equal(auth.status, 200);
+      const { accessToken } = await auth.json();
+      const response = await fetch(`${apiBase}/v1/invitations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}`, "X-School-Id": tenant.id },
+        body: JSON.stringify({ email: teachers[index].email, role: "TEACHER" }),
+      });
+      assert.equal(response.status, 201);
+      invitations.push({ user: teachers[index], token: (await response.json()).token });
+    }
   }
   vite = await createServer({
     server: { host: "127.0.0.1", port: 3309, strictPort: true },
@@ -130,6 +160,17 @@ try {
   await fits();
   await screenshot("login-mobile");
   await page.setViewportSize({ width: 1440, height: 960 });
+  async function accept({ user, token }) {
+    await page.getByRole("link", { name: "Join a school" }).click();
+    for (const [label, value] of [
+      ["Full name", user.name ?? "Synthetic Teacher"], ["Invited email", user.email],
+      ["Create password", password], ["Invitation code", token],
+    ]) await page.getByLabel(label, { exact: true }).fill(value);
+    await page.getByRole("button", { name: "Accept invitation" }).click();
+    await expect(page.getByRole("heading", { name: "School invitation accepted" })).toBeVisible();
+    await page.getByRole("link", { name: "Sign in", exact: true }).click();
+  }
+  if (integration) await accept(invitations[0]);
   await login(data.teacher);
   if (integration) {
     await page
@@ -302,7 +343,41 @@ try {
     await page.evaluate(() => localStorage.length + sessionStorage.length),
     0,
   );
+  const schoolAPlan = new URL(page.url()).pathname;
   await signOut();
+  if (integration) {
+    await accept(invitations[1]);
+    await login(invitations[1].user);
+    await expect(page.getByRole("link", { name: "Synthetic Learner" })).toHaveCount(0);
+    await page.getByRole("link", { name: "School B Learner" }).click();
+    await page.getByRole("button", { name: "Create ALP", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "ALP - School B Learner" })).toBeVisible();
+    const schoolBPlan = new URL(page.url()).pathname;
+    await page.getByRole("button", { name: "Add goal", exact: true }).click();
+    for (const [label, value] of [["Goal", "Count ten objects"], ["Baseline", "0"], ["Target", "10"], ["Unit", "objects"], ["Due date", "2027-03-01"]])
+      await page.getByRole("dialog").getByLabel(label, { exact: true }).fill(value);
+    await page.getByRole("button", { name: "Save goal", exact: true }).click();
+    await page.getByRole("button", { name: "Record progress", exact: true }).click();
+    await page.getByLabel("Observed value (objects)").fill("6");
+    await page.getByRole("button", { name: "Save observation" }).click();
+    await expect(page.getByRole("cell", { name: "6 objects", exact: true })).toBeVisible();
+    async function denied(path) {
+      const response = page.waitForResponse(r => r.url() === `${apiBase}/v1${path}` && r.request().method() === "GET");
+      await page.getByRole("link", { name: "Students", exact: true }).first().click();
+      await page.evaluate(path => {
+        history.pushState({}, "", path);
+        dispatchEvent(new PopStateEvent("popstate"));
+      }, path);
+      assert.equal((await response).status(), 404);
+    }
+    await denied(schoolAPlan);
+    await signOut();
+    await login(data.teacher);
+    await expect(page.getByRole("link", { name: "School B Learner" })).toHaveCount(0);
+    await denied(schoolBPlan);
+    await signOut();
+    console.log("Both test schools accepted invitations, signed in, created plans and saved progress. Each school's direct request for the other plan returned 404.");
+  }
   await login(data.parent);
   await expect(
     page.getByRole("link", { name: "Unlinked Learner" }),
