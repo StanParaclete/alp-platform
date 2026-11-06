@@ -1,7 +1,7 @@
 name: Workspace install and two-school browser check
 on:
   push:
-    branches: [codex/workspace-install, codex/production-readiness, codex/capacity-check]
+    branches: [codex/workspace-install, codex/production-readiness]
 permissions:
   contents: read
 jobs:
@@ -49,7 +49,7 @@ jobs:
       - run: npm run migrate:deploy
         working-directory: 05-backend
       - name: Run synthetic capacity check
-        if: github.ref == 'refs/heads/codex/capacity-check'
+        if: github.ref == 'refs/heads/codex/production-readiness'
         run: node scripts/check-capacity.mjs
         working-directory: 05-backend
       - name: Run full backend suite with required service connections
