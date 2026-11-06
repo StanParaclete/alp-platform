@@ -205,8 +205,8 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
       await audit(tx,req.actor,'update','plan',item.id); return saved;
     }); res.json(saved);
   });
-  app.get('/v1/plans/:id/versions',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); res.json(await db.planVersion.findMany({where:{planId:item.id},orderBy:{revision:'desc'},take:50})); });
-  app.get('/v1/plans/:id/comments',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); res.json(await db.planComment.findMany({where:{planId:item.id},orderBy:{createdAt:'desc'},take:100})); });
+  app.get('/v1/plans/:id/versions',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); await audit(db,req.actor,'plan_history_read','student',item.studentId); res.json(await db.planVersion.findMany({where:{planId:item.id},orderBy:{revision:'desc'},take:50})); });
+  app.get('/v1/plans/:id/comments',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); await audit(db,req.actor,'plan_comments_read','student',item.studentId); res.json(await db.planComment.findMany({where:{planId:item.id},orderBy:{createdAt:'desc'},take:100})); });
   app.post('/v1/plans/:id/comments',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); const input=messageInput.extend({section:z.enum(sectionIds)}).strict().parse(req.body); res.status(201).json(await db.$transaction(async tx=>{ const saved=await tx.planComment.create({data:{...input,planId:item.id,authorId:req.actor.id}}); await audit(tx,req.actor,'comment','plan',item.id); return saved; })); });
   app.post('/v1/plans/:id/goals',async (req,res)=>{
     staff(req); const item=await plan(req,req.params.id);
@@ -227,7 +227,7 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
   app.patch('/v1/notifications/:id',async (req,res)=>{ const result=await db.notification.updateMany({where:{id:uuid.parse(req.params.id),schoolId:req.actor.schoolId,userId:req.actor.id},data:{readAt:new Date()}}); if (!result.count) fail(404,'Notification not found.'); res.sendStatus(204); });
   app.get('/v1/frameworks',async (req,res)=>{ staff(req); res.json(await db.framework.findMany({where:{schoolId:req.actor.schoolId},orderBy:{name:'asc'}})); });
   app.post('/v1/frameworks',async (req,res)=>{ admin(req); const input=z.object({name:z.string().min(1).max(160),jurisdiction:z.string().min(1).max(100),version:z.string().min(1).max(50),requiredSections:z.array(z.enum(sectionIds)).min(1).max(13),sourceUrl:z.url().optional()}).strict().parse(req.body); res.status(201).json(await db.$transaction(async tx=>{ const saved=await tx.framework.create({data:{...input,schoolId:req.actor.schoolId}}); await audit(tx,req.actor,'create','framework',saved.id); return saved; })); });
-  app.get('/v1/plans/:id/check/:frameworkId',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); const framework=await db.framework.findFirst({where:{id:uuid.parse(req.params.frameworkId),schoolId:req.actor.schoolId}}); if(!framework) fail(404,'Framework not found.'); res.json(evaluateFramework(item.sections,framework.requiredSections)); });
+  app.get('/v1/plans/:id/check/:frameworkId',async (req,res)=>{ staff(req); const item=await plan(req,req.params.id); const framework=await db.framework.findFirst({where:{id:uuid.parse(req.params.frameworkId),schoolId:req.actor.schoolId}}); if(!framework) fail(404,'Framework not found.'); await audit(db,req.actor,'framework_check_read','student',item.studentId); res.json(evaluateFramework(item.sections,framework.requiredSections)); });
   app.get('/v1/audit',async (req,res)=>{ admin(req); res.json(await db.auditLog.findMany({where:{schoolId:req.actor.schoolId},orderBy:{createdAt:'desc'},take:100})); });
   app.use((_,res)=>res.status(404).json({error:'Endpoint not found.'}));
   app.use((error,req,res,next)=>{

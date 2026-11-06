@@ -135,6 +135,17 @@ test('real PostgreSQL: isolation, role restrictions, revisions, sessions and dur
       for (const item of (await response.json()).items)
         assert.ok(await db.auditLog.findFirst({where:{schoolId:schoolA.id,actorId:admin.id,action:'list_read',resourceType:'student',resourceId:item.id}}));
     });
+    await t.test('plan history and comment views are attributed to the student and actor',async()=>{
+      const created=await request(`/v1/students/${pupil.id}/plans`,{method:'POST',token:teacherSession.accessToken,body:{title:'Audit coverage test'}});
+      assert.equal(created.status,201);
+      const {id}=await created.json();
+      for(const [path,action] of [['versions','plan_history_read'],['comments','plan_comments_read']]){
+        assert.equal((await request(`/v1/plans/${id}/${path}`,{token:outsideSession.accessToken,school:schoolB.id})).status,404);
+        assert.equal(await db.auditLog.count({where:{actorId:outsider.id,schoolId:schoolB.id,resourceId:pupil.id,action}}),0);
+        assert.equal((await request(`/v1/plans/${id}/${path}`,{token:teacherSession.accessToken})).status,200);
+        assert.ok(await db.auditLog.findFirst({where:{actorId:teacher.id,schoolId:schoolA.id,resourceType:'student',resourceId:pupil.id,action}}));
+      }
+    });
     await t.test('workspace error reports reject unexpected fields',async()=>{
       const report=body=>request('/public/workspace-errors',{method:'POST',body});
       assert.equal((await report({kind:'runtime'})).status,204);
