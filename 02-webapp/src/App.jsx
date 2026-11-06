@@ -3496,37 +3496,21 @@ function ContactModal({onClose,type="demo"}){
   const isDemo=type==="demo";
   const {toast}=useToast();
   const [form,setForm]=useState({name:"",email:"",school:"",country:"Ghana",message:"",role:"teacher",students:"1-10"});
-  const [sent,setSent]=useState(false);
-  const [loading,setLoading]=useState(false);
-  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const set=(key,value)=>setForm(current=>({...current,[key]:value}));
 
-  function submit(){
-    if(!form.name||!form.email||!form.school){toast("Please fill in all required fields","error");return;}
-    if(!form.email.includes("@")){toast("Enter a valid email address","error");return;}
-    setLoading(true);
-    setTimeout(()=>{setLoading(false);setSent(true);},1200);
+  function openEmail(){
+    if(!form.name.trim()||!form.school.trim()||!/^\S+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())){
+      toast("Enter your name, school, and a valid work email","error");
+      return;
+    }
+    const subject=isDemo?"ALP school demo request":"ALP enquiry";
+    const body=[
+      `Name: ${form.name}`, `Work email: ${form.email}`, `School: ${form.school}`,
+      `Country: ${form.country}`, `Role: ${form.role}`, `School size: ${form.students}`,
+      "", form.message,
+    ].join("\n");
+    window.location.href=`mailto:support@growwithalp.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
-
-  if(sent) return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="card fade-up" style={{width:"100%",maxWidth:440,padding:"40px 36px",textAlign:"center"}}>
-        <div style={{width:72,height:72,borderRadius:"50%",background:"#DCFCE7",display:"flex",alignItems:"center",justifyContent:"center",fontSize:34,margin:"0 auto 20px"}}>📅</div>
-        <h3 className="serif" style={{fontSize:24,fontWeight:500,marginBottom:10,letterSpacing:"-.016em"}}>
-          {isDemo?"Demo Booked!":"Message Sent!"}
-        </h3>
-        <p style={{fontSize:14,color:C.warm,lineHeight:1.7,marginBottom:6}}>
-          {isDemo?`Thanks, ${form.name.split(" ")[0]}! Our team will reach out to ${form.email} within 24 hours to schedule your demo.`:`Thanks for reaching out! We'll reply to ${form.email} within one business day.`}
-        </p>
-        {isDemo&&<p style={{fontSize:12,color:C.warm,marginBottom:28}}>In the meantime, you can start your free account and explore the platform.</p>}
-        <div style={{display:"flex",gap:10}}>
-          <button className="btn-ghost" onClick={onClose} style={{flex:1,fontSize:12}}>Close</button>
-          <button className="btn-purple" onClick={onClose} style={{flex:2,fontSize:12,padding:"12px"}}>
-            {isDemo?"Start Free →":"OK, got it"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
@@ -3575,13 +3559,13 @@ function ContactModal({onClose,type="demo"}){
             placeholder={isDemo?"Any specific features or use cases you'd like us to focus on?":"How can we help you?"}/>
           <div style={{display:"flex",gap:10,marginTop:18}}>
             <button className="btn-ghost" onClick={onClose} style={{flex:1,fontSize:12}}>Cancel</button>
-            <button className="btn-purple" onClick={submit} disabled={loading||!form.name||!form.email||!form.school}
+            <button className="btn-purple" onClick={openEmail} disabled={!form.name||!form.email||!form.school}
               style={{flex:2,fontSize:12,padding:"14px"}}>
-              {loading?<><Spin/>{isDemo?"Booking…":"Sending…"}</>:isDemo?"📅 Book My Demo →":"Send Message →"}
+              Open email draft →
             </button>
           </div>
           <p style={{fontSize:10,color:C.warm,textAlign:"center",marginTop:10}}>
-            Your data is private and will never be shared. · <a href="mailto:hello@growwithalp.com" style={{color:C.purple}}>hello@growwithalp.com</a>
+            Your email app opens a draft for you to send. Please leave student details out. · <a href="mailto:support@growwithalp.com" style={{color:C.purple}}>support@growwithalp.com</a>
           </p>
         </div>
       </div>
