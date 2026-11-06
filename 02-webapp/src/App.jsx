@@ -1809,10 +1809,10 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
             <div style={{background:"#FAF8FF",border:`2px solid ${C.purple}`,borderRadius:16,padding:36,textAlign:"center"}}>
               <div style={{fontSize:40,marginBottom:14}}>👤</div>
               <h3 className="serif" style={{fontSize:22,fontWeight:700,marginBottom:8}}>Individual Teachers</h3>
-              <p style={{fontSize:14,color:C.warm,lineHeight:1.7,marginBottom:20}}>Subscribe yourself, self-onboard in minutes, and get instant access to all AI tools and caseload management. No IT department needed.</p>
-              <div style={{fontSize:30,fontWeight:800,color:C.purple,marginBottom:4}}>From $9<span style={{fontSize:14,fontWeight:400,color:C.warm}}>/mo</span></div>
-              <p style={{fontSize:12,color:C.warm,marginBottom:22}}>ALP AI Intelligence Suite tools free forever · 14-day trial</p>
-              <button className="btn-purple" onClick={onSignup||onEnter} style={{width:"100%",fontSize:12}}>Start Free Trial →</button>
+              <p style={{fontSize:14,color:C.warm,lineHeight:1.7,marginBottom:20}}>Sign in to your school workspace to create learning plans and record progress. Ask your school administrator for an invitation.</p>
+              <div style={{fontSize:30,fontWeight:800,color:C.purple,marginBottom:4}}>School invitation</div>
+              <p style={{fontSize:12,color:C.warm,marginBottom:22}}>Ask about school pilot access</p>
+              <button className="btn-purple" onClick={onEnter} style={{width:"100%",fontSize:12}}>Open workspace →</button>
             </div>
             <div style={{background:C.black,border:`2px solid ${C.black}`,borderRadius:16,padding:36,textAlign:"center"}}>
               <div style={{fontSize:40,marginBottom:14}}>🏫</div>
@@ -1896,10 +1896,10 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
       <section style={{background:C.white,padding:"clamp(48px,7vw,80px) clamp(20px,4vw,48px)",borderBottom:`1px solid ${C.tanL}`}}>
         <div style={{maxWidth:800,margin:"0 auto",textAlign:"center"}}>
           <p className="lbl" style={{marginBottom:16,color:C.purple}}>School & District Pricing</p>
-          <h2 className="serif" style={{fontSize:"clamp(26px,4vw,40px)",fontWeight:700,marginBottom:12,letterSpacing:"-.016em"}}>Straightforward pricing for every school</h2>
-          <p style={{fontSize:14,color:C.warm,marginBottom:40}}>Volume discounts available for 10+ teachers. NGO and government pricing on request.</p>
+          <h2 className="serif" style={{fontSize:"clamp(26px,4vw,40px)",fontWeight:700,marginBottom:12,letterSpacing:"-.016em"}}>Discuss access for your school or programme</h2>
+          <p style={{fontSize:14,color:C.warm,marginBottom:40}}>Contact ALP to discuss scope, onboarding, and pricing for your organisation.</p>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16,marginBottom:28}}>
-            {[{tier:"School",price:"$23",unit:"/mo per teacher",note:"Billed annually",features:["Everything in Professional","Admin dashboard","Staff management","District reports","Priority support","Custom frameworks"],color:C.green},{tier:"District",price:"Custom",unit:"",note:"Contact us",features:["Everything in School","Multi-school rollup","Dedicated CSM","Custom onboarding","SIS integration","SLA guarantee"],color:C.purple},{tier:"NGO / Government",price:"Custom",unit:"",note:"Subsidised pricing",features:["Everything in School","Country-wide deployment","Custom workflows","Training programme","Policy support","Research access"],color:C.blue}].map(tier=>(
+            {[{tier:"School",price:"On request",unit:"",note:"School pilot enquiries",features:["Plan development","Progress monitoring","Staff onboarding"],color:C.green},{tier:"District",price:"On request",unit:"",note:"District enquiries",features:["Discuss school onboarding","Discuss reporting needs"],color:C.purple},{tier:"NGO / Government",price:"On request",unit:"",note:"Programme enquiries",features:["Discuss rollout scope","Discuss training and support"],color:C.blue}].map(tier=>(
               <div key={tier.tier} className="card" style={{padding:"24px 20px",border:`1.5px solid ${tier.color}22`}}>
                 <p style={{fontSize:11,fontWeight:800,color:tier.color,letterSpacing:".1em",marginBottom:8}}>{tier.tier.toUpperCase()}</p>
                 <div className="serif" style={{fontSize:28,fontWeight:500,color:C.black,marginBottom:2}}>{tier.price}<span style={{fontSize:12,fontWeight:400,color:C.warm}}>{tier.unit}</span></div>
@@ -1935,177 +1935,23 @@ function ForSchoolsPage({setNavPage,onEnter,onSignup,onDemo}){
 // PRICING PAGE
 // ═══════════════════════════════════════════════════════════════════
 function PricingPage({setNavPage,onEnter,onSignup,onDemo}){
-  const [billing,setBilling]=useState("monthly");
-  const [openFaq,setOpenFaq]=useState(null);
-
-  const plans=[
-    {
-      name:"Free",price:"$0",period:"forever",tag:null,color:"#6B7280",bg:C.white,textColor:C.black,
-      desc:"ALP AI Intelligence Suite tools completely free for individual teachers. Forever. Because educators deserve support, not barriers.",
-      features:["Up to 10 students","ALP Goal Architect — unlimited","ALP Present Levels Coach","ALP Behaviour Blueprint","ALP Reading Adapter","ALP Intervention Planner","ALP Lesson Differentiator","ALP Progress Probe Generator","PDF export (3/month)"],
-      missing:["Caseload dashboard","10-step guided ALP workflow","Progress tracking engine","Director approval workflow","Compliance dashboard","Automated deadline tracking"],
-      cta:"Create Free Account",style:"btn-outline",
-    },
-    {
-      name:"Professional",
-      price:billing==="monthly"?"$9":"$7",
-      period:"/mo per teacher",tag:"MOST POPULAR",color:C.purple,bg:C.black,textColor:C.cream,
-      desc:"The complete ALP system — global support, professional PDF export, director approval workflow, and unlimited AI tools all included.",
-      features:["Unlimited students","ALP AI Intelligence Suite — all 8 tools unlimited","Full 10-step ALP Builder","Real-time CBM progress monitoring + alerts","Director approval workflow + audit log","All multi-region support","ALP Student Snapshot for gen-ed teachers","ALP Accommodations Hub","Caseload dashboard","Professional PDF export","Automated review date tracking","Priority email & chat support"],
-      missing:[],
-      cta:"Start 14-Day Free Trial",style:"btn-purple",
-    },
-    {
-      name:"School",
-      price:billing==="monthly"?"$29":"$23",
-      period:"/mo per teacher",tag:"BEST VALUE",color:"#16A34A",bg:C.white,textColor:C.black,
-      desc:"For schools that need admin oversight, progress reporting, and team management across all teachers.",
-      features:["Everything in Professional","School admin progress dashboard","District-wide review date tracking","Overdue alert system for administrators","Bulk student import (CSV/SIS)","Staff onboarding & training tools","Custom confidentiality settings","PowerSchool / Infinite Campus integration","privacy standards privacy certification","Phone + dedicated account support"],
-      missing:[],
-      cta:"Schedule Demo",style:"btn-outline",
-    },
-    {
-      name:"Enterprise",price:"Custom",period:"pricing",tag:null,color:C.black,bg:C.white,textColor:C.black,
-      desc:"For districts, NGOs, and governments deploying ALP at scale across many schools or entire countries.",
-      features:["Everything in School","Multi-school & district management","Custom planning framework builder","White-labeling & custom branding","Full API access for SIS integration","Dedicated account manager","On-site training & implementation","99.9% uptime SLA","Custom data residency","Government & NGO pricing available"],
-      missing:[],
-      cta:"Contact Sales",style:"btn-outline",
-    },
-  ];
-
-  const compare=[
-    {f:"AI ALP Goal Architect",a:"✓ Unlimited",p:"✓ Unlimited"},
-    {f:"ALP Behaviour Blueprint",a:"✓ All plans",p:"✓ All plans"},
-    {f:"ALP Present Levels Coach",a:"✓ All plans",p:"✓ All plans"},
-    {f:"ALP Reading Adapter",a:"✓ All plans",p:"✓ All plans"},
-    {f:"ALP Intervention Planner",a:"✓ All plans",p:"✓ All plans"},
-    {f:"Progress Monitoring (AI)",a:"✓ CBM + auto-alerts",p:"✓ Basic"},
-    {f:"PDF Export",a:"✓ All plans",p:"✗ Not included"},
-    {f:"E-Signature",a:"✓ Pro & above",p:"✗ Not included"},
-    {f:"Global Support (Ghana, Nigeria, UK…)",a:"✓ 10+ frameworks",p:"✗ USA only"},
-    {f:"ALP Student Snapshot",a:"✓ Pro & above",p:"✓ Pro & above"},
-    {f:"ALP Accommodations Hub",a:"✓ School & above",p:"✓ School & above"},
-    {f:"Age Range",a:"Birth–22+",p:"Ages 5–21 only"},
-    {f:"Price for student support teams",a:"$9/mo",p:"$10–15/mo"},
-  ];
-
-  const faqs=[
-    {q:"Is ALP really free for individual teachers?",a:"Yes. All 8 tools in the ALP AI Intelligence Suite are free for individual teachers, forever: ALP Goal Architect, ALP Present Levels Coach, ALP Behaviour Blueprint, ALP Reading Adapter, ALP Intervention Planner, ALP Progress Probe Generator, ALP Learner Profile Builder, and ALP Lesson Differentiator. We believe educators deserve support, not paywalls."},
-    {q:"How does ALP compare to other learning plan software?",a:"ALP's Professional plan starts at $9/month and includes features most learning-plan software charges extra for — global support frameworks (Ghana GES, Nigeria, UK, and more), a guided 10-step ALP workflow, director approval workflow, compliance dashboard, real-time progress tracking, and professional PDF export. All included at one price."},
-    {q:"Is there a free trial on paid plans?",a:"Yes — every paid plan comes with a 14-day free trial. No credit card required. You get full access to all features during the trial period."},
-    {q:"Do you support Ghana or Nigeria educators?",a:"Yes — ALP was built with African and global schools in mind from day one. We support Ghana, Nigeria, Kenya, WCED South Africa, UK, Australia NCCD, and all US frameworks (ALP standards, Support Plans) out of the box."},
-    {q:"Can I use ALP for students from birth to age 22?",a:"Absolutely. ALP supports early intervention (birth–3), preschool (ages 3–5), school age (6–13), transition (14–21), and adult transition (18–22+). The ALP Builder automatically adjusts required sections and requirements based on the student's age."},
-    {q:"Do you offer discounts for NGOs or governments?",a:"Yes — we offer significant discounts for non-profit organizations, government education departments, and schools in low-income countries. Email support@growwithalp.com for pricing."},
-    {q:"What happens to my data if I cancel?",a:"Your data is yours. Export all student records, ALPs, and progress data as CSV or PDF at any time before canceling. We retain your data for 90 days after cancellation."},
-  ];
-
-  return(
+  return (
     <div className="lp dot-bg" style={{minHeight:"100vh"}}>
       <SubNav active="Pricing" setNavPage={setNavPage} onEnter={onEnter} onSignup={onSignup} onDemo={onDemo}/>
-
-      {/* Hero */}
-      <section style={{padding:"72px 48px 48px",maxWidth:1100,margin:"0 auto",textAlign:"center"}}>
-        <p className="lbl" style={{marginBottom:16,color:C.purple}}>Simple, Transparent Pricing</p>
-        <h1 className="serif" style={{fontSize:"clamp(36px,5vw,68px)",fontWeight:500,letterSpacing:"-.038em",lineHeight:1.05,marginBottom:16}}>
-          Plans for every<br/><span className="serif-italic">school and budget.</span>
-        </h1>
-        <p style={{fontSize:17,color:C.warm,maxWidth:540,margin:"0 auto 12px",lineHeight:1.75}}>ALP AI Intelligence Suite tools are <b style={{color:C.black}}>free forever</b> for individual teachers. Paid plans start at just $9/mo — cheaper than traditional learning plan software.</p>
-        <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap",marginBottom:36}}>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Most affordable plan</span>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Global support included</span>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ Director approval workflow</span>
-          <span style={{fontSize:13,color:C.green,fontWeight:700}}>✓ PDF export included</span>
+      <section style={{padding:"clamp(48px,8vw,88px) 24px",maxWidth:960,margin:"0 auto",textAlign:"center"}}>
+        <p className="lbl" style={{marginBottom:16,color:C.purple}}>ALP access</p>
+        <h1 className="serif" style={{fontSize:"clamp(36px,5vw,64px)",marginBottom:20}}>Bring ALP to your school</h1>
+        <p style={{fontSize:17,color:C.warm,maxWidth:580,margin:"0 auto 36px"}}>
+          Schools can request an invitation to the ALP pilot. If your school already uses ALP, ask your administrator for an invitation.
+        </p>
+        <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
+          <button className="btn-purple" onClick={onDemo}>Request a school demo</button>
+          <button className="btn-outline" onClick={onEnter}>Open ALP workspace</button>
         </div>
-        <div style={{display:"inline-flex",background:C.white,border:`1px solid ${C.tanL}`,borderRadius:99,padding:4,gap:4,marginBottom:52}}>
-          {["monthly","annual"].map(b=>(
-            <button key={b} onClick={()=>setBilling(b)}
-              style={{padding:"9px 24px",borderRadius:99,border:"none",fontSize:13,fontWeight:600,cursor:"pointer",transition:"all .2s",background:billing===b?C.black:"transparent",color:billing===b?C.cream:C.warm}}>
-              
-              {b==="monthly"?"Monthly":"Annual"}{b==="annual"&&<span style={{fontSize:10,color:C.green,fontWeight:700,marginLeft:6}}>Save 22%</span>}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing cards */}
-      <section style={{padding:"0 clamp(20px,4vw,48px) 64px",maxWidth:1100,margin:"0 auto"}}>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,alignItems:"start",paddingTop:24}}>
-          {plans.map(p=>(
-            <div key={p.name} style={{background:p.bg,borderRadius:14,padding:26,position:"relative",border:`1.5px solid ${p.tag?p.color:C.tanL}`,boxShadow:p.tag?"0 8px 40px rgba(143,22,184,.2)":"0 1px 3px rgba(0,0,0,.04)",display:"flex",flexDirection:"column",gap:0,marginTop:p.tag?0:0}}>
-              {p.tag&&<div style={{position:"absolute",top:-14,left:"50%",transform:"translateX(-50%)",background:p.color,color:"#fff",fontSize:10,fontWeight:800,padding:"5px 18px",borderRadius:99,letterSpacing:".08em",whiteSpace:"nowrap",boxShadow:`0 2px 8px ${p.color}66`}}>{p.tag}</div>}
-              <p style={{fontSize:10,fontWeight:700,color:p.bg===C.black?"#D58BE8":p.color,letterSpacing:".12em",textTransform:"uppercase",marginBottom:8}}>{p.name}</p>
-              <div style={{display:"flex",alignItems:"flex-end",gap:3,marginBottom:4}}>
-                <span className="serif" style={{fontSize:p.price==="Custom"?30:42,fontWeight:500,color:p.bg===C.black?C.cream:C.black,lineHeight:1}}>{p.price}</span>
-                {p.price!=="Custom"&&<span style={{fontSize:12,color:p.bg===C.black?"#9A8A78":C.warm,marginBottom:5}}>{p.period}</span>}
-              </div>
-              {p.price==="Custom"&&<div style={{fontSize:12,color:C.warm,marginBottom:4}}>contact us</div>}
-              <p style={{fontSize:12.5,color:p.bg===C.black?"#9A8A78":C.warm,marginBottom:16,lineHeight:1.55}}>{p.desc}</p>
-              <hr style={{border:"none",borderTop:`1px solid ${p.bg===C.black?"rgba(255,255,255,.1)":C.tanL}`,marginBottom:14}}/>
-              <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:20,flex:1}}>
-                {p.features.map(f=><div key={f} style={{display:"flex",alignItems:"flex-start",gap:7,fontSize:12,color:p.bg===C.black?C.cream:C.black}}><span style={{color:"#16A34A",fontWeight:700,flexShrink:0,marginTop:.5}}>✓</span>{f}</div>)}
-                {p.missing.map(f=><div key={f} style={{display:"flex",alignItems:"flex-start",gap:7,fontSize:12,color:"#9CA3AF",opacity:.6}}><span style={{fontWeight:700,flexShrink:0,marginTop:.5}}>✗</span>{f}</div>)}
-              </div>
-              <button className={p.style} onClick={p.cta==="Schedule Demo"||p.cta==="Contact Sales"?(onDemo||onEnter):(onSignup||onEnter)}
-                style={{width:"100%",fontSize:12,padding:"13px",...(p.style==="btn-outline"&&p.bg===C.black?{color:C.cream,borderColor:"#555"}:{})}}>
-                {p.cta}
-              </button>
-            </div>
-          ))}
-        </div>
-        <p style={{textAlign:"center",fontSize:13,color:C.warm,marginTop:20}}>All paid plans include a <b style={{color:C.black}}>14-day free trial</b>. No credit card required. · <a href="mailto:support@growwithalp.com" style={{color:C.purple}}>support@growwithalp.com</a></p>
-      </section>
-
-      {/* ALP vs Traditional Software comparison */}
-      <section style={{background:C.white,padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:800,margin:"0 auto"}}>
-          <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-.026em",marginBottom:6,textAlign:"center"}}>ALP vs <span className="serif-italic">Traditional Learning Plan Software</span></h2>
-          <p style={{fontSize:14,color:C.warm,textAlign:"center",marginBottom:36}}>See exactly what makes ALP different — feature by feature.</p>
-          <div style={{border:`1px solid ${C.tanL}`,borderRadius:12,overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",background:C.purpleL,padding:"12px 20px",borderBottom:`1px solid ${C.tanL}`}}>
-              {["Feature","ALP","Traditional Software"].map((h,i)=><span key={h} style={{fontSize:11,fontWeight:700,color:i===1?C.purple:C.warm,textTransform:"uppercase",letterSpacing:".08em",textAlign:i>0?"center":"left"}}>{h}</span>)}
-            </div>
-            {compare.map((row,i)=>(
-              <div key={row.f} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",padding:"12px 20px",background:i%2===0?C.white:"#FAFAFA",borderBottom:i<compare.length-1?`1px solid ${C.tanL}`:"none",alignItems:"center"}}>
-                <span style={{fontSize:13,color:C.black}}>{row.f}</span>
-                <span style={{fontSize:13,textAlign:"center",color:row.a.startsWith("✓")||row.a.includes("$9")||row.a.includes("Birth")?C.green:C.black,fontWeight:row.a.startsWith("✓")?600:500}}>{row.a}</span>
-                <span style={{fontSize:13,textAlign:"center",color:row.p.startsWith("✗")?"#9CA3AF":C.black}}>{row.p}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section style={{padding:"clamp(44px,6vw,72px) clamp(20px,5vw,48px)",maxWidth:780,margin:"0 auto"}}>
-        <h2 className="serif" style={{fontSize:32,fontWeight:700,letterSpacing:"-.026em",marginBottom:40,textAlign:"center"}}>Frequently asked <span className="serif-italic">questions</span></h2>
-        {faqs.map((f,i)=>(
-          <div key={f.q} style={{borderBottom:`1px solid ${C.tanL}`,paddingBottom:20,marginBottom:20}}>
-            <div onClick={()=>setOpenFaq(openFaq===i?null:i)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",gap:16}}>
-              <span style={{fontSize:15,fontWeight:600,color:C.black,lineHeight:1.4}}>{f.q}</span>
-              <span style={{fontSize:22,color:C.purple,flexShrink:0,transition:"transform .2s",display:"inline-block",transform:openFaq===i?"rotate(45deg)":"rotate(0)"}}>+</span>
-            </div>
-            {openFaq===i&&<p style={{fontSize:14,color:C.warm,lineHeight:1.75,marginTop:14}}>{f.a}</p>}
-          </div>
-        ))}
-      </section>
-
-
-      {/* ── MONEY-BACK GUARANTEE ──────────────────── */}
-      <section style={{background:C.purpleL,padding:"clamp(36px,5vw,56px) clamp(20px,4vw,48px)",borderTop:`1px solid ${C.tanL}`,borderBottom:`1px solid ${C.tanL}`}}>
-        <div style={{maxWidth:800,margin:"0 auto",textAlign:"center"}}>
-          <div style={{fontSize:44,marginBottom:16}}>🛡️</div>
-          <h2 className="serif" style={{fontSize:"clamp(22px,3.5vw,34px)",fontWeight:700,marginBottom:12,letterSpacing:"-.016em"}}>14-day money-back guarantee</h2>
-          <p style={{fontSize:15,color:C.warm,lineHeight:1.7,marginBottom:28,maxWidth:540,margin:"0 auto 28px"}}>Try any paid plan free for 14 days. No credit card required to start. If you're not happy, we refund you — no questions asked.</p>
-          <div style={{display:"flex",justifyContent:"center",gap:"clamp(20px,4vw,48px)",flexWrap:"wrap"}}>
-            {[["🔒","Secure & Private","Your data is always protected"],["📧","24-hour support","Monday to Saturday"],["🌍","10+ frameworks","Global insights built in"],["🤝","No lock-in","Export all data anytime"]].map(([icon,title,desc])=>(
-              <div key={title} style={{textAlign:"center",minWidth:100}}>
-                <div style={{fontSize:26,marginBottom:6}}>{icon}</div>
-                <div style={{fontSize:12,fontWeight:700,color:C.black,marginBottom:2}}>{title}</div>
-                <div style={{fontSize:11,color:C.warm}}>{desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <p style={{marginTop:28,color:C.warm}}>
+          For school, district, or programme pricing, email{" "}
+          <a href="mailto:support@growwithalp.com">support@growwithalp.com</a>.
+        </p>
       </section>
       <PageFooter setNavPage={setNavPage} onEnter={onEnter} onDemo={onDemo}/>
     </div>
@@ -10520,7 +10366,7 @@ function AppInner(){
   const [screen,setScreen]=useState(()=>entryScreen(window.location.pathname));
   const [page,setPage]=useState("dashboard");
   const [sidebarOpen,setSidebarOpen]=useState(false);
-  const [navPage,setNavPage]=useState(null);
+  const [navPage,setNavPage]=useState(()=>window.location.pathname.replace(/\/$/,"")==="/pricing"?"Pricing":null);
   const [showOnboarding,setShowOnboarding]=useState(false);
   const [celebrate,setCelebrate]=useState(false);
   usePageTitle(page, 3);
