@@ -161,6 +161,22 @@ test('real PostgreSQL: isolation, role restrictions, revisions, sessions and dur
       assert.equal((await request('/auth/refresh',{method:'POST',body:{refreshToken:next.refreshToken}})).status,401);
       assert.equal((await request('/me',{token:next.accessToken})).status,401);
     });
+    await t.test('authenticated activity extends idle time; token refresh alone does not',async()=>{
+      const session=await login(parent);
+      const where={hash:digest(session.refreshToken)};
+      const lastActiveAt=new Date(Date.now()-5*60*1000);
+      await db.refreshToken.update({where,data:{lastActiveAt}});
+      const renewed=await request('/auth/refresh',{method:'POST',body:{refreshToken:session.refreshToken}});
+      assert.equal(renewed.status,200);
+      const next=await renewed.json();
+      const nextWhere={hash:digest(next.refreshToken)};
+      assert.deepEqual((await db.refreshToken.findUnique({where:nextWhere})).lastActiveAt,lastActiveAt);
+      assert.equal((await request('/me',{token:next.accessToken})).status,200);
+      assert.ok((await db.refreshToken.findUnique({where:nextWhere})).lastActiveAt>lastActiveAt);
+      await db.refreshToken.update({where:nextWhere,data:{lastActiveAt:new Date(Date.now()-31*60*1000)}});
+      assert.equal((await request('/me',{token:next.accessToken})).status,401);
+      assert.equal((await request('/auth/refresh',{method:'POST',body:{refreshToken:next.refreshToken}})).status,401);
+    });
     await t.test('sign-out revokes access tokens immediately',async()=>{
       const session=await login(parent);
       assert.equal((await request('/auth/logout',{method:'POST',body:{refreshToken:session.refreshToken}})).status,204);

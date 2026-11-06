@@ -69,6 +69,7 @@ model RefreshToken {
   familyId String @db.Uuid
   userId String @db.Uuid
   expiresAt DateTime
+  lastActiveAt DateTime @default(now())
   usedAt DateTime?
   revokedAt DateTime?
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

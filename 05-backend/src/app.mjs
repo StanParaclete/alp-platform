@@ -11,6 +11,8 @@ import { uuid, staffRoles, adminRoles, studentScope, planScope, studentInput, pl
 class HttpError extends Error { constructor(status,message) { super(message); this.status=status; } }
 const fail = (status,message) => { throw new HttpError(status,message); };
 const sessionLifetimeMs = 8 * 60 * 60 * 1000;
+const idleLifetimeMs = 30 * 60 * 1000;
+const activityWriteIntervalMs = 60 * 1000;
 const legacyLifetimeMs = 30 * 24 * 60 * 60 * 1000;
 const sessionDeadline = expiry => expiry.getTime() > Date.now() + sessionLifetimeMs
   ? new Date(expiry.getTime() - legacyLifetimeMs + sessionLifetimeMs) : expiry;
@@ -53,9 +55,9 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
     try { if (!await rateLimit.allow(`ip:${digest(req.ip||'unknown')}`,120,60)) return res.status(429).json({error:'Too many requests. Try again shortly.'}); next(); }
     catch { res.status(503).json({error:'Service temporarily unavailable.'}); }
   });
-  async function session(tx,userId,familyId=randomUUID(),expiresAt=new Date(Date.now()+sessionLifetimeMs)) {
+  async function session(tx,userId,familyId=randomUUID(),expiresAt=new Date(Date.now()+sessionLifetimeMs),lastActiveAt=new Date()) {
     const refreshToken = randomBytes(48).toString('base64url');
-    await tx.refreshToken.create({data:{userId,familyId,hash:digest(refreshToken),expiresAt}});
+    await tx.refreshToken.create({data:{userId,familyId,hash:digest(refreshToken),expiresAt,lastActiveAt}});
     return {accessToken:await tokens.issue(userId,familyId),refreshToken,expiresIn:600};
   }
   app.post('/public/workspace-errors',async (req,res)=>{
@@ -114,9 +116,10 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
         await tx.refreshToken.updateMany({where:{familyId:current.familyId,revokedAt:null},data:{revokedAt:new Date()}}); return null;
       }
       if (!await lockCredentials(tx,current.user)) return null;
-      const changed=await tx.refreshToken.updateMany({where:{id:current.id,usedAt:null,revokedAt:null},data:{usedAt:new Date()}});
-      if (!changed.count) { await tx.refreshToken.updateMany({where:{familyId:current.familyId},data:{revokedAt:new Date()}}); return null; }
-      return session(tx,current.userId,current.familyId,sessionDeadline(current.expiresAt));
+      const now=new Date();
+      const [changed]=await tx.refreshToken.updateManyAndReturn({where:{id:current.id,usedAt:null,revokedAt:null,lastActiveAt:{gt:new Date(now.getTime()-idleLifetimeMs)}},data:{usedAt:now},select:{lastActiveAt:true}});
+      if (!changed) { await tx.refreshToken.updateMany({where:{familyId:current.familyId},data:{revokedAt:new Date()}}); return null; }
+      return session(tx,current.userId,current.familyId,sessionDeadline(current.expiresAt),changed.lastActiveAt);
     },credentialTransactionOptions);
     if (!result) fail(401,'Session expired. Sign in again.');
     res.json(result);
@@ -143,10 +146,16 @@ export async function createApp({ db, rateLimit, env=process.env, mailer=null })
       id=uuid.parse(payload.sub);
       familyId=uuid.parse(payload.sid);
     } catch { return res.status(401).json({error:'Session expired. Sign in again.'}); }
-    const session=await db.refreshToken.findFirst({where:{userId:id,familyId,revokedAt:null,usedAt:null,expiresAt:{gt:new Date()}},select:{expiresAt:true}});
-    if (!session||sessionDeadline(session.expiresAt)<=new Date()) fail(401,'Session expired.');
+    const now=new Date();
+    const cutoff=new Date(now.getTime()-idleLifetimeMs);
+    const active={userId:id,familyId,revokedAt:null,usedAt:null,expiresAt:{gt:now},lastActiveAt:{gt:cutoff}};
+    const session=await db.refreshToken.findFirst({where:active,select:{expiresAt:true,lastActiveAt:true}});
+    if (!session||sessionDeadline(session.expiresAt)<=now) fail(401,'Session expired.');
     const user=await db.user.findUnique({where:{id},select:{id:true,name:true,email:true,disabled:true}});
     if (!user||user.disabled) fail(401,'Session expired.');
+    if (now.getTime()-session.lastActiveAt.getTime()>=activityWriteIntervalMs) {
+      await db.refreshToken.updateMany({where:{...active,lastActiveAt:{gt:cutoff,lt:now}},data:{lastActiveAt:now}});
+    }
     req.user=user;
     next();
   });
