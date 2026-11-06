@@ -48,10 +48,6 @@ jobs:
         working-directory: 05-backend
       - run: npm run migrate:deploy
         working-directory: 05-backend
-      - name: Run synthetic capacity check
-        if: github.ref == 'refs/heads/codex/production-readiness'
-        run: node scripts/check-capacity.mjs
-        working-directory: 05-backend
       - name: Run full backend suite with required service connections
         run: |
           node --input-type=module -e "for (const key of ['ALP_INTEGRATION_DATABASE_URL', 'ALP_INTEGRATION_REDIS_URL']) if (!process.env[key]) throw new Error(key + ' is required')"
@@ -71,3 +67,11 @@ jobs:
         working-directory: 02-webapp/ecosystem
       - run: npm run test:browser -- --integration
         working-directory: 02-webapp/ecosystem
+      - name: Reset the disposable database for the capacity fixture
+        if: github.ref == 'refs/heads/codex/production-readiness'
+        run: npx prisma migrate reset --force
+        working-directory: 05-backend
+      - name: Run synthetic capacity check
+        if: github.ref == 'refs/heads/codex/production-readiness'
+        run: node scripts/check-capacity.mjs
+        working-directory: 05-backend
