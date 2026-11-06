@@ -36,6 +36,7 @@ try {
   } });
   const app = await createApp({ db, rateLimit: redisRateLimit(redis), env: {
     JWT_SECRET: randomBytes(48).toString('hex'),
+    ALP_TRUSTED_PROXY_CIDRS: '127.0.0.1',
   } });
   server = app.listen(0, '127.0.0.1');
   await once(server, 'listening');
@@ -52,6 +53,15 @@ try {
   assert.equal(roster.status, 200);
   assert.equal((await roster.json()).total, 5000);
 
+  // Login and the roster check already used two requests from the shared address.
+  for (let index = 0; index < 119; index++) {
+    const response = await fetch(base + '/me', { headers });
+    await response.arrayBuffer();
+    assert.equal(response.status, index < 118 ? 200 : 429);
+  }
+  console.log('Shared source address: the 121st request returned HTTP 429.');
+
+  let requestNumber = 0;
   for (const concurrency of [10, 25, 50]) {
     const start = performance.now();
     const durations = [];
@@ -62,8 +72,11 @@ try {
         const requestStart = performance.now();
         let status;
         try {
+          // Simulate clients behind a trusted loopback proxy using the benchmark range.
+          const address = requestNumber++ % 5000;
+          const ip = `198.18.${Math.floor(address / 250)}.${address % 250 + 1}`;
           const response = await fetch(base + paths[step++ % paths.length], {
-            headers, signal: AbortSignal.timeout(5000),
+            headers: { ...headers, 'X-Forwarded-For': ip }, signal: AbortSignal.timeout(5000),
           });
           await response.arrayBuffer();
           status = response.status;
