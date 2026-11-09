@@ -62,7 +62,7 @@ export function Footer() {
       <div><h3>Community</h3>{[['About','about'],['Who we serve','who-we-serve'],['Partners','partners'],['Resources','resources'],['Blog','blog']].map(([label, slug]) => <Link key={slug} href={`/${slug}`}>{label}</Link>)}</div>
       <div><h3>Get in touch</h3><Link href="/contact">Contact ALP</Link><Link href="/contact?subject=demo">Request a demo</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div>
     </div>
-    <div className="colophon"><span>© {new Date().getFullYear()} ALP. Accelerated Learning Plan.</span><span>Built by <a href={site.credit.url} target="_blank" rel="noopener noreferrer">{site.credit.name}</a></span></div>
+    <div className="colophon"><span>© {new Date().getFullYear()} ALP. Accelerated Learning Plan.</span><span>ALP concept by {site.credit.conceptBy} · Built by <a href={site.credit.url} target="_blank" rel="noopener noreferrer">{site.credit.name}</a></span></div>
   </div></footer>;
 }
 

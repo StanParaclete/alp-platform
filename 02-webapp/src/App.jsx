@@ -1482,7 +1482,7 @@ function PageFooter({setNavPage,onEnter,onDemo}={}){
       </div>
       <div className="lp-colophon">
         <span>&copy; {new Date().getFullYear()} ALP.</span>
-        <span>Accra, Ghana &middot; Columbus, Georgia</span>
+        <span>ALP concept by Dr. Turkson Club</span>
       </div>
     </div></footer>
   );
@@ -5759,7 +5759,7 @@ function Landing({onEnter,onSignup,onDemo,navPage,setNavPage}){
         </div>
         <div className="lp-colophon">
           <span>&copy; {new Date().getFullYear()} ALP.</span>
-          <span>Accra, Ghana &middot; Columbus, Georgia</span>
+          <span>ALP concept by Dr. Turkson Club</span>
         </div>
       </div></footer>
     </div>

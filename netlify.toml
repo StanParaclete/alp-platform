@@ -21,6 +21,22 @@
 # ── SPA routing ────────────────────────────────────────────────────
 # Every path serves index.html so client-side routing works on refresh
 # and on deep links.
+# Keep older bookmarks on the production school workspace.
+[[redirects]]
+  from = "/login"
+  to = "https://app.growwithalp.com/login"
+  status = 302
+
+[[redirects]]
+  from = "/signup"
+  to = "https://app.growwithalp.com/join"
+  status = 302
+
+[[redirects]]
+  from = "/join"
+  to = "https://app.growwithalp.com/join"
+  status = 302
+
 [[redirects]]
   from   = "/*"
   to     = "/index.html"

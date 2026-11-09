@@ -16,7 +16,7 @@ export function Brand() {
 export function Credit() {
   return (
     <footer className="credit">
-      Built by{" "}
+      ALP concept by Dr. Turkson Club · Built by{" "}
       <a
         href="https://www.stanparaclete.com/"
         target="_blank"
