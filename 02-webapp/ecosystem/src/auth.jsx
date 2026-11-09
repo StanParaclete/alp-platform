@@ -258,12 +258,7 @@ export function Recovery() {
                     password: "",
                     confirmPassword: "",
                   });
-                  try {
-                  await session.signIn(email, values.password);
-                  navigate("/", { replace: true });
-                } catch {
-                  setDone(true);
-                }
+      setDone(true);
                 }
               });
             }}
@@ -368,7 +363,12 @@ export function Join() {
                   token: values.token.trim(),
                 });
                 setValues({ email: "", name: "", password: "", token: "" });
-                setDone(true);
+                try {
+                  await session.signIn(email, values.password);
+                  navigate("/", { replace: true });
+                } catch {
+                  setDone(true);
+                }
               }
             });
           }}
