@@ -67,9 +67,17 @@ try {
           memberships: { create: { schoolId: tenant.id, role: "SCHOOL_ADMIN" } },
         },
       });
+    const receivedEmails = [];
     const app = await createApp({
       db,
-      env: { JWT_SECRET: randomBytes(48).toString("hex"), CORS_ORIGINS: base },
+      env: {
+        JWT_SECRET: randomBytes(48).toString("hex"), CORS_ORIGINS: base,
+        SMTP_FROM: "notification@example.test", ALP_APP_URL: base,
+      },
+      mailer: { async sendMail(message) {
+        receivedEmails.push(message);
+        return { accepted: [message.to] };
+      } },
       rateLimit: { health: async () => true, allow: async () => true },
     });
     apiServer = app.listen(3310, "127.0.0.1");
@@ -91,7 +99,14 @@ try {
         body: JSON.stringify({ email: teachers[index].email, role: "TEACHER" }),
       });
       assert.equal(response.status, 201);
-      invitations.push({ user: teachers[index], token: (await response.json()).token });
+      assert.equal((await response.json()).emailDelivery.status, "sent");
+      const email = receivedEmails[index];
+      assert.equal(email.to, teachers[index].email);
+      const token = email.text.match(/^Invitation code: (\S+)$/m)?.[1];
+      assert.ok(token);
+      const joinUrl = email.text.match(/^https?:\/\/\S+\/join$/m)?.[0];
+      assert.equal(joinUrl, base + "/join");
+      invitations.push({ user: teachers[index], token, joinUrl });
     }
   }
   vite = await createServer({
@@ -160,18 +175,17 @@ try {
   await fits();
   await screenshot("login-mobile");
   await page.setViewportSize({ width: 1440, height: 960 });
-  async function accept({ user, token }) {
-    await page.getByRole("link", { name: "Join a school" }).click();
+  async function accept({ user, token, joinUrl }) {
+    await page.goto(joinUrl);
     for (const [label, value] of [
       ["Full name", user.name ?? "Synthetic Teacher"], ["Invited email", user.email],
       ["Create password", password], ["Invitation code", token],
     ]) await page.getByLabel(label, { exact: true }).fill(value);
     await page.getByRole("button", { name: "Accept invitation" }).click();
-    await expect(page.getByRole("heading", { name: "School invitation accepted" })).toBeVisible();
-    await page.getByRole("link", { name: "Sign in", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Students", exact: true })).toBeVisible();
   }
   if (integration) await accept(invitations[0]);
-  await login(data.teacher);
+  else await login(data.teacher);
   if (integration) {
     await page
       .getByRole("button", { name: "Add student", exact: true })
@@ -347,7 +361,6 @@ try {
   await signOut();
   if (integration) {
     await accept(invitations[1]);
-    await login(invitations[1].user);
     await expect(page.getByRole("link", { name: "Synthetic Learner" })).toHaveCount(0);
     await page.getByRole("link", { name: "School B Learner" }).click();
     await page.getByRole("button", { name: "Create ALP", exact: true }).click();

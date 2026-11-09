@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, ArrowRight, KeyRound } from "lucide-react";
 import { session, useSession, useAction } from "./runtime";
 import { resetInput } from "../../../03-app/src/recovery.mjs";
@@ -32,12 +32,14 @@ export function AuthFrame({ title, children }) {
 }
 export function Login() {
   const state = useSession(),
+    returningToInvite = useLocation().state?.returnToInvite === true,
     [email, setEmail] = useState(""),
     [password, setPassword] = useState("");
   const action = useAction();
-  if (state.user) return <Navigate to="/" replace />;
+  if (state.user) return <Navigate to={returningToInvite ? "/join" : "/"} replace />;
   return (
     <AuthFrame title="Welcome to ALP">
+      {returningToInvite && <p>Sign in with the email that received your invitation. Then enter your invitation code.</p>}
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -77,9 +79,6 @@ export function Login() {
       <div className="auth-links">
         <Link to="/join">
           Join a school <ArrowRight size={16} />
-        </Link>
-        <Link to="/setup">
-          Set up first school <ArrowRight size={16} />
         </Link>
         <a href="https://growwithalp.com/">Back to website</a>
       </div>
@@ -259,7 +258,12 @@ export function Recovery() {
                     password: "",
                     confirmPassword: "",
                   });
+                  try {
+                  await session.signIn(email, values.password);
+                  navigate("/", { replace: true });
+                } catch {
                   setDone(true);
+                }
                 }
               });
             }}
@@ -339,25 +343,28 @@ export function Join() {
   return (
     <AuthFrame title={done ? "School invitation accepted" : "Join a school"}>
       {done ? (
-        <Link className="button" to="/login">
-          Sign in
-        </Link>
+        <>
+          <p>Your account is ready. Sign in with the email and password you just used.</p>
+          <Link className="button" to="/login">Sign in</Link>
+        </>
       ) : (
         <form
           onSubmit={(event) => {
             event.preventDefault();
             action.run(async () => {
               if (user) {
-                await session.api.request("/auth/invitations/accept", {
+                const { schoolId } = await session.api.request("/auth/invitations/accept", {
                   method: "POST",
                   body: { token: values.token.trim() },
                 });
                 await session.reloadProfile();
-                navigate("/");
+                session.chooseSchool(schoolId);
+                navigate("/", { replace: true });
               } else {
+                const email = values.email.trim().toLowerCase();
                 await session.api.registerInvitation({
                   ...values,
-                  email: values.email.trim().toLowerCase(),
+                  email,
                   token: values.token.trim(),
                 });
                 setValues({ email: "", name: "", password: "", token: "" });
@@ -367,6 +374,7 @@ export function Join() {
           }}
         >
           <ErrorText>{configurationError || action.error}</ErrorText>
+          <p>Copy the invitation code from your ALP email. If it hasn’t arrived, check spam or ask your school administrator.</p>
           {user ? (
             <p>Joining as {user.email}</p>
           ) : (
@@ -406,7 +414,7 @@ export function Join() {
           <Button type="submit" disabled={action.busy || !!configurationError}>
             {action.busy ? "Joining..." : "Accept invitation"}
           </Button>
-          <Link to={user ? "/settings" : "/login"}>
+          <Link to={user ? "/settings" : "/login"} state={user ? undefined : { returnToInvite: true }}>
             {user
               ? "Back to settings"
               : "Already have an account? Sign in first"}
