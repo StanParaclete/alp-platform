@@ -258,7 +258,7 @@ export function Recovery() {
                     password: "",
                     confirmPassword: "",
                   });
-      setDone(true);
+                  setDone(true);
                 }
               });
             }}
